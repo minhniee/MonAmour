@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -20,6 +20,9 @@
 
   <ItemGroup>
     <Folder Include="Helpers\" />
+    <Folder Include="Imagine\IMGProduct\" />
+    <Folder Include="Imagine\IMGConcept\" />
+    <Folder Include="Imagine\Avatar\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="Services\Implements\" />
   </ItemGroup>

@@ -1,0 +1,451 @@
+@model MonAmour.ViewModels.ProductEditViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa Sản phẩm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa Sản phẩm</h1>
+        <div>
+            <a href="@Url.Action("ProductDetail", "Admin", new { id = Model.ProductId })" class="d-none d-sm-inline-block btn btn-info shadow-sm mr-2">
+                <i class="fas fa-eye fa-sm text-white-50"></i> Xem chi tiết
+            </a>
+            <a href="@Url.Action("Products", "Admin")" class="d-none d-sm-inline-block btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Sản phẩm</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditProduct" method="post" id="editProductForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ProductId" />
+                        <input type="hidden" asp-for="CreatedAt" />
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label asp-for="Name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                                    <input asp-for="Name" class="form-control" placeholder="Nhập tên sản phẩm...">
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="CategoryId" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                    <select asp-for="CategoryId" class="form-select" required>
+                                        <option value="">Chọn danh mục...</option>
+                                                        @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.CategoryId" selected="@(category.CategoryId == Model.CategoryId)">@category.Name</option>
+                }
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                      placeholder="Nhập mô tả chi tiết về sản phẩm..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <small class="form-text text-muted">Tối đa 1000 ký tự</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Price" class="form-label">Giá <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input asp-for="Price" class="form-control" type="number" step="1000" min="0" 
+                                               placeholder="0">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">₫</span>
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="StockQuantity" class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
+                                    <input asp-for="StockQuantity" class="form-control" type="number" min="0" 
+                                           placeholder="0">
+                                    <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Material" class="form-label">Chất liệu</label>
+                                    <input asp-for="Material" class="form-control" placeholder="Ví dụ: Vải cotton, Gỗ sồi...">
+                                    <span asp-validation-for="Material" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="TargetAudience" class="form-label">Đối tượng khách hàng</label>
+                                    <input asp-for="TargetAudience" class="form-control" placeholder="Ví dụ: Nam, Nữ, Trẻ em...">
+                                    <span asp-validation-for="TargetAudience" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select asp-for="Status" class="form-select" required>
+                                                        <option value="active" selected="@(Model.Status == "active")">Hoạt động</option>
+                        <option value="inactive" selected="@(Model.Status == "inactive")">Không hoạt động</option>
+                        <option value="draft" selected="@(Model.Status == "draft")">Bản nháp</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>Cập nhật sản phẩm
+                            </button>
+                            <a href="@Url.Action("Products", "Admin")" class="btn btn-secondary ml-2">
+                                <i class="fas fa-times mr-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Product Images Management -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Quản lý Hình ảnh</h6>
+                                    <a href="@Url.Action("ProductImages", "Admin")" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus fa-sm mr-2"></i>Thêm hình ảnh
+                </a>
+                </div>
+                <div class="card-body">
+                    <div id="productImagesContainer">
+                        <!-- Images will be loaded here via AJAX -->
+                        <div class="text-center py-3">
+                            <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                            <p class="text-muted mt-2">Đang tải hình ảnh...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Product Info Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle mr-2"></i>Thông tin
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold text-primary">ID sản phẩm:</h6>
+                        <p class="text-muted">@Model.ProductId</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold text-primary">Ngày tạo:</h6>
+                        <p class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold text-primary">Trạng thái hiện tại:</h6>
+                        @if (Model.Status == "active")
+                        {
+                            <span class="badge badge-success">Hoạt động</span>
+                        }
+                        else if (Model.Status == "inactive")
+                        {
+                            <span class="badge badge-secondary">Không hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-warning">Bản nháp</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt mr-2"></i>Thao tác nhanh
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("ProductDetail", "Admin", new { id = Model.ProductId })" class="list-group-item list-group-item-action">
+                            <i class="fas fa-eye mr-2 text-info"></i>Xem chi tiết
+                        </a>
+                        <button type="button" class="list-group-item list-group-item-action" onclick="duplicateProduct()">
+                            <i class="fas fa-copy mr-2 text-warning"></i>Nhân bản sản phẩm
+                        </button>
+                        <a href="@Url.Action("Products", "Admin")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-list mr-2 text-primary"></i>Danh sách sản phẩm
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Toggle -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-toggle-on mr-2"></i>Thay đổi trạng thái
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group-vertical w-100" role="group">
+                        @if (Model.Status != "active")
+                        {
+                            <form method="post" action="@Url.Action("ToggleProductStatus", "Admin")" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.ProductId" />
+                                <input type="hidden" name="status" value="active" />
+                                <button type="submit" class="btn btn-success btn-block mb-2">
+                                    <i class="fas fa-check mr-2"></i>Kích hoạt
+                                </button>
+                            </form>
+                        }
+                        
+                        @if (Model.Status != "inactive")
+                        {
+                            <form method="post" action="@Url.Action("ToggleProductStatus", "Admin")" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.ProductId" />
+                                <input type="hidden" name="status" value="inactive" />
+                                <button type="submit" class="btn btn-secondary btn-block mb-2">
+                                    <i class="fas fa-pause mr-2"></i>Tạm dừng
+                                </button>
+                            </form>
+                        }
+                        
+                        @if (Model.Status != "draft")
+                        {
+                            <form method="post" action="@Url.Action("ToggleProductStatus", "Admin")" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.ProductId" />
+                                <input type="hidden" name="status" value="draft" />
+                                <button type="submit" class="btn btn-warning btn-block">
+                                    <i class="fas fa-edit mr-2"></i>Chuyển thành bản nháp
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load product images
+            loadProductImages();
+            
+            // Form validation
+            $('#editProductForm').validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 200
+                    },
+                    CategoryId: {
+                        required: true
+                    },
+                    Price: {
+                        required: true,
+                        min: 0
+                    },
+                    StockQuantity: {
+                        required: true,
+                        min: 0
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "Vui lòng nhập tên sản phẩm",
+                        minlength: "Tên sản phẩm phải có ít nhất 3 ký tự",
+                        maxlength: "Tên sản phẩm không được vượt quá 200 ký tự"
+                    },
+                    CategoryId: {
+                        required: "Vui lòng chọn danh mục"
+                    },
+                    Price: {
+                        required: "Vui lòng nhập giá sản phẩm",
+                        min: "Giá sản phẩm phải lớn hơn 0"
+                    },
+                    StockQuantity: {
+                        required: "Vui lòng nhập số lượng tồn kho",
+                        min: "Số lượng tồn kho phải lớn hơn hoặc bằng 0"
+                    }
+                }
+            });
+            
+
+        });
+        
+        function loadProductImages() {
+            $.ajax({
+                url: '@Url.Action("GetProductImages", "Admin", new { productId = Model.ProductId })',
+                type: 'GET',
+                success: function(data) {
+                    if (data && data.length > 0) {
+                        displayProductImages(data);
+                    } else {
+                        $('#productImagesContainer').html(`
+                            <div class="text-center py-4">
+                                <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Chưa có hình ảnh nào</h6>
+                                <p class="text-muted small">Hãy thêm hình ảnh đầu tiên cho sản phẩm</p>
+                            </div>
+                        `);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading images:', error);
+                    $('#productImagesContainer').html(`
+                        <div class="text-center py-4">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h6 class="text-warning">Lỗi tải hình ảnh</h6>
+                            <p class="text-muted small mb-3">Vui lòng thử lại sau</p>
+                            <button class="btn btn-outline-primary btn-sm" onclick="loadProductImages()">
+                                <i class="fas fa-redo mr-1"></i>Thử lại
+                            </button>
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        function displayProductImages(images) {
+            let html = '<div class="row">';
+            images.forEach(function(image, index) {
+                html += `
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <img src="${image.imgUrl}" class="card-img-top" alt="${image.altText || image.imgName}" 
+                                 style="height: 150px; object-fit: cover;">
+                            <div class="card-body p-2">
+                                <h6 class="card-title small mb-1">${image.imgName || 'Hình ảnh ' + (index + 1)}</h6>
+                                <div class="btn-group btn-group-sm w-100" role="group">
+                                    ${image.isPrimary ? 
+                                        '<span class="btn btn-success disabled"><i class="fas fa-star"></i> Chính</span>' : 
+                                        '<button class="btn btn-outline-primary" onclick="setPrimaryImage(' + image.imgId + ')"><i class="fas fa-star"></i></button>'
+                                    }
+                                    <button class="btn btn-outline-warning" onclick="editImage(${image.imgId})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-outline-danger" onclick="deleteImage(${image.imgId})"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            $('#productImagesContainer').html(html);
+        }
+        
+
+        
+        function setPrimaryImage(imageId) {
+            if (confirm('Bạn có chắc chắn muốn đặt hình ảnh này làm hình ảnh chính?')) {
+                $.ajax({
+                    url: '@Url.Action("SetPrimaryImage", "Admin")',
+                    type: 'POST',
+                    data: {
+                        productId: @Model.ProductId,
+                        imageId: imageId
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            loadProductImages();
+                            showAlert('success', result.message || 'Đã cập nhật hình ảnh chính!');
+                        } else {
+                            showAlert('danger', result.message || 'Có lỗi xảy ra!');
+                        }
+                    },
+                    error: function() {
+                        showAlert('danger', 'Có lỗi xảy ra khi cập nhật hình ảnh chính!');
+                    }
+                });
+            }
+        }
+        
+        function editImage(imageId) {
+            // Implement edit image functionality
+            alert('Tính năng chỉnh sửa hình ảnh sẽ được phát triển sau');
+        }
+        
+        function deleteImage(imageId) {
+            if (confirm('Bạn có chắc chắn muốn xóa hình ảnh này?')) {
+                $.ajax({
+                    url: '@Url.Action("DeleteProductImage", "Admin")',
+                    type: 'POST',
+                    data: {
+                        imageId: imageId
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            loadProductImages();
+                            showAlert('success', result.message || 'Đã xóa hình ảnh!');
+                        } else {
+                            showAlert('danger', result.message || 'Có lỗi xảy ra khi xóa hình ảnh!');
+                        }
+                    },
+                    error: function() {
+                        showAlert('danger', 'Có lỗi xảy ra khi xóa hình ảnh!');
+                    }
+                });
+            }
+        }
+        
+        function duplicateProduct() {
+            if (confirm('Bạn có muốn tạo bản sao của sản phẩm này?')) {
+                // Store current form data
+                const formData = $('#editProductForm').serialize();
+                localStorage.setItem('duplicateProductData', formData);
+                
+                // Redirect to create product page
+                window.location.href = '@Url.Action("CreateProduct", "Admin")';
+            }
+        }
+        
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            // Insert alert at the top of the page
+            $('.container-fluid').prepend(alertHtml);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut();
+            }, 5000);
+        }
+    </script>
+}

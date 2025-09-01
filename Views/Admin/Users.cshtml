@@ -1,0 +1,389 @@
+@model List<MonAmour.ViewModels.AdminUserViewModel.UserListViewModel>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Quản lý người dùng</h1>
+        <p class="subtitle">Quản lý tất cả người dùng trong hệ thống</p>
+    </div>
+</div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@(ViewBag.Statistics?.ContainsKey("TotalUsers") == true ? ViewBag.Statistics["TotalUsers"] : 0)</h4>
+                            <div>Tổng người dùng</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@(ViewBag.Statistics?.ContainsKey("VerifiedUsers") == true ? ViewBag.Statistics["VerifiedUsers"] : 0)</h4>
+                            <div>Đã xác thực</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@(ViewBag.Statistics?.ContainsKey("ActiveUsers") == true ? ViewBag.Statistics["ActiveUsers"] : 0)</h4>
+                            <div>Đang hoạt động</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>@(ViewBag.Statistics?.ContainsKey("AdminUsers") == true ? ViewBag.Statistics["AdminUsers"] : 0)</h4>
+                            <div>Quản trị viên</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-shield fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-search me-1"></i>
+            Tìm kiếm và lọc
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Users">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="SearchTerm">Từ khóa</label>
+                            <input type="text" class="form-control" id="SearchTerm" name="SearchTerm" 
+                                   value="@Context.Request.Query["SearchTerm"]" placeholder="Email, tên, số điện thoại...">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="Status">Trạng thái</label>
+                            <select class="form-control" id="Status" name="Status">
+                                <option value="">Tất cả</option>
+                                <option value="active" selected="@(Context.Request.Query["Status"] == "active")">Hoạt động</option>
+                                <option value="inactive" selected="@(Context.Request.Query["Status"] == "inactive")">Không hoạt động</option>
+                                <option value="suspended" selected="@(Context.Request.Query["Status"] == "suspended")">Tạm khóa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="Gender">Giới tính</label>
+                            <select class="form-control" id="Gender" name="Gender">
+                                <option value="">Tất cả</option>
+                                <option value="male" selected="@(Context.Request.Query["Gender"] == "male")">Nam</option>
+                                <option value="female" selected="@(Context.Request.Query["Gender"] == "female")">Nữ</option>
+                                <option value="other" selected="@(Context.Request.Query["Gender"] == "other")">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="Verified">Xác thực</label>
+                            <select class="form-control" id="Verified" name="Verified">
+                                <option value="">Tất cả</option>
+                                <option value="true" selected="@(Context.Request.Query["Verified"] == "true")">Đã xác thực</option>
+                                <option value="false" selected="@(Context.Request.Query["Verified"] == "false")">Chưa xác thực</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="RoleId">Vai trò</label>
+                            <select class="form-control" id="RoleId" name="RoleId">
+                                <option value="">Tất cả</option>
+                                                                 @foreach (var role in ViewBag.Roles ?? new List<MonAmour.ViewModels.AdminUserViewModel.RoleViewModel>())
+                                {
+                                    <option value="@role.RoleId" selected="@(Context.Request.Query["RoleId"] == role.RoleId.ToString())">@role.RoleName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary form-control">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<div class="header-actions">
+    <a asp-action="CreateUser" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Thêm người dùng
+    </a>
+</div>
+        <!-- Users Table -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i>
+                 Danh sách người dùng (@(ViewBag.TotalCount ?? 0) người dùng)
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Avatar</th>
+                                <th>Thông tin</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>@user.UserId</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(user.Avatar))
+                                        {
+                                            <img src="@user.Avatar" alt="Avatar" class="rounded-circle" width="40" height="40">
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div><strong>@user.Name</strong></div>
+                                        <div class="text-muted">@user.Email</div>
+                                        <div class="text-muted">@user.Phone</div>
+                                    </td>
+                                    <td>
+                                        @foreach (var role in user.Roles)
+                                        {
+                                            <span class="badge bg-primary me-1">@role</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            @if (user.Verified == true)
+                                            {
+                                                <span class="badge bg-success mb-1">Đã xác thực</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning mb-1">Chưa xác thực</span>
+                                            }
+                                            
+                                            @if (user.Status == "active")
+                                            {
+                                                <span class="badge bg-success">Hoạt động</span>
+                                            }
+                                            else if (user.Status == "inactive")
+                                            {
+                                                <span class="badge bg-secondary">Không hoạt động</span>
+                                            }
+                                            else if (user.Status == "suspended")
+                                            {
+                                                <span class="badge bg-danger">Tạm khóa</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>@user.CreatedAt?.ToString("dd/MM/yyyy")</div>
+                                        <div class="text-muted">@user.CreatedAt?.ToString("HH:mm")</div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="UserDetail" asp-route-id="@user.UserId" 
+                                               class="btn btn-sm btn-info" title="Chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="EditUser" asp-route-id="@user.UserId" 
+                                               class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-action="ChangeUserPassword" asp-route-id="@user.UserId" 
+                                               class="btn btn-sm btn-secondary" title="Đổi mật khẩu">
+                                                <i class="fas fa-key"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-danger" title="Xóa"
+                                                    onclick="confirmDelete(@user.UserId, '@user.Name')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Quick Actions -->
+                                        <div class="mt-1">
+                                            <form asp-action="ToggleUserVerification" method="post" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@user.UserId" />
+                                                <button type="submit" class="btn btn-sm @(user.Verified == true ? "btn-warning" : "btn-success")" 
+                                                        title="@(user.Verified == true ? "Hủy xác thực" : "Xác thực")">
+                                                    <i class="fas @(user.Verified == true ? "fa-times" : "fa-check")"></i>
+                                                </button>
+                                            </form>
+                                            
+                                            @if (user.Status == "active")
+                                            {
+                                                <form asp-action="ToggleUserStatus" method="post" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@user.UserId" />
+                                                    <input type="hidden" name="status" value="suspended" />
+                                                    <button type="submit" class="btn btn-sm btn-warning" title="Tạm khóa">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="ToggleUserStatus" method="post" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@user.UserId" />
+                                                    <input type="hidden" name="status" value="active" />
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Kích hoạt">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                                 @if ((ViewBag.TotalPages ?? 0) > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                                                         @if ((ViewBag.CurrentPage ?? 1) > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" asp-action="Users" asp-route-page="@((ViewBag.CurrentPage ?? 1) - 1)" 
+                                       asp-route-SearchTerm="@Context.Request.Query["SearchTerm"]"
+                                       asp-route-Status="@Context.Request.Query["Status"]"
+                                       asp-route-Gender="@Context.Request.Query["Gender"]"
+                                       asp-route-Verified="@Context.Request.Query["Verified"]"
+                                       asp-route-RoleId="@Context.Request.Query["RoleId"]">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            }
+
+                                                         @for (int i = Math.Max(1, (ViewBag.CurrentPage ?? 1) - 2); i <= Math.Min(ViewBag.TotalPages ?? 1, (ViewBag.CurrentPage ?? 1) + 2); i++)
+                            {
+                                                                 <li class="page-item @(i == (ViewBag.CurrentPage ?? 1) ? "active" : "")">
+                                    <a class="page-link" asp-action="Users" asp-route-page="@i"
+                                       asp-route-SearchTerm="@Context.Request.Query["SearchTerm"]"
+                                       asp-route-Status="@Context.Request.Query["Status"]"
+                                       asp-route-Gender="@Context.Request.Query["Gender"]"
+                                       asp-route-Verified="@Context.Request.Query["Verified"]"
+                                       asp-route-RoleId="@Context.Request.Query["RoleId"]">@i</a>
+                                </li>
+                            }
+
+                                                         @if ((ViewBag.CurrentPage ?? 1) < (ViewBag.TotalPages ?? 1))
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" asp-action="Users" asp-route-page="@((ViewBag.CurrentPage ?? 1) + 1)"
+                                       asp-route-SearchTerm="@Context.Request.Query["SearchTerm"]"
+                                       asp-route-Status="@Context.Request.Query["Status"]"
+                                       asp-route-Gender="@Context.Request.Query["Gender"]"
+                                       asp-route-Verified="@Context.Request.Query["Verified"]"
+                                       asp-route-RoleId="@Context.Request.Query["RoleId"]">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Không có người dùng nào</h5>
+                    <p class="text-muted">Hãy thêm người dùng đầu tiên hoặc thay đổi bộ lọc tìm kiếm.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa người dùng <strong id="deleteUserName"></strong>?</p>
+                <p class="text-danger">Hành động này không thể hoàn tác!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(userId, userName) {
+            document.getElementById('deleteUserName').textContent = userName;
+            document.getElementById('deleteForm').action = '@Url.Action("DeleteUser")/' + userId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+}

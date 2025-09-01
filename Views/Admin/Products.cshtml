@@ -1,0 +1,348 @@
+@model List<MonAmour.ViewModels.ProductListViewModel>
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Sản phẩm</h1>
+        
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng sản phẩm</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.Statistics["TotalProducts"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Sản phẩm hoạt động</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.Statistics["ActiveProducts"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Hết hàng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.Statistics["OutOfStock"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Danh mục</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.Statistics["TotalCategories"]</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tags fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm & Lọc</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Products", "Admin")" class="row g-3">
+                <div class="col-md-3">
+                    <label for="SearchTerm" class="form-label">Từ khóa</label>
+                    <input type="text" class="form-control" id="SearchTerm" name="SearchTerm" 
+                           value="@Context.Request.Query["SearchTerm"]" placeholder="Tên sản phẩm...">
+                </div>
+                <div class="col-md-2">
+                    <label for="CategoryId" class="form-label">Danh mục</label>
+                    <select class="form-select" id="CategoryId" name="CategoryId">
+                        <option value="">Tất cả</option>
+                                        @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.CategoryId" selected="@(Context.Request.Query["CategoryId"] == category.CategoryId.ToString())">@category.Name</option>
+                }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="Status" class="form-label">Trạng thái</label>
+                    <select class="form-select" id="Status" name="Status">
+                        <option value="">Tất cả</option>
+                        <option value="active" selected="@(Context.Request.Query["Status"] == "active")">Hoạt động</option>
+                        <option value="inactive" selected="@(Context.Request.Query["Status"] == "inactive")">Không hoạt động</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="MinPrice" class="form-label">Giá từ</label>
+                    <input type="number" class="form-control" id="MinPrice" name="MinPrice" 
+                           value="@Context.Request.Query["MinPrice"]" placeholder="0">
+                </div>
+                <div class="col-md-2">
+                    <label for="MaxPrice" class="form-label">Giá đến</label>
+                    <input type="number" class="form-control" id="MaxPrice" name="MaxPrice" 
+                           value="@Context.Request.Query["MaxPrice"]" placeholder="1000000">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div><a href="@Url.Action("CreateProduct", "Admin")" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Thêm Sản phẩm
+        </a></div>
+    <!-- Products Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Sản phẩm</h6>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                     aria-labelledby="dropdownMenuLink">
+                    <div class="dropdown-header">Tùy chọn:</div>
+                    <a class="dropdown-item" href="@Url.Action("ProductCategories", "Admin")">
+                        <i class="fas fa-tags fa-sm fa-fw mr-2 text-gray-400"></i>Quản lý Danh mục
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" onclick="exportProducts()">
+                        <i class="fas fa-download fa-sm fa-fw mr-2 text-gray-400"></i>Xuất Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="productsTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Giá</th>
+                                <th>Tồn kho</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@product.Name</strong>
+                                    </td>
+                                    <td>@product.CategoryName</td>
+                                    <td>@product.Price.ToString("N0") ₫</td>
+                                    <td>
+                                        @if (product.StockQuantity <= 0)
+                                        {
+                                            <span class="badge badge-danger">Hết hàng</span>
+                                        }
+                                        else if (product.StockQuantity <= 10)
+                                        {
+                                            <span class="badge badge-warning">@product.StockQuantity</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-success">@product.StockQuantity</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (product.Status == "active")
+                                        {
+                                            <span class="badge badge-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">Không hoạt động</span>
+                                        }
+                                    </td>
+                                    <td>@product.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("ProductDetail", "Admin", new { id = product.ProductId })" 
+                                               class="btn btn-info btn-sm" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("EditProduct", "Admin", new { id = product.ProductId })" 
+                                               class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-danger btn-sm" title="Xóa"
+                                                    onclick="deleteProduct(@product.ProductId, '@product.Name')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Products", "Admin", new { 
+                                        SearchTerm = Context.Request.Query["SearchTerm"],
+                                        CategoryId = Context.Request.Query["CategoryId"],
+                                        Status = Context.Request.Query["Status"],
+                                        MinPrice = Context.Request.Query["MinPrice"],
+                                        MaxPrice = Context.Request.Query["MaxPrice"],
+                                        Page = ViewBag.CurrentPage - 1
+                                    })">Trước</a>
+                                </li>
+                            }
+
+                            @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                            {
+                                var active = i == ViewBag.CurrentPage ? "active" : "";
+                                <li class="page-item @active">
+                                    <a class="page-link" href="@Url.Action("Products", "Admin", new { 
+                                        SearchTerm = Context.Request.Query["SearchTerm"],
+                                        CategoryId = Context.Request.Query["CategoryId"],
+                                        Status = Context.Request.Query["Status"],
+                                        MinPrice = Context.Request.Query["MinPrice"],
+                                        MaxPrice = Context.Request.Query["MaxPrice"],
+                                        Page = i
+                                    })">@i</a>
+                                </li>
+                            }
+
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Products", "Admin", new { 
+                                        SearchTerm = Context.Request.Query["SearchTerm"],
+                                        CategoryId = Context.Request.Query["CategoryId"],
+                                        Status = Context.Request.Query["Status"],
+                                        MinPrice = Context.Request.Query["MinPrice"],
+                                        MaxPrice = Context.Request.Query["MaxPrice"],
+                                        Page = ViewBag.CurrentPage + 1
+                                    })">Sau</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Không có sản phẩm nào</h5>
+                    <p class="text-muted">Hãy thêm sản phẩm đầu tiên để bắt đầu</p>
+                    <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Thêm Sản phẩm
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa sản phẩm "<span id="productName"></span>"?
+                <br><br>
+                <strong>Lưu ý:</strong> Hành động này không thể hoàn tác!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteProduct(productId, productName) {
+            document.getElementById('productName').textContent = productName;
+            document.getElementById('deleteForm').action = '@Url.Action("DeleteProduct", "Admin")/' + productId;
+            $('#deleteModal').modal('show');
+        }
+
+        function exportProducts() {
+            // Implement export functionality
+            alert('Tính năng xuất Excel sẽ được phát triển sau');
+        }
+
+        // Initialize DataTable
+        $(document).ready(function() {
+            $('#productsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 25,
+                "order": [[6, "desc"]], // Sort by CreatedAt desc
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, 7] } // Disable sorting for image and action columns
+                ]
+            });
+        });
+    </script>
+}

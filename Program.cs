@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using MonAmour.Filters;
 using MonAmour.Middleware;
 using MonAmour.Models;
@@ -37,6 +38,8 @@ builder.Services.AddHttpContextAccessor();
 // Add Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
 
@@ -67,6 +70,14 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Cấu hình static file cho thư mục Imagine
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "Imagine")),
+    RequestPath = "/Imagine"
+});
 
 app.UseRouting();
 
