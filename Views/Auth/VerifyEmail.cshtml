@@ -1,0 +1,93 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Mon_Amour.Controllers.VerifyEmailViewModel
+@{
+    ViewData["Title"] = "Xác thực email";
+    ViewData["Subtitle"] = "Xác thực địa chỉ email của bạn";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+
+@if (ViewBag.Status == "success")
+{
+    <div class="text-center space-y-6">
+        <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+
+        <div class="space-y-2">
+            <p class="text-foreground font-medium">Chúc mừng!</p>
+            <p class="text-muted-foreground">
+                Tài khoản của bạn đã được kích hoạt thành công. Bạn có thể bắt đầu sử dụng dịch vụ MonAmour.
+            </p>
+        </div>
+
+        <div class="space-y-3">
+            <a href="/Auth/Login" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90">
+                Đăng nhập ngay
+            </a>
+            <a href="/" class="w-full inline-flex justify-center py-2 px-4 border border-border rounded-md shadow-sm text-sm font-medium text-foreground bg-transparent hover:bg-muted">
+                Về trang chủ
+            </a>
+        </div>
+    </div>
+}
+else if (ViewBag.Status == "expired")
+{
+    <div class="text-center space-y-6">
+        <div class="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+            <svg class="w-8 h-8 text-yellow-600" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+        </div>
+
+        <div class="space-y-2">
+            <p class="text-foreground">Liên kết xác thực đã hết hạn</p>
+            <p class="text-muted-foreground text-sm">
+                Liên kết xác thực email chỉ có hiệu lực trong 24 giờ. Vui lòng yêu cầu gửi lại email xác thực.
+            </p>
+        </div>
+
+        <form asp-action="ResendVerification" method="post" class="space-y-4">
+            <input asp-for="Email" type="hidden" />
+            <p class="text-sm text-muted-foreground">
+                Gửi lại email xác thực đến: <span class="font-medium text-foreground">@Model.Email</span>
+            </p>
+
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90">
+                Gửi lại email xác thực
+            </button>
+        </form>
+
+        <div class="pt-4">
+            <a href="/Auth/Login" class="text-sm text-muted-foreground hover:text-foreground">Quay lại đăng nhập</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center space-y-6">
+        <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <svg class="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+
+        <div class="space-y-2">
+            <p class="text-foreground">Xác thực email thất bại</p>
+            <p class="text-muted-foreground text-sm">
+                Liên kết xác thực không hợp lệ hoặc đã được sử dụng. Vui lòng thử lại hoặc liên hệ hỗ trợ.
+            </p>
+        </div>
+
+        <div class="space-y-3">
+            <a href="/Auth/Signup" class="w-full inline-flex justify-center py-2 px-4 border border-border rounded-md shadow-sm text-sm font-medium text-foreground bg-transparent hover:bg-muted">
+                Đăng ký lại
+            </a>
+        </div>
+
+        <div class="pt-4">
+            <a href="/contact" class="text-sm text-primary hover:text-primary/80">Liên hệ hỗ trợ</a>
+        </div>
+    </div>
+}

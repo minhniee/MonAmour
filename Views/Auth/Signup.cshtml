@@ -1,0 +1,81 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Mon_Amour.Controllers.SignupViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+    ViewData["Subtitle"] = "Tạo tài khoản để trải nghiệm dịch vụ MonAmour";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+}
+
+<form asp-action="Signup" method="post" class="space-y-6">
+    <div asp-validation-summary="ModelOnly" class="text-destructive text-sm"></div>
+
+    <div>
+        <label asp-for="FullName" class="block text-sm font-medium text-foreground">Họ và tên</label>
+        <input asp-for="FullName" type="text" class="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Nhập họ và tên đầy đủ" />
+        <span asp-validation-for="FullName" class="mt-1 text-sm text-destructive"></span>
+    </div>
+
+    <div>
+        <label asp-for="Email" class="block text-sm font-medium text-foreground">Email</label>
+        <input asp-for="Email" type="email" class="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Nhập địa chỉ email" />
+        <span asp-validation-for="Email" class="mt-1 text-sm text-destructive"></span>
+    </div>
+
+    <div>
+        <label asp-for="Phone" class="block text-sm font-medium text-foreground">Số điện thoại</label>
+        <input asp-for="Phone" type="tel" class="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Nhập số điện thoại" />
+        <span asp-validation-for="Phone" class="mt-1 text-sm text-destructive"></span>
+    </div>
+
+    <div>
+        <label asp-for="Password" class="block text-sm font-medium text-foreground">Mật khẩu</label>
+        <div class="relative mt-1">
+            <input asp-for="Password" type="password" id="password" class="block w-full px-3 py-2 pr-10 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Tạo mật khẩu mạnh" />
+            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('password', 'password-icon')">
+                <svg id="password-icon" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </button>
+        </div>
+        <span asp-validation-for="Password" class="mt-1 text-sm text-destructive"></span>
+    </div>
+
+    <div>
+        <label asp-for="ConfirmPassword" class="block text-sm font-medium text-foreground">Xác nhận mật khẩu</label>
+        <div class="relative mt-1">
+            <input asp-for="ConfirmPassword" type="password" id="confirmPassword" class="block w-full px-3 py-2 pr-10 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="Nhập lại mật khẩu" />
+            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('confirmPassword', 'confirm-password-icon')">
+                <svg id="confirm-password-icon" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </button>
+        </div>
+        <span asp-validation-for="ConfirmPassword" class="mt-1 text-sm text-destructive"></span>
+    </div>
+
+    <div>
+        <div class="flex items-start">
+            <input asp-for="AgreeToTerms" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-border rounded mt-1" />
+            <label asp-for="AgreeToTerms" class="ml-2 block text-sm text-foreground">
+                Tôi đồng ý với
+                <a href="/terms" class="text-primary hover:text-primary/80 font-medium">Điều khoản sử dụng</a>
+                và
+                <a href="/privacy" class="text-primary hover:text-primary/80 font-medium">Chính sách bảo mật</a>
+            </label>
+        </div>
+        <span asp-validation-for="AgreeToTerms" class="mt-1 text-sm text-destructive"></span>
+    </div>
+
+    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+        Đăng ký
+    </button>
+
+    <div class="text-center">
+        <p class="text-sm text-muted-foreground">
+            Đã có tài khoản?
+            <a href="/Auth/Login" class="text-primary hover:text-primary/80 font-medium">Đăng nhập ngay</a>
+        </p>
+    </div>
+</form>
