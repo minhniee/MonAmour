@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MonAmourDb_BE.Models;
+namespace MonAmour.Models;
 
 public partial class Partner
 {
@@ -16,6 +16,8 @@ public partial class Partner
     public string? Email { get; set; }
 
     public string? Phone { get; set; }
+
+    public string? Avatar { get; set; }
 
     public string? Status { get; set; }
 

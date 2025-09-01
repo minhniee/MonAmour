@@ -1,42 +1,61 @@
 using Microsoft.EntityFrameworkCore;
-using MonAmourDb_BE.Middleware;
-using MonAmourDb_BE.Models;
-using MonAmourDb_BE.Service.Implementations;
-using MonAmourDb_BE.Service.Interfaces;
+using MonAmour.Filters;
+using MonAmour.Middleware;
+using MonAmour.Models;
+using MonAmour.Services.Implements;
+using MonAmour.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<UserMenuFilter>();
+});
 
-// Register DbContext
+// Add Entity Framework
 builder.Services.AddDbContext<MonAmourDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register Services
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserManagementService, UserManagementService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
-builder.Services.AddScoped<IConceptManagementService, ConceptManagementService>();
-builder.Services.AddScoped<IPartnerManagementService, PartnerManagementService>();
-builder.Services.AddScoped<IProductManagementService, ProductManagementService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IWishListService, WishListService>();
-
-// Add Memory Cache
-builder.Services.AddMemoryCache();
+// Configure Settings
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 // Add Session
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromDays(1); // Kéo dài thời gian session
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
+// Add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+// Add Services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 var app = builder.Build();
+
+// Initialize system roles and settings
+using (var scope = app.Services.CreateScope())
+{
+    var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        await authService.InitializeSystemAsync();
+        logger.LogInformation("System initialized successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to initialize system");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -48,24 +67,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
-// Add custom exception handling middleware
-app.UseMiddleware<ExceptionMiddleware>();
-
-// Enable CORS
-app.UseCors(builder => builder
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
-
+// Add Session middleware
 app.UseSession();
-app.UseAuthentication();
-app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+// Add Remember Me middleware
+app.UseMiddleware<RememberMeMiddleware>();
+
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

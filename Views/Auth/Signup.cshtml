@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Mon_Amour.Controllers.SignupViewModel
+@model MonAmour.AuthViewModel.SignupViewModel
 @{
     ViewData["Title"] = "Đăng ký tài khoản";
     ViewData["Subtitle"] = "Tạo tài khoản để trải nghiệm dịch vụ MonAmour";
@@ -55,18 +55,18 @@
         <span asp-validation-for="ConfirmPassword" class="mt-1 text-sm text-destructive"></span>
     </div>
 
-    <div>
-        <div class="flex items-start">
-            <input asp-for="AgreeToTerms" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-border rounded mt-1" />
-            <label asp-for="AgreeToTerms" class="ml-2 block text-sm text-foreground">
-                Tôi đồng ý với
-                <a href="/terms" class="text-primary hover:text-primary/80 font-medium">Điều khoản sử dụng</a>
-                và
-                <a href="/privacy" class="text-primary hover:text-primary/80 font-medium">Chính sách bảo mật</a>
-            </label>
-        </div>
-        <span asp-validation-for="AgreeToTerms" class="mt-1 text-sm text-destructive"></span>
-    </div>
+    @* <div> *@
+    @*     <div class="flex items-start"> *@
+    @*         <input asp-for="AgreeToTerms" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-border rounded mt-1" /> *@
+    @*         <label asp-for="AgreeToTerms" class="ml-2 block text-sm text-foreground"> *@
+    @*             Tôi đồng ý với *@
+    @*             <a href="/terms" class="text-primary hover:text-primary/80 font-medium">Điều khoản sử dụng</a> *@
+    @*             và *@
+    @*             <a href="/privacy" class="text-primary hover:text-primary/80 font-medium">Chính sách bảo mật</a> *@
+    @*         </label> *@
+    @*     </div> *@
+    @*     <span asp-validation-for="AgreeToTerms" class="mt-1 text-sm text-destructive"></span> *@
+    @* </div> *@
 
     <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
         Đăng ký

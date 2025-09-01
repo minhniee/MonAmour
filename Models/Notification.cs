@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MonAmourDb_BE.Models;
+namespace MonAmour.Models;
 
 public partial class Notification
 {

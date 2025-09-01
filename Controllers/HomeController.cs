@@ -1,13 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Mon_Amour.Controllers
+namespace MonAmour.Controllers
 {
     public class HomeController : Controller
     {
-
         public IActionResult Index()
         {
-            ViewData["Title"] = "Trang ch? - MonAmour";
+            ViewData["Title"] = "Trang chủ - MonAmour";
             return View();
         }
     }

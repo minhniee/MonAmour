@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MonAmourDb_BE.Models;
+namespace MonAmour.Models;
 
 public partial class Product
 {
@@ -32,6 +32,4 @@ public partial class Product
     public virtual ICollection<ProductImg> ProductImgs { get; set; } = new List<ProductImg>();
 
     public virtual ICollection<WishList> WishLists { get; set; } = new List<WishList>();
-
-
 }

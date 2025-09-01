@@ -1,0 +1,182 @@
+@model MonAmour.AuthViewModel.UserViewModel.ProfileViewModel
+@{
+    ViewData["Title"] = "Hồ Sơ Cá Nhân";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-beige">
+    Header
+    <header class="bg-white shadow-sm border-b border-wine-red/10">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="text-wine-red hover:text-wine-red/80 transition-colors">
+                    ← Quay lại trang chủ
+                </a>
+                <h1 class="text-2xl font-serif font-bold text-wine-red">Hồ Sơ Cá Nhân</h1>
+                <div class="w-20"></div>  Spacer for centering
+            </div>
+        </div>
+    </header>
+
+    Main Content
+    <main class="max-w-2xl mx-auto px-4 py-8">
+        <div class="bg-white shadow-lg border-wine-red/20 rounded-lg border">
+            <div class="text-center pb-6 p-6">
+                <div class="relative mx-auto w-32 h-32 mb-4">
+                    <div class="w-32 h-32 border-4 border-wine-red/20 rounded-full overflow-hidden bg-wine-red/10 flex items-center justify-center">
+                        @if (!string.IsNullOrEmpty(Model.Avatar))
+                        {
+                            <img src="@Model.Avatar" alt="Avatar" class="w-full h-full object-cover" />
+                        }
+                        else
+                        {
+                            <span class="text-2xl text-wine-red">
+                                @(Model.Name?.Split(' ').Select(n => n.FirstOrDefault()).Take(2).Aggregate("", (acc, c) => acc + c))
+                            </span>
+                        }
+                    </div>
+                    <button id="avatarUploadBtn" class="absolute bottom-0 right-0 bg-wine-red text-white p-2 rounded-full cursor-pointer hover:bg-wine-red/90 transition-colors hidden">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <input type="file" accept="image/*" id="avatarInput" class="hidden" />
+                    </button>
+                </div>
+                <h2 class="text-wine-red font-serif text-2xl" id="profileTitle">Hồ Sơ Của Bạn</h2>
+            </div>
+
+            <form id="profileForm" class="p-6 space-y-6" method="post" asp-action="">
+                @Html.AntiForgeryToken()
+
+                Name Field
+                <div class="space-y-2">
+                    <label for="name" class="text-wine-red font-medium">Họ và Tên</label>
+                    <input type="text" id="name" name="Name" value="@Model.Name" readonly
+                           class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+                </div>
+
+                Email Field (Read Only)
+                <div class="space-y-2">
+                    <label for="email" class="text-wine-red font-medium">Email</label>
+                    <div class="relative">
+                        <input type="email" id="email" value="@Model.Email" readonly
+                               class="w-full bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed py-2 px-3 rounded-md" />
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
+                            Chỉ đọc
+                        </span>
+                    </div>
+                </div>
+
+                Birth Date Field
+                <div class="space-y-2">
+                    <label for="birthDate" class="text-wine-red font-medium">Ngày Sinh</label>
+                    <input type="date" id="birthDate" name="BirthDate" value="@Model.BirthDate?.ToString("yyyy-MM-dd")" readonly
+                           class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+                </div>
+
+                Phone Field
+                <div class="space-y-2">
+                    <label for="phone" class="text-wine-red font-medium">Số Điện Thoại</label>
+                    <input type="tel" id="phone" name="Phone" value="@Model.Phone" readonly
+                           class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+                </div>
+
+                Action Buttons
+                <div class="flex gap-4 pt-6">
+                    <button type="button" id="editBtn" class="flex-1 bg-wine-red hover:bg-wine-red/90 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Chỉnh Sửa Hồ Sơ
+                    </button>
+                    <button type="submit" id="saveBtn" class="flex-1 bg-wine-red hover:bg-wine-red/90 text-white py-2 px-4 rounded-md transition-colors hidden flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                        </svg>
+                        Lưu Thay Đổi
+                    </button>
+                    <button type="button" id="cancelBtn" class="flex-1 border-wine-red text-wine-red hover:bg-wine-red/5 bg-transparent py-2 px-4 rounded-md border transition-colors hidden flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        Additional Actions
+        <div class="mt-6 text-center">
+            <a href="/Profile/ChangePassword" class="text-wine-red hover:text-wine-red/80 underline transition-colors">
+                Đổi mật khẩu
+            </a>
+        </div>
+    </main>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editBtn = document.getElementById('editBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const profileTitle = document.getElementById('profileTitle');
+        const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+        const avatarInput = document.getElementById('avatarInput');
+
+        const fields = ['name', 'birthDate', 'phone'];
+        let originalValues = {};
+
+        // Store original values
+        fields.forEach(field => {
+            originalValues[field] = document.getElementById(field).value;
+        });
+
+        editBtn.addEventListener('click', function() {
+            // Switch to edit mode
+            fields.forEach(field => {
+                const input = document.getElementById(field);
+                input.readOnly = false;
+                input.classList.remove('bg-gray-50', 'border-gray-300');
+                input.classList.add('border-wine-red/30', 'focus:border-wine-red', 'focus:ring-wine-red/20');
+            });
+
+            profileTitle.textContent = 'Chỉnh Sửa Hồ Sơ';
+            editBtn.classList.add('hidden');
+            saveBtn.classList.remove('hidden');
+            cancelBtn.classList.remove('hidden');
+            avatarUploadBtn.classList.remove('hidden');
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            // Restore original values and switch back to view mode
+            fields.forEach(field => {
+                const input = document.getElementById(field);
+                input.value = originalValues[field];
+                input.readOnly = true;
+                input.classList.add('bg-gray-50', 'border-gray-300');
+                input.classList.remove('border-wine-red/30', 'focus:border-wine-red', 'focus:ring-wine-red/20');
+            });
+
+            profileTitle.textContent = 'Hồ Sơ Của Bạn';
+            editBtn.classList.remove('hidden');
+            saveBtn.classList.add('hidden');
+            cancelBtn.classList.add('hidden');
+            avatarUploadBtn.classList.add('hidden');
+        });
+
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarImg = document.querySelector('.w-32.h-32 img');
+                    if (avatarImg) {
+                        avatarImg.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>

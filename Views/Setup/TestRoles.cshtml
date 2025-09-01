@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "System Test";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-vial me-2"></i>
+                        System Test Results
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @ViewBag.SuccessMessage
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @ViewBag.ErrorMessage
+                        </div>
+                    }
+
+                    @if (ViewBag.TestResults != null)
+                    {
+                        <h5>Test Results:</h5>
+                        <ul class="list-group list-group-flush">
+                            @foreach (string result in ViewBag.TestResults)
+                            {
+                                <li class="list-group-item">
+                                    @Html.Raw(result)
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header">
+                                    <i class="fas fa-users me-2"></i>
+                                    User Roles
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>User:</strong> Người dùng thông thường</p>
+                                    <p><strong>Admin:</strong> Quản trị viên hệ thống</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Security Features
+                                </div>
+                                <div class="card-body">
+                                    <p>✓ Role-based Authorization</p>
+                                    <p>✓ Email Verification</p>
+                                    <p>✓ Password Reset</p>
+                                    <p>✓ Remember Me</p>
+                                    <p>✓ Session Management</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="text-center">
+                        <a href="/Setup/CreateFirstAdmin" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Create Admin User
+                        </a>
+                        <a href="/Auth/Login" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Login
+                        </a>
+                        <a href="/" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>
+                            Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
