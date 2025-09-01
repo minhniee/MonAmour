@@ -1,0 +1,15 @@
+﻿<section class="py-16 bg-muted">
+	<div class="container mx-auto px-4">
+		<h2 class="text-3xl font-bold text-center text-foreground mb-12 text-balance">OUR PARTNERS</h2>
+		<div class="grid grid-cols-4 md:grid-cols-8 gap-6">
+			@for (int i = 1; i <= 16; i++)
+			{
+				<div class="aspect-square bg-card rounded-lg flex items-center justify-center hover:scale-105 transition-transform cursor-pointer border border-border">
+					<div class="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+						<span class="text-xs text-muted-foreground font-medium">@i</span>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+</section>
