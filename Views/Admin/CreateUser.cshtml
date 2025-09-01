@@ -1,0 +1,418 @@
+@model MonAmour.ViewModels.AdminUserViewModel.UserCreateViewModel
+@{
+    ViewData["Title"] = "Tạo người dùng mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Tạo người dùng mới</h1>
+        <p class="subtitle">Thêm người dùng mới vào hệ thống</p>
+    </div>
+    <div class="header-actions">
+        <a asp-action="Users" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<!-- Debug Information -->
+@if (TempData["Error"] != null || !ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger" role="alert">
+        <h5><i class="fas fa-exclamation-triangle"></i> Debug Information</h5>
+        @if (TempData["Error"] != null)
+        {
+            <p><strong>Server Error:</strong> @TempData["Error"]</p>
+        }
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <p><strong>Validation Errors:</strong></p>
+            <ul>
+                @foreach (var modelState in ViewData.ModelState)
+                {
+                    foreach (var error in modelState.Value.Errors)
+                    {
+                        <li>@modelState.Key: @error.ErrorMessage</li>
+                    }
+                }
+            </ul>
+        }
+    </div>
+}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-plus me-1"></i>
+                    Thông tin người dùng
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateUser" method="post">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Name" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input asp-for="Name" class="form-control" placeholder="Nguyễn Văn A" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input asp-for="Password" type="password" class="form-control" id="password" placeholder="Mật khẩu" />
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
+                                            <i class="fas fa-eye" id="password-icon"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                    <small class="form-text text-muted">Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số</small>
+                                    <div class="mt-2">
+                                        <span class="badge bg-secondary" id="password-strength"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="ConfirmPassword" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input asp-for="ConfirmPassword" type="password" class="form-control" id="confirmPassword" placeholder="Xác nhận mật khẩu" />
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword')">
+                                            <i class="fas fa-eye" id="confirmPassword-icon"></i>
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input asp-for="Phone" class="form-control" placeholder="0123456789" />
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="BirthDate" class="form-label">Ngày sinh <span class="text-danger">*</span></label>
+                                    <input asp-for="BirthDate" type="date" class="form-control" />
+                                    <span asp-validation-for="BirthDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Gender" class="form-label">Giới tính <span class="text-danger">*</span></label>
+                                    <select asp-for="Gender" class="form-control">
+                                        <option value="">Chọn giới tính</option>
+                                        <option value="male">Nam</option>
+                                        <option value="female">Nữ</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                    <span asp-validation-for="Gender" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                    <select asp-for="Status" class="form-control">
+                                        <option value="">Chọn trạng thái</option>
+                                        <option value="active">Hoạt động</option>
+                                        <option value="inactive">Không hoạt động</option>
+                                        <option value="suspended">Tạm khóa</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Avatar" class="form-label">Avatar</label>
+                            <input asp-for="Avatar" class="form-control" placeholder="URL hình ảnh avatar" />
+                            <span asp-validation-for="Avatar" class="text-danger"></span>
+                            <small class="form-text text-muted">Nhập URL hình ảnh hoặc để trống</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <div class="form-check">
+                                <input asp-for="Verified" class="form-check-input" type="checkbox" />
+                                <label asp-for="Verified" class="form-check-label">
+                                    Đã xác thực email
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Vai trò <span class="text-danger">*</span></label>
+                            <div class="row">
+                                @foreach (var role in ViewBag.Roles ?? new List<MonAmour.ViewModels.AdminUserViewModel.RoleViewModel>())
+                                {
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="RoleIds" value="@role.RoleId" id="role_@role.RoleId" />
+                                            <label class="form-check-label" for="role_@role.RoleId">
+                                                @role.RoleName
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <span class="text-danger field-validation-error" id="roleIds-error"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a asp-action="Users" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Quay lại
+                                </a>
+                                <button type="button" class="btn btn-info ms-2" onclick="testDatabase()">
+                                    <i class="fas fa-database"></i> Test Database
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Tạo người dùng
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Hướng dẫn
+                </div>
+                <div class="card-body">
+                    <h6>Lưu ý khi tạo người dùng:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Email phải là duy nhất</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Mật khẩu phải đủ mạnh</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Chọn ít nhất một vai trò</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Người dùng sẽ nhận email thông báo</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <h6>Vai trò hệ thống:</h6>
+                    <ul class="list-unstyled">
+                        <li><span class="badge bg-primary me-2">Admin</span> Quản trị viên hệ thống</li>
+                        <li><span class="badge bg-secondary me-2">User</span> Người dùng thông thường</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <style>
+        .form-check-input:checked {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        
+        .password-strength-weak { color: #dc3545; }
+        .password-strength-medium { color: #ffc107; }
+        .password-strength-strong { color: #28a745; }
+        
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Debug logging
+        console.log('CreateUser page loaded');
+        
+        // Show any TempData messages
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            console.error('Server Error:', '@Html.Raw(TempData["Error"])');
+            </text>
+        }
+        
+        @if (TempData["Success"] != null)
+        {
+            <text>
+            console.log('Server Success:', '@Html.Raw(TempData["Success"])');
+            </text>
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '-icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Custom validation for role selection
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Form submission started');
+            
+            const roleCheckboxes = document.querySelectorAll('input[name="RoleIds"]:checked');
+            const roleError = document.getElementById('roleIds-error');
+            let isValid = true;
+            
+            console.log('Selected roles:', Array.from(roleCheckboxes).map(cb => cb.value));
+            
+            // Validate role selection
+            if (roleCheckboxes.length === 0) {
+                roleError.textContent = 'Vui lòng chọn ít nhất một vai trò';
+                isValid = false;
+                console.error('No roles selected');
+            } else {
+                roleError.textContent = '';
+            }
+            
+            // Validate password strength
+            const password = document.getElementById('password').value;
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
+            if (!passwordRegex.test(password)) {
+                alert('Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số');
+                isValid = false;
+                console.error('Password validation failed');
+            }
+            
+            // Validate phone number
+            const phone = document.getElementById('Phone').value;
+            const phoneRegex = /^[0-9]{10,11}$/;
+            if (!phoneRegex.test(phone)) {
+                alert('Số điện thoại phải có 10-11 chữ số');
+                isValid = false;
+                console.error('Phone validation failed');
+            }
+            
+            // Log form data
+            const formData = new FormData(this);
+            console.log('Form data:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ':', value);
+            }
+            
+            if (!isValid) {
+                console.error('Form validation failed');
+                e.preventDefault();
+            } else {
+                console.log('Form validation passed, submitting...');
+            }
+        });
+
+        // Real-time validation
+        document.getElementById('Phone').addEventListener('input', function() {
+            const phone = this.value;
+            const phoneRegex = /^[0-9]{10,11}$/;
+            if (phone && !phoneRegex.test(phone)) {
+                this.classList.add('is-invalid');
+                console.log('Phone validation failed:', phone);
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strength = calculatePasswordStrength(password);
+            updatePasswordStrengthIndicator(strength);
+        });
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            return strength;
+        }
+
+        function updatePasswordStrengthIndicator(strength) {
+            const indicator = document.getElementById('password-strength');
+            if (!indicator) return;
+            
+            const strengthText = ['Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
+            const strengthClass = ['bg-danger', 'bg-warning', 'bg-info', 'bg-success', 'bg-success'];
+            
+            indicator.textContent = strengthText[strength - 1] || '';
+            indicator.className = `badge ${strengthClass[strength - 1] || 'bg-secondary'}`;
+        }
+        
+        // Log validation errors
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <text>
+            console.error('ModelState errors:');
+            @foreach (var modelState in ViewData.ModelState)
+            {
+                foreach (var error in modelState.Value.Errors)
+                {
+                    <text>
+                    console.error('@modelState.Key:', '@error.ErrorMessage');
+                    </text>
+                }
+            }
+            </text>
+        }
+        
+        // Test database connection
+        function testDatabase() {
+            console.log('Testing database connection...');
+            fetch('@Url.Action("TestDatabase", "Admin")')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Database test result:', data);
+                    if (data.Success) {
+                        alert(`Database connection successful!\nRoles: ${data.RolesCount}\nUser Stats: ${JSON.stringify(data.UserStats)}`);
+                    } else {
+                        alert(`Database connection failed: ${data.Error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Database test error:', error);
+                    alert('Database test failed: ' + error.message);
+                });
+        }
+    </script>
+}
