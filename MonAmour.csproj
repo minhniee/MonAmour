@@ -21,7 +21,7 @@
   <ItemGroup>
     <Folder Include="Helpers\" />
     <Folder Include="Services\Interfaces\" />
-    <Folder Include="Services\Implements\" />
+    <Folder Include="wwwroot\avatars\" />
   </ItemGroup>
 
 </Project>

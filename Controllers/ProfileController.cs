@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MonAmour.Attributes;
+using Microsoft.AspNetCore.Hosting;
 using MonAmour.AuthViewModel;
 using MonAmour.Helpers;
 using MonAmour.Services.Interfaces;
@@ -11,11 +12,13 @@ public class ProfileController : Controller
 {
     private readonly IAuthService _authService;
     private readonly ILogger<ProfileController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
-    public ProfileController(IAuthService authService, ILogger<ProfileController> logger)
+    public ProfileController(IAuthService authService, ILogger<ProfileController> logger, IWebHostEnvironment environment)
     {
         _authService = authService;
         _logger = logger;
+        _environment = environment;
     }
 
     [HttpGet]
@@ -37,6 +40,8 @@ public class ProfileController : Controller
 
             var model = new UserViewModel.ProfileViewModel
             {
+
+
                 Name = user.Name ?? "",
                 Email = user.Email,
                 Phone = user.Phone ?? "",
@@ -56,21 +61,80 @@ public class ProfileController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Update(UserViewModel.ProfileViewModel model)
+    public async Task<IActionResult> Update(UserViewModel.ProfileViewModel model, IFormFile? avatar)
     {
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return View("Index", model);
-            }
-
             var userId = AuthHelper.GetUserId(HttpContext);
             if (userId == null)
             {
                 return RedirectToAction("Login", "Auth");
             }
+            _logger.LogInformation("Update with {UserId}", userId.Value);
 
+            // Load current user to backfill required fields when disabled inputs are not posted
+            var currentUser = await _authService.GetUserByIdAsync(userId.Value);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Ensure immutable email stays consistent
+            model.Email = currentUser.Email;
+
+            // Backfill required fields if missing
+            if (string.IsNullOrWhiteSpace(model.Name)) model.Name = currentUser.Name ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(model.Phone)) model.Phone = currentUser.Phone ?? string.Empty;
+            if (model.BirthDate == null) model.BirthDate = currentUser.BirthDate;
+            if (string.IsNullOrWhiteSpace(model.Gender)) model.Gender = currentUser.Gender ?? string.Empty;
+
+            // Handle avatar upload (max 20MB, png/jpg/jpeg), save as wwwroot/avatars/{userId}.{ext}
+            if (avatar != null && avatar.Length > 0)
+            {
+                const long maxBytes = 20L * 1024 * 1024; // 20MB
+                if (avatar.Length > maxBytes)
+                {
+                    ModelState.AddModelError("", "Ảnh đại diện vượt quá dung lượng tối đa 20MB.");
+                    return View("Index", model);
+                }
+
+                var ext = Path.GetExtension(avatar.FileName).ToLowerInvariant();
+                var allowed = new[] { ".png", ".jpg", ".jpeg" };
+                if (!allowed.Contains(ext))
+                {
+                    ModelState.AddModelError("", "Định dạng ảnh không hợp lệ. Chỉ hỗ trợ PNG/JPG/JPEG.");
+                    return View("Index", model);
+                }
+
+                var avatarsDir = Path.Combine(_environment.WebRootPath, "avatars");
+                if (!Directory.Exists(avatarsDir))
+                {
+                    Directory.CreateDirectory(avatarsDir);
+                }
+
+                var fileName = $"{userId.Value}{ext}";
+                var filePath = Path.Combine(avatarsDir, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    await avatar.CopyToAsync(stream);
+                }
+
+                model.Avatar = $"/avatars/{fileName}";
+            }
+            else
+            {
+                // Keep existing avatar if not uploading a new one
+                model.Avatar = currentUser.Avatar;
+            }
+            _logger.LogInformation("Avatar model: {@Model}", model.Avatar);
+
+            // Re-validate after backfilling
+            ModelState.Clear();
+            if (!TryValidateModel(model))
+            {
+                return View("Index", model);
+            }
             var result = await _authService.UpdateProfileAsync(userId.Value, model);
             if (result)
             {

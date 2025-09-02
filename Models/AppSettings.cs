@@ -3,7 +3,7 @@ namespace MonAmour.Models;
 public class AppSettings
 {
     public string AppName { get; set; } = "MonAmour";
-    public string AppUrl { get; set; } = "";
+    public string AppUrl { get; set; } = "https://localhost:7239";
     public string SupportEmail { get; set; } = "";
     public bool EnableEmailVerification { get; set; } = true;
     public int SessionTimeoutMinutes { get; set; } = 30;
