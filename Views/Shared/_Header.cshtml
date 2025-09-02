@@ -23,6 +23,15 @@
                 <a href="#contact" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                     Liên hệ
                 </a>
+                @if (MonAmour.Helpers.AuthHelper.IsAuthenticated(Context))
+                {
+                    <a href="@Url.Action("Index", "Wishlist")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-heart mr-1"></i>Yêu thích
+                    </a>
+                    <a href="@Url.Action("MyReviews", "Review")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-star mr-1"></i>Đánh giá
+                    </a>
+                }
             </nav>
         </div>
         <div class="flex items-center space-x-4">
@@ -58,6 +67,15 @@
             <a href="#contact" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                 Liên hệ
             </a>
+            @if (MonAmour.Helpers.AuthHelper.IsAuthenticated(Context))
+            {
+                <a href="@Url.Action("Index", "Wishlist")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    <i class="fas fa-heart mr-1"></i>Yêu thích
+                </a>
+                <a href="@Url.Action("MyReviews", "Review")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    <i class="fas fa-star mr-1"></i>Đánh giá
+                </a>
+            }
             <div class="pt-2 border-t border-border">
                 @await Html.PartialAsync("_UserMenu")
             </div>

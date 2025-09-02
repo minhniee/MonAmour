@@ -37,6 +37,8 @@ builder.Services.AddHttpContextAccessor();
 // Add Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IWishListService, WishListService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 var app = builder.Build();
 
