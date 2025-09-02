@@ -1,0 +1,504 @@
+﻿use master
+go
+
+IF EXISTS (SELECT name FROM sys.databases WHERE name = N'MonAmourDb')
+BEGIN
+    DROP DATABASE MonAmourDb;
+END
+GO
+
+-- Tạo database mới
+CREATE DATABASE MonAmourDb;
+GO
+
+-- Sử dụng database
+USE MonAmourDb;
+GO
+
+-- =========================
+-- 1. User & Roles
+-- =========================
+CREATE TABLE [User] (
+    user_id INT PRIMARY KEY IDENTITY(1,1),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password NVARCHAR(255) NOT NULL,
+    birth_date DATE NULL,
+    name NVARCHAR(255),
+    phone NVARCHAR(20) UNIQUE NULL,
+    avatar NVARCHAR(255) NULL,
+    verified BIT DEFAULT 0,
+    gender VARCHAR(10) CHECK (gender IN ('male','female','other')),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active','inactive','banned')),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE [Role] (
+    role_id INT PRIMARY KEY IDENTITY(1,1),
+    role_name VARCHAR(50) UNIQUE
+);
+
+CREATE TABLE User_Role (
+    user_id INT NOT NULL FOREIGN KEY REFERENCES [User](user_id),
+    role_id INT NOT NULL FOREIGN KEY REFERENCES [Role](role_id),
+    assigned_at DATETIME DEFAULT GETDATE(),
+    assigned_by INT NULL,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- =========================
+-- 2. Token Management
+-- =========================
+CREATE TABLE Token (
+    token_id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT NOT NULL FOREIGN KEY REFERENCES [User](user_id),
+    token_value NVARCHAR(500) NOT NULL,
+    token_type VARCHAR(30) NOT NULL CHECK (token_type IN ('access_token', 'refresh_token', 'reset_password', 'email_verification', 'remember_me')),
+    expires_at DATETIME NOT NULL,
+    is_active BIT DEFAULT 1,
+    used_at DATETIME NULL,
+    ip_address NVARCHAR(45) NULL, -- Hỗ trợ cả IPv4 và IPv6
+    user_agent NVARCHAR(500) NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    
+    -- Index để tối ưu performance
+    INDEX IX_Token_UserTokenType (user_id, token_type),
+    INDEX IX_Token_Value (token_value),
+    INDEX IX_Token_ExpiresActive (expires_at, is_active)
+);
+
+-- =========================
+-- 3. Email Template Management
+-- =========================
+CREATE TABLE Email_Template (
+    template_id INT PRIMARY KEY IDENTITY(1,1),
+    name VARCHAR(100) UNIQUE NOT NULL,
+    subject NVARCHAR(255) NOT NULL,
+    body NVARCHAR(MAX) NOT NULL,
+    template_type VARCHAR(50) CHECK (template_type IN ('welcome', 'email_verification', 'password_reset', 'booking_confirmation', 'order_confirmation', 'promotional', 'newsletter')),
+    is_active BIT DEFAULT 1,
+    variables NVARCHAR(500) NULL, -- JSON string chứa list variables: {"user_name", "reset_link", "booking_date"}
+    created_by INT NULL FOREIGN KEY REFERENCES [User](user_id),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- =========================
+-- 5. Partner & Location
+-- =========================
+CREATE TABLE Partner (
+    partner_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(255),
+    contact_info NVARCHAR(255),
+    user_id INT NULL FOREIGN KEY REFERENCES [User](user_id),
+    email VARCHAR(255),
+    phone VARCHAR(50),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('pending','active','inactive','suspended')),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE Location (
+    location_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(255),
+    address NVARCHAR(255),
+    district NVARCHAR(100),
+    city NVARCHAR(100),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active','inactive','maintenance')),
+    partner_id INT FOREIGN KEY REFERENCES Partner(partner_id),
+    ggmap_link VARCHAR(255),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- =========================
+-- 6. Concept & Lookup tables
+-- =========================
+CREATE TABLE Concept_Color (
+    color_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(50),
+    code NVARCHAR(20)
+);
+
+CREATE TABLE Concept_Category (
+    category_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(100),
+    description NVARCHAR(255),
+    is_active BIT DEFAULT 1
+);
+
+CREATE TABLE Concept_Ambience (
+    ambience_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(100)
+);
+
+CREATE TABLE Concept (
+    concept_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(255),
+    description NVARCHAR(MAX),
+    price DECIMAL(18,2),
+    location_id INT FOREIGN KEY REFERENCES Location(location_id),
+    color_id INT FOREIGN KEY REFERENCES Concept_Color(color_id),
+    category_id INT FOREIGN KEY REFERENCES Concept_Category(category_id),
+    ambience_id INT FOREIGN KEY REFERENCES Concept_Ambience(ambience_id),
+    preparation_time INT,
+    availability_status BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE Concept_img (
+    img_id INT PRIMARY KEY IDENTITY(1,1),
+    concept_id INT FOREIGN KEY REFERENCES Concept(concept_id),
+    img_url NVARCHAR(255),
+    img_name NVARCHAR(255),
+    alt_text NVARCHAR(255),
+    is_primary BIT DEFAULT 0,
+    display_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+-- =========================
+-- 7. Booking
+-- =========================
+CREATE TABLE Booking (
+    booking_id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT FOREIGN KEY REFERENCES [User](user_id),
+    concept_id INT FOREIGN KEY REFERENCES Concept(concept_id),
+    booking_date DATE,
+    booking_time TIME,
+    status VARCHAR(20) CHECK (status IN ('confirmed','cancelled','completed')),
+    payment_status VARCHAR(20) DEFAULT 'pending' CHECK (payment_status IN ('pending','paid','refunded','partial_refund')),
+    confirmed_at DATETIME NULL,
+    cancelled_at DATETIME NULL,
+    total_price DECIMAL(18,2),
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+-- =========================
+-- 8. Product & Category
+-- =========================
+CREATE TABLE Product_Category (
+    category_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(100)
+);
+
+CREATE TABLE Product (
+    product_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(255),
+    category_id INT FOREIGN KEY REFERENCES Product_Category(category_id),
+    description NVARCHAR(MAX),
+    price DECIMAL(18,2),
+    material NVARCHAR(100),
+    target_audience NVARCHAR(100),
+    stock_quantity INT,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active','inactive','discontinued','out_of_stock')),
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE Product_img (
+    img_id INT PRIMARY KEY IDENTITY(1,1),
+    product_id INT FOREIGN KEY REFERENCES Product(product_id),
+    img_url NVARCHAR(255),
+    img_name NVARCHAR(255),
+    alt_text NVARCHAR(255),
+    is_primary BIT DEFAULT 0,
+    display_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE Wish_list (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT NOT NULL FOREIGN KEY REFERENCES [User](user_id),
+    product_id INT NULL FOREIGN KEY REFERENCES Product(product_id),
+    concept_id INT NULL FOREIGN KEY REFERENCES Concept(concept_id),
+    created_at DATETIME DEFAULT GETDATE()
+);
+
+-- =========================
+-- 9. Orders
+-- =========================
+CREATE TABLE ShippingOption (
+    shipping_option_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(100)
+);
+
+CREATE TABLE [Order] (
+    order_id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT FOREIGN KEY REFERENCES [User](user_id),
+    total_price DECIMAL(18,2),
+    shipping_cost DECIMAL(18,2) DEFAULT 0,
+    status VARCHAR(20) CHECK (status IN ('confirmed','shipping','completed')),
+    shipping_option_id INT FOREIGN KEY REFERENCES ShippingOption(shipping_option_id),
+    tracking_number NVARCHAR(100),
+    estimated_delivery DATE,
+    delivered_at DATETIME NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE OrderItem (
+    order_item_id INT PRIMARY KEY IDENTITY(1,1),
+    order_id INT FOREIGN KEY REFERENCES [Order](order_id),
+    product_id INT FOREIGN KEY REFERENCES Product(product_id),
+    quantity INT,
+    unit_price DECIMAL(18,2),
+    total_price DECIMAL(18,2) NOT NULL
+);
+
+-- =========================
+-- 10. Payment
+-- =========================
+CREATE TABLE PaymentMethod (
+    payment_method_id INT PRIMARY KEY IDENTITY(1,1),
+    name NVARCHAR(50)
+);
+
+CREATE TABLE Payment (
+    payment_id INT PRIMARY KEY IDENTITY(1,1),
+    amount DECIMAL(18,2),
+    status VARCHAR(20) CHECK (status IN ('pending','completed','failed')),
+    payment_method_id INT FOREIGN KEY REFERENCES PaymentMethod(payment_method_id),
+    created_at DATETIME DEFAULT GETDATE(),
+    processed_at DATETIME NULL
+);
+
+CREATE TABLE PaymentDetail (
+    payment_detail_id INT PRIMARY KEY IDENTITY(1,1),
+    payment_id INT FOREIGN KEY REFERENCES Payment(payment_id),
+    order_id INT NULL FOREIGN KEY REFERENCES [Order](order_id),
+    booking_id INT NULL FOREIGN KEY REFERENCES Booking(booking_id),
+    amount DECIMAL(18,2)
+);
+
+-- =========================
+-- 11. Review (Polymorphic)
+-- =========================
+CREATE TABLE Review (
+    review_id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT FOREIGN KEY REFERENCES [User](user_id),
+    target_type VARCHAR(20) CHECK (target_type IN ('concept','product','partner')),
+    target_id INT NOT NULL,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comment NVARCHAR(MAX),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+-- =========================
+-- 12. Content (Blog/News)
+-- =========================
+CREATE TABLE Content (
+    content_id INT PRIMARY KEY IDENTITY(1,1),
+    title NVARCHAR(255),
+    body NVARCHAR(MAX),
+    category NVARCHAR(100),
+    tags NVARCHAR(255),
+    author_id INT FOREIGN KEY REFERENCES [User](user_id),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+
+
+
+CREATE TABLE Notification (
+    notification_id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT NOT NULL FOREIGN KEY REFERENCES [User](user_id),
+    title NVARCHAR(255) NOT NULL,
+    message NVARCHAR(MAX) NOT NULL,
+    notification_type VARCHAR(50) CHECK (notification_type IN ('booking', 'order', 'payment', 'promotion', 'system')),
+    is_read BIT DEFAULT 0,
+    action_url NVARCHAR(255) NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    read_at DATETIME NULL
+);
+
+-- =========================
+-- STORED PROCEDURES
+-- =========================
+
+-- Token Management Procedures
+GO
+CREATE PROCEDURE CreateToken
+    @user_id INT,
+    @token_value NVARCHAR(500),
+    @token_type VARCHAR(30),
+    @expires_at DATETIME,
+    @ip_address NVARCHAR(45) = NULL,
+    @user_agent NVARCHAR(500) = NULL
+AS
+BEGIN
+    -- Vô hiệu hóa các token cũ cùng loại (trừ refresh_token có thể có nhiều)
+    IF @token_type != 'refresh_token'
+    BEGIN
+        UPDATE Token 
+        SET is_active = 0, updated_at = GETDATE()
+        WHERE user_id = @user_id AND token_type = @token_type AND is_active = 1
+    END
+
+    INSERT INTO Token (user_id, token_value, token_type, expires_at, ip_address, user_agent)
+    VALUES (@user_id, @token_value, @token_type, @expires_at, @ip_address, @user_agent)
+END
+GO
+
+CREATE PROCEDURE ValidateToken
+    @token_value NVARCHAR(500),
+    @token_type VARCHAR(30)
+AS
+BEGIN
+    SELECT t.*, u.email, u.status as user_status
+    FROM Token t
+    INNER JOIN [User] u ON t.user_id = u.user_id
+    WHERE t.token_value = @token_value 
+        AND t.token_type = @token_type 
+        AND t.is_active = 1 
+        AND t.expires_at > GETDATE()
+        AND u.status = 'active'
+END
+GO
+
+CREATE PROCEDURE RevokeToken
+    @token_value NVARCHAR(500)
+AS
+BEGIN
+    UPDATE Token 
+    SET is_active = 0, used_at = GETDATE(), updated_at = GETDATE()
+    WHERE token_value = @token_value
+END
+GO
+
+CREATE PROCEDURE CleanupExpiredTokens
+AS
+BEGIN
+    DELETE FROM Token 
+    WHERE expires_at < DATEADD(DAY, -30, GETDATE()) -- Xóa token hết hạn quá 30 ngày
+    
+    DELETE FROM User_Session 
+    WHERE expires_at < DATEADD(DAY, -7, GETDATE()) -- Xóa session hết hạn quá 7 ngày
+END
+GO
+
+-- Email Management Procedures
+CREATE PROCEDURE QueueEmail
+    @to_email VARCHAR(255),
+    @subject NVARCHAR(255),
+    @body NVARCHAR(MAX),
+    @template_id INT = NULL,
+    @priority INT = 2,
+    @scheduled_at DATETIME = NULL
+AS
+BEGIN
+    IF @scheduled_at IS NULL
+        SET @scheduled_at = GETDATE()
+        
+    INSERT INTO Email_Queue (to_email, subject, body, template_id, priority, scheduled_at)
+    VALUES (@to_email, @subject, @body, @template_id, @priority, @scheduled_at)
+END
+GO
+
+CREATE PROCEDURE ProcessEmailQueue
+    @batch_size INT = 50
+AS
+BEGIN
+    SELECT TOP (@batch_size) *
+    FROM Email_Queue
+    WHERE status = 'pending' 
+        AND scheduled_at <= GETDATE()
+        AND attempts < max_attempts
+    ORDER BY priority ASC, scheduled_at ASC
+END
+GO
+
+
+
+-- =========================
+-- SAMPLE DATA
+-- =========================
+
+-- Insert default roles
+INSERT INTO [Role] (role_name) VALUES 
+('admin'), ('user');
+
+-- Insert default email templates
+INSERT INTO Email_Template (name, subject, body, template_type, variables) VALUES
+('welcome_email', 'Welcome to MonAmour!', 
+ 'Dear {{user_name}}, Welcome to MonAmour! We''re excited to have you join our community.', 
+ 'welcome', '["user_name"]'),
+ 
+('email_verification', 'Please verify your email', 
+ 'Hi {{user_name}}, Please click this link to verify your email: {{verification_link}}', 
+ 'email_verification', '["user_name", "verification_link"]'),
+ 
+('password_reset', 'Reset your password', 
+ 'Hi {{user_name}}, Click here to reset your password: {{reset_link}} This link expires in 24 hours.', 
+ 'password_reset', '["user_name", "reset_link"]'),
+ 
+('booking_confirmation', 'Booking Confirmed', 
+ 'Dear {{user_name}}, Your booking for {{concept_name}} on {{booking_date}} at {{booking_time}} has been confirmed.', 
+ 'booking_confirmation', '["user_name", "concept_name", "booking_date", "booking_time"]');
+
+-- Insert payment methods
+INSERT INTO PaymentMethod (name) VALUES 
+('Credit Card'), ('PayPal'), ('Bank Transfer'), ('Cash'), ('Crypto');
+
+-- Insert shipping options
+INSERT INTO ShippingOption (name) VALUES 
+('Standard Delivery'), ('Express Delivery'), ('Same Day Delivery'), ('Store Pickup');
+
+-- Insert concept colors
+INSERT INTO Concept_Color (name, code) VALUES 
+('Red', '#FF0000'), ('Pink', '#FFC0CB'), ('White', '#FFFFFF'), ('Purple', '#800080');
+
+-- Insert concept categories
+INSERT INTO Concept_Category (name, description) VALUES 
+('Romantic', 'Perfect for romantic occasions'),
+('Birthday', 'Special birthday celebrations'),
+('Anniversary', 'Memorable anniversary moments'),
+('Proposal', 'Unforgettable proposal settings');
+
+-- Insert ambiences
+INSERT INTO Concept_Ambience (name) VALUES 
+('Intimate'), ('Luxurious'), ('Cozy'), ('Elegant'), ('Modern');
+
+-- Insert product categories
+INSERT INTO Product_Category (name) VALUES 
+('Flowers'), ('Gifts'), ('Decorations'), ('Accessories'), ('Food & Beverages');
+
+PRINT 'Database MonAmourDb created successfully with all tables, procedures, and sample data!';
+GO
+
+DECLARE @sql NVARCHAR(MAX) = N'';
+
+;WITH C AS (
+    SELECT c.name AS ck_name
+    FROM sys.check_constraints c
+    JOIN sys.objects o ON o.object_id = c.parent_object_id
+    JOIN sys.columns col ON col.object_id = o.object_id AND col.column_id = c.parent_column_id
+    WHERE o.name = 'Order' AND col.name = 'status'
+)
+SELECT @sql = STRING_AGG(N'ALTER TABLE [dbo].[Order] DROP CONSTRAINT [' + ck_name + N'];', CHAR(10))
+FROM C;
+
+IF @sql IS NOT NULL AND LEN(@sql) > 0
+    EXEC sp_executesql @sql;
+GO
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.check_constraints 
+    WHERE name = 'CK_Order_Status' AND parent_object_id = OBJECT_ID('[dbo].[Order]')
+)
+BEGIN
+    ALTER TABLE [dbo].[Order]
+    ADD CONSTRAINT [CK_Order_Status]
+    CHECK ([status] IN ('cart','confirmed','shipping','completed'));
+END
+ELSE
+BEGIN
+    -- Nếu tên đã tồn tại nhưng (giả sử) definition cũ, thì drop và tạo lại
+    ALTER TABLE [dbo].[Order] DROP CONSTRAINT [CK_Order_Status];
+    ALTER TABLE [dbo].[Order]
+    ADD CONSTRAINT [CK_Order_Status]
+    CHECK ([status] IN ('cart','confirmed','shipping','completed'));
+END
+GO
