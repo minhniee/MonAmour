@@ -158,19 +158,13 @@
                                                     onclick="editCategory(@category.CategoryId, '@category.Name')">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            @if (category.ProductCount == 0)
-                                            {
-                                                <button type="button" class="btn btn-danger btn-sm" title="Xóa"
-                                                        onclick="deleteCategory(@category.CategoryId, '@category.Name')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <button type="button" class="btn btn-danger btn-sm" title="Không thể xóa (có sản phẩm)" disabled>
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            }
+                                            
+                                            <!-- Delete Button - Always enabled -->
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    title="@if (category.ProductCount == 0) { <text>Xóa danh mục (không có sản phẩm)</text> } else { <text>Xóa danh mục (có @category.ProductCount sản phẩm)</text> }"
+                                                    onclick="deleteCategory(@category.CategoryId, '@Html.Raw(category.Name.Replace("'", "\\'"))', @category.ProductCount)">
+                                                <i class="fas fa-times"></i> Xóa
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -259,28 +253,59 @@
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteCategoryModalLabel">Xác nhận xóa</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="deleteCategoryModalLabel">Xác nhận xóa danh mục</h5>
+                <button type="button" class="close" onclick="closeDeleteModal()" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                Bạn có chắc chắn muốn xóa danh mục "<span id="categoryNameToDelete"></span>"?
-                <br><br>
-                <strong>Lưu ý:</strong> Hành động này không thể hoàn tác!
+                <div id="deleteCategoryInfo">
+                    <p>Bạn có chắc chắn muốn xóa danh mục "<span id="categoryNameToDelete"></span>"?</p>
+                    <div id="productCountWarning" class="alert alert-warning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Cảnh báo:</strong> Danh mục này có <span id="productCount"></span> sản phẩm. 
+                        Bạn cần chọn cách xử lý các sản phẩm này trước khi xóa danh mục.
+                    </div>
+                </div>
+                
+                <div id="productHandlingOptions" style="display: none;">
+                    <h6 class="mt-3 mb-2">Chọn cách xử lý sản phẩm:</h6>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="productHandling" id="reassignProducts" value="reassign">
+                            <label class="form-check-label" for="reassignProducts">
+                                Chuyển sản phẩm sang danh mục khác
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="productHandling" id="uncategorizeProducts" value="uncategorize" checked>
+                            <label class="form-check-label" for="uncategorizeProducts">
+                                Chuyển sản phẩm sang trạng thái không phân loại
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="categorySelection" class="form-group" style="display: none;">
+                        <label for="targetCategoryId">Chọn danh mục đích:</label>
+                        <select class="form-control" id="targetCategoryId" name="targetCategoryId">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Lưu ý:</strong> Hành động này không thể hoàn tác!
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <form id="deleteCategoryForm" method="post" style="display: inline;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" id="categoryIdToDelete" name="id" />
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash mr-2"></i>Xóa danh mục
-                    </button>
-                </form>
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteCategory" onclick="confirmDelete()">
+                    <i class="fas fa-trash mr-2"></i>Xóa danh mục
+                </button>
             </div>
         </div>
     </div>
@@ -294,10 +319,119 @@
             $('#editCategoryModal').modal('show');
         }
         
-        function deleteCategory(categoryId, categoryName) {
-            $('#categoryIdToDelete').val(categoryId);
+        function deleteCategory(categoryId, categoryName, productCount) {
+            console.log('deleteCategory called:', categoryId, categoryName, productCount);
+            
+            // Set modal content
             $('#categoryNameToDelete').text(categoryName);
+            
+            // Show/hide product handling options based on product count
+            if (productCount > 0) {
+                $('#productCount').text(productCount);
+                $('#productCountWarning').show();
+                $('#productHandlingOptions').show();
+                
+                // Load available categories for reassignment
+                loadCategoriesForReassignment(categoryId);
+            } else {
+                $('#productCountWarning').hide();
+                $('#productHandlingOptions').hide();
+            }
+            
+            // Store category ID for later use
+            $('#deleteCategoryModal').data('categoryId', categoryId);
+            
+            // Show modal
             $('#deleteCategoryModal').modal('show');
+        }
+        
+        function loadCategoriesForReassignment(excludeCategoryId) {
+            $.get('@Url.Action("GetCategoriesForReassignment", "Admin")', { excludeCategoryId: excludeCategoryId })
+                .done(function(categories) {
+                    var select = $('#targetCategoryId');
+                    select.empty();
+                    select.append('<option value="">-- Chọn danh mục --</option>');
+                    
+                    if (categories && categories.length > 0) {
+                        categories.forEach(function(category) {
+                            select.append('<option value="' + category.categoryId + '">' + category.name + '</option>');
+                        });
+                    } else {
+                        select.append('<option value="" disabled>Không có danh mục khác</option>');
+                    }
+                })
+                .fail(function() {
+                    console.error('Failed to load categories for reassignment');
+                    var select = $('#targetCategoryId');
+                    select.empty();
+                    select.append('<option value="">-- Lỗi tải danh mục --</option>');
+                });
+        }
+        
+        function closeDeleteModal() {
+            console.log('closeDeleteModal called');
+            $('#deleteCategoryModal').modal('hide');
+        }
+        
+        function confirmDelete() {
+            console.log('confirmDelete called');
+            
+            var categoryId = $('#deleteCategoryModal').data('categoryId');
+            var productHandling = $('input[name="productHandling"]:checked').val();
+            var targetCategoryId = $('#targetCategoryId').val();
+            
+            console.log('Category ID:', categoryId);
+            console.log('Product handling:', productHandling);
+            console.log('Target category ID:', targetCategoryId);
+            
+            // Validate if reassign is selected but no target category is chosen
+            if (productHandling === 'reassign' && !targetCategoryId) {
+                alert('Vui lòng chọn danh mục đích để chuyển sản phẩm');
+                return false;
+            }
+            
+            // Disable button to prevent double submission
+            $('#confirmDeleteCategory').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang xóa...');
+            
+            // Create form dynamically
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': '@Url.Action("DeleteCategoryWithProducts", "Admin")'
+            });
+            
+            // Get anti-forgery token
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            if (!token) {
+                token = $('meta[name="__RequestVerificationToken"]').attr('content');
+            }
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': '__RequestVerificationToken',
+                'value': token
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'id',
+                'value': categoryId
+            }));
+            
+            if (productHandling === 'reassign' && targetCategoryId) {
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'reassignToCategoryId',
+                    'value': targetCategoryId
+                }));
+            }
+            
+            console.log('Submitting delete form...');
+            
+            // Submit the form
+            $('body').append(form);
+            form.submit();
+            
+            return false;
         }
         
         function exportCategories() {
@@ -352,6 +486,15 @@
                     { "orderable": false, "targets": [4] } // Disable sorting for action column
                 ]
             });
+        });
+        
+        // Use event delegation for dynamic content
+        $(document).on('change', 'input[name="productHandling"]', function() {
+            if ($(this).val() === 'reassign') {
+                $('#categorySelection').show();
+            } else {
+                $('#categorySelection').hide();
+            }
         });
     </script>
 }

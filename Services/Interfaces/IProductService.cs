@@ -18,6 +18,8 @@ namespace MonAmour.Services.Interfaces
         Task<bool> CreateCategoryAsync(ProductCategoryViewModel model);
         Task<bool> UpdateCategoryAsync(ProductCategoryViewModel model);
         Task<bool> DeleteCategoryAsync(int id);
+        Task<bool> DeleteCategoryWithProductsAsync(int id, int? reassignToCategoryId = null);
+        Task<List<object>> GetCategoriesForReassignmentAsync(int excludeCategoryId);
         
         // Product Image operations
         Task<List<ProductImgViewModel>> GetProductImagesAsync(int productId);

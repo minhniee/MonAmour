@@ -1239,6 +1239,61 @@ namespace MonAmour.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete Category With Products - xóa danh mục và xử lý sản phẩm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reassignToCategoryId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategoryWithProducts(int id, int? reassignToCategoryId = null)
+        {
+            try
+            {
+                _logger.LogInformation("DeleteCategoryWithProducts called for category {CategoryId}, reassignTo: {ReassignToCategoryId}", id, reassignToCategoryId);
+                
+                var result = await _productService.DeleteCategoryWithProductsAsync(id, reassignToCategoryId);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa danh mục thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa danh mục (có thể không tồn tại)";
+                }
+
+                return RedirectToAction(nameof(ProductCategories));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteCategoryWithProducts action for category {CategoryId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa danh mục";
+                return RedirectToAction(nameof(ProductCategories));
+            }
+        }
+
+        /// <summary>
+        /// Get Categories For Reassignment - lấy danh sách danh mục để chuyển sản phẩm
+        /// </summary>
+        /// <param name="excludeCategoryId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCategoriesForReassignment(int excludeCategoryId)
+        {
+            try
+            {
+                var categories = await _productService.GetCategoriesForReassignmentAsync(excludeCategoryId);
+                return Json(categories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetCategoriesForReassignment action");
+                return Json(new List<object>());
+            }
+        }
+
         #endregion
 
         #region Product Image Management

@@ -323,6 +323,93 @@ namespace MonAmour.Services.Implements
             }
         }
 
+        public async Task<bool> DeleteCategoryWithProductsAsync(int id, int? reassignToCategoryId = null)
+        {
+            try
+            {
+                _logger.LogInformation("DeleteCategoryWithProductsAsync called for category {CategoryId}, reassignTo: {ReassignToCategoryId}", id, reassignToCategoryId);
+                
+                var category = await _context.ProductCategories
+                    .Include(c => c.Products)
+                    .FirstOrDefaultAsync(c => c.CategoryId == id);
+
+                if (category == null) 
+                {
+                    _logger.LogWarning("Category {CategoryId} not found", id);
+                    return false;
+                }
+
+                // Handle products in this category
+                if (category.Products.Any())
+                {
+                    _logger.LogInformation("Category {CategoryId} has {ProductCount} products", id, category.Products.Count);
+                    
+                    if (reassignToCategoryId.HasValue)
+                    {
+                        // Reassign products to another category
+                        var targetCategory = await _context.ProductCategories
+                            .FirstOrDefaultAsync(c => c.CategoryId == reassignToCategoryId.Value);
+                        
+                        if (targetCategory != null)
+                        {
+                            foreach (var product in category.Products)
+                            {
+                                product.CategoryId = reassignToCategoryId.Value;
+                                _logger.LogInformation("Reassigned product {ProductId} to category {TargetCategoryId}", product.ProductId, reassignToCategoryId.Value);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Target category {TargetCategoryId} not found", reassignToCategoryId.Value);
+                        }
+                    }
+                    else
+                    {
+                        // Set products to uncategorized (CategoryId = null)
+                        foreach (var product in category.Products)
+                        {
+                            product.CategoryId = null;
+                            _logger.LogInformation("Set product {ProductId} to uncategorized", product.ProductId);
+                        }
+                    }
+                }
+
+                // Remove the category
+                _context.ProductCategories.Remove(category);
+                var result = await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("DeleteCategoryWithProductsAsync completed for category {CategoryId}, result: {Result}", id, result > 0);
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting category with products: {Id}", id);
+                throw;
+            }
+        }
+
+        public async Task<List<object>> GetCategoriesForReassignmentAsync(int excludeCategoryId)
+        {
+            try
+            {
+                var categories = await _context.ProductCategories
+                    .Where(c => c.CategoryId != excludeCategoryId)
+                    .Select(c => new
+                    {
+                        categoryId = c.CategoryId,
+                        name = c.Name
+                    })
+                    .ToListAsync();
+
+                return categories.Cast<object>().ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting categories for reassignment");
+                throw;
+            }
+        }
+
         // Product Image operations
         public async Task<List<ProductImgViewModel>> GetProductImagesAsync(int productId)
         {
