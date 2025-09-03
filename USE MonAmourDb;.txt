@@ -229,7 +229,7 @@ CREATE TABLE [Order] (
     user_id INT FOREIGN KEY REFERENCES [User](user_id),
     total_price DECIMAL(18,2),
     shipping_cost DECIMAL(18,2) DEFAULT 0,
-    status VARCHAR(20) CHECK (status IN ('confirmed','shipping','completed')),
+    status VARCHAR(20) CHECK (status IN ('confirmed','shipping','completed','canceled')),
     shipping_option_id INT FOREIGN KEY REFERENCES ShippingOption(shipping_option_id),
     tracking_number NVARCHAR(100),
     estimated_delivery DATE,

@@ -1,0 +1,301 @@
+﻿@{
+    ViewData["Title"] = "Order History";
+    Layout = "_Layout";
+}
+
+@using MonAmour.ViewModels
+@model OrderHistoryViewModel
+
+<div class="min-h-screen py-8" style="background-color: #fbf1e6;">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <div class="text-center mb-8">
+            <h1 class="font-prata text-4xl font-bold mb-4" style="color: #62000d;">
+                Order History
+            </h1>
+            <p class="text-lg text-muted-foreground">Track your romantic experiences and gift deliveries</p>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="w-full mb-8">
+            <div class="grid grid-cols-3 bg-white border-2 rounded-lg" style="border-color: #fbf1e6;">
+                <button class="tab-button px-4 py-3 text-center font-medium rounded-l-lg transition-all duration-200"
+                        data-tab="all" style="color: #62000d;">
+                    All Orders (<span id="all-count">@Model.Categories.SelectMany(c => c.Orders).Count()</span>)
+                </button>
+                <button class="tab-button px-4 py-3 text-center font-medium transition-all duration-200"
+                        data-tab="concept" style="color: #62000d;">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    Concepts (<span id="concept-count">@Model.Categories.FirstOrDefault(c => c.Name == "Concept")?.Orders.Count ?? 0</span>)
+                </button>
+                <button class="tab-button px-4 py-3 text-center font-medium rounded-r-lg transition-all duration-200"
+                        data-tab="giftbox" style="color: #62000d;">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                    </svg>
+                    Gift Boxes (<span id="giftbox-count">@Model.Categories.FirstOrDefault(c => c.Name == "Gift Box")?.Orders.Count ?? 0</span>)
+                </button>
+            </div>
+        </div>
+
+        <!-- All Orders Tab -->
+        <div id="tab-all" class="tab-content space-y-4">
+            @{
+                var allOrders = Model.Categories.SelectMany(c => c.Orders).ToList();
+            }
+            @if (allOrders.Any())
+            {
+                @foreach (var order in allOrders)
+                {
+                    <partial name="_OrderCard" model="order" />
+                }
+            }
+            else
+            {
+                <div class="bg-white rounded-lg border-2 text-center py-12" style="border-color: #fbf1e6;">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <h3 class="font-prata text-xl mb-2">No Orders Yet</h3>
+                    <p class="text-gray-600">Start creating beautiful memories with our romantic experiences.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Concept Orders Tab -->
+        <div id="tab-concept" class="tab-content space-y-4 hidden">
+            @{
+                var conceptCategory = Model.Categories.FirstOrDefault(c => c.Name == "Concept");
+                var conceptOrders = conceptCategory?.Orders ?? new List<OrderSummaryViewModel>();
+            }
+            @if (conceptOrders.Any())
+            {
+                @foreach (var order in conceptOrders)
+                {
+                    <partial name="_OrderCard" model="order" />
+                }
+            }
+            else
+            {
+                <div class="bg-white rounded-lg border-2 text-center py-12" style="border-color: #fbf1e6;">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <h3 class="font-prata text-xl mb-2">No Concept Orders</h3>
+                    <p class="text-gray-600">Explore our romantic experience concepts.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Gift Box Orders Tab -->
+        <div id="tab-giftbox" class="tab-content space-y-4 hidden">
+            @{
+                var giftBoxCategory = Model.Categories.FirstOrDefault(c => c.Name == "Gift Box");
+                var giftBoxOrders = giftBoxCategory?.Orders ?? new List<OrderSummaryViewModel>();
+            }
+            @if (giftBoxOrders.Any())
+            {
+                @foreach (var order in giftBoxOrders)
+                {
+                    <partial name="_OrderCard" model="order" />
+                }
+            }
+            else
+            {
+                <div class="bg-white rounded-lg border-2 text-center py-12" style="border-color: #fbf1e6;">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                    </svg>
+                    <h3 class="font-prata text-xl mb-2">No Gift Box Orders</h3>
+                    <p class="text-gray-600">Browse our curated gift box collection.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Rating Modal -->
+<div id="ratingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div class="mb-4">
+            <h3 class="font-prata text-xl font-semibold mb-2">Rate Your Experience</h3>
+            <p class="text-sm text-gray-600 mb-4">How was your experience with <span id="modal-product-name"></span>?</p>
+
+            <div class="flex gap-1 mb-4">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <button class="star-button p-1" data-rating="@i">
+                        <svg class="w-6 h-6 text-gray-300 hover:text-yellow-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                        </svg>
+                    </button>
+                }
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Write a review (optional)</label>
+                <textarea id="reviewText" class="w-full p-3 border border-gray-300 rounded-lg min-h-[100px] focus:ring-2 focus:ring-opacity-50"
+                          style="focus:ring-color: #62000d;" placeholder="Share your thoughts about this experience..."></textarea>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <button id="cancelRating" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button id="submitRating" class="px-4 py-2 text-white rounded-lg transition-colors"
+                        style="background-color: #62000d;" disabled>
+                    Submit Review
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+
+                // Remove active class from all buttons
+                tabButtons.forEach(btn => {
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.color = '#62000d';
+                });
+
+                // Add active class to clicked button
+                this.style.backgroundColor = '#62000d';
+                this.style.color = 'white';
+
+                // Hide all tab contents
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Show selected tab content
+                document.getElementById('tab-' + tabName).classList.remove('hidden');
+            });
+        });
+
+        // Rating modal functionality
+        const modal = document.getElementById('ratingModal');
+        const cancelBtn = document.getElementById('cancelRating');
+        const submitBtn = document.getElementById('submitRating');
+        const starButtons = document.querySelectorAll('.star-button');
+        const reviewText = document.getElementById('reviewText');
+        let currentRating = 0;
+        let currentOrderId = null;
+
+        // Open modal
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('rate-review-btn')) {
+                const orderId = e.target.getAttribute('data-order-id');
+                const productName = e.target.getAttribute('data-product-name');
+
+                currentOrderId = orderId;
+                document.getElementById('modal-product-name').textContent = productName;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        });
+
+        // Close modal
+        cancelBtn.addEventListener('click', function() {
+            closeModal();
+        });
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            currentRating = 0;
+            currentOrderId = null;
+            reviewText.value = '';
+            updateStars();
+            submitBtn.disabled = true;
+        }
+
+        // Star rating functionality
+        starButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                currentRating = parseInt(this.getAttribute('data-rating'));
+                updateStars();
+                submitBtn.disabled = currentRating === 0;
+            });
+        });
+
+        function updateStars() {
+            starButtons.forEach((button, index) => {
+                const star = button.querySelector('svg');
+                if (index < currentRating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                    star.setAttribute('fill', 'currentColor');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-300');
+                    star.setAttribute('fill', 'none');
+                }
+            });
+        }
+
+        // Submit rating
+        submitBtn.addEventListener('click', function() {
+            const review = reviewText.value;
+
+            // Here you would typically send the data to your server
+            console.log('Rating submitted:', {
+                orderId: currentOrderId,
+                rating: currentRating,
+                review: review
+            });
+
+            // You can add an AJAX call here to submit to your controller
+            // fetch('/OrderHistory/SubmitRating', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({
+            //         orderId: currentOrderId,
+            //         rating: currentRating,
+            //         review: review
+            //     })
+            // });
+
+            closeModal();
+
+            // Update the UI to show the rating was submitted
+            const rateButton = document.querySelector(`[data-order-id="${currentOrderId}"]`);
+            if (rateButton) {
+                rateButton.style.display = 'none';
+                const ratingDisplay = document.createElement('div');
+                ratingDisplay.className = 'flex items-center gap-2';
+                ratingDisplay.innerHTML = `
+                    <div class="flex">
+                        ${Array.from({length: 5}, (_, i) => `
+                            <svg class="w-4 h-4 ${i < currentRating ? 'text-yellow-400' : 'text-gray-300'}"
+                                 fill="${i < currentRating ? 'currentColor' : 'none'}"
+                                 stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                            </svg>
+                        `).join('')}
+                    </div>
+                    <span class="text-sm text-gray-600">Rated</span>
+                `;
+                rateButton.parentNode.appendChild(ratingDisplay);
+            }
+        });
+    });
+</script>

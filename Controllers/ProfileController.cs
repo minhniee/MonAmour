@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MonAmour.Attributes;
-using Microsoft.AspNetCore.Hosting;
 using MonAmour.AuthViewModel;
 using MonAmour.Helpers;
+using MonAmour.Models;
 using MonAmour.Services.Interfaces;
+using MonAmour.ViewModels;
 
 namespace MonAmour.Controllers;
 
@@ -13,12 +15,16 @@ public class ProfileController : Controller
     private readonly IAuthService _authService;
     private readonly ILogger<ProfileController> _logger;
     private readonly IWebHostEnvironment _environment;
+    private readonly MonAmourDbContext _db;
+    private readonly IReviewService _reviewService;
 
-    public ProfileController(IAuthService authService, ILogger<ProfileController> logger, IWebHostEnvironment environment)
+    public ProfileController(IAuthService authService, ILogger<ProfileController> logger, IWebHostEnvironment environment, MonAmourDbContext db, IReviewService reviewService)
     {
         _authService = authService;
         _logger = logger;
         _environment = environment;
+        _db = db;
+        _reviewService = reviewService;
     }
 
     [HttpGet]
@@ -195,5 +201,161 @@ public class ProfileController : Controller
             ModelState.AddModelError("", "Có lỗi xảy ra khi đổi mật khẩu.");
             return View(model);
         }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> OrderHistory()
+    {
+        try
+        {
+            var userId = AuthHelper.GetUserId(HttpContext);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Load gift box orders (Order + OrderItems + Product)
+            var giftBoxOrders = await _db.Orders
+                .AsNoTracking()
+                .Include(o => o.OrderItems)!.ThenInclude(oi => oi.Product)
+                .Where(o => o.UserId == userId.Value)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+
+            // Load concept bookings as another category
+            var conceptBookings = await _db.Bookings
+                .AsNoTracking()
+                .Include(b => b.Concept)
+                .Where(b => b.UserId == userId.Value)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+
+            var model = new OrderHistoryViewModel
+            {
+                Categories = new List<OrderCategoryViewModel>()
+            };
+
+            var giftBoxCategory = new OrderCategoryViewModel
+            {
+                Name = "Gift Box",
+                Orders = giftBoxOrders.Select(o => new OrderSummaryViewModel
+                {
+                    OrderDate = o.CreatedAt ?? DateTime.Now,
+                    OrderNumber = $"ORD-{o.OrderId}",
+                    Status = NormalizeStatus(o.Status),
+                    CanReview = string.Equals(NormalizeStatus(o.Status), "Completed", StringComparison.OrdinalIgnoreCase),
+                    TotalAmount = (o.TotalPrice ?? 0m) + (o.ShippingCost ?? 0m),
+                    Items = o.OrderItems.Select(oi => new OrderItemViewModel
+                    {
+                        ItemId = oi.OrderItemId,
+                        ItemType = "Product",
+                        TargetId = oi.ProductId ?? 0,
+                        Name = oi.Product?.Name ?? "",
+                        Quantity = oi.Quantity ?? 0,
+                        UnitPrice = oi.UnitPrice ?? 0m,
+                        TotalPrice = oi.TotalPrice ?? (oi.UnitPrice ?? 0m) * (oi.Quantity ?? 0)
+                    }).ToList()
+                }).ToList()
+            };
+
+            var conceptCategory = new OrderCategoryViewModel
+            {
+                Name = "Concept",
+                Orders = conceptBookings.Select(b => new OrderSummaryViewModel
+                {
+                    OrderDate = b.CreatedAt ?? DateTime.Now,
+                    OrderNumber = $"BK-{b.BookingId}",
+                    Status = NormalizeStatus(b.Status),
+                    CanReview = string.Equals(NormalizeStatus(b.Status), "Completed", StringComparison.OrdinalIgnoreCase),
+                    TotalAmount = b.TotalPrice ?? 0m,
+                    Items = new List<OrderItemViewModel>
+                    {
+                        new OrderItemViewModel
+                        {
+                            ItemId = b.BookingId,
+                            ItemType = "Concept",
+                            TargetId = b.ConceptId ?? 0,
+                            Name = b.Concept?.Name ?? "",
+                            Quantity = 1,
+                            UnitPrice = b.TotalPrice ?? 0m,
+                            TotalPrice = b.TotalPrice ?? 0m
+                        }
+                    }
+                }).ToList()
+            };
+
+            model.Categories.Add(conceptCategory);
+            model.Categories.Add(giftBoxCategory);
+
+            return View("OrderHistory", model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading order history");
+            TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải lịch sử đơn hàng.";
+            return RedirectToAction("Index");
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SubmitReview(int targetId, string targetType, int rating, string? comment)
+    {
+        try
+        {
+            var userId = AuthHelper.GetUserId(HttpContext);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (rating < 1 || rating > 5)
+            {
+                TempData["ErrorMessage"] = "Điểm đánh giá phải từ 1 đến 5.";
+                return RedirectToAction("OrderHistory");
+            }
+
+            // Ensure the user can review this target
+            var canReview = await _reviewService.CanUserReviewAsync(userId.Value, targetType, targetId);
+            if (!canReview)
+            {
+                TempData["ErrorMessage"] = "Bạn không thể đánh giá mục này.";
+                return RedirectToAction("OrderHistory");
+            }
+
+            var dto = new CreateReviewViewModel
+            {
+                UserId = userId.Value,
+                TargetType = targetType,
+                TargetId = targetId,
+                Rating = rating,
+                Comment = string.IsNullOrWhiteSpace(comment) ? null : comment
+            };
+
+            await _reviewService.CreateReviewAsync(dto);
+            TempData["SuccessMessage"] = "Gửi đánh giá thành công!";
+            return RedirectToAction("OrderHistory");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error submitting review for {TargetType} {TargetId}", targetType, targetId);
+            TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi đánh giá.";
+            return RedirectToAction("OrderHistory");
+        }
+    }
+
+    private static string NormalizeStatus(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "Confirmed";
+        var val = raw.Trim().ToLowerInvariant();
+        return val switch
+        {
+            "confirmed" => "Confirmed",
+            "shipping" => "Shipping",
+            "completed" => "Completed",
+            "canceled" => "Canceled",
+            "cancelled" => "Canceled",
+            _ => "Confirmed"
+        };
     }
 }
