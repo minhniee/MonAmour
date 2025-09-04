@@ -319,6 +319,70 @@ namespace MonAmour.Controllers
             return RedirectToAction("Index");
         }
 
+        // GET: /Cart/FinalizeZp
+        [HttpGet]
+        public IActionResult FinalizeZp(decimal? amount = null)
+        {
+            int? userId = GetCurrentUserId();
+
+            var orderQuery = _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Where(o => o.Status == "cart");
+
+            if (userId != null)
+            {
+                orderQuery = orderQuery.Where(o => o.UserId == userId);
+            }
+
+            var order = orderQuery
+                .OrderByDescending(o => o.CreatedAt)
+                .FirstOrDefault();
+
+            if (order == null || order.OrderItems == null || !order.OrderItems.Any())
+            {
+                TempData["CartError"] = "Giỏ hàng trống";
+                return RedirectToAction("Index");
+            }
+
+            order.TotalPrice = order.OrderItems
+                .Select(i => (decimal?)i.TotalPrice)
+                .Sum()
+                .GetValueOrDefault(0m);
+
+            // If amount is provided from gateway, prefer it
+            var paidAmount = amount ?? order.TotalPrice;
+
+            var paymentMethod = _db.PaymentMethods.FirstOrDefault();
+            var payment = new Payment
+            {
+                Amount = paidAmount,
+                Status = "completed",
+                PaymentMethodId = paymentMethod?.PaymentMethodId,
+                CreatedAt = DateTime.Now,
+                ProcessedAt = DateTime.Now
+            };
+            _db.Payments.Add(payment);
+            _db.SaveChanges();
+
+            var paymentDetail = new PaymentDetail
+            {
+                PaymentId = payment.PaymentId,
+                OrderId = order.OrderId,
+                Amount = paidAmount
+            };
+            _db.PaymentDetails.Add(paymentDetail);
+            _db.SaveChanges();
+
+            order.Status = "confirmed";
+            order.UpdatedAt = DateTime.Now;
+            _db.Orders.Update(order);
+            _db.SaveChanges();
+
+            TempData["CartSuccess"] = "Thanh toán thành công";
+            return RedirectToAction("Index", new { paid = true });
+        }
+
         private int? GetCurrentUserId()
         {
             // Prefer session-based auth to be consistent with the app's AuthHelper
