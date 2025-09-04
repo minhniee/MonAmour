@@ -1,0 +1,426 @@
+@model MonAmour.ViewModels.ConceptDetailViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết Concept";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Concept</h1>
+        <div>
+            <a href="@Url.Action("EditConcept", "Admin", new { id = Model.ConceptId })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Concepts", "Admin")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Concept Information -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Concept</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Tên Concept:</label>
+                                <p class="form-control-plaintext">@Model.Name</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Giá:</label>
+                                <p class="form-control-plaintext">
+                                    @if (Model.Price.HasValue)
+                                    {
+                                        <span class="text-success font-weight-bold">@Model.Price.Value.ToString("N0") VNĐ</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có giá</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label font-weight-bold">Mô tả:</label>
+                        <p class="form-control-plaintext">
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                @Model.Description
+                            }
+                            else
+                            {
+                                <span class="text-muted">Chưa có mô tả</span>
+                            }
+                        </p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Địa điểm:</label>
+                                <p class="form-control-plaintext">
+                                    @if (!string.IsNullOrEmpty(Model.LocationName))
+                                    {
+                                        <span class="badge badge-info">@Model.LocationName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa chọn địa điểm</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Danh mục:</label>
+                                <p class="form-control-plaintext">
+                                    @if (!string.IsNullOrEmpty(Model.CategoryName))
+                                    {
+                                        <span class="badge badge-secondary">@Model.CategoryName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa chọn danh mục</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Màu sắc:</label>
+                                <p class="form-control-plaintext">
+                                    @if (!string.IsNullOrEmpty(Model.ColorName))
+                                    {
+                                        <span class="badge badge-warning">@Model.ColorName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa chọn màu sắc</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Không gian:</label>
+                                <p class="form-control-plaintext">
+                                    @if (!string.IsNullOrEmpty(Model.AmbienceName))
+                                    {
+                                        <span class="badge badge-dark">@Model.AmbienceName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa chọn không gian</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Thời gian chuẩn bị:</label>
+                                <p class="form-control-plaintext">
+                                    @if (Model.PreparationTime.HasValue)
+                                    {
+                                        @(Model.PreparationTime.Value) 
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa xác định</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label font-weight-bold">Trạng thái:</label>
+                                <p class="form-control-plaintext">
+                                    @if (Model.AvailabilityStatus)
+                                    {
+                                        <span class="badge badge-success">Có sẵn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Không có sẵn</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concept Images -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Hình ảnh Concept</h6>
+                    <a href="@Url.Action("ConceptImages", "Admin", new { conceptId = Model.ConceptId })" class="btn btn-primary btn-sm">
+                        <i class="fas fa-images"></i> Quản lý hình ảnh
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        <div class="row">
+                            @foreach (var image in Model.Images.OrderBy(i => i.DisplayOrder))
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        @if (!string.IsNullOrEmpty(image.ImgUrl))
+                                        {
+                                            <img src="@image.ImgUrl" class="card-img-top" alt="@image.AltText" style="height: 200px; object-fit: cover;">
+                                        }
+                                        <div class="card-body">
+                                            <h6 class="card-title">@image.ImgName</h6>
+                                            @if (image.IsPrimary)
+                                            {
+                                                <span class="badge badge-success">Hình chính</span>
+                                            }
+                                            <p class="card-text small text-muted">Thứ tự: @image.DisplayOrder</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-images fa-3x text-gray-300 mb-3"></i>
+                            <h5 class="text-gray-600">Chưa có hình ảnh</h5>
+                            <p class="text-gray-500">Hãy thêm hình ảnh để concept trở nên hấp dẫn hơn.</p>
+                            <a href="@Url.Action("ConceptImages", "Admin", new { conceptId = Model.ConceptId })" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm hình ảnh
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Bookings -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Lịch đặt (Bookings)</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Bookings != null && Model.Bookings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Giờ đặt</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thanh toán</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.Bookings)
+                                    {
+                                        <tr>
+                                            <td>@booking.BookingId</td>
+                                            <td>@booking.BookingDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@booking.BookingTime.ToString(@"hh\:mm")</td>
+                                            <td>@booking.TotalPrice.ToString("N0") VNĐ</td>
+                                            <td>
+                                                <span class="badge badge-@(booking.Status == "Confirmed" ? "success" : booking.Status == "Pending" ? "warning" : "danger")">
+                                                    @booking.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-@(booking.PaymentStatus == "Paid" ? "success" : "warning")">
+                                                    @booking.PaymentStatus
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar fa-3x text-gray-300 mb-3"></i>
+                            <h5 class="text-gray-600">Chưa có booking nào</h5>
+                            <p class="text-gray-500">Concept này chưa có lịch đặt nào.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin hệ thống</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>ID Concept:</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            @Model.ConceptId
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>Ngày tạo:</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            @if (Model.CreatedAt.HasValue)
+                            {
+                                @Model.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>Cập nhật lần cuối:</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                @Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>Số hình ảnh:</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="badge badge-info">@Model.Images.Count hình</span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>Số booking:</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="badge badge-primary">@Model.Bookings.Count booking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thao tác nhanh</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("EditConcept", "Admin", new { id = Model.ConceptId })" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Chỉnh sửa Concept
+                        </a>
+                        <a href="@Url.Action("ConceptImages", "Admin", new { conceptId = Model.ConceptId })" class="btn btn-info">
+                            <i class="fas fa-images"></i> Quản lý Hình ảnh
+                        </a>
+                        <button type="button" class="btn btn-@(Model.AvailabilityStatus ? "secondary" : "success")" 
+                                onclick="toggleConceptStatus(@Model.ConceptId, @Model.AvailabilityStatus.ToString().ToLower())">
+                            <i class="fas fa-@(Model.AvailabilityStatus ? "pause" : "play")"></i> 
+                            @(Model.AvailabilityStatus ? "Tắt trạng thái" : "Bật trạng thái")
+                        </button>
+                        <button type="button" class="btn btn-danger" 
+                                onclick="deleteConcept(@Model.ConceptId, '@Model.Name')">
+                            <i class="fas fa-trash"></i> Xóa Concept
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConceptModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa Concept</h5>
+                <button type="button" class="close" data-bs-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa concept <strong id="deleteConceptName"></strong>?</p>
+                <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteConceptForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa Concept</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleConceptStatus(conceptId, currentStatus) {
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'bật' : 'tắt';
+            
+            if (confirm(`Bạn có chắc chắn muốn ${action} trạng thái concept này?`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("ToggleConceptStatus", "Admin")';
+                
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '__RequestVerificationToken';
+                token.value = $('input[name="__RequestVerificationToken"]').val();
+                form.appendChild(token);
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = conceptId;
+                form.appendChild(idInput);
+                
+                const statusInput = document.createElement('input');
+                statusInput.type = 'hidden';
+                statusInput.name = 'status';
+                statusInput.value = newStatus;
+                form.appendChild(statusInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function deleteConcept(conceptId, conceptName) {
+            $('#deleteConceptName').text(conceptName);
+            $('#deleteConceptForm').attr('action', '@Url.Action("DeleteConcept", "Admin")/' + conceptId);
+            $('#deleteConceptModal').modal('show');
+        }
+    </script>
+}

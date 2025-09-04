@@ -120,7 +120,7 @@ namespace MonAmour.Services.Implements
                     CreatedAt = location.CreatedAt,
                     UpdatedAt = location.UpdatedAt,
                     PartnerName = location.Partner != null ? location.Partner.Name : null,
-                    Concepts = location.Concepts.Select(c => new ConceptViewModel
+                    Concepts = location.Concepts.Select(c => new LocationConceptViewModel
                     {
                         ConceptId = c.ConceptId,
                         Name = c.Name ?? string.Empty,

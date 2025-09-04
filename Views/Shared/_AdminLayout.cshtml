@@ -49,29 +49,6 @@
                         </a>
                     </div>
 
-                    <div class="menu-item">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#conceptSubmenu">
-                            <i class="fas fa-images"></i>
-                            <span>Quản lý Concepts</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
-                        </a>
-                        <div class="collapse" id="conceptSubmenu">
-                            <div class="submenu">
-                                <a href="#" class="submenu-item">
-                                    <i class="fas fa-circle"></i>
-                                    <span>Danh sách Concepts</span>
-                                </a>
-                                <a href="#" class="submenu-item">
-                                    <i class="fas fa-circle"></i>
-                                    <span>Thêm Concept mới</span>
-                                </a>
-                                <a href="#" class="submenu-item">
-                                    <i class="fas fa-circle"></i>
-                                    <span>Phân loại</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Product") == true ? "active" : "")">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#productSubmenu">
@@ -132,6 +109,38 @@
                                 <a href="@Url.Action("CreateLocation", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "CreateLocation" ? "active" : "")">
                                     <i class="fas fa-plus"></i>
                                     <span>Thêm địa điểm</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Concept") == true ? "active" : "")">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#conceptSubmenu">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Quản lý Concept</span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Concept") == true ? "show" : "")" id="conceptSubmenu">
+                            <div class="submenu">
+                                <a href="@Url.Action("Concepts", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Concepts" ? "active" : "")">
+                                    <i class="fas fa-list"></i>
+                                    <span>Danh sách concept</span>
+                                </a>
+                                <a href="@Url.Action("ConceptCategories", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "ConceptCategories" ? "active" : "")">
+                                    <i class="fas fa-tags"></i>
+                                    <span>Danh mục concept</span>
+                                </a>
+                                <a href="@Url.Action("ConceptColors", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "ConceptColors" ? "active" : "")">
+                                    <i class="fas fa-palette"></i>
+                                    <span>Màu sắc concept</span>
+                                </a>
+                                <a href="@Url.Action("ConceptAmbiences", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "ConceptAmbiences" ? "active" : "")">
+                                    <i class="fas fa-home"></i>
+                                    <span>Không gian concept</span>
+                                </a>
+                                <a href="@Url.Action("ConceptImages", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "ConceptImages" ? "active" : "")">
+                                    <i class="fas fa-images"></i>
+                                    <span>Hình ảnh concept</span>
                                 </a>
                             </div>
                         </div>

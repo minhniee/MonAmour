@@ -1,0 +1,246 @@
+@model MonAmour.ViewModels.ConceptEditViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Concept";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa Concept</h1>
+        <div>
+            <a href="@Url.Action("ConceptDetail", "Admin", new { id = Model.ConceptId })" class="btn btn-info">
+                <i class="fas fa-eye"></i> Xem chi tiết
+            </a>
+            <a href="@Url.Action("Concepts", "Admin")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Concept</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditConcept" method="post">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="ConceptId" type="hidden" />
+                        <input asp-for="CreatedAt" type="hidden" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Name" class="control-label">Tên Concept <span class="text-danger">*</span></label>
+                                    <input asp-for="Name" class="form-control" placeholder="Nhập tên concept" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Price" class="control-label">Giá (VNĐ)</label>
+                                    <input asp-for="Price" type="number" step="1000" min="0" class="form-control" placeholder="Nhập giá" />
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Nhập mô tả concept"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="LocationId" class="control-label">Địa điểm</label>
+                                    <select asp-for="LocationId" class="form-control" id="LocationId">
+                                        <option value="">-- Chọn địa điểm (tùy chọn) --</option>
+                                    </select>
+                                    <span asp-validation-for="LocationId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CategoryId" class="control-label">Danh mục</label>
+                                    <select asp-for="CategoryId" class="form-control" id="CategoryId">
+                                        <option value="">-- Chọn danh mục (tùy chọn) --</option>
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ColorId" class="control-label">Màu sắc</label>
+                                    <select asp-for="ColorId" class="form-control" id="ColorId">
+                                        <option value="">-- Chọn màu sắc (tùy chọn) --</option>
+                                    </select>
+                                    <span asp-validation-for="ColorId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AmbienceId" class="control-label">Không gian</label>
+                                    <select asp-for="AmbienceId" class="form-control" id="AmbienceId">
+                                        <option value="">-- Chọn không gian (tùy chọn) --</option>
+                                    </select>
+                                    <span asp-validation-for="AmbienceId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="PreparationTime" class="control-label">Thời gian chuẩn bị (phút)</label>
+                                    <input asp-for="PreparationTime" type="number" min="0" class="form-control" placeholder="Nhập thời gian chuẩn bị" />
+                                    <span asp-validation-for="PreparationTime" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AvailabilityStatus" class="control-label">Trạng thái</label>
+                                    <div class="form-check">
+                                        <input asp-for="AvailabilityStatus" class="form-check-input" type="checkbox" />
+                                        <label asp-for="AvailabilityStatus" class="form-check-label">
+                                            Có sẵn
+                                        </label>
+                                    </div>
+                                    <span asp-validation-for="AvailabilityStatus" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Cập nhật Concept
+                            </button>
+                            <a href="@Url.Action("Concepts", "Admin")" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Concept</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>ID Concept:</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            @Model.ConceptId
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>Ngày tạo:</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            @if (Model.CreatedAt.HasValue)
+                            {
+                                @Model.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Hướng dẫn</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Thông tin cần thiết:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Tên Concept:</strong> Bắt buộc, tối đa 100 ký tự</li>
+                            <li><strong>Giá:</strong> Tùy chọn, tính bằng VNĐ</li>
+                            <li><strong>Mô tả:</strong> Tùy chọn, tối đa 500 ký tự</li>
+                            <li><strong>Địa điểm:</strong> Tùy chọn, chọn từ danh sách có sẵn</li>
+                            <li><strong>Danh mục:</strong> Tùy chọn, phân loại concept</li>
+                            <li><strong>Màu sắc:</strong> Tùy chọn, chủ đề màu sắc</li>
+                            <li><strong>Không gian:</strong> Tùy chọn, loại không gian</li>
+                            <li><strong>Thời gian chuẩn bị:</strong> Tùy chọn, tính bằng phút</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            loadDropdownData();
+        });
+
+        function loadDropdownData() {
+            $.ajax({
+                url: '@Url.Action("GetConceptDropdownData", "Admin")',
+                type: 'GET',
+                success: function(data) {
+                    if (data.success) {
+                        // Load locations
+                        var locationDropdown = $('#LocationId');
+                        locationDropdown.empty();
+                        locationDropdown.append('<option value="">-- Chọn địa điểm (tùy chọn) --</option>');
+                        $.each(data.locations, function(index, location) {
+                            var selected = location.locationId == @(Model.LocationId ?? 0) ? 'selected' : '';
+                            locationDropdown.append('<option value="' + location.locationId + '" ' + selected + '>' + location.name + '</option>');
+                        });
+
+                        // Load categories
+                        var categoryDropdown = $('#CategoryId');
+                        categoryDropdown.empty();
+                        categoryDropdown.append('<option value="">-- Chọn danh mục (tùy chọn) --</option>');
+                        $.each(data.categories, function(index, category) {
+                            var selected = category.categoryId == @(Model.CategoryId ?? 0) ? 'selected' : '';
+                            categoryDropdown.append('<option value="' + category.categoryId + '" ' + selected + '>' + category.name + '</option>');
+                        });
+
+                        // Load colors
+                        var colorDropdown = $('#ColorId');
+                        colorDropdown.empty();
+                        colorDropdown.append('<option value="">-- Chọn màu sắc (tùy chọn) --</option>');
+                        $.each(data.colors, function(index, color) {
+                            var selected = color.colorId == @(Model.ColorId ?? 0) ? 'selected' : '';
+                            colorDropdown.append('<option value="' + color.colorId + '" ' + selected + '>' + color.name + '</option>');
+                        });
+
+                        // Load ambiences
+                        var ambienceDropdown = $('#AmbienceId');
+                        ambienceDropdown.empty();
+                        ambienceDropdown.append('<option value="">-- Chọn không gian (tùy chọn) --</option>');
+                        $.each(data.ambiences, function(index, ambience) {
+                            var selected = ambience.ambienceId == @(Model.AmbienceId ?? 0) ? 'selected' : '';
+                            ambienceDropdown.append('<option value="' + ambience.ambienceId + '" ' + selected + '>' + ambience.name + '</option>');
+                        });
+
+                        console.log('Dropdown data loaded successfully');
+                    } else {
+                        console.error('Failed to load dropdown data:', data.message);
+                    }
+                },
+                error: function() {
+                    console.error('AJAX Error: Cannot load dropdown data');
+                }
+            });
+        }
+    </script>
+}

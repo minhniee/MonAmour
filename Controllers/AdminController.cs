@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MonAmour.Attributes;
 using MonAmour.Helpers;
 using MonAmour.Services.Interfaces;
@@ -14,16 +15,18 @@ namespace MonAmour.Controllers
         private readonly IProductService _productService;
         private readonly IPartnerService _partnerService;
         private readonly ILocationService _locationService;
+        private readonly IConceptService _conceptService;
         private readonly ILogger<AdminController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
+        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, IConceptService conceptService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _authService = authService;
             _userManagementService = userManagementService;
             _productService = productService;
             _partnerService = partnerService;
             _locationService = locationService;
+            _conceptService = conceptService;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
         }
@@ -2528,6 +2531,1094 @@ namespace MonAmour.Controllers
                 _logger.LogError(ex, "Error in ToggleLocationStatus action for location {LocationId}", id);
                 TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái địa điểm";
                 return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        #endregion
+
+        #region Concept Management
+
+        /// <summary>
+        /// Concepts - quản lý concept
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Concepts()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var searchModel = new ConceptSearchViewModel();
+                var (concepts, totalCount) = await _conceptService.GetConceptsAsync(searchModel);
+                
+                ViewBag.TotalCount = totalCount;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(concepts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Concepts action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách concept";
+                await SetAdminViewBagAsync();
+                return View(new List<ConceptViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept - tạo concept mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreateConcept()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var model = new ConceptCreateViewModel();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConcept GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Create Concept POST - xử lý tạo concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConcept(ConceptCreateViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo concept thành công";
+                    return RedirectToAction(nameof(Concepts));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo concept";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConcept POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi tạo concept";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept - chỉnh sửa concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditConcept(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var concept = await _conceptService.GetConceptByIdAsync(id);
+                if (concept == null)
+                {
+                    TempData["Error"] = "Không tìm thấy concept";
+                    return RedirectToAction(nameof(Concepts));
+                }
+
+                var model = new ConceptEditViewModel
+                {
+                    ConceptId = concept.ConceptId,
+                    Name = concept.Name,
+                    Description = concept.Description,
+                    Price = concept.Price,
+                    LocationId = concept.LocationId,
+                    ColorId = concept.ColorId,
+                    CategoryId = concept.CategoryId,
+                    AmbienceId = concept.AmbienceId,
+                    PreparationTime = concept.PreparationTime,
+                    AvailabilityStatus = concept.AvailabilityStatus,
+                    CreatedAt = concept.CreatedAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConcept GET action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept POST - xử lý cập nhật concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConcept(ConceptEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật concept thành công";
+                    return RedirectToAction(nameof(Concepts));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy concept hoặc có lỗi xảy ra";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConcept POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật concept";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Concept Detail - chi tiết concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> ConceptDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var concept = await _conceptService.GetConceptByIdAsync(id);
+                if (concept == null)
+                {
+                    TempData["Error"] = "Không tìm thấy concept";
+                    return RedirectToAction(nameof(Concepts));
+                }
+
+                return View(concept);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptDetail action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept - xóa concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConcept(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa concept thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa concept (có thể có booking liên kết)";
+                }
+
+                return RedirectToAction(nameof(Concepts));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConcept action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Toggle Concept Status - thay đổi trạng thái concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleConceptStatus(int id, bool status)
+        {
+            try
+            {
+                var result = await _conceptService.ToggleConceptStatusAsync(id, status);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật trạng thái concept thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái";
+                }
+
+                return RedirectToAction(nameof(Concepts));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ToggleConceptStatus action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Get Concept Dropdown Data - lấy dữ liệu dropdown cho concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetConceptDropdownData()
+        {
+            try
+            {
+                var categories = await _conceptService.GetConceptCategoriesForDropdownAsync();
+                var colors = await _conceptService.GetConceptColorsForDropdownAsync();
+                var ambiences = await _conceptService.GetConceptAmbiencesForDropdownAsync();
+                var locations = await _conceptService.GetLocationsForDropdownAsync();
+
+                return Json(new { 
+                    success = true, 
+                    categories = categories,
+                    colors = colors,
+                    ambiences = ambiences,
+                    locations = locations
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetConceptDropdownData action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải dữ liệu dropdown" });
+            }
+        }
+
+        #endregion
+
+        #region Concept Category Management
+
+        /// <summary>
+        /// Concept Categories List - danh sách danh mục concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> ConceptCategories()
+        {
+            try
+            {
+                var categories = await _conceptService.GetConceptCategoriesAsync();
+                return View(categories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptCategories action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách danh mục concept";
+                return View(new List<ConceptCategoryDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept Category - tạo danh mục concept mới
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult CreateConceptCategory()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Create Concept Category POST - xử lý tạo danh mục concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConceptCategory(ConceptCategoryDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptCategoryAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Tạo danh mục concept thành công!";
+                    return RedirectToAction("ConceptCategories");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo danh mục concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConceptCategory POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo danh mục concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Category - chỉnh sửa danh mục concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> EditConceptCategory(int id)
+        {
+            try
+            {
+                var category = await _conceptService.GetConceptCategoryByIdAsync(id);
+                if (category == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy danh mục concept";
+                    return RedirectToAction("ConceptCategories");
+                }
+
+                return View(category);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptCategory action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải thông tin danh mục concept";
+                return RedirectToAction("ConceptCategories");
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Category POST - xử lý chỉnh sửa danh mục concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConceptCategory(ConceptCategoryDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptCategoryAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật danh mục concept thành công!";
+                    return RedirectToAction("ConceptCategories");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật danh mục concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptCategory POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật danh mục concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept Category - xóa danh mục concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConceptCategory(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptCategoryAsync(id);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Xóa danh mục concept thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa danh mục concept này vì đang được sử dụng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptCategory action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa danh mục concept";
+            }
+
+            return RedirectToAction("ConceptCategories");
+        }
+
+        #endregion
+
+        #region Concept Color Management
+
+        /// <summary>
+        /// Concept Colors List - danh sách màu sắc concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> ConceptColors()
+        {
+            try
+            {
+                var colors = await _conceptService.GetConceptColorsAsync();
+                return View(colors);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptColors action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách màu sắc concept";
+                return View(new List<ConceptColorDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept Color - tạo màu sắc concept mới
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult CreateConceptColor()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Create Concept Color POST - xử lý tạo màu sắc concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConceptColor(ConceptColorDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptColorAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Tạo màu sắc concept thành công!";
+                    return RedirectToAction("ConceptColors");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo màu sắc concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConceptColor POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo màu sắc concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Color - chỉnh sửa màu sắc concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> EditConceptColor(int id)
+        {
+            try
+            {
+                var color = await _conceptService.GetConceptColorByIdAsync(id);
+                if (color == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy màu sắc concept";
+                    return RedirectToAction("ConceptColors");
+                }
+
+                return View(color);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptColor action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải thông tin màu sắc concept";
+                return RedirectToAction("ConceptColors");
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Color POST - xử lý chỉnh sửa màu sắc concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConceptColor(ConceptColorDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptColorAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật màu sắc concept thành công!";
+                    return RedirectToAction("ConceptColors");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật màu sắc concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptColor POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật màu sắc concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept Color - xóa màu sắc concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConceptColor(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptColorAsync(id);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Xóa màu sắc concept thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa màu sắc concept này vì đang được sử dụng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptColor action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa màu sắc concept";
+            }
+
+            return RedirectToAction("ConceptColors");
+        }
+
+        #endregion
+
+        #region Concept Ambience Management
+
+        /// <summary>
+        /// Concept Ambiences List - danh sách không gian concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> ConceptAmbiences()
+        {
+            try
+            {
+                var ambiences = await _conceptService.GetConceptAmbiencesAsync();
+                return View(ambiences);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptAmbiences action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách không gian concept";
+                return View(new List<ConceptAmbienceDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept Ambience - tạo không gian concept mới
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult CreateConceptAmbience()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Create Concept Ambience POST - xử lý tạo không gian concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConceptAmbience(ConceptAmbienceDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptAmbienceAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Tạo không gian concept thành công!";
+                    return RedirectToAction("ConceptAmbiences");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo không gian concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConceptAmbience POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo không gian concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Ambience - chỉnh sửa không gian concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> EditConceptAmbience(int id)
+        {
+            try
+            {
+                var ambience = await _conceptService.GetConceptAmbienceByIdAsync(id);
+                if (ambience == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy không gian concept";
+                    return RedirectToAction("ConceptAmbiences");
+                }
+
+                return View(ambience);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptAmbience action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải thông tin không gian concept";
+                return RedirectToAction("ConceptAmbiences");
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Ambience POST - xử lý chỉnh sửa không gian concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConceptAmbience(ConceptAmbienceDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptAmbienceAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật không gian concept thành công!";
+                    return RedirectToAction("ConceptAmbiences");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật không gian concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptAmbience POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật không gian concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept Ambience - xóa không gian concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConceptAmbience(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptAmbienceAsync(id);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Xóa không gian concept thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa không gian concept này vì đang được sử dụng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptAmbience action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa không gian concept";
+            }
+
+            return RedirectToAction("ConceptAmbiences");
+        }
+
+        #endregion
+
+        #region Concept Image Management
+
+        [HttpGet]
+        public async Task<IActionResult> ConceptImages(int? conceptId)
+        {
+            try
+            {
+                var concepts = await _conceptService.GetConceptsForDropdownAsync();
+                ViewBag.Concepts = concepts.Select(c => new SelectListItem
+                {
+                    Value = c.ConceptId.ToString(),
+                    Text = c.Name
+                }).ToList();
+
+                ViewBag.SelectedConceptId = conceptId;
+
+                List<object> conceptImagesGrouped = new List<object>();
+
+                if (conceptId.HasValue)
+                {
+                    // Lấy hình ảnh của concept cụ thể
+                    var images = await _conceptService.GetConceptImagesAsync(conceptId.Value);
+                    var concept = concepts.FirstOrDefault(c => c.ConceptId == conceptId.Value);
+                    if (concept != null)
+                    {
+                        conceptImagesGrouped.Add(new
+                        {
+                            ConceptId = concept.ConceptId,
+                            ConceptName = concept.Name,
+                            Images = images
+                        });
+                    }
+                }
+                else
+                {
+                    // Lấy tất cả concept (kể cả chưa có hình ảnh)
+                    foreach (var concept in concepts)
+                    {
+                        var images = await _conceptService.GetConceptImagesAsync(concept.ConceptId);
+                        conceptImagesGrouped.Add(new
+                        {
+                            ConceptId = concept.ConceptId,
+                            ConceptName = concept.Name,
+                            Images = images
+                        });
+                    }
+                }
+
+                return View(conceptImagesGrouped);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptImages action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách hình ảnh concept";
+                return View(new List<object>());
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddConceptImage(ConceptImgViewModel model, IFormFile imageFile)
+        {
+            try
+            {
+                if (imageFile == null || imageFile.Length == 0)
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn file hình ảnh!" });
+                }
+
+                // Validate file type
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF!" });
+                }
+
+                // Validate file size (5MB max)
+                if (imageFile.Length > 5 * 1024 * 1024)
+                {
+                    return Json(new { success = false, message = "Kích thước file không được vượt quá 5MB!" });
+                }
+
+                // Check if concept can add more images
+                var canAddMore = await _conceptService.CanConceptAddMoreImagesAsync(model.ConceptId);
+                if (!canAddMore)
+                {
+                    return Json(new { success = false, message = "Concept này đã đạt giới hạn 3 hình ảnh!" });
+                }
+
+                // Generate unique filename
+                var fileName = Guid.NewGuid().ToString() + fileExtension;
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGConcept");
+                
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var filePath = Path.Combine(uploadPath, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                // Set image URL
+                model.ImgUrl = $"/Imagine/IMGConcept/{fileName}";
+
+                // Set default values
+                if (string.IsNullOrEmpty(model.ImgName))
+                {
+                    model.ImgName = "Hình ảnh concept";
+                }
+                if (string.IsNullOrEmpty(model.AltText))
+                {
+                    model.AltText = "Hình ảnh concept";
+                }
+                if (model.DisplayOrder == 0)
+                {
+                    model.DisplayOrder = 1;
+                }
+
+                var result = await _conceptService.AddConceptImageAsync(model);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Thêm hình ảnh concept thành công!" });
+                }
+                else
+                {
+                    // Delete uploaded file if database operation failed
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                    return Json(new { success = false, message = "Không thể thêm hình ảnh concept!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in AddConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm hình ảnh concept!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateConceptImage(ConceptImgViewModel model, IFormFile? imageFile)
+        {
+            try
+            {
+                var existingImage = await _conceptService.GetConceptImageByIdAsync(model.ImgId);
+                if (existingImage == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy hình ảnh!" });
+                }
+
+                // If new image file is provided
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF!" });
+                    }
+
+                    // Validate file size (5MB max)
+                    if (imageFile.Length > 5 * 1024 * 1024)
+                    {
+                        return Json(new { success = false, message = "Kích thước file không được vượt quá 5MB!" });
+                    }
+
+                    // Generate unique filename
+                    var fileName = Guid.NewGuid().ToString() + fileExtension;
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGConcept");
+                    
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    var filePath = Path.Combine(uploadPath, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+
+                    // Delete old image file
+                    if (!string.IsNullOrEmpty(existingImage.ImgUrl))
+                    {
+                        var oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, existingImage.ImgUrl.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
+
+                    // Set new image URL
+                    model.ImgUrl = $"/Imagine/IMGConcept/{fileName}";
+                }
+                else
+                {
+                    // Keep existing image URL
+                    model.ImgUrl = existingImage.ImgUrl;
+                }
+
+                var result = await _conceptService.UpdateConceptImageAsync(model);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Cập nhật hình ảnh concept thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật hình ảnh concept!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật hình ảnh concept!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConceptImage(int imageId)
+        {
+            try
+            {
+                var existingImage = await _conceptService.GetConceptImageByIdAsync(imageId);
+                if (existingImage == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy hình ảnh!" });
+                }
+
+                var result = await _conceptService.DeleteConceptImageAsync(imageId);
+                if (result)
+                {
+                    // Delete image file
+                    if (!string.IsNullOrEmpty(existingImage.ImgUrl))
+                    {
+                        var filePath = Path.Combine(_webHostEnvironment.WebRootPath, existingImage.ImgUrl.TrimStart('/'));
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            System.IO.File.Delete(filePath);
+                        }
+                    }
+
+                    return Json(new { success = true, message = "Xóa hình ảnh concept thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xóa hình ảnh concept!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa hình ảnh concept!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetPrimaryConceptImage(int conceptId, int imageId)
+        {
+            try
+            {
+                var result = await _conceptService.SetPrimaryImageAsync(conceptId, imageId);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Đặt hình ảnh chính thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể đặt hình ảnh chính!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SetPrimaryConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi đặt hình ảnh chính!" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetConceptImageCount(int conceptId)
+        {
+            try
+            {
+                var count = await _conceptService.GetConceptImageCountAsync(conceptId);
+                var canAddMore = await _conceptService.CanConceptAddMoreImagesAsync(conceptId);
+                
+                return Json(new { 
+                    success = true, 
+                    count = count, 
+                    canAddMore = canAddMore,
+                    message = canAddMore ? "Có thể thêm hình ảnh" : "Đã đạt giới hạn 3 hình ảnh"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetConceptImageCount action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi kiểm tra số lượng hình ảnh!" });
             }
         }
 

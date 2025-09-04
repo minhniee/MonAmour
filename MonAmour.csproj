@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Imagine\**" />
+    <Content Remove="Imagine\**" />
+    <EmbeddedResource Remove="Imagine\**" />
+    <None Remove="Imagine\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,9 +27,6 @@
 
   <ItemGroup>
     <Folder Include="Helpers\" />
-    <Folder Include="Imagine\IMGProduct\" />
-    <Folder Include="Imagine\IMGConcept\" />
-    <Folder Include="Imagine\Avatar\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="Services\Implements\" />
     <Folder Include="wwwroot\Imagine\IMGConcept\" />

@@ -109,7 +109,7 @@ namespace MonAmour.ViewModels
 
         // Navigation properties
         public string? PartnerName { get; set; }
-        public List<ConceptViewModel> Concepts { get; set; } = new List<ConceptViewModel>();
+        public List<LocationConceptViewModel> Concepts { get; set; } = new List<LocationConceptViewModel>();
     }
 
     public class LocationSearchViewModel
@@ -124,7 +124,8 @@ namespace MonAmour.ViewModels
         public string? SortOrder { get; set; } = "asc";
     }
 
-    public class ConceptViewModel
+    // ConceptViewModel for Location context
+    public class LocationConceptViewModel
     {
         public int ConceptId { get; set; }
         public string Name { get; set; } = string.Empty;
