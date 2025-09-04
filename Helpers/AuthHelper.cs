@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using MonAmour.Models;
+using MonAmour.Util;
 
 namespace MonAmour.Helpers;
 
@@ -56,10 +56,10 @@ public static class AuthHelper
     public static bool IsAuthenticated(HttpContext context)
     {
         if (context?.Session == null) return false;
-        
+
         var isAuthenticated = context.Session.GetString(IS_AUTHENTICATED_KEY);
         var userId = context.Session.GetInt32(USER_ID_KEY);
-        
+
         return isAuthenticated == "true" && userId.HasValue;
     }
 
@@ -114,11 +114,11 @@ public static class AuthHelper
     public static List<string> GetUserRoles(HttpContext context)
     {
         if (!IsAuthenticated(context)) return new List<string>();
-        
+
         var rolesString = context.Session.GetString(USER_ROLES_KEY);
         if (string.IsNullOrEmpty(rolesString))
             return new List<string>();
-            
+
         return rolesString.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 
@@ -222,7 +222,7 @@ public static class AuthHelper
     public static bool IsSessionExpiring(HttpContext context)
     {
         if (context?.Session == null) return true;
-        
+
         // Check if session has been idle for more than 25 minutes (assuming 30 min timeout)
         var lastActivity = context.Session.GetString("LastActivity");
         if (string.IsNullOrEmpty(lastActivity)) return true;

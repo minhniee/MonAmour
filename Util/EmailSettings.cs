@@ -1,4 +1,4 @@
-namespace MonAmour.Models;
+namespace MonAmour.Util;
 
 public class EmailSettings
 {

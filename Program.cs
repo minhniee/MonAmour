@@ -4,6 +4,7 @@ using MonAmour.Middleware;
 using MonAmour.Models;
 using MonAmour.Services.Implements;
 using MonAmour.Services.Interfaces;
+using MonAmour.Util;
 
 var builder = WebApplication.CreateBuilder(args);
 

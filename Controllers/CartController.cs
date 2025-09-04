@@ -1,8 +1,8 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MonAmour.Models;
 using MonAmour.Helpers;
+using MonAmour.Models;
+using System.Security.Claims;
 
 namespace MonAmour.Controllers
 {
@@ -136,7 +136,7 @@ namespace MonAmour.Controllers
             {
                 item.Quantity += quantity;
                 item.UnitPrice = product.Price.HasValue ? product.Price.Value : item.UnitPrice;
-                item.TotalPrice = item.UnitPrice * item.Quantity;
+                item.TotalPrice = (item.UnitPrice ?? 0) * item.Quantity.GetValueOrDefault(0);
                 _db.OrderItems.Update(item);
             }
 
@@ -191,7 +191,7 @@ namespace MonAmour.Controllers
 
             // Update cart item
             item.Quantity = quantity;
-            item.TotalPrice = item.UnitPrice * item.Quantity;
+            item.TotalPrice = (item.UnitPrice ?? 0) * item.Quantity.GetValueOrDefault(0);
             _db.OrderItems.Update(item);
 
             // Update product stock

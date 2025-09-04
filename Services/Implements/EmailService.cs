@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
-using MonAmour.Models;
 using MonAmour.Services.Interfaces;
+using MonAmour.Util;
 using System.Net;
 using System.Net.Mail;
 

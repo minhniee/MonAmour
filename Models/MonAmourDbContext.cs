@@ -75,7 +75,7 @@ public partial class MonAmourDbContext : DbContext
     {
         modelBuilder.Entity<Booking>(entity =>
         {
-            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B14B3C053C");
+            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B159D753DC");
 
             entity.ToTable("Booking");
 
@@ -118,7 +118,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Concept>(entity =>
         {
-            entity.HasKey(e => e.ConceptId).HasName("PK__Concept__7925FD2D42CC2A8D");
+            entity.HasKey(e => e.ConceptId).HasName("PK__Concept__7925FD2DE0435406");
 
             entity.ToTable("Concept");
 
@@ -166,7 +166,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptAmbience>(entity =>
         {
-            entity.HasKey(e => e.AmbienceId).HasName("PK__Concept___5D801B582EC9BF31");
+            entity.HasKey(e => e.AmbienceId).HasName("PK__Concept___5D801B5814ACE9E4");
 
             entity.ToTable("Concept_Ambience");
 
@@ -178,7 +178,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Concept___D54EE9B440CC97AD");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Concept___D54EE9B4744B5019");
 
             entity.ToTable("Concept_Category");
 
@@ -196,7 +196,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptColor>(entity =>
         {
-            entity.HasKey(e => e.ColorId).HasName("PK__Concept___1143CECBF13BF9CC");
+            entity.HasKey(e => e.ColorId).HasName("PK__Concept___1143CECBEC7F8C36");
 
             entity.ToTable("Concept_Color");
 
@@ -211,7 +211,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptImg>(entity =>
         {
-            entity.HasKey(e => e.ImgId).HasName("PK__Concept___6F16A71C497042AA");
+            entity.HasKey(e => e.ImgId).HasName("PK__Concept___6F16A71CDF71B7F8");
 
             entity.ToTable("Concept_img");
 
@@ -244,7 +244,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Content>(entity =>
         {
-            entity.HasKey(e => e.ContentId).HasName("PK__Content__655FE51021E58B1A");
+            entity.HasKey(e => e.ContentId).HasName("PK__Content__655FE510DC9A9FD9");
 
             entity.ToTable("Content");
 
@@ -276,11 +276,11 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<EmailTemplate>(entity =>
         {
-            entity.HasKey(e => e.TemplateId).HasName("PK__Email_Te__BE44E07974942BB9");
+            entity.HasKey(e => e.TemplateId).HasName("PK__Email_Te__BE44E079234D1F03");
 
             entity.ToTable("Email_Template");
 
-            entity.HasIndex(e => e.Name, "UQ__Email_Te__72E12F1B997D2BFE").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Email_Te__72E12F1B3FDC91E4").IsUnique();
 
             entity.Property(e => e.TemplateId).HasColumnName("template_id");
             entity.Property(e => e.Body).HasColumnName("body");
@@ -318,7 +318,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Location>(entity =>
         {
-            entity.HasKey(e => e.LocationId).HasName("PK__Location__771831EAA38CB2F9");
+            entity.HasKey(e => e.LocationId).HasName("PK__Location__771831EA6822AA9F");
 
             entity.ToTable("Location");
 
@@ -361,7 +361,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__E059842FBA1CDDA0");
+            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__E059842FB5BD5E60");
 
             entity.ToTable("Notification");
 
@@ -397,7 +397,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__Order__46596229EAEB7409");
+            entity.HasKey(e => e.OrderId).HasName("PK__Order__46596229A3D0FEA1");
 
             entity.ToTable("Order");
 
@@ -410,6 +410,7 @@ public partial class MonAmourDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("delivered_at");
             entity.Property(e => e.EstimatedDelivery).HasColumnName("estimated_delivery");
+            entity.Property(e => e.ShippingAddress).HasColumnName("shipping_address");
             entity.Property(e => e.ShippingCost)
                 .HasDefaultValue(0m)
                 .HasColumnType("decimal(18, 2)")
@@ -442,7 +443,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__3764B6BCB010A350");
+            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__3764B6BCD4612A63");
 
             entity.ToTable("OrderItem");
 
@@ -468,14 +469,11 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Partner>(entity =>
         {
-            entity.HasKey(e => e.PartnerId).HasName("PK__Partner__576F1B2725A33660");
+            entity.HasKey(e => e.PartnerId).HasName("PK__Partner__576F1B2760143582");
 
             entity.ToTable("Partner");
 
             entity.Property(e => e.PartnerId).HasColumnName("partner_id");
-            entity.Property(e => e.Avatar)
-                .HasMaxLength(255)
-                .HasColumnName("avatar");
             entity.Property(e => e.ContactInfo)
                 .HasMaxLength(255)
                 .HasColumnName("contact_info");
@@ -512,7 +510,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__ED1FC9EAB60D10B8");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__ED1FC9EA0F051E89");
 
             entity.ToTable("Payment");
 
@@ -540,7 +538,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<PaymentDetail>(entity =>
         {
-            entity.HasKey(e => e.PaymentDetailId).HasName("PK__PaymentD__C66E6E36C6AA507E");
+            entity.HasKey(e => e.PaymentDetailId).HasName("PK__PaymentD__C66E6E36960CA82A");
 
             entity.ToTable("PaymentDetail");
 
@@ -567,7 +565,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.PaymentMethodId).HasName("PK__PaymentM__8A3EA9EBCF4FB4BE");
+            entity.HasKey(e => e.PaymentMethodId).HasName("PK__PaymentM__8A3EA9EB1F4AA5BD");
 
             entity.ToTable("PaymentMethod");
 
@@ -579,7 +577,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__Product__47027DF54807DCBE");
+            entity.HasKey(e => e.ProductId).HasName("PK__Product__47027DF5214502C9");
 
             entity.ToTable("Product");
 
@@ -616,7 +614,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Product___D54EE9B41F4BD1F8");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Product___D54EE9B42E010B9D");
 
             entity.ToTable("Product_Category");
 
@@ -628,7 +626,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ProductImg>(entity =>
         {
-            entity.HasKey(e => e.ImgId).HasName("PK__Product___6F16A71C510649A7");
+            entity.HasKey(e => e.ImgId).HasName("PK__Product___6F16A71C2327A88B");
 
             entity.ToTable("Product_img");
 
@@ -661,7 +659,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.HasKey(e => e.ReviewId).HasName("PK__Review__60883D90F5C1D425");
+            entity.HasKey(e => e.ReviewId).HasName("PK__Review__60883D90BCD570AF");
 
             entity.ToTable("Review");
 
@@ -690,11 +688,11 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CCF0A6923F");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CC401337EF");
 
             entity.ToTable("Role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Role__783254B177421E18").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Role__783254B1CC21FE4C").IsUnique();
 
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.RoleName)
@@ -705,7 +703,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ShippingOption>(entity =>
         {
-            entity.HasKey(e => e.ShippingOptionId).HasName("PK__Shipping__6B1300C871C028DE");
+            entity.HasKey(e => e.ShippingOptionId).HasName("PK__Shipping__6B1300C824455E88");
 
             entity.ToTable("ShippingOption");
 
@@ -717,7 +715,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Token>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__Token__CB3C9E17655CC4D6");
+            entity.HasKey(e => e.TokenId).HasName("PK__Token__CB3C9E17CD394AA9");
 
             entity.ToTable("Token");
 
@@ -768,13 +766,13 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__B9BE370F8BB597BA");
+            entity.HasKey(e => e.UserId).HasName("PK__User__B9BE370FEA846F54");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164D5EBC73F").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164DE0E25C7").IsUnique();
 
-            entity.HasIndex(e => e.Phone, "UQ__User__B43B145F570692D5").IsUnique();
+            entity.HasIndex(e => e.Phone, "UQ__User__B43B145FBDADCA42").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.Avatar)
@@ -818,7 +816,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__User_Rol__6EDEA15398F9BAAB");
+            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__User_Rol__6EDEA15328A69503");
 
             entity.ToTable("User_Role");
 
@@ -843,7 +841,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<WishList>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Wish_lis__3213E83F4C533205");
+            entity.HasKey(e => e.Id).HasName("PK__Wish_lis__3213E83F805E3562");
 
             entity.ToTable("Wish_list");
 

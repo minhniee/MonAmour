@@ -41,7 +41,7 @@ public static class RoleHelper
         try
         {
             return await context.UserRoles
-                .AnyAsync(ur => ur.UserId == userId && 
+                .AnyAsync(ur => ur.UserId == userId &&
                                ur.Role.RoleName == roleName);
         }
         catch
@@ -84,7 +84,7 @@ public static class RoleHelper
         try
         {
             return await context.UserRoles
-                .AnyAsync(ur => ur.UserId == userId && 
+                .AnyAsync(ur => ur.UserId == userId &&
                                roles.Contains(ur.Role.RoleName));
         }
         catch
@@ -105,7 +105,7 @@ public static class RoleHelper
         try
         {
             var userRoleCount = await context.UserRoles
-                .Where(ur => ur.UserId == userId && 
+                .Where(ur => ur.UserId == userId &&
                             roles.Contains(ur.Role.RoleName))
                 .CountAsync();
 

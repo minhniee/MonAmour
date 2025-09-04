@@ -94,6 +94,7 @@ CREATE TABLE Partner (
     user_id INT NULL FOREIGN KEY REFERENCES [User](user_id),
     email VARCHAR(255),
     phone VARCHAR(50),
+    avatar NVARCHAR(255) NULL,
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('pending','active','inactive','suspended')),
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
@@ -231,6 +232,7 @@ CREATE TABLE [Order] (
     shipping_cost DECIMAL(18,2) DEFAULT 0,
     status VARCHAR(20) CHECK (status IN ('confirmed','shipping','completed','canceled')),
     shipping_option_id INT FOREIGN KEY REFERENCES ShippingOption(shipping_option_id),
+    shipping_address NVARCHAR(MAX),
     tracking_number NVARCHAR(100),
     estimated_delivery DATE,
     delivered_at DATETIME NULL,

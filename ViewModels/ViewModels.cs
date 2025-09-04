@@ -17,6 +17,8 @@ public class OrderSummaryViewModel
     public string OrderNumber { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty; // Confirmed, Shipping, Completed, Canceled
     public bool CanReview { get; set; }
+    public bool HasReview { get; set; }
+    public int? ReviewId { get; set; }
     public decimal TotalAmount { get; set; }
     public List<OrderItemViewModel> Items { get; set; } = new();
 }

@@ -46,8 +46,6 @@ public class ProfileController : Controller
 
             var model = new UserViewModel.ProfileViewModel
             {
-
-
                 Name = user.Name ?? "",
                 Email = user.Email,
                 Phone = user.Phone ?? "",
@@ -214,6 +212,12 @@ public class ProfileController : Controller
                 return RedirectToAction("Login", "Auth");
             }
 
+            // Get all reviews for this user's orders
+            var reviews = await _db.Reviews
+                .Where(r => r.UserId == userId.Value)
+                .Select(r => new { r.ReviewId, r.TargetId, r.TargetType })
+                .ToListAsync();
+
             // Load gift box orders (Order + OrderItems + Product)
             var giftBoxOrders = await _db.Orders
                 .AsNoTracking()
@@ -238,49 +242,67 @@ public class ProfileController : Controller
             var giftBoxCategory = new OrderCategoryViewModel
             {
                 Name = "Gift Box",
-                Orders = giftBoxOrders.Select(o => new OrderSummaryViewModel
+                Orders = giftBoxOrders.Select(o =>
                 {
-                    OrderDate = o.CreatedAt ?? DateTime.Now,
-                    OrderNumber = $"ORD-{o.OrderId}",
-                    Status = NormalizeStatus(o.Status),
-                    CanReview = string.Equals(NormalizeStatus(o.Status), "Completed", StringComparison.OrdinalIgnoreCase),
-                    TotalAmount = (o.TotalPrice ?? 0m) + (o.ShippingCost ?? 0m),
-                    Items = o.OrderItems.Select(oi => new OrderItemViewModel
+                    // Find review for first product in order
+                    var firstProduct = o.OrderItems.FirstOrDefault()?.ProductId;
+                    var review = firstProduct != null ? reviews.FirstOrDefault(r =>
+                        r.TargetType == "Product" && r.TargetId == firstProduct) : null;
+
+                    return new OrderSummaryViewModel
                     {
-                        ItemId = oi.OrderItemId,
-                        ItemType = "Product",
-                        TargetId = oi.ProductId ?? 0,
-                        Name = oi.Product?.Name ?? "",
-                        Quantity = oi.Quantity ?? 0,
-                        UnitPrice = oi.UnitPrice ?? 0m,
-                        TotalPrice = oi.TotalPrice ?? (oi.UnitPrice ?? 0m) * (oi.Quantity ?? 0)
-                    }).ToList()
+                        OrderDate = o.CreatedAt ?? DateTime.Now,
+                        OrderNumber = $"ORD-{o.OrderId}",
+                        Status = NormalizeStatus(o.Status),
+                        CanReview = string.Equals(NormalizeStatus(o.Status), "Completed", StringComparison.OrdinalIgnoreCase),
+                        HasReview = review != null,
+                        ReviewId = review?.ReviewId,
+                        TotalAmount = (o.TotalPrice) + (o.ShippingCost),
+                        Items = o.OrderItems.Select(oi => new OrderItemViewModel
+                        {
+                            ItemId = oi.OrderItemId,
+                            ItemType = "Product",
+                            TargetId = oi.ProductId ?? 0,
+                            Name = oi.Product?.Name ?? "",
+                            Quantity = oi.Quantity ?? 0,
+                            UnitPrice = oi.UnitPrice ?? 0m,
+                            TotalPrice = oi.TotalPrice
+                        }).ToList()
+                    };
                 }).ToList()
             };
 
             var conceptCategory = new OrderCategoryViewModel
             {
                 Name = "Concept",
-                Orders = conceptBookings.Select(b => new OrderSummaryViewModel
+                Orders = conceptBookings.Select(b =>
                 {
-                    OrderDate = b.CreatedAt ?? DateTime.Now,
-                    OrderNumber = $"BK-{b.BookingId}",
-                    Status = NormalizeStatus(b.Status),
-                    CanReview = string.Equals(NormalizeStatus(b.Status), "Completed", StringComparison.OrdinalIgnoreCase),
-                    TotalAmount = b.TotalPrice ?? 0m,
-                    Items = new List<OrderItemViewModel>
+                    var review = reviews.FirstOrDefault(r =>
+                        r.TargetType == "Concept" && r.TargetId == b.ConceptId);
+
+                    return new OrderSummaryViewModel
                     {
-                        new OrderItemViewModel
+                        OrderDate = b.CreatedAt ?? DateTime.Now,
+                        OrderNumber = $"BK-{b.BookingId}",
+                        Status = NormalizeStatus(b.Status),
+                        CanReview = string.Equals(NormalizeStatus(b.Status), "Completed", StringComparison.OrdinalIgnoreCase),
+                        HasReview = review != null,
+                        ReviewId = review?.ReviewId,
+                        TotalAmount = b.TotalPrice ?? 0m,
+                        Items = new List<OrderItemViewModel>
                         {
-                            ItemId = b.BookingId,
-                            ItemType = "Concept",
-                            TargetId = b.ConceptId ?? 0,
-                            Name = b.Concept?.Name ?? "",
-                            Quantity = 1,
-                            UnitPrice = b.TotalPrice ?? 0m,
-                            TotalPrice = b.TotalPrice ?? 0m
+                            new OrderItemViewModel
+                            {
+                                ItemId = b.BookingId,
+                                ItemType = "Concept",
+                                TargetId = b.ConceptId ?? 0,
+                                Name = b.Concept?.Name ?? "",
+                                Quantity = 1,
+                                UnitPrice = b.TotalPrice ?? 0m,
+                                TotalPrice = b.TotalPrice ?? 0m
+                            }
                         }
-                    }
+                    };
                 }).ToList()
             };
 
@@ -294,6 +316,43 @@ public class ProfileController : Controller
             _logger.LogError(ex, "Error loading order history");
             TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải lịch sử đơn hàng.";
             return RedirectToAction("Index");
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateReview(int reviewId, int rating, string? comment)
+    {
+        try
+        {
+            var userId = AuthHelper.GetUserId(HttpContext);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (rating < 1 || rating > 5)
+            {
+                TempData["ErrorMessage"] = "Điểm đánh giá phải từ 1 đến 5.";
+                return RedirectToAction("OrderHistory");
+            }
+
+            var dto = new UpdateReviewViewModel
+            {
+                ReviewId = reviewId,
+                Rating = rating,
+                Comment = string.IsNullOrWhiteSpace(comment) ? null : comment
+            };
+
+            await _reviewService.UpdateReviewAsync(dto);
+            TempData["SuccessMessage"] = "Cập nhật đánh giá thành công!";
+            return RedirectToAction("OrderHistory");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating review {ReviewId}", reviewId);
+            TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đánh giá.";
+            return RedirectToAction("OrderHistory");
         }
     }
 
@@ -340,6 +399,132 @@ public class ProfileController : Controller
         {
             _logger.LogError(ex, "Error submitting review for {TargetType} {TargetId}", targetType, targetId);
             TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi đánh giá.";
+            return RedirectToAction("OrderHistory");
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> OrderDetail(string orderNumber)
+    {
+        try
+        {
+            var userId = AuthHelper.GetUserId(HttpContext);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Parse order number to get type and ID
+            var parts = orderNumber.Split('-');
+            if (parts.Length != 2)
+            {
+                TempData["ErrorMessage"] = "Mã đơn hàng không hợp lệ.";
+                return RedirectToAction("OrderHistory");
+            }
+
+            var type = parts[0].ToUpperInvariant();
+            if (!int.TryParse(parts[1], out var id))
+            {
+                TempData["ErrorMessage"] = "Mã đơn hàng không hợp lệ.";
+                return RedirectToAction("OrderHistory");
+            }
+
+            OrderDetailViewModel? model = null;
+
+            if (type == "ORD") // Gift Box Order
+            {
+                var order = await _db.Orders
+                    .AsNoTracking()
+                    .Include(o => o.OrderItems)!
+                        .ThenInclude(oi => oi.Product)
+                    .Include(o => o.PaymentDetails)
+                        .ThenInclude(pd => pd.Payment)
+                        .ThenInclude(p => p!.PaymentMethod)
+                    .FirstOrDefaultAsync(o => o.OrderId == id && o.UserId == userId);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                    return RedirectToAction("OrderHistory");
+                }
+
+                model = new OrderDetailViewModel
+                {
+                    OrderNumber = orderNumber,
+                    OrderDate = order.CreatedAt ?? DateTime.Now,
+                    Status = NormalizeStatus(order.Status),
+                    TotalAmount = order.TotalPrice,
+                    ShippingCost = order.ShippingCost,
+                    ShippingAddress = order.ShippingAddress,
+                    PaymentMethod = order.PaymentDetails.FirstOrDefault()?.Payment?.PaymentMethod?.Name,
+                    PaymentStatus = order.PaymentDetails.FirstOrDefault()?.Payment?.Status,
+                    PaymentDate = order.PaymentDetails.FirstOrDefault()?.Payment?.ProcessedAt,
+                    TransactionId = order.PaymentDetails.FirstOrDefault()?.PaymentId.ToString(),
+                    Items = order.OrderItems.Select(oi => new OrderItemViewModel
+                    {
+                        ItemId = oi.OrderItemId,
+                        ItemType = "Product",
+                        TargetId = oi.ProductId ?? 0,
+                        Name = oi.Product?.Name ?? "",
+                        Quantity = oi.Quantity ?? 0,
+                        UnitPrice = oi.UnitPrice ?? 0m,
+                        TotalPrice = order.ShippingCost + order.TotalPrice
+                    }).ToList()
+                };
+            }
+            else if (type == "BK") // Concept Booking
+            {
+                var booking = await _db.Bookings
+                    .AsNoTracking()
+                    .Include(b => b.Concept)
+                    .Include(b => b.PaymentDetails)
+                        .ThenInclude(pd => pd.Payment)
+                        .ThenInclude(p => p!.PaymentMethod)
+                    .FirstOrDefaultAsync(b => b.BookingId == id && b.UserId == userId);
+
+                if (booking == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                    return RedirectToAction("OrderHistory");
+                }
+
+                model = new OrderDetailViewModel
+                {
+                    OrderNumber = orderNumber,
+                    OrderDate = booking.CreatedAt ?? DateTime.Now,
+                    Status = NormalizeStatus(booking.Status),
+                    TotalAmount = booking.TotalPrice ?? 0m,
+                    PaymentMethod = booking.PaymentDetails.FirstOrDefault()?.Payment?.PaymentMethod?.Name,
+                    PaymentStatus = booking.PaymentDetails.FirstOrDefault()?.Payment?.Status,
+                    PaymentDate = booking.PaymentDetails.FirstOrDefault()?.Payment?.ProcessedAt,
+                    TransactionId = booking.PaymentDetails.FirstOrDefault()?.PaymentId.ToString(),
+                    Items = new List<OrderItemViewModel>
+                    {
+                        new OrderItemViewModel
+                        {
+                            ItemId = booking.BookingId,
+                            ItemType = "Concept",
+                            TargetId = booking.ConceptId ?? 0,
+                            Name = booking.Concept?.Name ?? "",
+                            Quantity = 1,
+                            UnitPrice = booking.TotalPrice ?? 0m,
+                            TotalPrice = booking.TotalPrice ?? 0m
+                        }
+                    }
+                };
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Loại đơn hàng không hợp lệ.";
+                return RedirectToAction("OrderHistory");
+            }
+
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading order detail for {OrderNumber}", orderNumber);
+            TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải chi tiết đơn hàng.";
             return RedirectToAction("OrderHistory");
         }
     }
