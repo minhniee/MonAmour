@@ -12,14 +12,18 @@ namespace MonAmour.Controllers
         private readonly IAuthService _authService;
         private readonly IUserManagementService _userManagementService;
         private readonly IProductService _productService;
+        private readonly IPartnerService _partnerService;
+        private readonly ILocationService _locationService;
         private readonly ILogger<AdminController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
+        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _authService = authService;
             _userManagementService = userManagementService;
             _productService = productService;
+            _partnerService = partnerService;
+            _locationService = locationService;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
         }
@@ -253,7 +257,7 @@ namespace MonAmour.Controllers
                     var fileName = $"{Guid.NewGuid()}{fileExtension}";
                     
                     // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                    var uploadPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Imagine", "Avatars");
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
                     
                     // Tạo thư mục nếu chưa tồn tại
                     if (!Directory.Exists(uploadPath))
@@ -452,7 +456,7 @@ namespace MonAmour.Controllers
                     var fileName = $"{Guid.NewGuid()}{fileExtension}";
                     
                     // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                    var uploadPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Imagine", "Avatars");
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
                     
                     // Tạo thư mục nếu chưa tồn tại
                     if (!Directory.Exists(uploadPath))
@@ -1434,7 +1438,7 @@ namespace MonAmour.Controllers
                      var fileName = $"{Guid.NewGuid()}{fileExtension}";
                      
                      // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                     var uploadPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Imagine", "IMGProduct");
+                     var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGProduct");
                      
                      // Tạo thư mục nếu chưa tồn tại
                      if (!Directory.Exists(uploadPath))
@@ -1558,7 +1562,7 @@ namespace MonAmour.Controllers
                     var fileName = $"{Guid.NewGuid()}{fileExtension}";
                     
                     // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                    var uploadPath = Path.Combine(_webHostEnvironment.ContentRootPath, "Imagine", "IMGProduct");
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGProduct");
                     
                     // Tạo thư mục nếu chưa tồn tại
                     if (!Directory.Exists(uploadPath))
@@ -1638,6 +1642,892 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error in DeleteProductImage action");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi xóa hình ảnh" });
+            }
+        }
+
+        #endregion
+
+        #region Partner Management
+
+        /// <summary>
+        /// Partners - quản lý đối tác
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Partners()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var searchModel = new PartnerSearchViewModel();
+                var (partners, totalCount) = await _partnerService.GetPartnersAsync(searchModel);
+                
+                ViewBag.TotalCount = totalCount;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(partners);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Partners action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách đối tác";
+                await SetAdminViewBagAsync();
+                return View(new List<PartnerViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Partner - tạo đối tác mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreatePartner()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var model = new PartnerCreateViewModel();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreatePartner GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Create Partner POST - xử lý tạo đối tác
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePartner(PartnerCreateViewModel model, IFormFile AvatarFile)
+        {
+            try
+            {
+                _logger.LogInformation("CreatePartner called with model: Name={Name}, Status={Status}, UserId={UserId}, Email={Email}, Phone={Phone}, ContactInfo={ContactInfo}", 
+                    model.Name, model.Status, model.UserId, model.Email, model.Phone, model.ContactInfo);
+                
+                // Log all form data
+                _logger.LogInformation("Form data: {FormData}", string.Join(", ", Request.Form.Select(x => $"{x.Key}={x.Value}")));
+
+                // Handle UserId - convert 0 to null
+                if (model.UserId == 0)
+                {
+                    model.UserId = null;
+                    _logger.LogInformation("Converted UserId from 0 to null");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
+                        string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                // Handle avatar file upload
+                if (AvatarFile != null && AvatarFile.Length > 0)
+                {
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
+                    
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("AvatarFile", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Validate file size (max 5MB)
+                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("AvatarFile", "Kích thước file không được vượt quá 5MB");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Create unique filename
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
+                    
+                    // Ensure directory exists
+                    if (!Directory.Exists(uploadsPath))
+                    {
+                        Directory.CreateDirectory(uploadsPath);
+                    }
+
+                    var filePath = Path.Combine(uploadsPath, fileName);
+                    
+                    // Save file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await AvatarFile.CopyToAsync(stream);
+                    }
+
+                    // Update model with new avatar path
+                    model.Avatar = $"/Imagine/Avatars/{fileName}";
+                }
+
+                var result = await _partnerService.CreatePartnerAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo đối tác thành công";
+                    return RedirectToAction(nameof(Partners));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo đối tác";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreatePartner POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi tạo đối tác";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Partner - chỉnh sửa đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditPartner(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var partner = await _partnerService.GetPartnerByIdAsync(id);
+                if (partner == null)
+                {
+                    TempData["Error"] = "Không tìm thấy đối tác";
+                    return RedirectToAction(nameof(Partners));
+                }
+
+                var model = new PartnerEditViewModel
+                {
+                    PartnerId = partner.PartnerId,
+                    Name = partner.Name,
+                    ContactInfo = partner.ContactInfo,
+                    UserId = partner.UserId,
+                    Email = partner.Email,
+                    Phone = partner.Phone,
+                    Avatar = partner.Avatar,
+                    Status = partner.Status,
+                    CreatedAt = partner.CreatedAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditPartner GET action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Get Partner for Edit - lấy thông tin đối tác cho modal edit
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetPartnerForEdit(int id)
+        {
+            try
+            {
+                var partner = await _partnerService.GetPartnerByIdAsync(id);
+                if (partner == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đối tác" });
+                }
+
+                var result = new
+                {
+                    success = true,
+                    partner = new
+                    {
+                        partnerId = partner.PartnerId,
+                        name = partner.Name,
+                        status = partner.Status,
+                        email = partner.Email,
+                        phone = partner.Phone,
+                        contactInfo = partner.ContactInfo,
+                        avatar = partner.Avatar,
+                        userId = partner.UserId
+                    }
+                };
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetPartnerForEdit action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải thông tin đối tác" });
+            }
+        }
+
+        /// <summary>
+        /// Test Database Connection - kiểm tra kết nối database
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> TestDatabaseConnection()
+        {
+            try
+            {
+                // Test by getting users and partners
+                var users = await _userManagementService.GetAllUsersAsync();
+                var partners = await _partnerService.GetPartnersAsync(new PartnerSearchViewModel { PageSize = 1 });
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Database connection successful",
+                    partnerCount = partners.totalCount,
+                    userCount = users.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Database connection test failed");
+                return Json(new { 
+                    success = false, 
+                    message = "Database connection failed: " + ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Test Create Partner - test tạo partner đơn giản
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> TestCreatePartner()
+        {
+            try
+            {
+                // Get first user to test with UserId
+                var users = await _userManagementService.GetAllUsersAsync();
+                var firstUserId = users.FirstOrDefault()?.UserId;
+
+                var testModel = new PartnerCreateViewModel
+                {
+                    Name = "Test Partner " + DateTime.Now.ToString("HHmmss"),
+                    Status = "Active",
+                    Email = "test@example.com",
+                    Phone = "0123456789",
+                    ContactInfo = "Test contact info",
+                    UserId = firstUserId, // Test with actual user ID
+                    Avatar = null // Test without avatar
+                };
+
+                _logger.LogInformation("Testing partner creation with model: {Model}, UserId: {UserId}", testModel.Name, testModel.UserId);
+
+                var result = await _partnerService.CreatePartnerAsync(testModel);
+                
+                return Json(new { 
+                    success = result, 
+                    message = result ? "Partner created successfully" : "Failed to create partner",
+                    model = testModel,
+                    userId = firstUserId
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Test partner creation failed");
+                return Json(new { 
+                    success = false, 
+                    message = "Test failed: " + ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Test Create Partner Without User - test tạo partner không có UserId
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> TestCreatePartnerWithoutUser()
+        {
+            try
+            {
+                var testModel = new PartnerCreateViewModel
+                {
+                    Name = "Test Partner No User " + DateTime.Now.ToString("HHmmss"),
+                    Status = "Active",
+                    Email = "test@example.com",
+                    Phone = "0123456789",
+                    ContactInfo = "Test contact info",
+                    UserId = null, // Test without user ID
+                    Avatar = null // Test without avatar
+                };
+
+                _logger.LogInformation("Testing partner creation without user: {Model}", testModel.Name);
+
+                var result = await _partnerService.CreatePartnerAsync(testModel);
+                
+                return Json(new { 
+                    success = result, 
+                    message = result ? "Partner created successfully without user" : "Failed to create partner without user",
+                    model = testModel
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Test partner creation without user failed");
+                return Json(new { 
+                    success = false, 
+                    message = "Test failed: " + ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get Users for Dropdown - lấy danh sách người dùng cho dropdown
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetUsersForDropdown()
+        {
+            try
+            {
+                var users = await _userManagementService.GetAllUsersAsync();
+                var result = users.Select(u => new
+                {
+                    id = u.UserId,
+                    name = u.Name,
+                    email = u.Email
+                }).ToList();
+
+                return Json(new { success = true, users = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetUsersForDropdown action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải danh sách người dùng" });
+            }
+        }
+
+        /// <summary>
+        /// Get Partners for Dropdown - lấy danh sách đối tác cho dropdown
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetPartnersForDropdown()
+        {
+            try
+            {
+                var partners = await _partnerService.GetPartnersForDropdownAsync();
+                var result = partners.Select(p => new
+                {
+                    id = p.PartnerId,
+                    name = p.Name
+                }).ToList();
+
+                return Json(new { success = true, partners = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetPartnersForDropdown action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải danh sách đối tác" });
+            }
+        }
+
+        /// <summary>
+        /// Get Location for Edit - lấy thông tin địa điểm cho edit modal
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetLocationForEdit(int id)
+        {
+            try
+            {
+                var location = await _locationService.GetLocationByIdAsync(id);
+                if (location == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy địa điểm" });
+                }
+
+                var result = new
+                {
+                    locationId = location.LocationId,
+                    name = location.Name,
+                    address = location.Address,
+                    district = location.District,
+                    city = location.City,
+                    partnerId = location.PartnerId,
+                    ggmapLink = location.GgmapLink,
+                    status = location.Status
+                };
+
+                return Json(new { success = true, location = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetLocationForEdit action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải thông tin địa điểm" });
+            }
+        }
+
+        /// <summary>
+        /// Edit Partner POST - xử lý cập nhật đối tác
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPartner(PartnerEditViewModel model, IFormFile AvatarFile)
+        {
+            try
+            {
+                _logger.LogInformation("EditPartner called with model: PartnerId={PartnerId}, Name={Name}, Status={Status}, UserId={UserId}, Email={Email}, Phone={Phone}, ContactInfo={ContactInfo}", 
+                    model.PartnerId, model.Name, model.Status, model.UserId, model.Email, model.Phone, model.ContactInfo);
+                
+                // Log all form data
+                _logger.LogInformation("Form data: {FormData}", string.Join(", ", Request.Form.Select(x => $"{x.Key}={x.Value}")));
+
+                // Handle UserId - convert 0 to null
+                if (model.UserId == 0)
+                {
+                    model.UserId = null;
+                    _logger.LogInformation("Converted UserId from 0 to null");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
+                        string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                // Handle avatar file upload
+                if (AvatarFile != null && AvatarFile.Length > 0)
+                {
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
+                    
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("AvatarFile", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Validate file size (max 5MB)
+                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("AvatarFile", "Kích thước file không được vượt quá 5MB");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Create unique filename
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
+                    
+                    // Ensure directory exists
+                    if (!Directory.Exists(uploadsPath))
+                    {
+                        Directory.CreateDirectory(uploadsPath);
+                    }
+
+                    var filePath = Path.Combine(uploadsPath, fileName);
+                    
+                    // Save file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await AvatarFile.CopyToAsync(stream);
+                    }
+
+                    // Update model with new avatar path
+                    model.Avatar = $"/Imagine/Avatars/{fileName}";
+                }
+
+                var result = await _partnerService.UpdatePartnerAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật đối tác thành công";
+                    return RedirectToAction(nameof(Partners));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy đối tác hoặc có lỗi xảy ra";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditPartner POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật đối tác";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Partner Detail - chi tiết đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> PartnerDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var partner = await _partnerService.GetPartnerByIdAsync(id);
+                if (partner == null)
+                {
+                    TempData["Error"] = "Không tìm thấy đối tác";
+                    return RedirectToAction(nameof(Partners));
+                }
+
+                return View(partner);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in PartnerDetail action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Delete Partner - xóa đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePartner(int id)
+        {
+            try
+            {
+                var result = await _partnerService.DeletePartnerAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa đối tác thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa đối tác (có thể có địa điểm liên kết)";
+                }
+
+                return RedirectToAction(nameof(Partners));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeletePartner action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Toggle Partner Status - thay đổi trạng thái đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TogglePartnerStatus(int id, string status)
+        {
+            try
+            {
+                var result = await _partnerService.TogglePartnerStatusAsync(id, status);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật trạng thái đối tác thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái";
+                }
+
+                return RedirectToAction(nameof(Partners));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in TogglePartnerStatus action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        #endregion
+
+        #region Location Management
+
+        /// <summary>
+        /// Locations - quản lý địa điểm
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Locations()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var searchModel = new LocationSearchViewModel();
+                var (locations, totalCount) = await _locationService.GetLocationsAsync(searchModel);
+                
+                ViewBag.TotalCount = totalCount;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(locations);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Locations action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách địa điểm";
+                await SetAdminViewBagAsync();
+                return View(new List<LocationViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Location - tạo địa điểm mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreateLocation()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var model = new LocationCreateViewModel();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateLocation GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Create Location POST - xử lý tạo địa điểm
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateLocation(LocationCreateViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _locationService.CreateLocationAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo địa điểm thành công";
+                    return RedirectToAction(nameof(Locations));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo địa điểm";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateLocation POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi tạo địa điểm";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Location - chỉnh sửa địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditLocation(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var location = await _locationService.GetLocationByIdAsync(id);
+                if (location == null)
+                {
+                    TempData["Error"] = "Không tìm thấy địa điểm";
+                    return RedirectToAction(nameof(Locations));
+                }
+
+                var model = new LocationEditViewModel
+                {
+                    LocationId = location.LocationId,
+                    Name = location.Name,
+                    Address = location.Address,
+                    District = location.District,
+                    City = location.City,
+                    Status = location.Status,
+                    PartnerId = location.PartnerId,
+                    GgmapLink = location.GgmapLink,
+                    CreatedAt = location.CreatedAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditLocation GET action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Edit Location POST - xử lý cập nhật địa điểm
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditLocation(LocationEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _locationService.UpdateLocationAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật địa điểm thành công";
+                    return RedirectToAction(nameof(Locations));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy địa điểm hoặc có lỗi xảy ra";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditLocation POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật địa điểm";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Location Detail - chi tiết địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> LocationDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var location = await _locationService.GetLocationByIdAsync(id);
+                if (location == null)
+                {
+                    TempData["Error"] = "Không tìm thấy địa điểm";
+                    return RedirectToAction(nameof(Locations));
+                }
+
+                return View(location);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in LocationDetail action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Delete Location - xóa địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteLocation(int id)
+        {
+            try
+            {
+                var result = await _locationService.DeleteLocationAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa địa điểm thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa địa điểm (có thể có concept liên kết)";
+                }
+
+                return RedirectToAction(nameof(Locations));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteLocation action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Toggle Location Status - thay đổi trạng thái địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLocationStatus(int id, string status)
+        {
+            try
+            {
+                var result = await _locationService.ToggleLocationStatusAsync(id, status);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật trạng thái địa điểm thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái";
+                }
+
+                return RedirectToAction(nameof(Locations));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ToggleLocationStatus action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái địa điểm";
+                return RedirectToAction(nameof(Locations));
             }
         }
 

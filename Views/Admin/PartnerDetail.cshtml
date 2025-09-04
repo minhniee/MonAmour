@@ -1,0 +1,448 @@
+@model MonAmour.ViewModels.PartnerDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết Đối tác";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chi tiết Đối tác</h1>
+        <div>
+            <a href="@Url.Action("EditPartner", "Admin", new { id = Model.PartnerId })" class="btn btn-warning shadow-sm mr-2">
+                <i class="fas fa-edit fa-sm text-white-50"></i> Chỉnh sửa
+            </a>
+            <a href="@Url.Action("Partners", "Admin")" class="d-none d-sm-inline-block btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Partner Information Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Đối tác</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            @if (!string.IsNullOrEmpty(Model.Avatar))
+                            {
+                                <img class="rounded-circle mb-3" src="@Model.Avatar" alt="Avatar" width="120" height="120">
+                            }
+                            else
+                            {
+                                <div class="rounded-circle mb-3 bg-primary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x"></i>
+                                </div>
+                            }
+                            <h5 class="font-weight-bold">@Model.Name</h5>
+                            @if (Model.Status == "Active")
+                            {
+                                <span class="badge badge-success badge-lg">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning badge-lg">Tạm dừng</span>
+                            }
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <h6 class="font-weight-bold text-primary">Thông tin cơ bản</h6>
+                                        <table class="table table-sm table-borderless">
+                                            <tr>
+                                                <td class="font-weight-bold">ID:</td>
+                                                <td>@Model.PartnerId</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="font-weight-bold">Tên:</td>
+                                                <td>@Model.Name</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="font-weight-bold">Trạng thái:</td>
+                                                <td>
+                                                    @if (Model.Status == "Active")
+                                                    {
+                                                        <span class="badge badge-success">Hoạt động</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-warning">Tạm dừng</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="font-weight-bold">Tạo lúc:</td>
+                                                <td>@(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="font-weight-bold">Cập nhật lúc:</td>
+                                                <td>@(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <h6 class="font-weight-bold text-primary">Thông tin liên hệ</h6>
+                                        <table class="table table-sm table-borderless">
+                                            <tr>
+                                                <td class="font-weight-bold">Email:</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(Model.Email))
+                                                    {
+                                                        <a href="mailto:@Model.Email" class="text-decoration-none">
+                                                            <i class="fas fa-envelope mr-1"></i>@Model.Email
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="font-weight-bold">Điện thoại:</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(Model.Phone))
+                                                    {
+                                                        <a href="tel:@Model.Phone" class="text-decoration-none">
+                                                            <i class="fas fa-phone mr-1"></i>@Model.Phone
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="font-weight-bold">Người dùng:</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(Model.UserName))
+                                                    {
+                                                        <span class="badge badge-info">@Model.UserName</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(Model.ContactInfo))
+                            {
+                                <div class="mb-3">
+                                    <h6 class="font-weight-bold text-primary">Thông tin liên hệ chi tiết</h6>
+                                    <div class="bg-light p-3 rounded">
+                                        @Model.ContactInfo
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locations Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Địa điểm của Đối tác</h6>
+                    <a href="@Url.Action("Locations", "Admin")" class="btn btn-primary btn-sm">
+                        <i class="fas fa-map-marker-alt fa-sm"></i> Quản lý Địa điểm
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Locations.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên địa điểm</th>
+                                        <th>Địa chỉ</th>
+                                        <th>Thành phố</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var location in Model.Locations)
+                                    {
+                                        <tr>
+                                            <td>@location.LocationId</td>
+                                            <td>
+                                                <strong>@location.Name</strong>
+                                            </td>
+                                            <td>@location.Address</td>
+                                            <td>@(location.City ?? "-")</td>
+                                            <td>
+                                                @if (location.Status == "Active")
+                                                {
+                                                    <span class="badge badge-success">Hoạt động</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-warning">Tạm dừng</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("LocationDetail", "Admin", new { id = location.LocationId })" 
+                                                       class="btn btn-info btn-sm" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("EditLocation", "Admin", new { id = location.LocationId })" 
+                                                       class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có địa điểm nào</h5>
+                            <p class="text-muted">Đối tác này chưa có địa điểm nào được tạo</p>
+                            <a href="@Url.Action("Locations", "Admin")" class="btn btn-primary">
+                                <i class="fas fa-map-marker-alt mr-2"></i>Quản lý Địa điểm
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Statistics Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thống kê</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-right">
+                                <h4 class="text-primary">@Model.Locations.Count</h4>
+                                <p class="text-muted mb-0">Địa điểm</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">@Model.Locations.Count(l => l.Status == "Active")</h4>
+                            <p class="text-muted mb-0">Hoạt động</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thao tác nhanh</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("EditPartner", "Admin", new { id = Model.PartnerId })" class="btn btn-warning">
+                            <i class="fas fa-edit mr-2"></i>Chỉnh sửa Đối tác
+                        </a>
+                        @if (Model.Status == "Active")
+                        {
+                            <button type="button" class="btn btn-secondary" onclick="togglePartnerStatus(@Model.PartnerId, 'Inactive')">
+                                <i class="fas fa-pause mr-2"></i>Tạm dừng
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-success" onclick="togglePartnerStatus(@Model.PartnerId, 'Active')">
+                                <i class="fas fa-play mr-2"></i>Kích hoạt
+                            </button>
+                        }
+                        <button type="button" class="btn btn-outline-danger" onclick="deletePartner(@Model.PartnerId, '@Html.Raw(Model.Name.Replace("'", "\\'"))', @Model.Locations.Count)">
+                            <i class="fas fa-trash mr-2"></i>Xóa Đối tác
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Hệ thống</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td class="font-weight-bold">ID:</td>
+                            <td>@Model.PartnerId</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Tạo lúc:</td>
+                            <td>@(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Cập nhật lúc:</td>
+                            <td>@(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Trạng thái:</td>
+                            <td>
+                                @if (Model.Status == "Active")
+                                {
+                                    <span class="badge badge-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-warning">Tạm dừng</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deletePartnerModal" tabindex="-1" role="dialog" aria-labelledby="deletePartnerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deletePartnerModalLabel">Xác nhận xóa đối tác</h5>
+                <button type="button" class="close" onclick="closeDeletePartnerModal()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="deletePartnerInfo">
+                    <p>Bạn có chắc chắn muốn xóa đối tác "<span id="partnerNameToDelete"></span>"?</p>
+                    <div id="locationCountWarning" class="alert alert-warning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Cảnh báo:</strong> Đối tác này có <span id="locationCount"></span> địa điểm. 
+                        Bạn cần xóa hoặc chuyển các địa điểm này trước khi xóa đối tác.
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Lưu ý:</strong> Hành động này không thể hoàn tác!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeletePartnerModal()">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeletePartner" onclick="confirmDeletePartner()">
+                    <i class="fas fa-trash mr-2"></i>Xóa đối tác
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deletePartner(partnerId, partnerName, locationCount) {
+            console.log('deletePartner called:', partnerId, partnerName, locationCount);
+            
+            $('#partnerNameToDelete').text(partnerName);
+            
+            if (locationCount > 0) {
+                $('#locationCount').text(locationCount);
+                $('#locationCountWarning').show();
+                $('#confirmDeletePartner').prop('disabled', true);
+            } else {
+                $('#locationCountWarning').hide();
+                $('#confirmDeletePartner').prop('disabled', false);
+            }
+            
+            $('#deletePartnerModal').data('partnerId', partnerId);
+            $('#deletePartnerModal').modal('show');
+        }
+        
+        function closeDeletePartnerModal() {
+            console.log('closeDeletePartnerModal called');
+            $('#deletePartnerModal').modal('hide');
+        }
+        
+        function confirmDeletePartner() {
+            console.log('confirmDeletePartner called');
+            
+            var partnerId = $('#deletePartnerModal').data('partnerId');
+            
+            $('#confirmDeletePartner').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang xóa...');
+            
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': '@Url.Action("DeletePartner", "Admin")'
+            });
+            
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            if (!token) {
+                token = $('meta[name="__RequestVerificationToken"]').attr('content');
+            }
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': '__RequestVerificationToken',
+                'value': token
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'id',
+                'value': partnerId
+            }));
+            
+            $('body').append(form);
+            form.submit();
+            
+            return false;
+        }
+        
+        function togglePartnerStatus(partnerId, status) {
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': '@Url.Action("TogglePartnerStatus", "Admin")'
+            });
+            
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            if (!token) {
+                token = $('meta[name="__RequestVerificationToken"]').attr('content');
+            }
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': '__RequestVerificationToken',
+                'value': token
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'id',
+                'value': partnerId
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'status',
+                'value': status
+            }));
+            
+            $('body').append(form);
+            form.submit();
+        }
+    </script>
+}

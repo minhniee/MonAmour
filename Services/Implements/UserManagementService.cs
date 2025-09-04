@@ -99,6 +99,38 @@ public class UserManagementService : IUserManagementService
         }
     }
 
+    public async Task<List<AdminUserViewModel.UserListViewModel>> GetAllUsersAsync()
+    {
+        try
+        {
+            var users = await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .Select(u => new AdminUserViewModel.UserListViewModel
+                {
+                    UserId = u.UserId,
+                    Email = u.Email,
+                    Name = u.Name,
+                    Phone = u.Phone,
+                    Avatar = u.Avatar,
+                    Verified = u.Verified,
+                    Gender = u.Gender,
+                    Status = u.Status,
+                    CreatedAt = u.CreatedAt,
+                    UpdatedAt = u.UpdatedAt,
+                    Roles = u.UserRoles.Select(ur => ur.Role.RoleName).ToList()
+                })
+                .ToListAsync();
+
+            return users;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all users");
+            throw;
+        }
+    }
+
     public async Task<AdminUserViewModel.UserDetailViewModel?> GetUserByIdAsync(int userId)
     {
         try
@@ -239,7 +271,6 @@ public class UserManagementService : IUserManagementService
             return false;
         }
     }
-
 
 
     public async Task<bool> UpdateUserAsync(AdminUserViewModel.UserEditViewModel model, int adminUserId)
@@ -431,7 +462,6 @@ public class UserManagementService : IUserManagementService
             var normalizedEmail = email.Trim().ToLower();
 
             var query = _context.Users.Where(u => u.Email.ToLower() == normalizedEmail);
-
             if (excludeUserId.HasValue)
             {
                 query = query.Where(u => u.UserId != excludeUserId.Value);
@@ -444,7 +474,6 @@ public class UserManagementService : IUserManagementService
             // Debug: Log existing emails
             var existingEmails = await _context.Users.Select(u => u.Email).ToListAsync();
             _logger.LogInformation("All existing emails: {Emails}", string.Join(", ", existingEmails));
-
             return exists;
         }
         catch (Exception ex)

@@ -25,6 +25,8 @@
     <Folder Include="Imagine\Avatar\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="Services\Implements\" />
+    <Folder Include="wwwroot\Imagine\IMGConcept\" />
+    <Folder Include="wwwroot\Imagine\IMGProduct\" />
   </ItemGroup>
 
 </Project>

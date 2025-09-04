@@ -5,6 +5,7 @@ namespace MonAmour.Services.Interfaces;
 public interface IUserManagementService
 {
     Task<(List<AdminUserViewModel.UserListViewModel> Users, int TotalCount)> GetUsersAsync(AdminUserViewModel.UserSearchViewModel searchModel);
+    Task<List<AdminUserViewModel.UserListViewModel>> GetAllUsersAsync();
     Task<AdminUserViewModel.UserDetailViewModel?> GetUserByIdAsync(int userId);
     Task<bool> CreateUserAsync(AdminUserViewModel.UserCreateViewModel model, int adminUserId);
     Task<bool> UpdateUserAsync(AdminUserViewModel.UserEditViewModel model, int adminUserId);

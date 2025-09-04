@@ -97,6 +97,46 @@
                         </div>
                     </div>
 
+                    <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Partner") == true ? "active" : "")">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#partnerSubmenu">
+                            <i class="fas fa-handshake"></i>
+                            <span>Quản lý đối tác</span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Partner") == true ? "show" : "")" id="partnerSubmenu">
+                            <div class="submenu">
+                                <a href="@Url.Action("Partners", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Partners" ? "active" : "")">
+                                    <i class="fas fa-list"></i>
+                                    <span>Danh sách đối tác</span>
+                                </a>
+                                <a href="@Url.Action("CreatePartner", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "CreatePartner" ? "active" : "")">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Thêm đối tác</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Location") == true ? "active" : "")">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#locationSubmenu">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Quản lý địa điểm</span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Location") == true ? "show" : "")" id="locationSubmenu">
+                            <div class="submenu">
+                                <a href="@Url.Action("Locations", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Locations" ? "active" : "")">
+                                    <i class="fas fa-list"></i>
+                                    <span>Danh sách địa điểm</span>
+                                </a>
+                                <a href="@Url.Action("CreateLocation", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "CreateLocation" ? "active" : "")">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Thêm địa điểm</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="menu-item">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#orderSubmenu">
                             <i class="fas fa-shopping-cart"></i>

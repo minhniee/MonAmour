@@ -1,0 +1,240 @@
+@model MonAmour.ViewModels.LocationEditViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa Địa điểm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa Địa điểm</h1>
+        <div>
+            <a href="@Url.Action("Locations", "Admin")" class="d-none d-sm-inline-block btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Địa điểm</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="@Url.Action("EditLocation", "Admin")" id="editLocationForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="LocationId" value="@Model.LocationId" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Name" class="form-label">Tên địa điểm <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="Name" name="Name" required 
+                                           placeholder="Nhập tên địa điểm..." maxlength="100" value="@Model.Name">
+                                    <small class="form-text text-muted">Tối đa 100 ký tự</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                                                <select class="form-control" id="Status" name="Status" required>
+                                <option value="Active" selected="@(Model.Status == "Active")">Hoạt động</option>
+                                <option value="Inactive" selected="@(Model.Status == "Inactive")">Tạm dừng</option>
+                            </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="Address" name="Address" required 
+                                   placeholder="Nhập địa chỉ chi tiết..." maxlength="200" value="@Model.Address">
+                            <small class="form-text text-muted">Tối đa 200 ký tự</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="District" class="form-label">Quận/Huyện</label>
+                                    <input type="text" class="form-control" id="District" name="District" 
+                                           placeholder="Nhập quận/huyện..." maxlength="50" value="@Model.District">
+                                    <small class="form-text text-muted">Tối đa 50 ký tự</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="City" class="form-label">Thành phố</label>
+                                    <input type="text" class="form-control" id="City" name="City" 
+                                           placeholder="Nhập thành phố..." maxlength="50" value="@Model.City">
+                                    <small class="form-text text-muted">Tối đa 50 ký tự</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="PartnerId" class="form-label">Đối tác</label>
+                            <select class="form-control" id="PartnerId" name="PartnerId">
+                                <option value="">-- Chọn đối tác (tùy chọn) --</option>
+                                @if (Model.PartnerId.HasValue)
+                                {
+                                    <option value="@Model.PartnerId" selected>Partner ID: @Model.PartnerId</option>
+                                }
+                                <!-- Options sẽ được load bằng JavaScript -->
+                            </select>
+                            <small class="form-text text-muted">Liên kết với đối tác (không bắt buộc)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="GgmapLink" class="form-label">Link Google Maps</label>
+                            <input type="url" class="form-control" id="GgmapLink" name="GgmapLink" 
+                                   placeholder="Nhập link Google Maps..." maxlength="500" value="@Model.GgmapLink">
+                            <small class="form-text text-muted">URL link Google Maps của địa điểm</small>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save mr-2"></i>Cập nhật Địa điểm
+                            </button>
+                            <a href="@Url.Action("Locations", "Admin")" class="btn btn-secondary ml-2">
+                                <i class="fas fa-times mr-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Hệ thống</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-edit fa-3x text-warning mb-3"></i>
+                        <h5>Chỉnh sửa Địa điểm</h5>
+                        <p class="text-muted">Cập nhật thông tin địa điểm</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Thông tin hệ thống:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>ID:</strong> @Model.LocationId</li>
+                            <li><strong>Tạo lúc:</strong> @(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Lưu ý:</strong> Thay đổi trạng thái địa điểm sẽ ảnh hưởng đến các concept liên kết.
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>Mẹo:</strong> Bạn có thể xem chi tiết địa điểm và quản lý concept từ trang danh sách.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load partners for dropdown
+            loadPartnersForDropdown();
+            
+            // Form validation
+            $('#editLocationForm').validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100
+                    },
+                    Address: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 200
+                    },
+                    Status: {
+                        required: true
+                    },
+                    District: {
+                        maxlength: 50
+                    },
+                    City: {
+                        maxlength: 50
+                    },
+                    GgmapLink: {
+                        url: true,
+                        maxlength: 500
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "Vui lòng nhập tên địa điểm",
+                        minlength: "Tên địa điểm phải có ít nhất 2 ký tự",
+                        maxlength: "Tên địa điểm không được vượt quá 100 ký tự"
+                    },
+                    Address: {
+                        required: "Vui lòng nhập địa chỉ",
+                        minlength: "Địa chỉ phải có ít nhất 5 ký tự",
+                        maxlength: "Địa chỉ không được vượt quá 200 ký tự"
+                    },
+                    Status: {
+                        required: "Vui lòng chọn trạng thái"
+                    },
+                    District: {
+                        maxlength: "Quận/Huyện không được vượt quá 50 ký tự"
+                    },
+                    City: {
+                        maxlength: "Thành phố không được vượt quá 50 ký tự"
+                    },
+                    GgmapLink: {
+                        url: "Link Google Maps không hợp lệ",
+                        maxlength: "Link Google Maps không được vượt quá 500 ký tự"
+                    }
+                },
+                submitHandler: function(form) {
+                    // Show loading state
+                    var submitBtn = $(form).find('button[type="submit"]');
+                    var originalText = submitBtn.html();
+                    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang cập nhật...');
+                    
+                    // Submit form
+                    form.submit();
+                }
+            });
+        });
+        
+        function loadPartnersForDropdown() {
+            $.ajax({
+                url: '@Url.Action("GetPartnersForDropdown", "Admin")',
+                type: 'GET',
+                success: function(data) {
+                    if (data.success && data.partners) {
+                        var dropdown = $('#PartnerId');
+                        dropdown.empty();
+                        dropdown.append('<option value="">-- Chọn đối tác (tùy chọn) --</option>');
+                        
+                        $.each(data.partners, function(index, partner) {
+                            var selected = partner.id == @(Model.PartnerId ?? 0) ? 'selected' : '';
+                            dropdown.append('<option value="' + partner.id + '" ' + selected + '>' + partner.name + '</option>');
+                        });
+                        
+                        console.log('Partners loaded successfully:', data.partners.length);
+                    } else {
+                        console.error('Failed to load partners:', data.message);
+                    }
+                },
+                error: function() {
+                    console.error('AJAX Error: Cannot load partners');
+                }
+            });
+        }
+    </script>
+}
