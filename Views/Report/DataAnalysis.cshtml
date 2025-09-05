@@ -1,0 +1,470 @@
+@{
+    ViewData["Title"] = "Phân tích Dữ liệu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-chart-pie mr-2"></i>Phân tích Dữ liệu
+        </h1>
+        <div class="d-flex">
+            <div class="input-group mr-3" style="width: 300px;">
+                <input type="date" id="startDate" class="form-control" placeholder="Từ ngày">
+                <input type="date" id="endDate" class="form-control" placeholder="Đến ngày">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" onclick="filterData()">
+                        <i class="fas fa-filter"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng đơn hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalOrders">
+                                @(ViewBag.OrderStats?.TotalOrders ?? 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng sản phẩm
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalProducts">
+                                @(ViewBag.ProductStats?.TotalProducts ?? 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tổng đặt chỗ
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalBookings">
+                                @(ViewBag.BookingStats?.TotalBookings ?? 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Sản phẩm sắp hết hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="lowStockProducts">
+                                @(ViewBag.ProductStats?.LowStockProducts ?? 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Order Status Distribution -->
+        <div class="col-xl-6 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Phân bố trạng thái đơn hàng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Category Distribution -->
+        <div class="col-xl-6 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Phân bố danh mục sản phẩm</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="productCategoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Row -->
+    <div class="row">
+        <!-- Top Selling Products -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Sản phẩm bán chạy nhất</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Danh mục</th>
+                                    <th>Đã bán</th>
+                                    <th>Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.TopSellingProducts != null)
+                                {
+                                    @foreach (var product in ViewBag.TopSellingProducts)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(product.ProductImage))
+                                                    {
+                                                        <img src="@product.ProductImage" class="img-thumbnail mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                    }
+                                                    <span>@product.ProductName</span>
+                                                </div>
+                                            </td>
+                                            <td>@product.CategoryName</td>
+                                            <td>@product.TotalSold</td>
+                                            <td>@product.TotalRevenue.ToString("N0") VNĐ</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Sản phẩm sắp hết hàng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Danh mục</th>
+                                    <th>Tồn kho</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.LowStockProducts != null)
+                                {
+                                    @foreach (var product in ViewBag.LowStockProducts)
+                                    {
+                                        <tr>
+                                            <td>@product.ProductName</td>
+                                            <td>@product.CategoryName</td>
+                                            <td>@product.CurrentStock</td>
+                                            <td>
+                                                <span class="badge @(product.Status == "Hết hàng" ? "badge-danger" : "badge-warning")">
+                                                    @product.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Concepts -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Concept phổ biến nhất</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Concept</th>
+                                    <th>Danh mục</th>
+                                    <th>Số đặt chỗ</th>
+                                    <th>Doanh thu</th>
+                                    <th>Giá trung bình</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.PopularConcepts != null)
+                                {
+                                    @foreach (var concept in ViewBag.PopularConcepts)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(concept.ConceptImage))
+                                                    {
+                                                        <img src="@concept.ConceptImage" class="img-thumbnail mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                    }
+                                                    <span>@concept.ConceptName</span>
+                                                </div>
+                                            </td>
+                                            <td>@concept.CategoryName</td>
+                                            <td>@concept.BookingCount</td>
+                                            <td>@concept.TotalRevenue.ToString("N0") VNĐ</td>
+                                            <td>@concept.AveragePrice.ToString("N0") VNĐ</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let orderStatusChart, productCategoryChart;
+
+        // Prepare data
+        let orderStatusDistribution = [];
+        let productCategoryDistribution = [];
+        
+        try {
+            orderStatusDistribution = @Html.Raw(Json.Serialize(ViewBag.OrderStats?.StatusDistribution ?? new List<MonAmour.ViewModels.OrderStatusDistributionViewModel>()));
+        } catch (e) {
+            console.error('Error serializing order status distribution:', e);
+            orderStatusDistribution = [];
+        }
+        
+        try {
+            productCategoryDistribution = @Html.Raw(Json.Serialize(ViewBag.ProductStats?.CategoryDistribution ?? new List<MonAmour.ViewModels.ProductCategoryDistributionViewModel>()));
+        } catch (e) {
+            console.error('Error serializing product category distribution:', e);
+            productCategoryDistribution = [];
+        }
+        
+        // Debug logging
+        console.log('Order Status Distribution Raw:', orderStatusDistribution);
+        console.log('Product Category Distribution Raw:', productCategoryDistribution);
+        console.log('Order Status Distribution Type:', typeof orderStatusDistribution);
+        console.log('Product Category Distribution Type:', typeof productCategoryDistribution);
+        
+        // Check if arrays are actually arrays
+        console.log('Order Status is Array:', Array.isArray(orderStatusDistribution));
+        console.log('Product Category is Array:', Array.isArray(productCategoryDistribution));
+        
+        // Inspect first object structure
+        if (orderStatusDistribution && orderStatusDistribution.length > 0) {
+            console.log('First Order Status Object Keys:', Object.keys(orderStatusDistribution[0]));
+            console.log('First Order Status Object:', JSON.stringify(orderStatusDistribution[0], null, 2));
+        }
+        
+        if (productCategoryDistribution && productCategoryDistribution.length > 0) {
+            console.log('First Product Category Object Keys:', Object.keys(productCategoryDistribution[0]));
+            console.log('First Product Category Object:', JSON.stringify(productCategoryDistribution[0], null, 2));
+        }
+        
+        const orderStatusLabels = (orderStatusDistribution || []).map(s => s.statusName || s.StatusName || '');
+        const orderStatusData = (orderStatusDistribution || []).map(s => s.count || s.Count || 0);
+        const productCategoryLabels = (productCategoryDistribution || []).map(c => c.categoryName || c.CategoryName || '');
+        const productCategoryData = (productCategoryDistribution || []).map(c => c.productCount || c.ProductCount || 0);
+        
+        console.log('Order Status Labels:', orderStatusLabels);
+        console.log('Order Status Data:', orderStatusData);
+        console.log('Product Category Labels:', productCategoryLabels);
+        console.log('Product Category Data:', productCategoryData);
+        
+        // Check if we have real data
+        console.log('Order Status has data:', orderStatusLabels.length > 0 && orderStatusData.some(d => d > 0));
+        console.log('Product Category has data:', productCategoryLabels.length > 0 && productCategoryData.some(d => d > 0));
+        
+        // Detailed data inspection
+        console.log('Order Status detailed:');
+        orderStatusDistribution.forEach((item, index) => {
+            console.log(`  [${index}] Status: "${item.status || item.Status}", StatusName: "${item.statusName || item.StatusName}", Count: ${item.count || item.Count}`);
+        });
+        
+        console.log('Product Category detailed:');
+        productCategoryDistribution.forEach((item, index) => {
+            console.log(`  [${index}] CategoryName: "${item.categoryName || item.CategoryName}", ProductCount: ${item.productCount || item.ProductCount}`);
+        });
+
+        $(document).ready(function() {
+            initializeCharts();
+            setupEventHandlers();
+        });
+
+        function initializeCharts() {
+            // Destroy existing charts
+            if (orderStatusChart) {
+                orderStatusChart.destroy();
+            }
+            if (productCategoryChart) {
+                productCategoryChart.destroy();
+            }
+            
+            // Prepare order status data with fallback
+            let finalOrderLabels = orderStatusLabels;
+            let finalOrderData = orderStatusData;
+            
+            if (finalOrderLabels.length === 0 || finalOrderData.every(d => d === 0)) {
+                console.log('Using fallback order status data - no real data available');
+                finalOrderLabels = ['Chờ xử lý', 'Đã xác nhận', 'Đang giao hàng', 'Hoàn thành', 'Đã hủy'];
+                finalOrderData = [0, 0, 0, 0, 0];
+            } else {
+                console.log('Using real order status data:', finalOrderLabels, finalOrderData);
+            }
+            
+            // Order Status Chart
+            const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+            orderStatusChart = new Chart(orderStatusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: finalOrderLabels,
+                    datasets: [{
+                        data: finalOrderData,
+                        backgroundColor: ['#4e73df', '#1cc88a', '#f6c23e', '#e74a3b', '#858796'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#dda20a', '#c0392b', '#6c757d']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Prepare product category data with fallback
+            let finalCategoryLabels = productCategoryLabels;
+            let finalCategoryData = productCategoryData;
+            
+            if (finalCategoryLabels.length === 0 || finalCategoryData.every(d => d === 0)) {
+                console.log('Using fallback product category data - no real data available');
+                finalCategoryLabels = ['Hoa', 'Quà tặng', 'Trang trí', 'Phụ kiện', 'Đồ ăn & Thức uống'];
+                finalCategoryData = [0, 0, 0, 0, 0];
+            } else {
+                console.log('Using real product category data:', finalCategoryLabels, finalCategoryData);
+            }
+            
+            // Product Category Chart
+            const productCategoryCtx = document.getElementById('productCategoryChart').getContext('2d');
+            productCategoryChart = new Chart(productCategoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: finalCategoryLabels,
+                    datasets: [{
+                        data: finalCategoryData,
+                        backgroundColor: ['#4e73df', '#1cc88a', '#f6c23e', '#e74a3b', '#858796', '#36b9cc'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#dda20a', '#c0392b', '#6c757d', '#2c9faf']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupEventHandlers() {
+            // Set default date range (last 30 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+        }
+
+        function filterData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn khoảng thời gian');
+                return;
+            }
+            
+            // Reload page with date parameters
+            const url = new URL(window.location);
+            url.searchParams.set('startDate', startDate);
+            url.searchParams.set('endDate', endDate);
+            window.location.href = url.toString();
+        }
+
+        function exportData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let url = '@Url.Action("ExportDataAnalysis", "Report")';
+            if (startDate && endDate) {
+                url += `?startDate=${startDate}&endDate=${endDate}`;
+            }
+            
+            window.open(url, '_blank');
+        }
+    </script>
+}

@@ -247,9 +247,9 @@ namespace MonAmour.Services.Implements
             {
                 var stats = new Dictionary<string, int>
                 {
-                    ["Total"] = await _context.Partners.CountAsync(),
-                    ["Active"] = await _context.Partners.CountAsync(p => p.Status == "Active"),
-                    ["Inactive"] = await _context.Partners.CountAsync(p => p.Status == "Inactive"),
+                    ["TotalPartners"] = await _context.Partners.CountAsync(),
+                    ["ActivePartners"] = await _context.Partners.CountAsync(p => p.Status == "Active"),
+                    ["InactivePartners"] = await _context.Partners.CountAsync(p => p.Status == "Inactive"),
                     ["WithLocations"] = await _context.Partners.CountAsync(p => p.Locations.Any())
                 };
 

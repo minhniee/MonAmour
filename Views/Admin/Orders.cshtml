@@ -94,6 +94,86 @@
         </div>
     </div>
 
+    <!-- Additional Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                Chờ xử lý
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingCount">
+                                @(ViewBag.Statistics != null && ViewBag.Statistics.ContainsKey("pending") ? ViewBag.Statistics["pending"] : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Đã hủy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="cancelledCount">
+                                @(ViewBag.Statistics != null && ViewBag.Statistics.ContainsKey("cancelled") ? ViewBag.Statistics["cancelled"] : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-dark shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                Chưa thanh toán
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="unpaidCount">
+                                @(Model != null ? Model.Count(o => !o.HasPayment) : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-light shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">
+                                Đã thanh toán
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="paidCount">
+                                @(Model != null ? Model.Count(o => o.HasPayment) : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Search and Filter -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -210,6 +290,9 @@
                                     <td>
                                         @switch (order.Status)
                                         {
+                                            case "pending":
+                                                <span class="badge badge-secondary">Chờ xử lý</span>
+                                                break;
                                             case "confirmed":
                                                 <span class="badge badge-success">Đã xác nhận</span>
                                                 break;
@@ -218,6 +301,9 @@
                                                 break;
                                             case "completed":
                                                 <span class="badge badge-info">Hoàn thành</span>
+                                                break;
+                                            case "cancelled":
+                                                <span class="badge badge-danger">Đã hủy</span>
                                                 break;
                                             default:
                                                 <span class="badge badge-secondary">@order.Status</span>
@@ -405,6 +491,8 @@
                     $('#confirmedCount').text(result.statistics.confirmed || 0);
                     $('#shippingCount').text(result.statistics.shipping || 0);
                     $('#completedCount').text(result.statistics.completed || 0);
+                    $('#pendingCount').text(result.statistics.pending || 0);
+                    $('#cancelledCount').text(result.statistics.cancelled || 0);
                     
                     // Show success message
                     showAlert('success', 'Đã cập nhật thống kê thành công!');

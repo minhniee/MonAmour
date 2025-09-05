@@ -1,0 +1,338 @@
+@{
+    ViewData["Title"] = "Hiệu suất Đối tác";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-handshake mr-2"></i>Hiệu suất Đối tác
+        </h1>
+        <div class="d-flex">
+            <div class="input-group mr-3" style="width: 300px;">
+                <input type="date" id="startDate" class="form-control" placeholder="Từ ngày">
+                <input type="date" id="endDate" class="form-control" placeholder="Đến ngày">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" onclick="filterData()">
+                        <i class="fas fa-filter"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partner Performance Summary -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng đối tác
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalPartners">
+                                @(ViewBag.PerformanceData?.Count ?? 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-handshake fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng doanh thu
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalRevenue">
+                                0 VNĐ
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tổng đặt chỗ
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalBookings">
+                                0
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Đánh giá TB
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="averageRating">
+                                0.0
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Partner Revenue Chart -->
+        <div class="col-xl-6 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Doanh thu theo đối tác</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="partnerRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partner Booking Chart -->
+        <div class="col-xl-6 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Số đặt chỗ theo đối tác</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="partnerBookingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partner Performance Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Bảng hiệu suất đối tác</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Đối tác</th>
+                                    <th>Doanh thu</th>
+                                    <th>Số đặt chỗ</th>
+                                    <th>Đánh giá TB</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.PerformanceData != null)
+                                {
+                                    @foreach (var partner in ViewBag.PerformanceData)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(partner.Avatar))
+                                                    {
+                                                        <img src="@partner.Avatar" class="img-thumbnail mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                    }
+                                                    <div>
+                                                        <div class="font-weight-bold">@partner.PartnerName</div>
+                                                        <small class="text-muted">@partner.Email</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>@partner.TotalRevenue.ToString("N0") VNĐ</td>
+                                            <td>@partner.BookingCount</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="mr-2">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <i class="fas fa-star @(i <= partner.AverageRating ? "text-warning" : "text-gray-300")"></i>
+                                                        }
+                                                    </div>
+                                                    <span>@partner.AverageRating.ToString("F1")</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(partner.Status == "active" ? "badge-success" : "badge-secondary")">
+                                                    @(partner.Status == "active" ? "Hoạt động" : "Không hoạt động")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let partnerRevenueChart, partnerBookingChart;
+
+        // Prepare data
+        let performanceData = [];
+        
+        try {
+            performanceData = @Html.Raw(Json.Serialize(ViewBag.PerformanceData ?? new List<MonAmour.ViewModels.PartnerPerformanceViewModel>()));
+        } catch (e) {
+            console.error('Error serializing performance data:', e);
+            performanceData = [];
+        }
+        
+        const partnerLabels = (performanceData || []).map(p => p.PartnerName || '');
+        const partnerRevenueData = (performanceData || []).map(p => p.TotalRevenue || 0);
+        const partnerBookingData = (performanceData || []).map(p => p.BookingCount || 0);
+
+        $(document).ready(function() {
+            updateSummaryCards();
+            initializeCharts();
+            setupEventHandlers();
+        });
+
+        function updateSummaryCards() {
+            const totalRevenue = (performanceData || []).reduce((sum, p) => sum + (p.TotalRevenue || 0), 0);
+            const totalBookings = (performanceData || []).reduce((sum, p) => sum + (p.BookingCount || 0), 0);
+            const averageRating = (performanceData || []).length > 0 ? 
+                (performanceData || []).reduce((sum, p) => sum + (p.AverageRating || 0), 0) / (performanceData || []).length : 0;
+            
+            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString() + ' VNĐ';
+            document.getElementById('totalBookings').textContent = totalBookings.toString();
+            document.getElementById('averageRating').textContent = averageRating.toFixed(1);
+        }
+
+        function initializeCharts() {
+            // Partner Revenue Chart
+            const revenueCtx = document.getElementById('partnerRevenueChart').getContext('2d');
+            partnerRevenueChart = new Chart(revenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: partnerLabels,
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: partnerRevenueData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' VNĐ';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Partner Booking Chart
+            const bookingCtx = document.getElementById('partnerBookingChart').getContext('2d');
+            partnerBookingChart = new Chart(bookingCtx, {
+                type: 'bar',
+                data: {
+                    labels: partnerLabels,
+                    datasets: [{
+                        label: 'Số đặt chỗ',
+                        data: partnerBookingData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupEventHandlers() {
+            // Set default date range (last 30 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+        }
+
+        function filterData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn khoảng thời gian');
+                return;
+            }
+            
+            // Reload page with date parameters
+            const url = new URL(window.location);
+            url.searchParams.set('startDate', startDate);
+            url.searchParams.set('endDate', endDate);
+            window.location.href = url.toString();
+        }
+
+        function exportData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let url = '@Url.Action("ExportPartnerPerformance", "Report")';
+            if (startDate && endDate) {
+                url += `?startDate=${startDate}&endDate=${endDate}`;
+            }
+            
+            window.open(url, '_blank');
+        }
+
+    </script>
+}

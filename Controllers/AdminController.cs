@@ -80,6 +80,14 @@ namespace MonAmour.Controllers
                 var productStats = await _productService.GetProductStatisticsAsync();
                 ViewBag.ProductStats = productStats;
 
+                // Get concept statistics
+                var conceptStats = await _conceptService.GetConceptStatisticsAsync();
+                ViewBag.ConceptStats = conceptStats;
+
+                // Get partner statistics
+                var partnerStats = await _partnerService.GetPartnerStatisticsAsync();
+                ViewBag.PartnerStats = partnerStats;
+
                 return View();
             }
             catch (Exception ex)
@@ -93,6 +101,16 @@ namespace MonAmour.Controllers
                     ["ActiveProducts"] = 0,
                     ["OutOfStock"] = 0,
                     ["TotalCategories"] = 0
+                };
+                ViewBag.ConceptStats = new Dictionary<string, int>
+                {
+                    ["TotalConcepts"] = 0,
+                    ["ActiveConcepts"] = 0
+                };
+                ViewBag.PartnerStats = new Dictionary<string, int>
+                {
+                    ["TotalPartners"] = 0,
+                    ["ActivePartners"] = 0
                 };
                 return View();
             }

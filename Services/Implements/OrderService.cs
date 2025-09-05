@@ -20,7 +20,7 @@ namespace MonAmour.Services.Implements
         {
             try
             {
-                // Chỉ lấy orders đã thanh toán (không lấy cart)
+                // Lấy tất cả orders (trừ cart) để admin có thể quản lý
                 var query = _context.Orders
                     .Include(o => o.User)
                     .Include(o => o.ShippingOption)
@@ -28,8 +28,11 @@ namespace MonAmour.Services.Implements
                     .Include(o => o.PaymentDetails)
                         .ThenInclude(pd => pd.Payment)
                             .ThenInclude(p => p.PaymentMethod)
-                    .Where(o => o.Status != "cart" && o.PaymentDetails.Any()) // Chỉ lấy orders đã thanh toán
+                    .Where(o => o.Status != "cart") // Chỉ loại bỏ cart, hiển thị tất cả orders khác
                     .AsQueryable();
+
+                _logger.LogInformation($"Total orders in database: {await _context.Orders.CountAsync()}");
+                _logger.LogInformation($"Orders after filtering (not cart): {await query.CountAsync()}");
 
                 // Apply filters
                 if (!string.IsNullOrEmpty(searchModel.SearchTerm))
@@ -282,7 +285,7 @@ namespace MonAmour.Services.Implements
             try
             {
                 var stats = await _context.Orders
-                    .Where(o => o.Status != "cart" && o.PaymentDetails.Any())
+                    .Where(o => o.Status != "cart") // Hiển thị thống kê cho tất cả orders (trừ cart)
                     .GroupBy(o => o.Status)
                     .Select(g => new { Status = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(x => x.Status ?? "unknown", x => x.Count);
@@ -307,7 +310,7 @@ namespace MonAmour.Services.Implements
                     .Include(o => o.PaymentDetails)
                         .ThenInclude(pd => pd.Payment)
                             .ThenInclude(p => p.PaymentMethod)
-                    .Where(o => o.Status != "cart" && o.PaymentDetails.Any())
+                    .Where(o => o.Status != "cart") // Hiển thị tất cả orders (trừ cart)
                     .OrderByDescending(o => o.CreatedAt)
                     .Take(count)
                     .Select(o => new OrderViewModel
@@ -365,15 +368,17 @@ namespace MonAmour.Services.Implements
         {
             return new List<OrderStatusDropdownViewModel>
             {
+                new() { Value = "pending", Text = "Chờ xử lý" },
                 new() { Value = "confirmed", Text = "Đã xác nhận" },
                 new() { Value = "shipping", Text = "Đang giao hàng" },
-                new() { Value = "completed", Text = "Hoàn thành" }
+                new() { Value = "completed", Text = "Hoàn thành" },
+                new() { Value = "cancelled", Text = "Đã hủy" }
             };
         }
 
         public async Task<bool> IsValidOrderStatusAsync(string status)
         {
-            var validStatuses = new[] { "cart", "confirmed", "shipping", "completed" };
+            var validStatuses = new[] { "cart", "pending", "confirmed", "shipping", "completed", "cancelled" };
             return validStatuses.Contains(status);
         }
 
