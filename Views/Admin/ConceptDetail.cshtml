@@ -238,9 +238,9 @@
                                     {
                                         <tr>
                                             <td>@booking.BookingId</td>
-                                            <td>@booking.BookingDate.ToString("dd/MM/yyyy")</td>
-                                            <td>@booking.BookingTime.ToString(@"hh\:mm")</td>
-                                            <td>@booking.TotalPrice.ToString("N0") VNĐ</td>
+                                            <td>@(booking.BookingDate?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                            <td>@(booking.BookingTime?.ToString("HH:mm") ?? "N/A")</td>
+                                            <td><text>@(booking.TotalPrice?.ToString("N0") ?? "N/A") VNĐ</text></td>
                                             <td>
                                                 <span class="badge badge-@(booking.Status == "Confirmed" ? "success" : booking.Status == "Pending" ? "warning" : "danger")">
                                                     @booking.Status

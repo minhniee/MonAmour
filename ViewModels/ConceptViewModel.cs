@@ -138,27 +138,8 @@ namespace MonAmour.ViewModels
         public DateTime? CreatedAt { get; set; }
     }
 
-    public class BookingViewModel
-    {
-        public int BookingId { get; set; }
-        public int UserId { get; set; }
-        public int ConceptId { get; set; }
-        public DateTime BookingDate { get; set; }
-        public TimeSpan BookingTime { get; set; }
-        public decimal TotalPrice { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public string PaymentStatus { get; set; } = string.Empty;
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? ConfirmedAt { get; set; }
-        public DateTime? CancelledAt { get; set; }
-    }
 
     // Dropdown ViewModels
-    public class ConceptDropdownViewModel
-    {
-        public int ConceptId { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
 
     public class ConceptCategoryDropdownViewModel
     {

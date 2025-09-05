@@ -69,19 +69,22 @@
             <div>
                 @{
                     int totalPrimaryImages = 0;
-                    int totalSecondaryImages = 0;
+                    int totalBannerImages = 0;
+                    int totalDescriptionImages = 0;
                     int totalConcepts = Model.Count();
                     
                     foreach (dynamic conceptGroup in Model)
                     {
                         var images = (List<MonAmour.ViewModels.ConceptImgViewModel>)conceptGroup.Images;
-                        totalPrimaryImages += images.Count(i => i.IsPrimary == true);
-                        totalSecondaryImages += images.Count(i => i.IsPrimary != true);
+                        totalPrimaryImages += images.Count(i => i.DisplayOrder == 1);
+                        totalBannerImages += images.Count(i => i.DisplayOrder >= 2 && i.DisplayOrder <= 3);
+                        totalDescriptionImages += images.Count(i => i.DisplayOrder >= 4 && i.DisplayOrder <= 6);
                     }
                 }
                 <span class="badge badge-success">@totalPrimaryImages Ảnh chính</span>
-                <span class="badge badge-primary ml-2">@totalSecondaryImages Ảnh phụ</span>
-                <span class="badge badge-info ml-2">@totalConcepts Concept</span>
+                <span class="badge badge-info ml-2">@totalBannerImages Banner</span>
+                <span class="badge badge-primary ml-2">@totalDescriptionImages Ảnh mô tả</span>
+                <span class="badge badge-secondary ml-2">@totalConcepts Concept</span>
             </div>
         </div>
         <div class="card-body">
@@ -103,23 +106,19 @@
                                             <div class="image-count-info">
                                                 @{
                                                     var imageCount = ((List<MonAmour.ViewModels.ConceptImgViewModel>)conceptGroup.Images).Count;
-                                                    var canAddMore = imageCount < 3;
+                                                    var canAddMore = imageCount < 6;
                                                 }
-                                                <span class="badge @(canAddMore ? "badge-success" : "badge-warning")">
-                                                    <i class="fas fa-image mr-1"></i>
-                                                    @imageCount/3 hình ảnh
-                                                </span>
                                                 @if (canAddMore)
                                                 {
-                                                    <button type="button" class="btn btn-sm btn-light ml-2" 
-                                                            onclick="addImageForConcept(@conceptGroup.ConceptId, '@conceptGroup.ConceptName')">
-                                                        <i class="fas fa-plus"></i> Thêm ảnh
-                                                    </button>
+                                                    <span class="badge badge-success">
+                                                        <i class="fas fa-image mr-1"></i>
+                                                        @imageCount/6 hình ảnh
+                                                    </span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge badge-warning ml-2">
-                                                        <i class="fas fa-exclamation-triangle"></i> Đã đạt giới hạn
+                                                    <span class="badge badge-warning">
+                                                        <i class="fas fa-exclamation-triangle mr-1"></i> Đã đạt giới hạn
                                                     </span>
                                                 }
                                             </div>
@@ -127,12 +126,29 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            @if (((List<MonAmour.ViewModels.ConceptImgViewModel>)conceptGroup.Images).Any())
-                                            {
-                                                foreach (var image in (List<MonAmour.ViewModels.ConceptImgViewModel>)conceptGroup.Images)
+                                            @{
+                                                var images = (List<MonAmour.ViewModels.ConceptImgViewModel>)conceptGroup.Images;
+                                                var imageDict = new Dictionary<int, MonAmour.ViewModels.ConceptImgViewModel>();
+                                                
+                                                // Group by DisplayOrder and take the first one for each position
+                                                foreach (var image in images.OrderBy(x => x.ImgId))
                                                 {
-                                                    <div class="col-lg-4 col-md-6 mb-4">
-                                                        <div class="card h-100 @(image.IsPrimary == true ? "border-success" : "border-primary") image-card">
+                                                    if (!imageDict.ContainsKey(image.DisplayOrder))
+                                                    {
+                                                        imageDict[image.DisplayOrder] = image;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            @for (int i = 1; i <= 6; i++)
+                                            {
+                                                var hasImage = imageDict.ContainsKey(i);
+                                                var image = hasImage ? imageDict[i] : null;
+                                                
+                                                <div class="col-lg-4 col-md-6 mb-4">
+                                                    <div class="card h-100 @(hasImage ? (image.IsPrimary == true ? "border-success" : "border-primary") : "border-light") image-card">
+                                                        @if (hasImage)
+                                                        {
                                                             <div class="card-img-top-container">
                                                                 <img src="@image.ImgUrl" class="card-img-top" alt="@image.AltText" 
                                                                      onclick="openImageModal('@image.ImgUrl', '@image.ImgName', '@image.AltText', @image.IsPrimary.ToString().ToLower(), @image.DisplayOrder)">
@@ -141,12 +157,6 @@
                                                                         <button type="button" class="btn btn-sm btn-outline-light" onclick="editImage(@image.ImgId)">
                                                                             <i class="fas fa-edit"></i>
                                                                         </button>
-                                                                        @if (image.IsPrimary != true)
-                                                                        {
-                                                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="setPrimaryImage(@image.ConceptId, @image.ImgId)">
-                                                                                <i class="fas fa-star"></i>
-                                                                            </button>
-                                                                        }
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteImage(@image.ImgId)">
                                                                             <i class="fas fa-trash"></i>
                                                                         </button>
@@ -156,43 +166,93 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div class="card-body">
-                                                                <h6 class="card-title">
-                                                                    @if (image.IsPrimary == true)
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="card-img-top-container bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                                <div class="text-center">
+                                                                    <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                                                    <p class="text-muted small mb-0">Chưa có ảnh</p>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        
+                                                        <div class="card-body">
+                                                            <h6 class="card-title">
+                                                                @if (i == 1)
+                                                                {
+                                                                    <span class="badge badge-success badge-sm mr-2">
+                                                                        <i class="fas fa-star mr-1"></i>Ảnh chính
+                                                                    </span>
+                                                                }
+                                                                else if (i >= 2 && i <= 3)
+                                                                {
+                                                                    <span class="badge badge-info badge-sm mr-2">
+                                                                        <i class="fas fa-image mr-1"></i>Banner
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge badge-primary badge-sm mr-2">
+                                                                        <i class="fas fa-image mr-1"></i>Ảnh mô tả
+                                                                    </span>
+                                                                }
+                                                                @if (hasImage)
+                                                                {
+                                                                    @(image.ImgName ?? "Hình ảnh concept")
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted">Vị trí @i</span>
+                                                                }
+                                                            </h6>
+                                                            <p class="card-text small text-muted">
+                                                                @if (hasImage)
+                                                                {
+                                                                    @if (image.DisplayOrder == 1)
                                                                     {
-                                                                        <span class="badge badge-success badge-sm mr-2">
-                                                                            <i class="fas fa-star mr-1"></i>Ảnh chính
-                                                                        </span>
+                                                                        <span class="text-success"><i class="fas fa-star mr-1"></i>Ảnh chính của concept</span>
+                                                                    }
+                                                                    else if (image.DisplayOrder >= 2 && image.DisplayOrder <= 3)
+                                                                    {
+                                                                        <span class="text-info"><i class="fas fa-image mr-1"></i>Banner concept</span>
                                                                     }
                                                                     else
                                                                     {
-                                                                        <span class="badge badge-primary badge-sm mr-2">
-                                                                            <i class="fas fa-image mr-1"></i>Ảnh phụ
-                                                                        </span>
+                                                                        @(image.AltText ?? "Mô tả chi tiết về concept")
                                                                     }
-                                                                    @(image.ImgName ?? "Hình ảnh concept")
-                                                                </h6>
-                                                                <p class="card-text small text-muted">@(image.AltText ?? "Không có mô tả")</p>
-                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                    <small class="text-muted">Thứ tự: @image.DisplayOrder</small>
+                                                                }
+                                                                else
+                                                                {
+                                                                    @if (i == 1)
+                                                                    {
+                                                                        <span class="text-muted"><i class="fas fa-star mr-1"></i>Ảnh chính của concept</span>
+                                                                    }
+                                                                    else if (i >= 2 && i <= 3)
+                                                                    {
+                                                                        <span class="text-muted"><i class="fas fa-image mr-1"></i>Banner concept</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="text-muted"><i class="fas fa-image mr-1"></i>Mô tả chi tiết về concept</span>
+                                                                    }
+                                                                }
+                                                            </p>
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <small class="text-muted">Thứ tự: @i</small>
+                                                                @if (hasImage)
+                                                                {
                                                                     <small class="text-muted">ID: @image.ImgId</small>
-                                                                </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                                            onclick="addImageForPosition(@conceptGroup.ConceptId, '@conceptGroup.ConceptName', @i)">
+                                                                        <i class="fas fa-plus mr-1"></i>Thêm ảnh
+                                                                    </button>
+                                                                }
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <div class="col-12">
-                                                    <div class="alert alert-info text-center">
-                                                        <i class="fas fa-image fa-2x mb-3 text-info"></i>
-                                                        <h6>Concept này chưa có hình ảnh</h6>
-                                                        <p>Hãy thêm hình ảnh cho concept "@conceptGroup.ConceptName"</p>
-                                                        <button type="button" class="btn btn-primary btn-sm" 
-                                                                onclick="addImageForConcept(@conceptGroup.ConceptId, '@conceptGroup.ConceptName')">
-                                                            <i class="fas fa-plus mr-2"></i>Thêm hình ảnh đầu tiên
-                                                        </button>
                                                     </div>
                                                 </div>
                                             }
@@ -218,7 +278,7 @@
                             <span>Chưa có concept nào có hình ảnh trong hệ thống</span>
                         }
                     </h6>
-                    <p class="text-muted small">Hãy thêm hình ảnh cho các concept!</p>
+                                                                            <p class="text-muted small">Hãy thêm hình ảnh cho các concept! Mỗi concept có 6 vị trí cố định: 1 ảnh chính + 2 banner + 3 ảnh mô tả</p>
                 </div>
             }
         </div>
@@ -267,14 +327,25 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="addDisplayOrder">Thứ tự hiển thị</label>
-                                <input type="number" id="addDisplayOrder" name="DisplayOrder" class="form-control" value="1" min="1">
+                                <select id="addDisplayOrder" name="DisplayOrder" class="form-control" required>
+                                    <option value="">-- Chọn vị trí --</option>
+                                    <option value="1">1 - Ảnh chính (IsPrimary = true)</option>
+                                    <option value="2">2 - Banner concept</option>
+                                    <option value="3">3 - Banner concept</option>
+                                    <option value="4">4 - Ảnh mô tả</option>
+                                    <option value="5">5 - Ảnh mô tả</option>
+                                    <option value="6">6 - Ảnh mô tả</option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    <strong>Lưu ý:</strong> Thứ tự 1 sẽ tự động là ảnh chính, thứ tự 2-3 là banner, thứ tự 4-6 là ảnh mô tả
+                                </small>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="addImageFile">Chọn hình ảnh từ máy tính <span class="text-danger">*</span></label>
                         <input type="file" id="addImageFile" name="imageFile" class="form-control" accept="image/*" onchange="previewImage(this)" required>
-                        <small class="form-text text-muted">Hỗ trợ: JPG, PNG, GIF. Kích thước tối đa: 5MB</small>
+                        <small class="form-text text-muted">Hỗ trợ: JPG, PNG, GIF. Kích thước tối đa: 5MB. Tối đa 6 ảnh: 1 ảnh chính + 2 banner + 3 ảnh mô tả</small>
                         <div id="imagePreview" class="mt-2" style="display: none;">
                             <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
                         </div>
@@ -284,13 +355,19 @@
                         <input type="text" id="addImgName" name="ImgName" class="form-control" placeholder="Tên mô tả cho hình ảnh">
                     </div>
                     <div class="form-group">
-                        <label for="addAltText">Alt Text</label>
-                        <input type="text" id="addAltText" name="AltText" class="form-control" placeholder="Mô tả cho SEO">
+                        <label for="addAltText">Alt Text (chỉ cho ảnh mô tả)</label>
+                        <input type="text" id="addAltText" name="AltText" class="form-control" placeholder="Mô tả chi tiết về concept (chỉ áp dụng cho ảnh mô tả)">
+                        <small class="form-text text-muted">Chỉ cần nhập cho ảnh mô tả (thứ tự 4-6). Ảnh chính và banner sẽ tự động có alt text.</small>
                     </div>
                     <div class="form-group">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" id="addIsPrimary" name="IsPrimary" class="custom-control-input">
-                            <label class="custom-control-label" for="addIsPrimary">Đặt làm ảnh chính</label>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Thông tin:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Thứ tự 1: Tự động là ảnh chính (IsPrimary = true)</li>
+                                <li>Thứ tự 2-3: Banner concept (AltText = "Banner concept")</li>
+                                <li>Thứ tự 4-6: Ảnh mô tả (AltText do bạn nhập)</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -341,14 +418,25 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="editDisplayOrder">Thứ tự hiển thị</label>
-                                <input type="number" id="editDisplayOrder" name="DisplayOrder" class="form-control" min="1">
+                                <select id="editDisplayOrder" name="DisplayOrder" class="form-control" required>
+                                    <option value="">-- Chọn vị trí --</option>
+                                    <option value="1">1 - Ảnh chính (IsPrimary = true)</option>
+                                    <option value="2">2 - Banner concept</option>
+                                    <option value="3">3 - Banner concept</option>
+                                    <option value="4">4 - Ảnh mô tả</option>
+                                    <option value="5">5 - Ảnh mô tả</option>
+                                    <option value="6">6 - Ảnh mô tả</option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    <strong>Lưu ý:</strong> Thứ tự 1 sẽ tự động là ảnh chính, thứ tự 2-3 là banner, thứ tự 4-6 là ảnh mô tả
+                                </small>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="editImageFile">Chọn hình ảnh mới từ máy tính</label>
                         <input type="file" id="editImageFile" name="imageFile" class="form-control" accept="image/*" onchange="previewEditImage(this)">
-                        <small class="form-text text-muted">Hỗ trợ: JPG, PNG, GIF. Kích thước tối đa: 5MB. Để trống nếu không muốn thay đổi hình ảnh.</small>
+                        <small class="form-text text-muted">Hỗ trợ: JPG, PNG, GIF. Kích thước tối đa: 5MB. Để trống nếu không muốn thay đổi hình ảnh. Tối đa 6 ảnh: 1 ảnh chính + 2 banner + 3 ảnh mô tả</small>
                         <div id="editImagePreview" class="mt-2" style="display: none;">
                             <img id="editPreviewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
                         </div>
@@ -358,13 +446,19 @@
                         <input type="text" id="editImgName" name="ImgName" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="editAltText">Alt Text</label>
-                        <input type="text" id="editAltText" name="AltText" class="form-control">
+                        <label for="editAltText">Alt Text (chỉ cho ảnh mô tả)</label>
+                        <input type="text" id="editAltText" name="AltText" class="form-control" placeholder="Mô tả chi tiết về concept (chỉ áp dụng cho ảnh mô tả)">
+                        <small class="form-text text-muted">Chỉ cần nhập cho ảnh mô tả (thứ tự 4-6). Ảnh chính và banner sẽ tự động có alt text.</small>
                     </div>
                     <div class="form-group">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" id="editIsPrimary" name="IsPrimary" class="custom-control-input">
-                            <label class="custom-control-label" for="editIsPrimary">Đặt làm ảnh chính</label>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Thông tin:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Thứ tự 1: Tự động là ảnh chính (IsPrimary = true)</li>
+                                <li>Thứ tự 2-3: Banner concept (AltText = "Banner concept")</li>
+                                <li>Thứ tự 4-6: Ảnh mô tả (AltText do bạn nhập)</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -490,7 +584,7 @@
                 if (result.success && result.canAddMore) {
                     submitAddImageForm();
                 } else {
-                    showAlert('danger', result.message || 'Concept này đã đạt giới hạn 3 hình ảnh!');
+                    showAlert('danger', result.message || 'Concept này đã đạt giới hạn 6 hình ảnh!');
                 }
             });
         });
@@ -517,8 +611,7 @@
             const formData = new FormData();
             formData.append('ConceptId', conceptId);
             formData.append('ImgName', $('#addImgName').val() || 'Hình ảnh concept');
-            formData.append('AltText', $('#addAltText').val() || 'Hình ảnh concept');
-            formData.append('IsPrimary', $('#addIsPrimary').is(':checked'));
+            formData.append('AltText', $('#addAltText').val() || '');
             formData.append('DisplayOrder', $('#addDisplayOrder').val() || '1');
             formData.append('imageFile', imageFile);
            
@@ -566,7 +659,6 @@
                 $('#editConceptId').val(foundImage.conceptId);
                 $('#editImgName').val(foundImage.imgName || '');
                 $('#editAltText').val(foundImage.altText || '');
-                $('#editIsPrimary').prop('checked', foundImage.isPrimary === true);
                 $('#editDisplayOrder').val(foundImage.displayOrder || 1);
                 
                 var editModal = new bootstrap.Modal(document.getElementById('editImageModal'));
@@ -586,7 +678,6 @@
             formData.append('ConceptId', $('#editConceptId').val());
             formData.append('ImgName', $('#editImgName').val());
             formData.append('AltText', $('#editAltText').val());
-            formData.append('IsPrimary', $('#editIsPrimary').is(':checked'));
             formData.append('DisplayOrder', $('#editDisplayOrder').val());
             
             // Nếu có file mới, thêm vào formData
@@ -616,30 +707,6 @@
             });
         });
 
-        // Set Primary Image
-        function setPrimaryImage(conceptId, imageId) {
-            if (confirm('Bạn có chắc chắn muốn đặt hình ảnh này làm hình ảnh chính?')) {
-                $.ajax({
-                    url: '@Url.Action("SetPrimaryConceptImage", "Admin")',
-                    type: 'POST',
-                    data: {
-                        conceptId: conceptId,
-                        imageId: imageId
-                    },
-                    success: function(result) {
-                        if (result.success) {
-                            showAlert('success', result.message);
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            showAlert('danger', result.message);
-                        }
-                    },
-                    error: function() {
-                        showAlert('danger', 'Có lỗi xảy ra khi cập nhật hình ảnh chính!');
-                    }
-                });
-            }
-        }
 
         // Delete Image
         function deleteImage(imageId) {
@@ -736,7 +803,37 @@
                     var addModal = new bootstrap.Modal(document.getElementById('addImageModal'));
                     addModal.show();
                 } else {
-                    showAlert('warning', result.message || 'Concept này đã đạt giới hạn 3 hình ảnh!');
+                    showAlert('warning', result.message || 'Concept này đã đạt giới hạn 6 hình ảnh!');
+                }
+            });
+        }
+
+        // Add Image for specific position
+        function addImageForPosition(conceptId, conceptName, position) {
+            // Kiểm tra giới hạn hình ảnh
+            $.get('@Url.Action("GetConceptImageCount", "Admin")', { conceptId: conceptId }, function(result) {
+                if (result.success && result.canAddMore) {
+                    // Pre-fill form với concept và vị trí đã chọn
+                    $('#addConceptId').val(conceptId);
+                    $('#addConceptId').prop('disabled', true);
+                    $('#addDisplayOrder').val(position);
+                    $('#addDisplayOrder').prop('disabled', true);
+                    
+                    // Set title based on position
+                    let positionText = '';
+                    if (position == 1) {
+                        positionText = 'Ảnh chính';
+                    } else if (position >= 2 && position <= 3) {
+                        positionText = 'Banner concept';
+                    } else {
+                        positionText = 'Ảnh mô tả';
+                    }
+                    
+                    $('#addImageModalLabel').html('<i class="fas fa-plus mr-2"></i>Thêm ' + positionText + ' cho "' + conceptName + '"');
+                    var addModal = new bootstrap.Modal(document.getElementById('addImageModal'));
+                    addModal.show();
+                } else {
+                    showAlert('warning', result.message || 'Concept này đã đạt giới hạn 6 hình ảnh!');
                 }
             });
         }
@@ -744,6 +841,7 @@
         // Reset form khi đóng modal
         document.getElementById('addImageModal').addEventListener('hidden.bs.modal', function() {
             $('#addConceptId').prop('disabled', false);
+            $('#addDisplayOrder').prop('disabled', false);
             $('#addImageModalLabel').html('<i class="fas fa-plus mr-2"></i>Thêm Hình ảnh Mới');
             $('#imagePreview').hide();
         });

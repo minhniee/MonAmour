@@ -69,13 +69,13 @@ public partial class MonAmourDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("server =(local); database = MonAmourDb; uid=sa;pwd=123;Trusted_Connection=True;Encrypt=False");
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=MonAmourDb;User Id=sa;Password=123;TrustServerCertificate=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Booking>(entity =>
         {
-            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B14B3C053C");
+            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B1BE95ACF6");
 
             entity.ToTable("Booking");
 
@@ -109,16 +109,16 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Concept).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.ConceptId)
-                .HasConstraintName("FK__Booking__concept__7A672E12");
+                .HasConstraintName("FK__Booking__concept__6754599E");
 
             entity.HasOne(d => d.User).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Booking__user_id__797309D9");
+                .HasConstraintName("FK__Booking__user_id__66603565");
         });
 
         modelBuilder.Entity<Concept>(entity =>
         {
-            entity.HasKey(e => e.ConceptId).HasName("PK__Concept__7925FD2D42CC2A8D");
+            entity.HasKey(e => e.ConceptId).HasName("PK__Concept__7925FD2DD5CDC8C9");
 
             entity.ToTable("Concept");
 
@@ -149,24 +149,24 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Ambience).WithMany(p => p.Concepts)
                 .HasForeignKey(d => d.AmbienceId)
-                .HasConstraintName("FK__Concept__ambienc__6E01572D");
+                .HasConstraintName("FK__Concept__ambienc__5AEE82B9");
 
             entity.HasOne(d => d.Category).WithMany(p => p.Concepts)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("FK__Concept__categor__6D0D32F4");
+                .HasConstraintName("FK__Concept__categor__59FA5E80");
 
             entity.HasOne(d => d.Color).WithMany(p => p.Concepts)
                 .HasForeignKey(d => d.ColorId)
-                .HasConstraintName("FK__Concept__color_i__6C190EBB");
+                .HasConstraintName("FK__Concept__color_i__59063A47");
 
             entity.HasOne(d => d.Location).WithMany(p => p.Concepts)
                 .HasForeignKey(d => d.LocationId)
-                .HasConstraintName("FK__Concept__locatio__6B24EA82");
+                .HasConstraintName("FK__Concept__locatio__5812160E");
         });
 
         modelBuilder.Entity<ConceptAmbience>(entity =>
         {
-            entity.HasKey(e => e.AmbienceId).HasName("PK__Concept___5D801B582EC9BF31");
+            entity.HasKey(e => e.AmbienceId).HasName("PK__Concept___5D801B5896384309");
 
             entity.ToTable("Concept_Ambience");
 
@@ -178,7 +178,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Concept___D54EE9B440CC97AD");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Concept___D54EE9B4DE639D84");
 
             entity.ToTable("Concept_Category");
 
@@ -196,7 +196,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptColor>(entity =>
         {
-            entity.HasKey(e => e.ColorId).HasName("PK__Concept___1143CECBF13BF9CC");
+            entity.HasKey(e => e.ColorId).HasName("PK__Concept___1143CECBFD3FAF21");
 
             entity.ToTable("Concept_Color");
 
@@ -211,7 +211,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptImg>(entity =>
         {
-            entity.HasKey(e => e.ImgId).HasName("PK__Concept___6F16A71C497042AA");
+            entity.HasKey(e => e.ImgId).HasName("PK__Concept___6F16A71C685462FA");
 
             entity.ToTable("Concept_img");
 
@@ -239,12 +239,12 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Concept).WithMany(p => p.ConceptImgs)
                 .HasForeignKey(d => d.ConceptId)
-                .HasConstraintName("FK__Concept_i__conce__73BA3083");
+                .HasConstraintName("FK__Concept_i__conce__60A75C0F");
         });
 
         modelBuilder.Entity<Content>(entity =>
         {
-            entity.HasKey(e => e.ContentId).HasName("PK__Content__655FE51021E58B1A");
+            entity.HasKey(e => e.ContentId).HasName("PK__Content__655FE5106304D0AB");
 
             entity.ToTable("Content");
 
@@ -271,16 +271,16 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Author).WithMany(p => p.Contents)
                 .HasForeignKey(d => d.AuthorId)
-                .HasConstraintName("FK__Content__author___339FAB6E");
+                .HasConstraintName("FK__Content__author___208CD6FA");
         });
 
         modelBuilder.Entity<EmailTemplate>(entity =>
         {
-            entity.HasKey(e => e.TemplateId).HasName("PK__Email_Te__BE44E07974942BB9");
+            entity.HasKey(e => e.TemplateId).HasName("PK__Email_Te__BE44E0793813FCB8");
 
             entity.ToTable("Email_Template");
 
-            entity.HasIndex(e => e.Name, "UQ__Email_Te__72E12F1B997D2BFE").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Email_Te__72E12F1BC89E656A").IsUnique();
 
             entity.Property(e => e.TemplateId).HasColumnName("template_id");
             entity.Property(e => e.Body).HasColumnName("body");
@@ -313,12 +313,12 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.EmailTemplates)
                 .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK__Email_Tem__creat__52593CB8");
+                .HasConstraintName("FK__Email_Tem__creat__3F466844");
         });
 
         modelBuilder.Entity<Location>(entity =>
         {
-            entity.HasKey(e => e.LocationId).HasName("PK__Location__771831EAA38CB2F9");
+            entity.HasKey(e => e.LocationId).HasName("PK__Location__771831EAC726B173");
 
             entity.ToTable("Location");
 
@@ -356,12 +356,12 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Partner).WithMany(p => p.Locations)
                 .HasForeignKey(d => d.PartnerId)
-                .HasConstraintName("FK__Location__partne__5FB337D6");
+                .HasConstraintName("FK__Location__partne__4CA06362");
         });
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__E059842FBA1CDDA0");
+            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__E059842FE680CEB2");
 
             entity.ToTable("Notification");
 
@@ -392,12 +392,12 @@ public partial class MonAmourDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Notificat__user___3864608B");
+                .HasConstraintName("FK__Notificat__user___25518C17");
         });
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__Order__46596229EAEB7409");
+            entity.HasKey(e => e.OrderId).HasName("PK__Order__465962290730FC3E");
 
             entity.ToTable("Order");
 
@@ -410,6 +410,7 @@ public partial class MonAmourDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("delivered_at");
             entity.Property(e => e.EstimatedDelivery).HasColumnName("estimated_delivery");
+            entity.Property(e => e.ShippingAddress).HasColumnName("shipping_address");
             entity.Property(e => e.ShippingCost)
                 .HasDefaultValue(0m)
                 .HasColumnType("decimal(18, 2)")
@@ -433,16 +434,16 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.ShippingOption).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.ShippingOptionId)
-                .HasConstraintName("FK__Order__shipping___18EBB532");
+                .HasConstraintName("FK__Order__shipping___05D8E0BE");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Order__user_id__160F4887");
+                .HasConstraintName("FK__Order__user_id__02FC7413");
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__3764B6BCB010A350");
+            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__3764B6BC33577AC5");
 
             entity.ToTable("OrderItem");
 
@@ -459,16 +460,16 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.OrderId)
-                .HasConstraintName("FK__OrderItem__order__1DB06A4F");
+                .HasConstraintName("FK__OrderItem__order__0A9D95DB");
 
             entity.HasOne(d => d.Product).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__OrderItem__produ__1EA48E88");
+                .HasConstraintName("FK__OrderItem__produ__0B91BA14");
         });
 
         modelBuilder.Entity<Partner>(entity =>
         {
-            entity.HasKey(e => e.PartnerId).HasName("PK__Partner__576F1B2725A33660");
+            entity.HasKey(e => e.PartnerId).HasName("PK__Partner__576F1B2771104DFE");
 
             entity.ToTable("Partner");
 
@@ -507,12 +508,12 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Partners)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Partner__user_id__571DF1D5");
+                .HasConstraintName("FK__Partner__user_id__440B1D61");
         });
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__ED1FC9EAB60D10B8");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__ED1FC9EA1F152B84");
 
             entity.ToTable("Payment");
 
@@ -535,12 +536,12 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.PaymentMethod).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.PaymentMethodId)
-                .HasConstraintName("FK__Payment__payment__245D67DE");
+                .HasConstraintName("FK__Payment__payment__114A936A");
         });
 
         modelBuilder.Entity<PaymentDetail>(entity =>
         {
-            entity.HasKey(e => e.PaymentDetailId).HasName("PK__PaymentD__C66E6E36C6AA507E");
+            entity.HasKey(e => e.PaymentDetailId).HasName("PK__PaymentD__C66E6E36C55D7CB0");
 
             entity.ToTable("PaymentDetail");
 
@@ -554,20 +555,20 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Booking).WithMany(p => p.PaymentDetails)
                 .HasForeignKey(d => d.BookingId)
-                .HasConstraintName("FK__PaymentDe__booki__2A164134");
+                .HasConstraintName("FK__PaymentDe__booki__17036CC0");
 
             entity.HasOne(d => d.Order).WithMany(p => p.PaymentDetails)
                 .HasForeignKey(d => d.OrderId)
-                .HasConstraintName("FK__PaymentDe__order__29221CFB");
+                .HasConstraintName("FK__PaymentDe__order__160F4887");
 
             entity.HasOne(d => d.Payment).WithMany(p => p.PaymentDetails)
                 .HasForeignKey(d => d.PaymentId)
-                .HasConstraintName("FK__PaymentDe__payme__282DF8C2");
+                .HasConstraintName("FK__PaymentDe__payme__151B244E");
         });
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.PaymentMethodId).HasName("PK__PaymentM__8A3EA9EBCF4FB4BE");
+            entity.HasKey(e => e.PaymentMethodId).HasName("PK__PaymentM__8A3EA9EB511ACDBE");
 
             entity.ToTable("PaymentMethod");
 
@@ -579,7 +580,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__Product__47027DF54807DCBE");
+            entity.HasKey(e => e.ProductId).HasName("PK__Product__47027DF51F91D2CD");
 
             entity.ToTable("Product");
 
@@ -611,12 +612,12 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
-                .HasConstraintName("FK__Product__categor__02FC7413");
+                .HasConstraintName("FK__Product__categor__6FE99F9F");
         });
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Product___D54EE9B41F4BD1F8");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Product___D54EE9B4DBA333FD");
 
             entity.ToTable("Product_Category");
 
@@ -628,7 +629,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ProductImg>(entity =>
         {
-            entity.HasKey(e => e.ImgId).HasName("PK__Product___6F16A71C510649A7");
+            entity.HasKey(e => e.ImgId).HasName("PK__Product___6F16A71C1CD8BC49");
 
             entity.ToTable("Product_img");
 
@@ -656,12 +657,12 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductImgs)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__Product_i__produ__08B54D69");
+                .HasConstraintName("FK__Product_i__produ__75A278F5");
         });
 
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.HasKey(e => e.ReviewId).HasName("PK__Review__60883D90F5C1D425");
+            entity.HasKey(e => e.ReviewId).HasName("PK__Review__60883D903159616B");
 
             entity.ToTable("Review");
 
@@ -685,16 +686,16 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Review__user_id__2CF2ADDF");
+                .HasConstraintName("FK__Review__user_id__19DFD96B");
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CCF0A6923F");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CC314F983E");
 
             entity.ToTable("Role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Role__783254B177421E18").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Role__783254B1AFE98257").IsUnique();
 
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.RoleName)
@@ -705,7 +706,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ShippingOption>(entity =>
         {
-            entity.HasKey(e => e.ShippingOptionId).HasName("PK__Shipping__6B1300C871C028DE");
+            entity.HasKey(e => e.ShippingOptionId).HasName("PK__Shipping__6B1300C85FBDA44A");
 
             entity.ToTable("ShippingOption");
 
@@ -717,7 +718,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Token>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__Token__CB3C9E17655CC4D6");
+            entity.HasKey(e => e.TokenId).HasName("PK__Token__CB3C9E1768B31213");
 
             entity.ToTable("Token");
 
@@ -763,18 +764,18 @@ public partial class MonAmourDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Tokens)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Token__user_id__48CFD27E");
+                .HasConstraintName("FK__Token__user_id__35BCFE0A");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__B9BE370F8BB597BA");
+            entity.HasKey(e => e.UserId).HasName("PK__User__B9BE370FDD1B9247");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164D5EBC73F").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164EE63F622").IsUnique();
 
-            entity.HasIndex(e => e.Phone, "UQ__User__B43B145F570692D5").IsUnique();
+            entity.HasIndex(e => e.Phone, "UQ__User__B43B145F0D20C783").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.Avatar)
@@ -818,7 +819,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__User_Rol__6EDEA15398F9BAAB");
+            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__User_Rol__6EDEA15315EB03C8");
 
             entity.ToTable("User_Role");
 
@@ -833,17 +834,17 @@ public partial class MonAmourDbContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User_Role__role___44FF419A");
+                .HasConstraintName("FK__User_Role__role___31EC6D26");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User_Role__user___440B1D61");
+                .HasConstraintName("FK__User_Role__user___30F848ED");
         });
 
         modelBuilder.Entity<WishList>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Wish_lis__3213E83F4C533205");
+            entity.HasKey(e => e.Id).HasName("PK__Wish_lis__3213E83F05ADB958");
 
             entity.ToTable("Wish_list");
 
@@ -858,16 +859,16 @@ public partial class MonAmourDbContext : DbContext
 
             entity.HasOne(d => d.Concept).WithMany(p => p.WishLists)
                 .HasForeignKey(d => d.ConceptId)
-                .HasConstraintName("FK__Wish_list__conce__10566F31");
+                .HasConstraintName("FK__Wish_list__conce__7D439ABD");
 
             entity.HasOne(d => d.Product).WithMany(p => p.WishLists)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__Wish_list__produ__0F624AF8");
+                .HasConstraintName("FK__Wish_list__produ__7C4F7684");
 
             entity.HasOne(d => d.User).WithMany(p => p.WishLists)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Wish_list__user___0E6E26BF");
+                .HasConstraintName("FK__Wish_list__user___7B5B524B");
         });
 
         OnModelCreatingPartial(modelBuilder);

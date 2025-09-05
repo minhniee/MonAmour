@@ -16,10 +16,12 @@ namespace MonAmour.Controllers
         private readonly IPartnerService _partnerService;
         private readonly ILocationService _locationService;
         private readonly IConceptService _conceptService;
+        private readonly IOrderService _orderService;
+        private readonly IBookingService _bookingService;
         private readonly ILogger<AdminController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, IConceptService conceptService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
+        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, IConceptService conceptService, IOrderService orderService, IBookingService bookingService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _authService = authService;
             _userManagementService = userManagementService;
@@ -27,6 +29,8 @@ namespace MonAmour.Controllers
             _partnerService = partnerService;
             _locationService = locationService;
             _conceptService = conceptService;
+            _orderService = orderService;
+            _bookingService = bookingService;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
         }
@@ -3612,13 +3616,514 @@ namespace MonAmour.Controllers
                     success = true, 
                     count = count, 
                     canAddMore = canAddMore,
-                    message = canAddMore ? "Có thể thêm hình ảnh" : "Đã đạt giới hạn 3 hình ảnh"
+                    message = canAddMore ? "Có thể thêm hình ảnh" : "Đã đạt giới hạn 6 hình ảnh"
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in GetConceptImageCount action");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi kiểm tra số lượng hình ảnh!" });
+            }
+        }
+
+        #endregion
+
+        #region Order Management
+
+        [HttpGet]
+        public async Task<IActionResult> Orders(OrderSearchViewModel? searchModel)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                
+                searchModel ??= new OrderSearchViewModel();
+                
+                var (orders, totalCount) = await _orderService.GetOrdersAsync(searchModel);
+                var statistics = await _orderService.GetOrderStatisticsAsync();
+                var orderStatuses = await _orderService.GetOrderStatusesAsync();
+                
+                ViewBag.Orders = orders;
+                ViewBag.TotalCount = totalCount;
+                ViewBag.Statistics = statistics;
+                ViewBag.OrderStatuses = orderStatuses;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Orders action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách đơn hàng";
+                return View(new List<OrderViewModel>());
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                
+                var order = await _orderService.GetOrderByIdAsync(id);
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng";
+                    return RedirectToAction("Orders");
+                }
+                
+                var orderStatuses = await _orderService.GetOrderStatusesAsync();
+                var shippingOptions = await _orderService.GetShippingOptionsAsync();
+                
+                ViewBag.OrderStatuses = orderStatuses;
+                ViewBag.ShippingOptions = shippingOptions;
+                
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in OrderDetail action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải chi tiết đơn hàng";
+                return RedirectToAction("Orders");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrder(OrderEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    TempData["ErrorMessage"] = "Dữ liệu không hợp lệ";
+                    return RedirectToAction("OrderDetail", new { id = model.OrderId });
+                }
+
+                var result = await _orderService.UpdateOrderAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể cập nhật đơn hàng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateOrder action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đơn hàng";
+            }
+
+            return RedirectToAction("OrderDetail", new { id = model.OrderId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        {
+            try
+            {
+                var result = await _orderService.UpdateOrderStatusAsync(orderId, status);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật trạng thái đơn hàng thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể cập nhật trạng thái đơn hàng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateOrderStatus action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật trạng thái đơn hàng";
+            }
+
+            return RedirectToAction("OrderDetail", new { id = orderId });
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrderStatistics()
+        {
+            try
+            {
+                var statistics = await _orderService.GetOrderStatisticsAsync();
+                var totalRevenue = await _orderService.GetTotalRevenueAsync();
+                var recentOrders = await _orderService.GetRecentOrdersAsync(5);
+                
+                return Json(new
+                {
+                    success = true,
+                    statistics = statistics,
+                    totalRevenue = totalRevenue,
+                    recentOrders = recentOrders
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetOrderStatistics action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thống kê đơn hàng" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProcessPayment(int orderId, decimal amount, int paymentMethodId)
+        {
+            try
+            {
+                var result = await _orderService.ProcessOrderPaymentAsync(orderId, amount, paymentMethodId);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Xử lý thanh toán thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xử lý thanh toán" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ProcessPayment action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xử lý thanh toán" });
+            }
+        }
+
+        #endregion
+
+        #region Booking Management
+
+        /// <summary>
+        /// Display all bookings
+        /// </summary>
+        public async Task<IActionResult> Bookings()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var bookings = await _bookingService.GetAllBookingsAsync();
+                return View(bookings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Bookings action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách đặt chỗ";
+                return View(new List<BookingViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Display bookings by status
+        /// </summary>
+        public async Task<IActionResult> BookingsByStatus(string status)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var allBookings = await _bookingService.GetAllBookingsAsync();
+                
+                // Filter by status
+                var filteredBookings = allBookings.Where(b => 
+                    string.Equals(b.Status, status, StringComparison.OrdinalIgnoreCase)).ToList();
+                
+                ViewBag.Status = status;
+                ViewBag.StatusDisplayName = status?.ToLower() switch
+                {
+                    "pending" => "Chờ xác nhận",
+                    "confirmed" => "Đã xác nhận", 
+                    "cancelled" => "Đã hủy",
+                    "completed" => "Hoàn thành",
+                    _ => status
+                };
+                
+                return View("Bookings", filteredBookings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in BookingsByStatus action for status: {Status}", status);
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách đặt chỗ theo trạng thái";
+                return View("Bookings", new List<BookingViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Display booking details
+        /// </summary>
+        public async Task<IActionResult> BookingDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var booking = await _bookingService.GetBookingDetailAsync(id);
+                if (booking == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đặt chỗ";
+                    return RedirectToAction("Bookings");
+                }
+                return View(booking);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in BookingDetail action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải chi tiết đặt chỗ";
+                return RedirectToAction("Bookings");
+            }
+        }
+
+
+        /// <summary>
+        /// Display edit booking form
+        /// </summary>
+        public async Task<IActionResult> EditBooking(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var booking = await _bookingService.GetBookingByIdAsync(id);
+                if (booking == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đặt chỗ";
+                    return RedirectToAction("Bookings");
+                }
+
+                var model = new BookingEditViewModel
+                {
+                    BookingId = booking.BookingId,
+                    UserId = booking.UserId ?? 0,
+                    ConceptId = booking.ConceptId ?? 0,
+                    BookingDate = booking.BookingDate ?? DateOnly.FromDateTime(DateTime.Now),
+                    BookingTime = booking.BookingTime ?? TimeOnly.FromDateTime(DateTime.Now),
+                    Status = booking.Status ?? "pending",
+                    PaymentStatus = booking.PaymentStatus ?? "pending",
+                    TotalPrice = booking.TotalPrice,
+                    ConfirmedAt = booking.ConfirmedAt,
+                    CancelledAt = booking.CancelledAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditBooking GET action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải form chỉnh sửa đặt chỗ";
+                return RedirectToAction("Bookings");
+            }
+        }
+
+        /// <summary>
+        /// Handle edit booking form submission
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditBooking(BookingEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var success = await _bookingService.UpdateBookingAsync(model);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật đặt chỗ thành công";
+                    return RedirectToAction("Bookings");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đặt chỗ";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditBooking POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đặt chỗ";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete booking
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteBooking(int id)
+        {
+            try
+            {
+                var success = await _bookingService.DeleteBookingAsync(id);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Xóa đặt chỗ thành công";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa đặt chỗ";
+                }
+                return RedirectToAction("Bookings");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteBooking action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa đặt chỗ";
+                return RedirectToAction("Bookings");
+            }
+        }
+
+        /// <summary>
+        /// Get users for dropdown
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetUsersForBookingDropdown()
+        {
+            try
+            {
+                var users = await _bookingService.GetUsersForDropdownAsync();
+                return Json(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting users for booking dropdown");
+                return Json(new List<UserDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Get concepts for dropdown
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetConceptsForBookingDropdown()
+        {
+            try
+            {
+                var concepts = await _bookingService.GetConceptsForDropdownAsync();
+                return Json(concepts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting concepts for booking dropdown");
+                return Json(new List<ConceptDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Confirm booking
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ConfirmBooking(int id)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingStatusAsync(id, "confirmed");
+                if (result)
+                {
+                    return Json(new { success = true, message = "Xác nhận đặt chỗ thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xác nhận đặt chỗ" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error confirming booking {BookingId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xác nhận đặt chỗ" });
+            }
+        }
+
+        /// <summary>
+        /// Cancel booking
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingStatusAsync(id, "cancelled");
+                if (result)
+                {
+                    return Json(new { success = true, message = "Hủy đặt chỗ thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể hủy đặt chỗ" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling booking {BookingId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi hủy đặt chỗ" });
+            }
+        }
+
+        /// <summary>
+        /// Update booking status
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateBookingStatus(int id, string status)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingStatusAsync(id, status);
+                if (result)
+                {
+                    var statusText = status switch
+                    {
+                        "pending" => "Chờ xác nhận",
+                        "confirmed" => "Đã xác nhận",
+                        "cancelled" => "Đã hủy",
+                        "completed" => "Hoàn thành",
+                        _ => status
+                    };
+                    return Json(new { success = true, message = $"Cập nhật trạng thái thành công: {statusText}" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật trạng thái" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating booking status {BookingId} to {Status}", id, status);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái" });
+            }
+        }
+
+        /// <summary>
+        /// Update booking payment status
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateBookingPaymentStatus(int id, string paymentStatus)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingPaymentStatusAsync(id, paymentStatus);
+                if (result)
+                {
+                    var statusText = paymentStatus switch
+                    {
+                        "pending" => "Chờ thanh toán",
+                        "paid" => "Đã thanh toán",
+                        "failed" => "Thanh toán thất bại",
+                        _ => paymentStatus
+                    };
+                    return Json(new { success = true, message = $"Cập nhật trạng thái thanh toán thành công: {statusText}" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật trạng thái thanh toán" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating booking payment status {BookingId} to {PaymentStatus}", id, paymentStatus);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái thanh toán" });
             }
         }
 

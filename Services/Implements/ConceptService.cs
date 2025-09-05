@@ -160,8 +160,8 @@ namespace MonAmour.Services.Implements
                         BookingId = b.BookingId,
                         UserId = b.UserId ?? 0,
                         ConceptId = b.ConceptId ?? 0,
-                        BookingDate = b.BookingDate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.MinValue,
-                        BookingTime = b.BookingTime?.ToTimeSpan() ?? TimeSpan.Zero,
+                        BookingDate = b.BookingDate ?? DateOnly.MinValue,
+                        BookingTime = b.BookingTime ?? TimeOnly.MinValue,
                         TotalPrice = b.TotalPrice ?? 0,
                         Status = b.Status ?? string.Empty,
                         PaymentStatus = b.PaymentStatus ?? string.Empty,
@@ -407,11 +407,31 @@ namespace MonAmour.Services.Implements
         {
             try
             {
-                // Check if concept can add more images (limit to 5)
+                // Check if concept can add more images (limit to 6)
                 var canAddMore = await CanConceptAddMoreImagesAsync(model.ConceptId);
                 if (!canAddMore)
                 {
                     return false;
+                }
+
+                // Auto-set IsPrimary and AltText based on DisplayOrder
+                bool isPrimary = model.DisplayOrder == 1;
+                string altText = model.AltText;
+                
+                if (string.IsNullOrEmpty(altText))
+                {
+                    if (model.DisplayOrder == 1)
+                    {
+                        altText = "Ảnh chính của concept";
+                    }
+                    else if (model.DisplayOrder >= 2 && model.DisplayOrder <= 3)
+                    {
+                        altText = "Banner concept";
+                    }
+                    else
+                    {
+                        altText = "Mô tả chi tiết về concept";
+                    }
                 }
 
                 var image = new ConceptImg
@@ -419,8 +439,8 @@ namespace MonAmour.Services.Implements
                     ConceptId = model.ConceptId,
                     ImgUrl = model.ImgUrl,
                     ImgName = model.ImgName,
-                    AltText = model.AltText,
-                    IsPrimary = model.IsPrimary,
+                    AltText = altText,
+                    IsPrimary = isPrimary,
                     DisplayOrder = model.DisplayOrder,
                     CreatedAt = DateTime.Now
                 };
@@ -443,10 +463,30 @@ namespace MonAmour.Services.Implements
                 var image = await _context.ConceptImgs.FindAsync(model.ImgId);
                 if (image == null) return false;
 
+                // Auto-set IsPrimary and AltText based on DisplayOrder
+                bool isPrimary = model.DisplayOrder == 1;
+                string altText = model.AltText;
+                
+                if (string.IsNullOrEmpty(altText))
+                {
+                    if (model.DisplayOrder == 1)
+                    {
+                        altText = "Ảnh chính của concept";
+                    }
+                    else if (model.DisplayOrder >= 2 && model.DisplayOrder <= 3)
+                    {
+                        altText = "Banner concept";
+                    }
+                    else
+                    {
+                        altText = "Mô tả chi tiết về concept";
+                    }
+                }
+
                 image.ImgUrl = model.ImgUrl;
                 image.ImgName = model.ImgName;
-                image.AltText = model.AltText;
-                image.IsPrimary = model.IsPrimary;
+                image.AltText = altText;
+                image.IsPrimary = isPrimary;
                 image.DisplayOrder = model.DisplayOrder;
 
                 var result = await _context.SaveChangesAsync();
@@ -526,7 +566,7 @@ namespace MonAmour.Services.Implements
             try
             {
                 var imageCount = await GetConceptImageCountAsync(conceptId);
-                return imageCount < 5; // Limit to 5 images per concept
+                return imageCount < 6; // Limit to 6 images per concept
             }
             catch (Exception ex)
             {

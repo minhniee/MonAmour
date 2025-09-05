@@ -17,13 +17,13 @@ public partial class Partner
 
     public string? Phone { get; set; }
 
-    public string? Avatar { get; set; }
-
     public string? Status { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public string? Avatar { get; set; }
 
     public virtual ICollection<Location> Locations { get; set; } = new List<Location>();
 
