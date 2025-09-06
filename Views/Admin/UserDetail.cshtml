@@ -1,0 +1,358 @@
+@model MonAmour.ViewModels.AdminUserViewModel.UserDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chi tiết người dùng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Admin" asp-action="Users">Quản lý người dùng</a></li>
+        <li class="breadcrumb-item active">Chi tiết người dùng</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- User Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user me-1"></i>
+                    Thông tin người dùng
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            @if (!string.IsNullOrEmpty(Model.Avatar))
+                            {
+                                <img src="@Model.Avatar" alt="Avatar" class="rounded-circle mb-3" width="120" height="120">
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                            }
+                            <h5>@Model.Name</h5>
+                            <p class="text-muted">ID: @Model.UserId</p>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Thông tin cơ bản</h6>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Email:</strong></td>
+                                            <td>@Model.Email</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Số điện thoại:</strong></td>
+                                            <td>@Model.Phone</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Ngày sinh:</strong></td>
+                                            <td>@Model.BirthDate?.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Giới tính:</strong></td>
+                                            <td>
+                                                @switch (Model.Gender)
+                                                {
+                                                    case "male":
+                                                        <span class="badge bg-primary">Nam</span>
+                                                        break;
+                                                    case "female":
+                                                        <span class="badge bg-pink">Nữ</span>
+                                                        break;
+                                                    case "other":
+                                                        <span class="badge bg-secondary">Khác</span>
+                                                        break;
+                                                    default:
+                                                        <span class="text-muted">Chưa cập nhật</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Trạng thái tài khoản</h6>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Trạng thái:</strong></td>
+                                            <td>
+                                                @switch (Model.Status)
+                                                {
+                                                    case "active":
+                                                        <span class="badge bg-success">Hoạt động</span>
+                                                        break;
+                                                    case "inactive":
+                                                        <span class="badge bg-secondary">Không hoạt động</span>
+                                                        break;
+                                                    case "suspended":
+                                                        <span class="badge bg-danger">Tạm khóa</span>
+                                                        break;
+                                                    default:
+                                                        <span class="text-muted">Chưa cập nhật</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Xác thực:</strong></td>
+                                            <td>
+                                                @if (Model.Verified == true)
+                                                {
+                                                    <span class="badge bg-success">Đã xác thực</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Chưa xác thực</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Ngày tạo:</strong></td>
+                                            <td>@Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Cập nhật lần cuối:</strong></td>
+                                            <td>@Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roles Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-shield me-1"></i>
+                    Vai trò và quyền hạn
+                </div>
+                <div class="card-body">
+                    @if (Model.Roles.Any())
+                    {
+                        <div class="row">
+                            @foreach (var role in Model.Roles)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <span class="badge bg-primary">@role.RoleName</span>
+                                            </h6>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    Được gán: @role.AssignedAt?.ToString("dd/MM/yyyy HH:mm")<br>
+                                                    @if (role.AssignedBy.HasValue)
+                                                    {
+                                                        <span>Bởi admin ID: @role.AssignedBy</span>
+                                                    }
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                            <p class="text-muted">Người dùng chưa được gán vai trò nào</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Activity Statistics Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Thống kê hoạt động
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="border-end">
+                                <h4 class="text-primary">@Model.TotalOrders</h4>
+                                <p class="text-muted">Đơn hàng</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border-end">
+                                <h4 class="text-success">@Model.TotalBookings</h4>
+                                <p class="text-muted">Đặt chỗ</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-warning">@Model.TotalReviews</h4>
+                            <p class="text-muted">Đánh giá</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Quick Actions Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-tools me-1"></i>
+                    Thao tác nhanh
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="EditUser" asp-route-id="@Model.UserId" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Chỉnh sửa thông tin
+                        </a>
+                        <a asp-action="ChangeUserPassword" asp-route-id="@Model.UserId" class="btn btn-secondary">
+                            <i class="fas fa-key"></i> Đổi mật khẩu
+                        </a>
+                        
+                        <hr>
+                        
+                        @if (Model.Verified == true)
+                        {
+                            <form asp-action="ToggleUserVerification" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.UserId" />
+                                <button type="submit" class="btn btn-outline-warning w-100">
+                                    <i class="fas fa-times"></i> Hủy xác thực
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="ToggleUserVerification" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.UserId" />
+                                <button type="submit" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-check"></i> Xác thực email
+                                </button>
+                            </form>
+                        }
+                        
+                        @if (Model.Status == "active")
+                        {
+                            <form asp-action="ToggleUserStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.UserId" />
+                                <input type="hidden" name="status" value="suspended" />
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-ban"></i> Tạm khóa tài khoản
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="ToggleUserStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.UserId" />
+                                <input type="hidden" name="status" value="active" />
+                                <button type="submit" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-check"></i> Kích hoạt tài khoản
+                                </button>
+                            </form>
+                        }
+                        
+                        <hr>
+                        
+                        <button type="button" class="btn btn-danger w-100" onclick="confirmDelete(@Model.UserId, '@Model.Name')">
+                            <i class="fas fa-trash"></i> Xóa người dùng
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Status Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Trạng thái tài khoản
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái hiện tại:</label>
+                        <div>
+                            @switch (Model.Status)
+                            {
+                                case "active":
+                                    <span class="badge bg-success fs-6">Hoạt động</span>
+                                    break;
+                                case "inactive":
+                                    <span class="badge bg-secondary fs-6">Không hoạt động</span>
+                                    break;
+                                case "suspended":
+                                    <span class="badge bg-danger fs-6">Tạm khóa</span>
+                                    break;
+                                default:
+                                    <span class="text-muted">Chưa cập nhật</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Xác thực email:</label>
+                        <div>
+                            @if (Model.Verified == true)
+                            {
+                                <span class="badge bg-success fs-6">Đã xác thực</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning fs-6">Chưa xác thực</span>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Số vai trò:</label>
+                        <div>
+                            <span class="badge bg-primary fs-6">@Model.Roles.Count vai trò</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa người dùng <strong id="deleteUserName"></strong>?</p>
+                <p class="text-danger">Hành động này không thể hoàn tác!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(userId, userName) {
+            document.getElementById('deleteUserName').textContent = userName;
+            document.getElementById('deleteForm').action = '@Url.Action("DeleteUser")/' + userId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+}

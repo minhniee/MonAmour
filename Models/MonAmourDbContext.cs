@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace MonAmour.Models;
 
@@ -66,6 +64,12 @@ public partial class MonAmourDbContext : DbContext
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
     public virtual DbSet<WishList> WishLists { get; set; }
+
+    public virtual DbSet<Blog> Blogs { get; set; }
+
+    public virtual DbSet<BlogCategory> BlogCategories { get; set; }
+
+    public virtual DbSet<BlogComment> BlogComments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -866,6 +870,128 @@ public partial class MonAmourDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Wish_list__user___0E6E26BF");
+        });
+
+        modelBuilder.Entity<Blog>(entity =>
+        {
+            entity.HasKey(e => e.BlogId).HasName("PK__Blog__B4BF7CD53F2A15F0");
+
+            entity.ToTable("Blog");
+
+            entity.Property(e => e.BlogId).HasColumnName("blog_id");
+            entity.Property(e => e.Title)
+                .HasMaxLength(255)
+                .HasColumnName("title");
+            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.Excerpt)
+                .HasMaxLength(500)
+                .HasColumnName("excerpt");
+            entity.Property(e => e.FeaturedImage)
+                .HasMaxLength(255)
+                .HasColumnName("featured_image");
+            entity.Property(e => e.AuthorId).HasColumnName("author_id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.Tags)
+                .HasMaxLength(255)
+                .HasColumnName("tags");
+            entity.Property(e => e.PublishedDate)
+                .HasColumnType("datetime")
+                .HasColumnName("published_date");
+            entity.Property(e => e.IsFeatured)
+                .HasDefaultValue(false)
+                .HasColumnName("is_featured");
+            entity.Property(e => e.IsPublished)
+                .HasDefaultValue(false)
+                .HasColumnName("is_published");
+            entity.Property(e => e.ReadTime)
+                .HasDefaultValue(0)
+                .HasColumnName("read_time");
+            entity.Property(e => e.ViewCount)
+                .HasDefaultValue(0)
+                .HasColumnName("view_count");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.Author).WithMany()
+                .HasForeignKey(d => d.AuthorId)
+                .HasConstraintName("FK__Blog__author___8B5F8F7C");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Blogs)
+                .HasForeignKey(d => d.CategoryId)
+                .HasConstraintName("FK__Blog__category___8C53B3B5");
+        });
+
+        modelBuilder.Entity<BlogCategory>(entity =>
+        {
+            entity.HasKey(e => e.CategoryId).HasName("PK__Blog_Cat__D54EE9B41F98B571");
+
+            entity.ToTable("Blog_Category");
+
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
+            entity.Property(e => e.Slug)
+                .HasMaxLength(50)
+                .HasColumnName("slug");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+        });
+
+        modelBuilder.Entity<BlogComment>(entity =>
+        {
+            entity.HasKey(e => e.CommentId).HasName("PK__Blog_Com__E795498735FA02C8");
+
+            entity.ToTable("Blog_Comment");
+
+            entity.Property(e => e.CommentId).HasColumnName("comment_id");
+            entity.Property(e => e.BlogId).HasColumnName("blog_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.AuthorName)
+                .HasMaxLength(100)
+                .HasColumnName("author_name");
+            entity.Property(e => e.AuthorEmail)
+                .HasMaxLength(255)
+                .HasColumnName("author_email");
+            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.IsApproved)
+                .HasDefaultValue(false)
+                .HasColumnName("is_approved");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.HasOne(d => d.Blog).WithMany(p => p.Comments)
+                .HasForeignKey(d => d.BlogId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Blog_Comm__blog___8D47D7EE");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__Blog_Comm__user___8E3BFC27");
         });
 
         OnModelCreatingPartial(modelBuilder);

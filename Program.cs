@@ -38,8 +38,16 @@ builder.Services.AddHttpContextAccessor();
 // Add Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddScoped<IWishListService, WishListService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+
+// Add SignalR
+builder.Services.AddSignalR();
+
 
 var app = builder.Build();
 
@@ -48,7 +56,7 @@ using (var scope = app.Services.CreateScope())
 {
     var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    
+
     try
     {
         await authService.InitializeSystemAsync();
@@ -84,5 +92,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map SignalR Hub
+app.MapHub<MonAmour.Hubs.CommentHub>("/commentHub");
 
 app.Run();
