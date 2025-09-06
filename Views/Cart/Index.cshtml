@@ -1,0 +1,137 @@
+@model MonAmour.Models.Order
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var paidFlag = Context.Request.Query["paid"].ToString();
+    var paid = !string.IsNullOrEmpty(paidFlag) && paidFlag.ToLower() == "true";
+}
+
+<div class="min-h-screen bg-beige">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <h1 class="font-prata text-3xl md:text-4xl text-wine-red mb-8">Giỏ hàng của bạn</h1>
+
+        @if (Model == null || Model.OrderItems == null || !Model.OrderItems.Any())
+        {
+            <div class="bg-white border border-wine-red/20 rounded-xl p-8 text-center text-wine-red/80">
+                Chưa có sản phẩm nào trong giỏ hàng.
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-4">
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <div class="bg-white border border-wine-red/20 rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                                <div class="font-prata text-wine-red text-lg">@item.Product?.Name</div>
+                                <div class="text-wine-red/70">@String.Format("{0:N0}₫", item.UnitPrice) × @item.Quantity</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <form asp-controller="Cart" asp-action="Update" method="post" class="flex items-center gap-2">
+                                    <input type="hidden" name="itemId" value="@item.OrderItemId" />
+                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="w-20 border border-wine-red/30 rounded px-2 py-1 text-center" />
+                                    <button type="submit" class="px-3 py-2 bg-wine-red text-beige rounded">Cập nhật</button>
+                                </form>
+                                <form asp-controller="Cart" asp-action="Remove" method="post">
+                                    <input type="hidden" name="itemId" value="@item.OrderItemId" />
+                                    <button type="submit" class="px-3 py-2 border border-wine-red text-wine-red rounded">Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div>
+                    <div class="bg-white border border-wine-red/20 rounded-xl p-6">
+                        <div class="flex items-center justify-between font-prata text-lg text-wine-red">
+                            <span>Tổng cộng</span>
+                            <span id="cart-total" data-total="@Model.TotalPrice">@String.Format("{0:N0}₫", Model.TotalPrice)</span>
+                        </div>
+                        <form id="checkout-form" asp-controller="Cart" asp-action="Checkout" method="post">
+                            <button type="submit" class="w-full mt-6 bg-wine-red text-beige px-4 py-3 rounded-lg">Thanh toán</button>
+                        </form>
+                        <button id="zp-btn" class="w-full mt-3 border border-wine-red text-wine-red px-4 py-3 rounded-lg">Thanh toán ZaloPay (Sandbox)</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+(function(){
+    // Show toast when redirected back after payment
+    const paid = @paid.ToString().ToLower();
+    const cartSuccess = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["CartSuccess"] as string ?? ""));
+    if (paid || cartSuccess) {
+        const toast = document.createElement('div');
+        toast.textContent = cartSuccess || 'Thanh toán thành công';
+        toast.className = 'fixed bottom-6 right-6 bg-wine-red text-beige px-4 py-3 rounded-lg shadow-lg';
+        toast.style.zIndex = '9999';
+        toast.style.fontFamily = 'Noto Serif, serif';
+        document.body.appendChild(toast);
+        setTimeout(()=>{ toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 2500);
+    }
+
+    const form = document.getElementById('checkout-form');
+    if(form){
+        form.addEventListener('submit', async function(e){
+            e.preventDefault();
+            try {
+                const formData = new FormData(form);
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    const toast = document.createElement('div');
+                    toast.textContent = data.message || 'Thanh toán thành công';
+                    toast.className = 'fixed bottom-6 right-6 bg-wine-red text-beige px-4 py-3 rounded-lg shadow-lg';
+                    toast.style.zIndex = '9999';
+                    toast.style.fontFamily = 'Noto Serif, serif';
+                    document.body.appendChild(toast);
+                    setTimeout(()=>{ toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 2000);
+                    setTimeout(()=>{ window.location.reload(); }, 2200);
+                } else if (res.status === 401) {
+                    window.location.href = '@Url.Action("Login","Auth")';
+                } else {
+                    const errorData = await res.json().catch(()=>({message:'Thanh toán thất bại'}));
+                    alert(errorData.message || 'Thanh toán thất bại');
+                }
+            } catch (err) {
+                alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+            }
+        });
+    }
+
+    const zpBtn = document.getElementById('zp-btn');
+    if (zpBtn) {
+        zpBtn.addEventListener('click', async function(){
+            try{
+                const res = await fetch('/Zalopay/CreateOrder', { method: 'POST', credentials: 'same-origin' });
+                const text = await res.text();
+                let data;
+                try { data = JSON.parse(text); } catch (_) { data = null; }
+                const ok = data && ((data.return_code === 1) || (data.returncode === 1) || (data.returnmessage === 'Success') || (data.return_message === 'Success'));
+                if (ok) {
+                    const orderUrl = (data.order_url || data.orderurl);
+                    if (orderUrl) {
+                        window.location.href = orderUrl;
+                    } else {
+                        alert('Thiếu order_url trong phản hồi ZaloPay:\n' + text);
+                    }
+                } else {
+                    alert((data && (data.return_message || data.returnmessage)) ? ((data.return_message || data.returnmessage) + '\n' + text) : ('Không tạo được đơn ZaloPay\n' + text));
+                }
+            }catch(err){
+                alert('Lỗi khi tạo đơn ZaloPay: ' + (err && err.message ? err.message : err));
+            }
+        });
+    }
+})();
+</script>
+
+

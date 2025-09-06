@@ -1,0 +1,340 @@
+﻿@model MonAmour.Models.BlogDetailViewModel
+@{
+    ViewData["Title"] = Model.Title + " - MonAmour Blog";
+}
+
+<div class="min-h-screen" style="background-color: #fbf1e6;">
+    <!-- Header Navigation -->
+    <header class="border-b border-gray-200" style="background-color: #fbf1e6;">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-2xl font-bold" style="color: #62000d; font-family: 'Prata', serif;">
+                    MonAmour
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-700 hover:text-[#62000d] transition-colors">Home</a>
+                    <a href="/about" class="text-gray-700 hover:text-[#62000d] transition-colors">About Us</a>
+                    <a href="/services" class="text-gray-700 hover:text-[#62000d] transition-colors">Service Packages</a>
+                    <a href="/booking" class="text-gray-700 hover:text-[#62000d] transition-colors">Booking</a>
+                    <a href="/blog" class="text-[#62000d] font-medium">Blog</a>
+                    <a href="/contact" class="text-gray-700 hover:text-[#62000d] transition-colors">Contact</a>
+                </nav>
+                <button class="px-4 py-2 rounded-lg text-white transition-colors" style="background-color: #62000d;">
+                    Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="container mx-auto px-4 py-4">
+        <nav class="text-sm text-gray-600">
+            <a href="/" class="hover:text-[#62000d]">Home</a>
+            <span class="mx-2">/</span>
+            <a href="/blog" class="hover:text-[#62000d]">Blog</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-800">@Model.Title</span>
+        </nav>
+    </div>
+
+    <!-- Article Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Article Header -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+                <div class="aspect-video bg-gray-200">
+                    <img src="@Model.FeaturedImage" alt="@Model.Title" class="w-full h-full object-cover">
+                </div>
+                <div class="p-8">
+                    <div class="flex items-center text-sm text-gray-500 mb-4">
+                        <span>@Model.Category</span>
+                        <span class="mx-2">•</span>
+                        <span>@Model.Author</span>
+                        <span class="mx-2">•</span>
+                        <span>@Model.PublishedDate.ToString("dd/MM/yyyy")</span>
+                        <span class="mx-2">•</span>
+                        <span>@Model.ReadTime phút đọc</span>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold mb-6 text-gray-800 leading-tight" style="font-family: 'Prata', serif;">
+                        @Model.Title
+                    </h1>
+                    <p class="text-lg text-gray-600 leading-relaxed mb-6" style="font-family: 'Noto Serif', serif;">
+                        @Model.Excerpt
+                    </p>
+                </div>
+            </div>
+
+            <!-- Article Body -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <div class="prose prose-lg max-w-none" style="font-family: 'Noto Serif', serif;">
+                    @Html.Raw(Model.Content)
+                </div>
+                
+                <!-- Tags -->
+                @if (Model.Tags != null && Model.Tags.Any())
+                {
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-3">Tags:</h3>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var tag in Model.Tags)
+                            {
+                                <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-[#62000d] hover:text-white transition-colors cursor-pointer">
+                                    #@tag
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Comments Section -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800" style="font-family: 'Prata', serif;">
+                    Bình luận (<span id="commentCount">@Model.Comments.Count</span>)
+                </h3>
+
+                <!-- Comment Form -->
+                <form id="commentForm" class="mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="authorName" placeholder="Tên của bạn" required
+                               class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#62000d]">
+                        <input type="email" id="authorEmail" placeholder="Email của bạn" required
+                               class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#62000d]">
+                    </div>
+                    <textarea id="commentContent" placeholder="Viết bình luận của bạn..." rows="4" required
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#62000d] mb-4"></textarea>
+                    <button type="submit" id="submitBtn" class="px-6 py-3 text-white rounded-lg transition-colors" style="background-color: #62000d;">
+                        Gửi bình luận
+                    </button>
+                </form>
+
+                <!-- Message Display -->
+                <div id="messageDisplay" class="mb-4 hidden"></div>
+
+                <!-- Comments List -->
+                <div id="commentsList" class="space-y-6">
+                    @foreach (var comment in Model.Comments)
+                    {
+                        <div class="comment-item border-b border-gray-200 pb-6" data-comment-id="@comment.Id">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style="background-color: #62000d;">
+                                    @comment.AuthorName.Substring(0, 1).ToUpper()
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="font-semibold text-gray-800">@comment.AuthorName</h4>
+                                            <span class="text-sm text-gray-500">@comment.CreatedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                        </div>
+                                        <!-- Delete button for admin or comment author -->
+                                        @if (ViewBag.CurrentUserId != null && (comment.BlogPostId == ViewBag.CurrentUserId || ViewBag.IsAdmin == true))
+                                        {
+                                            <button onclick="deleteComment(@comment.Id)" class="text-red-500 hover:text-red-700 text-sm">
+                                                <i class="fas fa-trash"></i> Xóa
+                                            </button>
+                                        }
+                                    </div>
+                                    <p class="text-gray-700 leading-relaxed" style="font-family: 'Noto Serif', serif;">
+                                        @comment.Content
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Related Posts -->
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800" style="font-family: 'Prata', serif;">
+                    Bài viết liên quan
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @for (int i = 1; i <= 3; i++)
+                    {
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="openBlogDetail(@(Model.Id + i))">
+                            <div class="aspect-video bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-400 text-sm">Related Post @i</span>
+                            </div>
+                            <div class="p-4">
+                                <h4 class="font-semibold text-gray-800 mb-2" style="font-family: 'Prata', serif;">
+                                    Bài viết liên quan @i
+                                </h4>
+                                <p class="text-gray-600 text-sm" style="font-family: 'Noto Serif', serif;">
+                                    Mô tả ngắn về bài viết liên quan...
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SignalR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+
+<script>
+// Initialize SignalR connection
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/commentHub")
+    .build();
+
+// Start the connection
+connection.start().then(function () {
+    console.log("SignalR Connected");
+    // Join the blog group
+    connection.invoke("JoinBlogGroup", "@Model.Id");
+}).catch(function (err) {
+    console.error("SignalR Connection Error: ", err.toString());
+});
+
+// Listen for new comments
+connection.on("ReceiveComment", function (comment) {
+    addCommentToUI(comment);
+    updateCommentCount(1);
+    showMessage("Bình luận mới đã được thêm!", "success");
+});
+
+// Listen for deleted comments
+connection.on("CommentDeleted", function (commentId) {
+    removeCommentFromUI(commentId);
+    updateCommentCount(-1);
+    showMessage("Bình luận đã được xóa!", "info");
+});
+
+// Handle comment form submission
+document.getElementById('commentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const authorName = document.getElementById('authorName').value;
+    const authorEmail = document.getElementById('authorEmail').value;
+    const content = document.getElementById('commentContent').value;
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang gửi...';
+    
+    // Send comment to server
+    fetch('/Blog/AddComment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `blogId=@Model.Id&authorName=${encodeURIComponent(authorName)}&authorEmail=${encodeURIComponent(authorEmail)}&content=${encodeURIComponent(content)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear form
+            document.getElementById('commentForm').reset();
+            showMessage(data.message, "success");
+        } else {
+            showMessage(data.message, "error");
+        }
+    })
+    .catch(error => {
+        showMessage("Có lỗi xảy ra khi gửi bình luận!", "error");
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Gửi bình luận';
+    });
+});
+
+// Delete comment function
+function deleteComment(commentId) {
+    if (confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
+        fetch('/Blog/DeleteComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `commentId=${commentId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(data.message, "success");
+            } else {
+                showMessage(data.message, "error");
+            }
+        })
+        .catch(error => {
+            showMessage("Có lỗi xảy ra khi xóa bình luận!", "error");
+            console.error('Error:', error);
+        });
+    }
+}
+
+// Add comment to UI
+function addCommentToUI(comment) {
+    const commentsList = document.getElementById('commentsList');
+    const commentHtml = `
+        <div class="comment-item border-b border-gray-200 pb-6" data-comment-id="${comment.Id}">
+            <div class="flex items-start space-x-4">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style="background-color: #62000d;">
+                    ${comment.AuthorName.charAt(0).toUpperCase()}
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-2">
+                            <h4 class="font-semibold text-gray-800">${comment.AuthorName}</h4>
+                            <span class="text-sm text-gray-500">${comment.CreatedDate}</span>
+                        </div>
+                        ${comment.CanDelete ? `<button onclick="deleteComment(${comment.Id})" class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash"></i> Xóa</button>` : ''}
+                    </div>
+                    <p class="text-gray-700 leading-relaxed" style="font-family: 'Noto Serif', serif;">
+                        ${comment.Content}
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    commentsList.insertAdjacentHTML('afterbegin', commentHtml);
+}
+
+// Remove comment from UI
+function removeCommentFromUI(commentId) {
+    const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+    if (commentElement) {
+        commentElement.remove();
+    }
+}
+
+// Update comment count
+function updateCommentCount(change) {
+    const countElement = document.getElementById('commentCount');
+    const currentCount = parseInt(countElement.textContent);
+    countElement.textContent = currentCount + change;
+}
+
+// Show message
+function showMessage(message, type) {
+    const messageDisplay = document.getElementById('messageDisplay');
+    messageDisplay.className = `mb-4 p-4 rounded-lg ${type === 'success' ? 'bg-green-100 text-green-700' : type === 'error' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`;
+    messageDisplay.textContent = message;
+    messageDisplay.classList.remove('hidden');
+    
+    setTimeout(() => {
+        messageDisplay.classList.add('hidden');
+    }, 5000);
+}
+
+// Other functions
+function openBlogDetail(id) {
+    window.location.href = '/Blog/Detail/' + id;
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (connection) {
+        connection.invoke("LeaveBlogGroup", "@Model.Id");
+    }
+});
+</script>

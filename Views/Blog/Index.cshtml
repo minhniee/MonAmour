@@ -1,0 +1,174 @@
+﻿@model MonAmour.Models.BlogIndexViewModel
+@{
+    ViewData["Title"] = "Blog - MonAmour";
+}
+
+<div class="min-h-screen" style="background-color: #fbf1e6;">
+
+    <!-- Search Section -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto mb-8">
+            <form method="post" action="@Url.Action("Search", "Blog")">
+                <div class="relative">
+                    <input type="text" name="searchTerm" placeholder="Tìm kiếm bài viết..."
+                           class="w-full px-4 py-3 rounded-full border border-gray-300 focus:outline-none focus:border-[#62000d] bg-white"
+                           value="@Model.SearchQuery">
+                    <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#62000d]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button class="px-6 py-2 rounded-full border border-gray-300 bg-white hover:bg-[#62000d] hover:text-white transition-colors filter-btn" data-filter="new">
+                Lọc theo mới
+            </button>
+            <button class="px-6 py-2 rounded-full border border-gray-300 bg-white hover:bg-[#62000d] hover:text-white transition-colors filter-btn" data-filter="time">
+                Lọc theo thời gian
+            </button>
+            <button class="px-6 py-2 rounded-full border border-gray-300 bg-white hover:bg-[#62000d] hover:text-white transition-colors filter-btn" data-filter="type">
+                Lọc theo loại
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+            <!-- Featured Post - Takes up 3 columns -->
+            <div class="lg:col-span-7">
+                <h3 class="text-lg font-medium mb-6 text-gray-700" style="font-family: 'Noto Serif', serif;">Bài viết nổi bật</h3>
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(1)">
+                    <div class="h-[350px] bg-gray-200 flex items-center justify-center">
+                        <img src="/romantic-dinner-setup.jpg" alt="Featured Post" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-8">
+                        <div class="flex items-center text-sm text-gray-500 mb-3">
+                            <span>Sự kiện Mới</span>
+                            <span class="mx-2">•</span>
+                            <span>15/08/2025</span>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-4 text-gray-800" style="font-family: 'Prata', serif;">
+                            EMPOWERING AT-RISK AND DISADVANTAGED YOUTH IN VIETNAM
+                        </h2>
+                        <p class="text-gray-600 leading-relaxed line-clamp-3 text-base" style="font-family: 'Noto Serif', serif;">
+                            Khám phá những trải nghiệm lãng mạn độc đáo được thiết kế đặc biệt cho các cặp đôi.
+                            Từ bữa tối dưới ánh nến đến những chuyến picnic riêng tư...
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Posts - Takes up 2 columns, arranged in 2x2 grid -->
+            <div class="lg:col-span-5 mt-8 lg:mt-0">
+                <div class="grid grid-cols-2 mt-[50px] gap-6">
+                    @for (int i = 2; i <= 5; i++)
+                    {
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="openBlogDetail(@i)">
+                            <div class="bg-gray-200 flex items-center justify-center h-[150px]">
+                                <span class="text-gray-400 text-sm uppercase">WE ARE KOTO</span>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-gray-800 text-base mb-3" style="font-family: 'Prata', serif;">
+                                    WE ARE KOTO
+                                </h3>
+                                <p class="text-gray-600 text-sm leading-relaxed line-clamp-2" style="font-family: 'Noto Serif', serif;">
+                                    Lorem ipsum dolor sit amet consectetur. Ac hac sociis arcu aen...
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider Line -->
+        <div class="w-full my-8">
+            <hr class="border-t-2 border-gray-200">
+        </div>
+
+        <!-- Daily Posts Section -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-center mb-8 text-gray-800" style="font-family: 'Prata', serif;">
+                BÀI MỚI MỖI NGÀY
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- The History Post -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(6)">
+                    <div class="aspect-video bg-gray-200 flex items-center justify-center">
+                        <img src="/romantic-picnic-setup.jpg" alt="History" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-3 text-gray-800" style="font-family: 'Prata', serif;">
+                            THE HISTORY OF KOTO
+                        </h3>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4" style="font-family: 'Noto Serif', serif;">
+                            Jimmy Pham has been in Vietnam in 1996 and moved to Australia as a young child with his brother and mother, spending his formative years in Sydney...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Founder's Message -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(7)">
+                    <div class="aspect-video bg-gray-200 flex items-center justify-center">
+                        <img src="/luxury-anniversary-gift-box.jpg" alt="Founder" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-3 text-gray-800" style="font-family: 'Prata', serif;">
+                            FOUNDER'S MESSAGE
+                        </h3>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4" style="font-family: 'Noto Serif', serif;">
+                            I am humbled that my dreams to provide a mixed medium with training, a stable income and just workplace in a social business such as I hope has...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- News -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(8)">
+                    <div class="aspect-video bg-gray-200 flex items-center justify-center">
+                        <img src="/rooftop-cinema-romantic-setup.jpg" alt="News" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-3 text-gray-800" style="font-family: 'Prata', serif;">
+                            NEWS
+                        </h3>
+                        <p class="text-gray-600 text-sm leading-relaxed mb-4" style="font-family: 'Noto Serif', serif;">
+                            KOTO staff and volunteers are privileged to visit the business initiatives from Hanoi, the foundation's key young...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function openBlogDetail(id) {
+        window.location.href = '/Blog/Detail/' + id;
+    }
+
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('bg-[#62000d]', 'text-white');
+                    btn.classList.add('bg-white');
+                });
+
+                // Add active class to clicked button
+                this.classList.add('bg-[#62000d]', 'text-white');
+                this.classList.remove('bg-white');
+
+                // Implement the actual filtering logic
+                const filter = this.getAttribute('data-filter');
+                window.location.href = '/Blog?filter=' + filter;
+            });
+        });
+    });
+</script>

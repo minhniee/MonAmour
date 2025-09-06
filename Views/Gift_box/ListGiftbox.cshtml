@@ -1,0 +1,264 @@
+﻿@model IEnumerable<MonAmour.Models.Product>
+@{
+    ViewData["Title"] = "Gift Box Collection";
+}
+
+<div class="min-h-screen bg-white">
+    <!-- Hero Section -->
+    <div class="bg-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Visual Area (Left Side) -->
+                <div class="relative h-80 flex items-center justify-start">
+                    <!-- Back Image (Smaller, positioned right) -->
+                    <div id="back-rect" class="w-40 h-56 rounded-lg shadow-lg transform -rotate-1 hover:rotate-0 transition-all duration-500 cursor-pointer z-10 absolute overflow-hidden" 
+                         onclick="bringToFront('back-rect')" 
+                         style="left: 60px; top: 50px;">
+                        <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=600&fit=crop" 
+                             alt="Gift Box 1" 
+                             class="w-full h-full object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    <!-- Front Image (Larger, positioned left) -->
+                    <div id="front-rect" class="w-48 h-64 rounded-lg shadow-lg transform rotate-2 hover:rotate-0 transition-all duration-500 cursor-pointer z-20 absolute overflow-hidden" 
+                         onclick="bringToFront('front-rect')" 
+                         style="left: 0px; top: 20px;">
+                        <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?w=500&h=700&fit=crop" 
+                             alt="Gift Box 2" 
+                             class="w-full h-full object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    <!-- Decorative Elements -->
+                    <div class="absolute -top-4 -right-4 w-8 h-8 bg-wine-red rounded-full opacity-20"></div>
+                    <div class="absolute -bottom-4 -left-4 w-6 h-6 bg-wine-red rounded-full opacity-30"></div>
+                </div>
+
+                <!-- Text Area (Right Side) -->
+                <div class="space-y-6">
+                    <h1 class="font-prata text-5xl md:text-6xl font-bold text-wine-red leading-tight">
+                        Smart Gift Box
+                    </h1>
+                    <p class="font-noto-serif text-lg text-gray-600 leading-relaxed">
+                        Mô tả về bộ sưu tập hộp quà thông minh của chúng tôi, được thiết kế đặc biệt để tạo nên những khoảnh khắc đáng nhớ và ý nghĩa cho mọi dịp đặc biệt.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button class="bg-wine-red text-beige px-8 py-3 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
+                            Khám phá ngay
+                        </button>
+                        <button class="border-2 border-wine-red text-wine-red px-8 py-3 rounded-lg font-prata text-lg hover:bg-wine-red hover:text-beige transition-colors duration-200">
+                            Tìm hiểu thêm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Products Section (static placeholder) -->
+    <div class="bg-beige/20 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="font-prata text-4xl md:text-5xl font-bold text-wine-red mb-4">
+                    Sản phẩm nổi bật
+                </h2>
+                <p class="font-noto-serif text-lg text-gray-600 max-w-2xl mx-auto">
+                    Các sản phẩm nổi bật sẽ hiển thị tại đây khi có đủ dữ liệu.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
+                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
+                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
+                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="bg-beige/30 backdrop-blur-sm border-b border-wine-red/20 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <form method="get" action="@Url.Action("ListGiftbox", "Gift_box")" class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <span class="font-prata text-lg text-wine-red">Filter by:</span>
+                    <!-- Categories from database -->
+                    <select name="categoryId" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var c in ViewBag.Categories)
+                            {
+                                <option value="@c.CategoryId" selected="@((int?)ViewBag.SelectedCategoryId == (int)c.CategoryId)">@c.Name</option>
+                            }
+                        }
+                    </select>
+                    <!-- Price filter (static options, send to controller for filtering) -->
+                    <select name="price" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
+                        <option value="">All Prices</option>
+                        <option value="under500k" selected="@((string)ViewBag.SelectedPrice == "under500k")">Dưới 500k</option>
+                        <option value="500k-1m" selected="@((string)ViewBag.SelectedPrice == "500k-1m")">500k - 1 triệu</option>
+                        <option value="1m-2m" selected="@((string)ViewBag.SelectedPrice == "1m-2m")">1 - 2 triệu</option>
+                        <option value="above2m" selected="@((string)ViewBag.SelectedPrice == "above2m")">Trên 2 triệu</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-prata text-lg text-wine-red">Sort by:</span>
+                    <select name="sort" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
+                        <option value="newest" selected="@((string)ViewBag.SelectedSort == "newest")">Newest</option>
+                        <option value="price_asc" selected="@((string)ViewBag.SelectedSort == "price_asc")">Price: Low to High</option>
+                        <option value="price_desc" selected="@((string)ViewBag.SelectedSort == "price_desc")">Price: High to Low</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Gift Box Grid -->
+    <div class="bg-beige/20 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var p in Model)
+                {
+                    var img = p.ProductImgs?.OrderBy(pi => pi.DisplayOrder).FirstOrDefault()?.ImgUrl ?? "https://via.placeholder.com/600x400?text=No+Image";
+            <a href="@Url.Action("ProductDetail", "Gift_box", new { id = p.ProductId })" class="block group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-wine-red/10 cursor-pointer">
+                <div class="relative overflow-hidden">
+                    <img src="@img" alt="@p.Name" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
+                </div>
+                <div class="p-6">
+                    <h3 class="font-prata text-xl font-bold text-wine-red mb-2">@p.Name</h3>
+                    <p class="font-noto-serif text-gray-600 mb-4 line-clamp-2">@p.Description</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="font-prata text-2xl font-bold text-wine-red">@String.Format("{0:N0}₫", p.Price)</span>
+                        <span class="text-sm text-gray-600">@p.Category?.Name</span>
+                    </div>
+                    <div class="w-full bg-wine-red text-beige py-3 rounded-lg font-medium hover:bg-wine-red/90 transition-colors duration-200 text-center">
+                        Xem chi tiết
+                    </div>
+                </div>
+            </a>
+                }
+            }
+            else
+            {
+                <div class="col-span-4 text-center text-gray-600 py-16">Chưa có sản phẩm.</div>
+            }
+
+        </div>
+
+        <!-- Load More Button -->
+        <div class="text-center mt-12">
+            <button class="bg-wine-red text-beige px-8 py-4 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
+                Load More Gift Boxes
+            </button>
+        </div>
+        </div>
+    </div>
+
+ 
+</div>
+
+<style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .group:hover .group-hover\:scale-110 {
+        transform: scale(1.1);
+    }
+    
+    .group:hover .group-hover\:-translate-y-2 {
+        transform: translateY(-0.5rem);
+    }
+    
+    .group:hover .group-hover\:shadow-lg {
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Interactive layering styles */
+    .rect-front {
+        z-index: 30 !important;
+        transform: rotate(2deg) scale(1) !important;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.5s ease !important;
+        width: 12rem !important;
+        height: 16rem !important;
+    }
+    
+    .rect-back {
+        z-index: 10 !important;
+        transform: rotate(-1deg) scale(1) !important;
+        box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15) !important;
+        transition: all 0.5s ease !important;
+        width: 10rem !important;
+        height: 14rem !important;
+    }
+    
+    /* Ensure proper stacking context */
+    #front-rect, #back-rect {
+        position: absolute !important;
+    }
+    
+    /* Initial state - both rectangles visible */
+    #front-rect {
+        z-index: 20;
+        transform: rotate(2deg);
+        opacity: 1;
+    }
+    
+    #back-rect {
+        z-index: 10;
+        transform: rotate(-1deg);
+        opacity: 1;
+    }
+</style>
+
+<script>
+    function bringToFront(clickedId) {
+        const frontRect = document.getElementById('front-rect');
+        const backRect = document.getElementById('back-rect');
+        
+        // Remove existing classes
+        frontRect.classList.remove('rect-front', 'rect-back');
+        backRect.classList.remove('rect-front', 'rect-back');
+        
+        // Add appropriate classes based on which was clicked
+        if (clickedId === 'front-rect') {
+            frontRect.classList.add('rect-front');
+            backRect.classList.add('rect-back');
+        } else {
+            backRect.classList.add('rect-front');
+            frontRect.classList.add('rect-back');
+        }
+        
+        // Ensure both rectangles are always visible
+        frontRect.style.opacity = '1';
+        backRect.style.opacity = '1';
+        
+        // Add a click animation effect with scale
+        const clickedElement = document.getElementById(clickedId);
+        const currentTransform = clickedElement.style.transform;
+        clickedElement.style.transform = currentTransform + ' scale(1.1)';
+        
+        setTimeout(() => {
+            clickedElement.style.transform = currentTransform;
+        }, 200);
+    }
+    
+    // Initialize the rectangles on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const frontRect = document.getElementById('front-rect');
+        const backRect = document.getElementById('back-rect');
+        
+        // Set initial state
+        frontRect.classList.add('rect-front');
+        backRect.classList.add('rect-back');
+        
+        // Ensure both are visible
+        frontRect.style.opacity = '1';
+        backRect.style.opacity = '1';
+    });
+</script>

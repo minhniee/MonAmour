@@ -1,0 +1,202 @@
+@model MonAmour.AuthViewModel.UserWishListViewModel
+@{
+    ViewData["Title"] = "Danh Sách Yêu Thích";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-beige">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-serif font-bold text-wine-red mb-4">Danh Sách Yêu Thích</h1>
+            <div class="flex gap-4 mb-4">
+                <a href="@Url.Action("Add")" class="btn btn-primary bg-wine-red hover:bg-wine-red/90 text-white px-4 py-2 rounded-md">
+                    <i class="fas fa-plus me-2"></i>Thêm Mục Yêu Thích
+                </a>
+                @if (Model.Products.Any() || Model.Concepts.Any())
+                {
+                    <form asp-action="Clear" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md" 
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa toàn bộ danh sách yêu thích?')">
+                            <i class="fas fa-trash me-2"></i>Xóa Tất Cả
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        @if (!Model.Products.Any() && !Model.Concepts.Any())
+        {
+            <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+                <div class="text-gray-500 mb-4">
+                    <i class="fas fa-heart-broken text-6xl"></i>
+                </div>
+                <h3 class="text-xl font-medium text-gray-700 mb-2">Danh sách yêu thích trống</h3>
+                <p class="text-gray-500 mb-4">Bạn chưa có mục nào trong danh sách yêu thích.</p>
+                <a href="@Url.Action("Add")" class="btn btn-primary bg-wine-red hover:bg-wine-red/90 text-white px-6 py-2 rounded-md">
+                    Thêm Mục Đầu Tiên
+                </a>
+            </div>
+        }
+        else
+        {
+            @if (Model.Products.Any())
+            {
+                <div class="mb-8">
+                    <h2 class="text-2xl font-serif font-semibold text-wine-red mb-4">
+                        <i class="fas fa-box me-2"></i>Sản Phẩm (@Model.Products.Count)
+                    </h2>
+                    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sản Phẩm</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô Tả</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Thêm</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    @if (product.ProductImages != null && product.ProductImages.Any())
+                                                    {
+                                                        <img src="@product.ProductImages.First()" alt="@product.ProductName" class="h-12 w-12 rounded-lg object-cover mr-3">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
+                                                            <i class="fas fa-image text-gray-400"></i>
+                                                        </div>
+                                                    }
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">@product.ProductName</div>
+                                                        <div class="text-sm text-gray-500">ID: @product.ProductId</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-900 max-w-xs truncate" title="@product.ProductDescription">
+                                                    @product.ProductDescription
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-semibold text-wine-red">
+                                                    @(product.ProductPrice?.ToString("C", new System.Globalization.CultureInfo("vi-VN")) ?? "N/A")
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                                                      @(product.ProductStatus?.ToLower() == "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800")">
+                                                    @product.ProductStatus
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                @product.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <form asp-action="RemoveItem" method="post" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="productId" value="@product.ProductId" />
+                                                    <button type="submit" class="text-red-600 hover:text-red-900" 
+                                                            onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi danh sách yêu thích?')">
+                                                        <i class="fas fa-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Concepts.Any())
+            {
+                <div class="mb-8">
+                    <h2 class="text-2xl font-serif font-semibold text-wine-red mb-4">
+                        <i class="fas fa-lightbulb me-2"></i>Ý Tưởng (@Model.Concepts.Count)
+                    </h2>
+                    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ý Tưởng</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô Tả</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Thêm</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach (var concept in Model.Concepts)
+                                    {
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    @if (concept.ConceptImages != null && concept.ConceptImages.Any())
+                                                    {
+                                                        <img src="@concept.ConceptImages.First()" alt="@concept.ConceptName" class="h-12 w-12 rounded-lg object-cover mr-3">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
+                                                            <i class="fas fa-image text-gray-400"></i>
+                                                        </div>
+                                                    }
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">@concept.ConceptName</div>
+                                                        <div class="text-sm text-gray-500">ID: @concept.ConceptId</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-900 max-w-xs truncate" title="@concept.ConceptDescription">
+                                                    @concept.ConceptDescription
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-semibold text-wine-red">
+                                                    @(concept.ConceptPrice?.ToString("C", new System.Globalization.CultureInfo("vi-VN")) ?? "N/A")
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                                                      @(concept.ConceptAvailabilityStatus == true ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
+                                                    @(concept.ConceptAvailabilityStatus == true ? "Có sẵn" : "Không có sẵn")
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                @concept.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <form asp-action="RemoveItem" method="post" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="conceptId" value="@concept.ConceptId" />
+                                                    <button type="submit" class="text-red-600 hover:text-red-900" 
+                                                            onclick="return confirm('Bạn có chắc chắn muốn xóa ý tưởng này khỏi danh sách yêu thích?')">
+                                                        <i class="fas fa-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

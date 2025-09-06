@@ -14,6 +14,9 @@
                 <a href="#services" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                     Gói dịch vụ
                 </a>
+                <a href="@Url.Action("ListGiftbox", "Gift_box")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    Smart Gift Box
+                </a>
                 <a href="#booking" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                     Đặt lịch
                 </a>
@@ -23,10 +26,25 @@
                 <a href="#contact" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                     Liên hệ
                 </a>
+                @if (MonAmour.Helpers.AuthHelper.IsAuthenticated(Context))
+                {
+                    <a href="@Url.Action("Index", "Wishlist")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-heart mr-1"></i>Yêu thích
+                    </a>
+                    <a href="@Url.Action("MyReviews", "Review")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-star mr-1"></i>Đánh giá
+                    </a>
+                }
             </nav>
         </div>
         <div class="flex items-center space-x-4">
             @await Html.PartialAsync("_UserMenu")
+            <a href="@Url.Action("Index", "Cart")" class="relative inline-flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-beige/80 border border-wine-red/20" title="Giỏ hàng">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                    <path d="M2.25 3a.75.75 0 000 1.5h1.596c.26 0 .49.167.57.413l2.805 8.415a2.25 2.25 0 002.137 1.522h7.017a2.25 2.25 0 002.137-1.522l1.93-5.79A.75.75 0 0019.25 6H6.866l-.6-1.8A2.25 2.25 0 003.846 3H2.25z"/>
+                    <path d="M9 20.25a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17.25 20.25a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                </svg>
+            </a>
             <a href="#booking" class="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors">
                 Đặt ngay
             </a>
@@ -49,6 +67,9 @@
             <a href="#services" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                 Gói dịch vụ
             </a>
+            <a href="@Url.Action("ListGiftbox", "Gift_box")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                Smart Gift Box
+            </a>
             <a href="#booking" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                 Đặt lịch
             </a>
@@ -58,6 +79,15 @@
             <a href="#contact" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                 Liên hệ
             </a>
+            @if (MonAmour.Helpers.AuthHelper.IsAuthenticated(Context))
+            {
+                <a href="@Url.Action("Index", "Wishlist")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    <i class="fas fa-heart mr-1"></i>Yêu thích
+                </a>
+                <a href="@Url.Action("MyReviews", "Review")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                    <i class="fas fa-star mr-1"></i>Đánh giá
+                </a>
+            }
             <div class="pt-2 border-t border-border">
                 @await Html.PartialAsync("_UserMenu")
             </div>
