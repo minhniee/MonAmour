@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MonAmour.Models;
+﻿namespace MonAmour.Models;
 
 public partial class Role
 {

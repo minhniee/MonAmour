@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MonAmour.Services.Interfaces;
-using MonAmour.Models;
-using MonAmour.Helpers;
+using MonAmour.Util;
 
 namespace MonAmour.Controllers
 {
@@ -16,7 +15,7 @@ namespace MonAmour.Controllers
         private readonly IConfiguration _configuration;
 
         public SetupController(
-            IAuthService authService, 
+            IAuthService authService,
             ILogger<SetupController> logger,
             IConfiguration configuration)
         {
@@ -77,7 +76,7 @@ namespace MonAmour.Controllers
                 };
 
                 var (success, errorMessage) = await _authService.SignupAsync(signupModel);
-                
+
                 if (success)
                 {
                     // Lấy user vừa tạo
@@ -86,10 +85,10 @@ namespace MonAmour.Controllers
                     {
                         // Xác thực email ngay lập tức
                         user.Verified = true;
-                        
+
                         // Gán role Admin
-                        await _authService.AssignRoleToUserAsync(user.UserId, Role.Names.Admin);
-                        
+                        await _authService.AssignRoleToUserAsync(user.UserId, Names.Admin);
+
                         _logger.LogInformation("First admin user created successfully: {Email}", email);
                         ViewBag.SuccessMessage = $"Admin user đã được tạo thành công! Email: {email}";
                     }
