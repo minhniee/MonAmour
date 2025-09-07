@@ -1,0 +1,323 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Danh Sách Đánh Giá";
+    Layout = "_Layout";
+    bool isUserReviews = ViewBag.IsUserReviews ?? false;
+    string targetType = ViewBag.TargetType ?? "";
+    int targetId = ViewBag.TargetId ?? 0;
+}
+
+<div class="min-h-screen bg-beige">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-serif font-bold text-wine-red mb-4">
+                @if (isUserReviews)
+                {
+                    <text><i class="fas fa-user me-2"></i>Đánh Giá Của Tôi</text>
+                }
+                else
+                {
+                    <text><i class="fas fa-star me-2"></i>Đánh Giá @(targetType == "Product" ? "Sản Phẩm" : "Ý Tưởng")</text>
+                }
+            </h1>
+            <div class="flex gap-4 mb-4">
+                @if (!isUserReviews && !string.IsNullOrEmpty(targetType) && targetId > 0)
+                {
+                    <a href="@Url.Action("Create", new { targetType = targetType, targetId = targetId })" class="btn btn-primary bg-wine-red hover:bg-wine-red/90 text-white px-4 py-2 rounded-md">
+                        <i class="fas fa-plus me-2"></i>Thêm Đánh Giá
+                    </a>
+                }
+                <a href="@Url.Action("MyReviews")" class="btn btn-secondary bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">
+                    <i class="fas fa-user me-2"></i>Đánh Giá Của Tôi
+                </a>
+                <a href="@Url.Action("Summary")" class="btn btn-info bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                    <i class="fas fa-chart-bar me-2"></i>Tổng Quan
+                </a>
+            </div>
+        </div>
+
+        @if (isUserReviews)
+        {
+            @* User Reviews View *@
+            var userReviews = Model as MonAmour.AuthViewModel.UserReviewViewModel;
+            if (userReviews != null)
+            {
+                <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900">@userReviews.UserName</h2>
+                            <p class="text-gray-600">@userReviews.TotalReviews đánh giá</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-wine-red">@userReviews.AverageRating.ToString("F1")</div>
+                            <div class="text-sm text-gray-500">Điểm trung bình</div>
+                            <div class="flex items-center mt-1">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="fas fa-star @(i <= userReviews.AverageRating ? "text-yellow-400" : "text-gray-300") text-sm"></i>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (!userReviews.Reviews.Any())
+                {
+                    <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+                        <div class="text-gray-500 mb-4">
+                            <i class="fas fa-comments text-6xl"></i>
+                        </div>
+                        <h3 class="text-xl font-medium text-gray-700 mb-2">Chưa có đánh giá</h3>
+                        <p class="text-gray-500">Bạn chưa đánh giá sản phẩm hoặc ý tưởng nào.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="space-y-4">
+                        @foreach (var review in userReviews.Reviews)
+                        {
+                            <div class="bg-white rounded-lg shadow-sm border p-6">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center mb-2">
+                                            <h3 class="text-lg font-medium text-gray-900 mr-3">@review.TargetName</h3>
+                                            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                                @(review.TargetType == "Product" ? "Sản phẩm" : "Ý tưởng")
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center mb-3">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="fas fa-star @(i <= review.Rating ? "text-yellow-400" : "text-gray-300") text-sm mr-1"></i>
+                                            }
+                                            <span class="ml-2 text-sm text-gray-600">@review.Rating/5</span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(review.Comment))
+                                        {
+                                            <p class="text-gray-700 mb-3">@review.Comment</p>
+                                        }
+                                        <div class="flex items-center text-sm text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            @review.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            @if (review.UpdatedAt != review.CreatedAt)
+                                            {
+                                                <span class="ml-2">(Cập nhật: @review.UpdatedAt?.ToString("dd/MM/yyyy HH:mm"))</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2 ml-4">
+                                        <a href="@Url.Action("Update", new { id = review.ReviewId })" class="text-blue-600 hover:text-blue-900 text-sm">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </a>
+                                        <form asp-action="Delete" method="post" style="display: inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@review.ReviewId" />
+                                            <button type="submit" class="text-red-600 hover:text-red-900 text-sm" 
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
+                                                <i class="fas fa-trash"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        }
+        else
+        {
+            @* Product/Concept Reviews View *@
+            @if (targetType == "Product")
+            {
+                var productReviews = Model as MonAmour.AuthViewModel.ProductReviewViewModel;
+                if (productReviews != null)
+                {
+                    <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">@productReviews.ProductName</h2>
+                                <p class="text-gray-600">@productReviews.TotalReviews đánh giá</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-wine-red">@productReviews.AverageRating.ToString("F1")</div>
+                                <div class="text-sm text-gray-500">Điểm trung bình</div>
+                                <div class="flex items-center mt-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= productReviews.AverageRating ? "text-yellow-400" : "text-gray-300") text-sm"></i>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if (productReviews.RatingDistribution.Any())
+                        {
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <h3 class="text-sm font-medium text-gray-900 mb-3">Phân bố điểm đánh giá</h3>
+                                <div class="space-y-2">
+                                    @for (int stars = 5; stars >= 1; stars--)
+                                    {
+                                        int count = productReviews.RatingDistribution.ContainsKey(stars) ? productReviews.RatingDistribution[stars] : 0;
+                                        double percentage = productReviews.TotalReviews > 0 ? (double)count / productReviews.TotalReviews * 100 : 0;
+                                        
+                                        <div class="flex items-center">
+                                            <div class="flex items-center w-20">
+                                                <span class="text-sm">@stars</span>
+                                                <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
+                                            </div>
+                                            <div class="flex-1 mx-3">
+                                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-wine-red h-2 rounded-full" style="width: @percentage%"></div>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm text-gray-600 w-12 text-right">@count</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!productReviews.Reviews.Any())
+                    {
+                        <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+                            <div class="text-gray-500 mb-4">
+                                <i class="fas fa-comments text-6xl"></i>
+                            </div>
+                            <h3 class="text-xl font-medium text-gray-700 mb-2">Chưa có đánh giá</h3>
+                            <p class="text-gray-500">Sản phẩm này chưa có đánh giá nào.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-4">
+                            @foreach (var review in productReviews.Reviews)
+                            {
+                                <div class="bg-white rounded-lg shadow-sm border p-6">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center mb-2">
+                                                <h3 class="text-lg font-medium text-gray-900 mr-3">@review.UserName</h3>
+                                                <div class="flex items-center">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star @(i <= review.Rating ? "text-yellow-400" : "text-gray-300") text-sm mr-1"></i>
+                                                    }
+                                                    <span class="ml-2 text-sm text-gray-600">@review.Rating/5</span>
+                                                </div>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(review.Comment))
+                                            {
+                                                <p class="text-gray-700 mb-3">@review.Comment</p>
+                                            }
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                @review.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            }
+            else if (targetType == "Concept")
+            {
+                var conceptReviews = Model as MonAmour.AuthViewModel.ConceptReviewViewModel;
+                if (conceptReviews != null)
+                {
+                    <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">@conceptReviews.ConceptName</h2>
+                                <p class="text-gray-600">@conceptReviews.TotalReviews đánh giá</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-wine-red">@conceptReviews.AverageRating.ToString("F1")</div>
+                                <div class="text-sm text-gray-500">Điểm trung bình</div>
+                                <div class="flex items-center mt-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star @(i <= conceptReviews.AverageRating ? "text-yellow-400" : "text-gray-300") text-sm"></i>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if (conceptReviews.RatingDistribution.Any())
+                        {
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <h3 class="text-sm font-medium text-gray-900 mb-3">Phân bố điểm đánh giá</h3>
+                                <div class="space-y-2">
+                                    @for (int stars = 5; stars >= 1; stars--)
+                                    {
+                                        int count = conceptReviews.RatingDistribution.ContainsKey(stars) ? conceptReviews.RatingDistribution[stars] : 0;
+                                        double percentage = conceptReviews.TotalReviews > 0 ? (double)count / conceptReviews.TotalReviews * 100 : 0;
+                                        
+                                        <div class="flex items-center">
+                                            <div class="flex items-center w-20">
+                                                <span class="text-sm">@stars</span>
+                                                <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
+                                            </div>
+                                            <div class="flex-1 mx-3">
+                                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-wine-red h-2 rounded-full" style="width: @percentage%"></div>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm text-gray-600 w-12 text-right">@count</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!conceptReviews.Reviews.Any())
+                    {
+                        <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+                            <div class="text-gray-500 mb-4">
+                                <i class="fas fa-comments text-6xl"></i>
+                            </div>
+                            <h3 class="text-xl font-medium text-gray-700 mb-2">Chưa có đánh giá</h3>
+                            <p class="text-gray-500">Ý tưởng này chưa có đánh giá nào.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-4">
+                            @foreach (var review in conceptReviews.Reviews)
+                            {
+                                <div class="bg-white rounded-lg shadow-sm border p-6">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center mb-2">
+                                                <h3 class="text-lg font-medium text-gray-900 mr-3">@review.UserName</h3>
+                                                <div class="flex items-center">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star @(i <= review.Rating ? "text-yellow-400" : "text-gray-300") text-sm mr-1"></i>
+                                                    }
+                                                    <span class="ml-2 text-sm text-gray-600">@review.Rating/5</span>
+                                                </div>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(review.Comment))
+                                            {
+                                                <p class="text-gray-700 mb-3">@review.Comment</p>
+                                            }
+                                            <div class="flex items-center text-sm text-gray-500">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                @review.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            }
+        }
+    </div>
+</div>

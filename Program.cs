@@ -4,6 +4,7 @@ using MonAmour.Middleware;
 using MonAmour.Models;
 using MonAmour.Services.Implements;
 using MonAmour.Services.Interfaces;
+using MonAmour.Util;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,16 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICassoService, CassoService>();
 builder.Services.AddScoped<IVietQRService, VietQRService>();
 
+builder.Services.AddScoped<IWishListService, WishListService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+
+// Add SignalR
+builder.Services.AddSignalR();
+
+
 // Add HttpClient for Casso API
 builder.Services.AddHttpClient<ICassoService, CassoService>();
 
@@ -57,7 +68,7 @@ using (var scope = app.Services.CreateScope())
 {
     var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    
+
     try
     {
         await authService.InitializeSystemAsync();
@@ -93,6 +104,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map SignalR Hub
+app.MapHub<MonAmour.Hubs.CommentHub>("/commentHub");
 
 
 app.Run();

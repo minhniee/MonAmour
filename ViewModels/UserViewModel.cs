@@ -10,8 +10,8 @@ public class UserViewModel
         [MinLength(2, ErrorMessage = "Họ và tên phải có ít nhất 2 ký tự")]
         public string Name { get; set; } = "";
 
-        [Required(ErrorMessage = "Email là bắt buộc")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        // [Required(ErrorMessage = "Email là bắt buộc")]
+        // [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string Email { get; set; } = "";
 
         [Required(ErrorMessage = "Số điện thoại là bắt buộc")]

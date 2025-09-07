@@ -5,20 +5,14 @@
 }
 
 <div class="min-h-screen bg-beige">
-    Header
     <header class="bg-white shadow-sm border-b border-wine-red/10">
-        <div class="max-w-4xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <a href="/" class="text-wine-red hover:text-wine-red/80 transition-colors">
-                    ← Quay lại trang chủ
-                </a>
-                <h1 class="text-2xl font-serif font-bold text-wine-red">Hồ Sơ Cá Nhân</h1>
-                <div class="w-20"></div>  Spacer for centering
-            </div>
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="/" class="text-wine-red hover:text-wine-red/80 transition-colors">← Quay lại trang chủ</a>
+            <h1 class="text-2xl font-serif font-bold text-wine-red">Hồ Sơ Cá Nhân</h1>
+            <div class="w-20"></div>
         </div>
     </header>
 
-    Main Content
     <main class="max-w-2xl mx-auto px-4 py-8">
         <div class="bg-white shadow-lg border-wine-red/20 rounded-lg border">
             <div class="text-center pb-6 p-6">
@@ -35,78 +29,85 @@
                             </span>
                         }
                     </div>
-                    <button id="avatarUploadBtn" class="absolute bottom-0 right-0 bg-wine-red text-white p-2 rounded-full cursor-pointer hover:bg-wine-red/90 transition-colors hidden">
+                    <label for="avatarInput" id="avatarUploadBtn" class="absolute bottom-0 right-0 bg-wine-red text-white p-2 rounded-full cursor-pointer hover:bg-wine-red/90 transition-colors hidden">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 3 0 016 0z"></path>
                         </svg>
-                        <input type="file" accept="image/*" id="avatarInput" class="hidden" />
-                    </button>
+                    </label>
+                    <input type="file" accept="image/*" id="avatarInput" name="avatar" class="hidden" />
                 </div>
                 <h2 class="text-wine-red font-serif text-2xl" id="profileTitle">Hồ Sơ Của Bạn</h2>
             </div>
 
-            <form id="profileForm" class="p-6 space-y-6" method="post" asp-action="">
+            <form id="profileForm" class="p-6 space-y-6" method="post" enctype="multipart/form-data" asp-action="Update" asp-controller="Profile">
                 @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2" role="alert"></div>
 
-                Name Field
+                <!-- Name -->
                 <div class="space-y-2">
                     <label for="name" class="text-wine-red font-medium">Họ và Tên</label>
-                    <input type="text" id="name" name="Name" value="@Model.Name" readonly
+                    <input asp-for="Name" id="name" disabled 
                            class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+                    <span asp-validation-for="Name" class="text-sm text-red-600"></span>
                 </div>
 
-                Email Field (Read Only)
+                <!-- Email -->
                 <div class="space-y-2">
-                    <label for="email" class="text-wine-red font-medium">Email</label>
-                    <div class="relative">
-                        <input type="email" id="email" value="@Model.Email" readonly
-                               class="w-full bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed py-2 px-3 rounded-md" />
-                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
-                            Chỉ đọc
-                        </span>
-                    </div>
+	                <label for="email" class="text-wine-red font-medium">Email</label>
+	                <div class="relative">
+		                <input asp-for="Email" id="email" readonly
+		                       class="w-full bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed py-2 px-3 rounded-md" />
+	                </div>
                 </div>
 
-                Birth Date Field
+
+                <!-- Birth Date -->
                 <div class="space-y-2">
-                    <label for="birthDate" class="text-wine-red font-medium">Ngày Sinh</label>
-                    <input type="date" id="birthDate" name="BirthDate" value="@Model.BirthDate?.ToString("yyyy-MM-dd")" readonly
-                           class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+	                <label for="birthDate" class="text-wine-red font-medium">Ngày Sinh</label>
+	                <input type="date" id="birthDate" asp-for="BirthDate" disabled value="@Model.BirthDate?.ToString("yyyy-MM-dd")" 
+	                       class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+                    <span asp-validation-for="BirthDate" class="text-sm text-red-600"></span>
                 </div>
-
-                Phone Field
+				
+                <!-- Gender -->
                 <div class="space-y-2">
-                    <label for="phone" class="text-wine-red font-medium">Số Điện Thoại</label>
-                    <input type="tel" id="phone" name="Phone" value="@Model.Phone" readonly
-                           class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+	                <label for="gender" class="text-wine-red font-medium">Giới tính</label>
+	                <select id="gender" asp-for="Gender" disabled class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="male">Nam</option>
+                        <option value="female">Nữ</option>
+                        <option value="other">Khác</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-sm text-red-600"></span>
                 </div>
 
-                Action Buttons
+
+                <!-- Phone -->
+                <div class="space-y-2">
+	                <label for="phone" class="text-wine-red font-medium">Số Điện Thoại</label>
+	                <input asp-for="Phone" id="phone" disabled 
+	                       class="w-full text-gray-700 py-2 px-3 bg-gray-50 rounded-md border border-gray-300" />
+                    <span asp-validation-for="Phone" class="text-sm text-red-600"></span>
+                </div>
+				
+               
+
+                <!-- Action Buttons -->
                 <div class="flex gap-4 pt-6">
                     <button type="button" id="editBtn" class="flex-1 bg-wine-red hover:bg-wine-red/90 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Chỉnh Sửa Hồ Sơ
+                        ✏️ Chỉnh Sửa
                     </button>
                     <button type="submit" id="saveBtn" class="flex-1 bg-wine-red hover:bg-wine-red/90 text-white py-2 px-4 rounded-md transition-colors hidden flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                        </svg>
-                        Lưu Thay Đổi
+                        💾 Lưu
                     </button>
                     <button type="button" id="cancelBtn" class="flex-1 border-wine-red text-wine-red hover:bg-wine-red/5 bg-transparent py-2 px-4 rounded-md border transition-colors hidden flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Hủy
+                        ❌ Hủy
                     </button>
                 </div>
             </form>
         </div>
 
-        Additional Actions
         <div class="mt-6 text-center">
             <a href="/Profile/ChangePassword" class="text-wine-red hover:text-wine-red/80 underline transition-colors">
                 Đổi mật khẩu
@@ -124,21 +125,21 @@
         const avatarUploadBtn = document.getElementById('avatarUploadBtn');
         const avatarInput = document.getElementById('avatarInput');
 
-        const fields = ['name', 'birthDate', 'phone'];
+        const fields = ['name', 'birthDate', 'gender', 'phone'];
         let originalValues = {};
 
-        // Store original values
         fields.forEach(field => {
-            originalValues[field] = document.getElementById(field).value;
+            const el = document.getElementById(field);
+            originalValues[field] = el ? el.value : '';
         });
 
         editBtn.addEventListener('click', function() {
-            // Switch to edit mode
             fields.forEach(field => {
                 const input = document.getElementById(field);
-                input.readOnly = false;
+                if (!input) return;
+                input.disabled = false;
                 input.classList.remove('bg-gray-50', 'border-gray-300');
-                input.classList.add('border-wine-red/30', 'focus:border-wine-red', 'focus:ring-wine-red/20');
+                input.classList.add('border-wine-red/30');
             });
 
             profileTitle.textContent = 'Chỉnh Sửa Hồ Sơ';
@@ -149,13 +150,13 @@
         });
 
         cancelBtn.addEventListener('click', function() {
-            // Restore original values and switch back to view mode
             fields.forEach(field => {
                 const input = document.getElementById(field);
+                if (!input) return;
                 input.value = originalValues[field];
-                input.readOnly = true;
+                input.disabled = true;
                 input.classList.add('bg-gray-50', 'border-gray-300');
-                input.classList.remove('border-wine-red/30', 'focus:border-wine-red', 'focus:ring-wine-red/20');
+                input.classList.remove('border-wine-red/30');
             });
 
             profileTitle.textContent = 'Hồ Sơ Của Bạn';
@@ -169,14 +170,23 @@
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    const avatarImg = document.querySelector('.w-32.h-32 img');
-                    if (avatarImg) {
-                        avatarImg.src = e.target.result;
+                reader.onload = function(ev) {
+                    let avatarImg = document.querySelector('.w-32.h-32 img');
+                    if (!avatarImg) {
+                        const container = document.querySelector('.w-32.h-32');
+                        avatarImg = document.createElement('img');
+                        avatarImg.className = "w-full h-full object-cover";
+                        container.innerHTML = "";
+                        container.appendChild(avatarImg);
                     }
+                    avatarImg.src = ev.target.result;
                 };
                 reader.readAsDataURL(file);
             }
         });
     });
 </script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

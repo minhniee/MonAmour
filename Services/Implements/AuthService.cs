@@ -125,6 +125,14 @@ public class AuthService : IAuthService
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == model.Email);
 
+            var existingPhone = await _context.Users
+                .FirstOrDefaultAsync(u => u.Phone == model.Phone);
+
+            if (existingPhone != null)
+            {
+                _logger.LogWarning("Signup failed - phone already exists: {Phone}", model.Phone);
+                return (false, "Số điện thoại đã được sử dụng.");
+            }
             if (existingUser != null)
             {
                 _logger.LogWarning("Signup failed - email already exists: {Email}", model.Email);
@@ -483,18 +491,22 @@ public class AuthService : IAuthService
 
             // Cập nhật thông tin
             user.Name = model.Name;
-            user.Email = model.Email;
+            user.Email = user.Email;
             user.Phone = model.Phone;
             user.Avatar = model.Avatar;
             user.BirthDate = model.BirthDate;
             user.Gender = model.Gender;
             user.UpdatedAt = DateTime.Now;
 
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Update model: {@Model}", model);
+
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error while updating profile for user {UserId}", userId);
             return false;
         }
     }
