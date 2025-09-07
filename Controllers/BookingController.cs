@@ -399,7 +399,7 @@ namespace MonAmour.Controllers
                 .Include(b => b.Concept)
                 .Include(b => b.Concept.ConceptImgs)
                 .Include(b => b.Concept.Location)
-                .Where(b => b.UserId == userId)
+                .Where(b => b.UserId == userId && b.PaymentStatus == "paid")
                 .OrderByDescending(b => b.CreatedAt)
                 .ToList();
 

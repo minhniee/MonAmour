@@ -29,8 +29,6 @@ public partial class Order
 
     public DateTime? UpdatedAt { get; set; }
 
-    public DateTime? UpdatedAt1 { get; set; }
-
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual ICollection<PaymentDetail> PaymentDetails { get; set; } = new List<PaymentDetail>();

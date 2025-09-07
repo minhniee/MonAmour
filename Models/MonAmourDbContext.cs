@@ -475,9 +475,6 @@ public partial class MonAmourDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
-            entity.Property(e => e.UpdatedAt1)
-                .HasColumnType("datetime")
-                .HasColumnName("UpdatedAt");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.ShippingOption).WithMany(p => p.Orders)
