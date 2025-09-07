@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using MonAmour.Models;
 using MonAmour.Services.Interfaces;
-using MonAmour.Util;
 
 namespace MonAmour.Controllers
 {
@@ -87,7 +87,7 @@ namespace MonAmour.Controllers
                         user.Verified = true;
 
                         // Gán role Admin
-                        await _authService.AssignRoleToUserAsync(user.UserId, Names.Admin);
+                        await _authService.AssignRoleToUserAsync(user.UserId, Role.Names.Admin);
 
                         _logger.LogInformation("First admin user created successfully: {Email}", email);
                         ViewBag.SuccessMessage = $"Admin user đã được tạo thành công! Email: {email}";
