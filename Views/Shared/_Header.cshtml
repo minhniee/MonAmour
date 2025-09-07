@@ -20,21 +20,21 @@
                 <a href="#booking" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                     Đặt lịch
                 </a>
-                <a href="#blog" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                <a href="@Url.Action("Index","Blog")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                     Blog
                 </a>
                 <a href="#contact" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                     Liên hệ
                 </a>
-                @if (MonAmour.Helpers.AuthHelper.IsAuthenticated(Context))
-                {
-                    <a href="@Url.Action("Index", "Wishlist")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                        <i class="fas fa-heart mr-1"></i>Yêu thích
-                    </a>
-                    <a href="@Url.Action("MyReviews", "Review")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                        <i class="fas fa-star mr-1"></i>Đánh giá
-                    </a>
-                }
+                @* @if (MonAmour.Helpers.AuthHelper.IsAuthenticated(Context)) *@
+                @* { *@
+                @*     <a href="@Url.Action("Index", "Wishlist")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"> *@
+                @*         <i class="fas fa-heart mr-1"></i>Yêu thích *@
+                @*     </a> *@
+                @*     <a href="@Url.Action("MyReviews", "Review")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"> *@
+                @*         <i class="fas fa-star mr-1"></i>Đánh giá *@
+                @*     </a> *@
+                @* } *@
             </nav>
         </div>
         <div class="flex items-center space-x-4">

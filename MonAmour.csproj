@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Imagine\**" />
+    <Content Remove="Imagine\**" />
+    <EmbeddedResource Remove="Imagine\**" />
+    <None Remove="Imagine\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -27,6 +34,8 @@
     <Folder Include="Services\Interfaces\" />
     <Folder Include="wwwroot\avatars\" />
     <Folder Include="Services\Implements\" />
+    <Folder Include="wwwroot\Imagine\IMGConcept\" />
+    <Folder Include="wwwroot\Imagine\IMGProduct\" />
   </ItemGroup>
 
 </Project>

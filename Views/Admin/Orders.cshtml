@@ -1,0 +1,527 @@
+@model List<MonAmour.ViewModels.OrderViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý Đơn hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Đơn hàng</h1>
+        <div>
+            <button type="button" class="btn btn-info" onclick="refreshStatistics()">
+                <i class="fas fa-sync-alt"></i> Làm mới thống kê
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng đơn hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Đã xác nhận
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="confirmedCount">
+                                @(ViewBag.Statistics != null && ViewBag.Statistics.ContainsKey("confirmed") ? ViewBag.Statistics["confirmed"] : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Đang giao hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="shippingCount">
+                                @(ViewBag.Statistics != null && ViewBag.Statistics.ContainsKey("shipping") ? ViewBag.Statistics["shipping"] : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-truck fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Hoàn thành
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="completedCount">
+                                @(ViewBag.Statistics != null && ViewBag.Statistics.ContainsKey("completed") ? ViewBag.Statistics["completed"] : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-flag-checkered fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                Chờ xử lý
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingCount">
+                                @(ViewBag.Statistics != null && ViewBag.Statistics.ContainsKey("pending") ? ViewBag.Statistics["pending"] : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Đã hủy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="cancelledCount">
+                                @(ViewBag.Statistics != null && ViewBag.Statistics.ContainsKey("cancelled") ? ViewBag.Statistics["cancelled"] : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-dark shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                Chưa thanh toán
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="unpaidCount">
+                                @(Model != null ? Model.Count(o => !o.HasPayment) : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-light shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">
+                                Đã thanh toán
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="paidCount">
+                                @(Model != null ? Model.Count(o => o.HasPayment) : 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-3">
+                    <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                    <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                           value="@ViewBag.SearchModel?.SearchTerm" placeholder="ID, tên khách hàng, email...">
+                </div>
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Trạng thái</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="">-- Tất cả --</option>
+                        @if (ViewBag.OrderStatuses != null)
+                        {
+                            foreach (var status in ViewBag.OrderStatuses)
+                            {
+                                var isSelected = ViewBag.SearchModel?.Status == status.Value;
+                                <option value="@status.Value" selected="@isSelected">@status.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="fromDate" class="form-label">Từ ngày</label>
+                    <input type="date" id="fromDate" name="fromDate" class="form-control" 
+                           value="@ViewBag.SearchModel?.FromDate?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-2">
+                    <label for="toDate" class="form-label">Đến ngày</label>
+                    <input type="date" id="toDate" name="toDate" class="form-control" 
+                           value="@ViewBag.SearchModel?.ToDate?.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Đơn hàng</h6>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="ordersTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Khách hàng</th>
+                                <th>Địa chỉ giao hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Vận chuyển</th>
+                                <th>Mã tracking</th>
+                                <th>Thanh toán</th>
+                                <th>Số sản phẩm</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>#@order.OrderId</strong>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@order.UserName</strong><br>
+                                            <small class="text-muted">@order.UserEmail</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(order.ShippingAddress))
+                                        {
+                                            <div class="text-truncate" style="max-width: 200px;" title="@order.ShippingAddress">
+                                                @order.ShippingAddress
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (order.TotalPrice.HasValue)
+                                        {
+                                            <span class="text-success font-weight-bold">@order.TotalPrice.Value.ToString("N0") VNĐ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (order.Status)
+                                        {
+                                            case "pending":
+                                                <span class="badge badge-secondary">Chờ xử lý</span>
+                                                break;
+                                            case "confirmed":
+                                                <span class="badge badge-success">Đã xác nhận</span>
+                                                break;
+                                            case "shipping":
+                                                <span class="badge badge-warning">Đang giao hàng</span>
+                                                break;
+                                            case "completed":
+                                                <span class="badge badge-info">Hoàn thành</span>
+                                                break;
+                                            case "cancelled":
+                                                <span class="badge badge-danger">Đã hủy</span>
+                                                break;
+                                            default:
+                                                <span class="badge badge-secondary">@order.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(order.ShippingOptionName))
+                                        {
+                                            <span class="badge badge-primary">@order.ShippingOptionName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa chọn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(order.TrackingNumber))
+                                        {
+                                            <code>@order.TrackingNumber</code>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (order.HasPayment)
+                                        {
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-check"></i> Đã thanh toán
+                                            </span>
+                                            @if (order.PaymentAmount.HasValue)
+                                            {
+                                                <br><small class="text-muted">@order.PaymentAmount.Value.ToString("N0") VNĐ</small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">
+                                                <i class="fas fa-times"></i> Chưa thanh toán
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-info">@order.ItemCount sản phẩm</span>
+                                    </td>
+                                    <td>
+                                        @if (order.CreatedAt.HasValue)
+                                        {
+                                            @order.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("OrderDetail", "Admin", new { id = order.OrderId })" 
+                                               class="btn btn-info btn-sm" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (order.Status != "completed")
+                                            {
+                                                <button type="button" class="btn btn-warning btn-sm" 
+                                                        onclick="updateOrderStatus(@order.OrderId, '@order.Status')"
+                                                        title="Cập nhật trạng thái">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-shopping-cart fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-600">Chưa có đơn hàng nào</h5>
+                    <p class="text-gray-500">Các đơn hàng sẽ hiển thị ở đây sau khi khách hàng thanh toán.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Update Order Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật Trạng thái Đơn hàng</h5>
+                <button type="button" class="close" data-bs-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="updateStatusForm">
+                <div class="modal-body">
+                    <input type="hidden" id="orderId" name="orderId">
+                    <div class="form-group">
+                        <label for="newStatus">Trạng thái mới</label>
+                        <select id="newStatus" name="status" class="form-control" required>
+                            <option value="">-- Chọn trạng thái --</option>
+                            @if (ViewBag.OrderStatuses != null)
+                            {
+                                foreach (var status in ViewBag.OrderStatuses)
+                                {
+                                    <option value="@status.Value">@status.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#ordersTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 25,
+                "order": [[0, "desc"]]
+            });
+        });
+
+        function updateOrderStatus(orderId, currentStatus) {
+            $('#orderId').val(orderId);
+            $('#newStatus').val(currentStatus);
+            $('#updateStatusModal').modal('show');
+        }
+
+        $('#updateStatusForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const orderId = $('#orderId').val();
+            const newStatus = $('#newStatus').val();
+            
+            if (!newStatus) {
+                alert('Vui lòng chọn trạng thái mới!');
+                return;
+            }
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("UpdateOrderStatus", "Admin")';
+            
+            const token = document.createElement('input');
+            token.type = 'hidden';
+            token.name = '__RequestVerificationToken';
+            token.value = $('input[name="__RequestVerificationToken"]').val();
+            form.appendChild(token);
+            
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'orderId';
+            idInput.value = orderId;
+            form.appendChild(idInput);
+            
+            const statusInput = document.createElement('input');
+            statusInput.type = 'hidden';
+            statusInput.name = 'status';
+            statusInput.value = newStatus;
+            form.appendChild(statusInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+
+        function refreshStatistics() {
+            $.get('@Url.Action("GetOrderStatistics", "Admin")', function(result) {
+                if (result.success) {
+                    $('#confirmedCount').text(result.statistics.confirmed || 0);
+                    $('#shippingCount').text(result.statistics.shipping || 0);
+                    $('#completedCount').text(result.statistics.completed || 0);
+                    $('#pendingCount').text(result.statistics.pending || 0);
+                    $('#cancelledCount').text(result.statistics.cancelled || 0);
+                    
+                    // Show success message
+                    showAlert('success', 'Đã cập nhật thống kê thành công!');
+                } else {
+                    showAlert('danger', result.message || 'Có lỗi xảy ra khi cập nhật thống kê!');
+                }
+            });
+        }
+
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            // Remove existing alerts
+            $('.alert').remove();
+            
+            // Add new alert
+            $('.container-fluid').prepend(alertHtml);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                $('.alert').fadeOut();
+            }, 5000);
+        }
+    </script>
+}

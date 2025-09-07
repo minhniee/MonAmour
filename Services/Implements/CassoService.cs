@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MonAmour.Models;
 using MonAmour.Services.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 
 namespace MonAmour.Services.Implements
@@ -22,12 +20,12 @@ namespace MonAmour.Services.Implements
             _config = config;
             _apiKey = _config["Casso:ApiKey"] ?? throw new InvalidOperationException("Casso API key not configured");
             _apiBase = _config["Casso:ApiBase"] ?? "https://oauth.casso.vn";
-            
+
             _httpClient.BaseAddress = new Uri(_apiBase);
-            
+
             // Casso API requires "Apikey" format
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Apikey {_apiKey}");
-            
+
             // Debug logging
             System.Diagnostics.Debug.WriteLine($"CassoService initialized:");
             System.Diagnostics.Debug.WriteLine($"- API Base: {_apiBase}");
@@ -56,7 +54,7 @@ namespace MonAmour.Services.Implements
                     System.Diagnostics.Debug.WriteLine($"Casso API Error: {response.StatusCode}");
                     System.Diagnostics.Debug.WriteLine($"Error Content: {content}");
                     System.Diagnostics.Debug.WriteLine($"Response Headers: {string.Join(", ", response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}"))}");
-                    
+
                     return new CassoApiResponse<CassoTransactionList>
                     {
                         Code = (int)response.StatusCode,
@@ -135,11 +133,11 @@ namespace MonAmour.Services.Implements
                 System.Diagnostics.Debug.WriteLine($"Found cart order: {cartOrder.OrderId}, Total: {cartOrder.TotalPrice}");
 
                 // Check if amount matches (with some tolerance for rounding)
-                var expectedAmount = (long)Math.Round((cartOrder.TotalPrice ?? 0)); // Casso trả về VND, không phải cents
+                var expectedAmount = (long)Math.Round((cartOrder.TotalPrice)); // Casso trả về VND, không phải cents
                 var amountDifference = Math.Abs(transaction.Amount - expectedAmount);
-                
+
                 System.Diagnostics.Debug.WriteLine($"Amount check: Expected={expectedAmount}, Received={transaction.Amount}, Difference={amountDifference}");
-                
+
                 // Allow 1000 VND difference for rounding
                 if (amountDifference > 1000)
                 {
@@ -155,9 +153,9 @@ namespace MonAmour.Services.Implements
                                transaction.Reference?.Contains(userIdStr) == true ||
                                transaction.Ref?.Contains($"UserID{userIdStr}") == true ||
                                transaction.Ref?.Contains(userIdStr) == true;
-                
+
                 System.Diagnostics.Debug.WriteLine($"UserID check: Description='{transaction.Description}', Reference='{transaction.Reference}', Ref='{transaction.Ref}', HasUserId={hasUserId}");
-                
+
                 if (!hasUserId)
                 {
                     System.Diagnostics.Debug.WriteLine("UserID not found in transaction details");
@@ -167,7 +165,7 @@ namespace MonAmour.Services.Implements
                 // Check if payment already exists for this transaction
                 var existingPayment = await _dbContext.Payments
                     .FirstOrDefaultAsync(p => p.TransactionId == transaction.Id);
-                
+
                 if (existingPayment != null)
                 {
                     System.Diagnostics.Debug.WriteLine($"Payment already exists for transaction: {transaction.Id}");

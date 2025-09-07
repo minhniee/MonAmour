@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using MonAmour.Filters;
 using MonAmour.Middleware;
 using MonAmour.Models;
@@ -38,6 +39,14 @@ builder.Services.AddHttpContextAccessor();
 // Add Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IPartnerService, PartnerService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IConceptService, ConceptService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ICassoService, CassoService>();
 builder.Services.AddScoped<IVietQRService, VietQRService>();
 
@@ -90,6 +99,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+
 
 app.UseRouting();
 

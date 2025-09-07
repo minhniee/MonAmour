@@ -1,0 +1,463 @@
+@{
+    ViewData["Title"] = "Báo cáo Doanh thu";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-chart-line mr-2"></i>Báo cáo Doanh thu
+        </h1>
+        <div class="d-flex">
+            <div class="input-group mr-3" style="width: 300px;">
+                <input type="date" id="startDate" class="form-control" placeholder="Từ ngày">
+                <input type="date" id="endDate" class="form-control" placeholder="Đến ngày">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" onclick="filterData()">
+                        <i class="fas fa-filter"></i> Lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng doanh thu
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalRevenue">
+                                @(ViewBag.RevenueReport?.TotalRevenue.ToString("N0") ?? "0") VNĐ
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Doanh thu đơn hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="orderRevenue">
+                                @(ViewBag.RevenueReport?.OrderRevenue.ToString("N0") ?? "0") VNĐ
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Doanh thu đặt chỗ
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="bookingRevenue">
+                                @(ViewBag.RevenueReport?.BookingRevenue.ToString("N0") ?? "0") VNĐ
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tăng trưởng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="growthRate">
+                                @(ViewBag.RevenueReport?.GrowthRate.ToString("F1") ?? "0")%
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Monthly Revenue Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Doanh thu theo tháng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="monthlyRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Distribution -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Phân bố doanh thu</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="revenueDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Revenue Chart -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Doanh thu theo ngày</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="dailyRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Details Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Chi tiết doanh thu</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Nguồn</th>
+                                    <th>Doanh thu</th>
+                                    <th>Tỷ lệ</th>
+                                    <th>Số lượng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Đơn hàng</td>
+                                    <td>@(ViewBag.RevenueReport?.OrderRevenue.ToString("N0") ?? "0") VNĐ</td>
+                                    <td>@(ViewBag.RevenueReport?.OrderPercentage.ToString("F1") ?? "0")%</td>
+                                    <td>@(ViewBag.RevenueReport?.OrderCount ?? 0)</td>
+                                </tr>
+                                <tr>
+                                    <td>Đặt chỗ</td>
+                                    <td>@(ViewBag.RevenueReport?.BookingRevenue.ToString("N0") ?? "0") VNĐ</td>
+                                    <td>@(ViewBag.RevenueReport?.BookingPercentage.ToString("F1") ?? "0")%</td>
+                                    <td>@(ViewBag.RevenueReport?.BookingCount ?? 0)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let monthlyRevenueChart, dailyRevenueChart, revenueDistributionChart;
+
+        // Prepare data
+        let monthlyData = [];
+        let dailyData = [];
+        
+        try {
+            monthlyData = @Html.Raw(Json.Serialize(ViewBag.MonthlyData ?? new List<MonAmour.ViewModels.MonthlyRevenueViewModel>()));
+        } catch (e) {
+            console.error('Error serializing monthly data:', e);
+            monthlyData = [];
+        }
+        
+        try {
+            dailyData = @Html.Raw(Json.Serialize(ViewBag.DailyData ?? new List<MonAmour.ViewModels.DailyRevenueViewModel>()));
+        } catch (e) {
+            console.error('Error serializing daily data:', e);
+            dailyData = [];
+        }
+        
+        // Debug logging
+        console.log('Raw Monthly data:', monthlyData);
+        console.log('Raw Daily data:', dailyData);
+        console.log('Monthly data type:', typeof monthlyData, 'Length:', monthlyData?.length);
+        console.log('Daily data type:', typeof dailyData, 'Length:', dailyData?.length);
+        
+        // Debug first item structure
+        if (monthlyData && monthlyData.length > 0) {
+            console.log('First monthly item structure:', monthlyData[0]);
+            console.log('First monthly item keys:', Object.keys(monthlyData[0]));
+        }
+        if (dailyData && dailyData.length > 0) {
+            console.log('First daily item structure:', dailyData[0]);
+            console.log('First daily item keys:', Object.keys(dailyData[0]));
+        }
+        
+        const monthlyLabels = (monthlyData || []).map(m => {
+            console.log('Processing monthly item:', m);
+            return m.MonthName || m.monthName || '';
+        });
+        const monthlyDataValues = (monthlyData || []).map(m => {
+            console.log('Processing monthly revenue:', m, 'Revenue:', m.Revenue || m.revenue);
+            return m.Revenue || m.revenue || 0;
+        });
+        const dailyLabels = (dailyData || []).map(d => {
+            try {
+                console.log('Processing daily item:', d, 'Date:', d.Date || d.date);
+                const dateValue = d.Date || d.date;
+                if (dateValue) {
+                    return new Date(dateValue).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+                }
+                return '';
+            } catch (e) {
+                console.error('Error processing daily date:', e, d);
+                return '';
+            }
+        });
+        const dailyDataValues = (dailyData || []).map(d => {
+            console.log('Processing daily revenue:', d, 'Revenue:', d.Revenue || d.revenue);
+            return d.Revenue || d.revenue || 0;
+        });
+        
+        // Debug processed data
+        console.log('Monthly labels:', monthlyLabels);
+        console.log('Monthly values:', monthlyDataValues);
+        console.log('Daily labels:', dailyLabels);
+        console.log('Daily values:', dailyDataValues);
+        
+        // Fallback data if no data available
+        if (monthlyLabels.length === 0 || monthlyDataValues.every(v => v === 0)) {
+            console.log('No monthly data, using fallback');
+            monthlyLabels.length = 0; // Clear existing
+            monthlyDataValues.length = 0; // Clear existing
+            monthlyLabels.push('Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12');
+            monthlyDataValues.push(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+        
+        if (dailyLabels.length === 0 || dailyDataValues.every(v => v === 0)) {
+            console.log('No daily data, using fallback');
+            dailyLabels.length = 0; // Clear existing
+            dailyDataValues.length = 0; // Clear existing
+            const today = new Date();
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                dailyLabels.push(date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }));
+                dailyDataValues.push(0);
+            }
+        }
+        
+        // Final debug
+        console.log('Final monthly data:', { labels: monthlyLabels, values: monthlyDataValues });
+        console.log('Final daily data:', { labels: dailyLabels, values: dailyDataValues });
+
+        $(document).ready(function() {
+            initializeCharts();
+            setupEventHandlers();
+        });
+
+        function initializeCharts() {
+            console.log('Initializing charts...');
+            console.log('Chart.js available:', typeof Chart !== 'undefined');
+            
+            // Destroy existing charts first
+            if (monthlyRevenueChart) {
+                monthlyRevenueChart.destroy();
+                monthlyRevenueChart = null;
+            }
+            if (dailyRevenueChart) {
+                dailyRevenueChart.destroy();
+                dailyRevenueChart = null;
+            }
+            if (revenueDistributionChart) {
+                revenueDistributionChart.destroy();
+                revenueDistributionChart = null;
+            }
+            
+            // Monthly Revenue Chart
+            const monthlyCtx = document.getElementById('monthlyRevenueChart');
+            if (!monthlyCtx) {
+                console.error('Monthly chart canvas not found!');
+                return;
+            }
+            console.log('Monthly chart canvas found:', monthlyCtx);
+            
+            monthlyRevenueChart = new Chart(monthlyCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: monthlyDataValues,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' VNĐ';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Daily Revenue Chart
+            const dailyCtx = document.getElementById('dailyRevenueChart');
+            if (!dailyCtx) {
+                console.error('Daily chart canvas not found!');
+                return;
+            }
+            console.log('Daily chart canvas found:', dailyCtx);
+            
+            dailyRevenueChart = new Chart(dailyCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: dailyLabels,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: dailyDataValues,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' VNĐ';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Revenue Distribution Chart
+            const distributionCtx = document.getElementById('revenueDistributionChart');
+            if (!distributionCtx) {
+                console.error('Distribution chart canvas not found!');
+                return;
+            }
+            console.log('Distribution chart canvas found:', distributionCtx);
+            
+            revenueDistributionChart = new Chart(distributionCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Đơn hàng', 'Đặt chỗ'],
+                    datasets: [{
+                        data: [
+                            @(ViewBag.RevenueReport?.OrderRevenue ?? 0),
+                            @(ViewBag.RevenueReport?.BookingRevenue ?? 0)
+                        ],
+                        backgroundColor: ['#4e73df', '#1cc88a'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupEventHandlers() {
+            // Set default date range (last 30 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+        }
+
+        function filterData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Vui lòng chọn khoảng thời gian');
+                return;
+            }
+            
+            // Reload page with date parameters
+            const url = new URL(window.location);
+            url.searchParams.set('startDate', startDate);
+            url.searchParams.set('endDate', endDate);
+            window.location.href = url.toString();
+        }
+
+        function exportData() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let url = '@Url.Action("ExportRevenueReport", "Report")';
+            if (startDate && endDate) {
+                url += `?startDate=${startDate}&endDate=${endDate}`;
+            }
+            
+            window.open(url, '_blank');
+        }
+
+        function refreshCharts() {
+            console.log('Refreshing charts...');
+            initializeCharts();
+        }
+    </script>
+}

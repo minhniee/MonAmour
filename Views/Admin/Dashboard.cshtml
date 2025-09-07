@@ -3,341 +3,425 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="page-header">
+<!-- Page Header -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
     <div>
-        <h1>Dashboard</h1>
-        <p class="subtitle">Free Bootstrap 5 Admin Dashboard</p>
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+        </h1>
+        <p class="text-muted">Tổng quan hệ thống MonAmour</p>
     </div>
-    <div class="header-actions">
-        <button class="btn btn-outline-primary">Manage</button>
-        <button class="btn btn-primary">Add Customer</button>
-    </div>
-</div>
-
-<!-- Statistics Cards -->
-<div class="stats-grid">
-    <div class="stat-card visitors">
-        <div class="stat-icon">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="stat-content">
-            <h3>@(ViewBag.UserStats?.ContainsKey("TotalUsers") == true ? ViewBag.UserStats["TotalUsers"] : 0)</h3>
-            <p>Tổng người dùng</p>
-        </div>
-    </div>
-
-    <div class="stat-card subscribers">
-        <div class="stat-icon">
-            <i class="fas fa-user-check"></i>
-        </div>
-        <div class="stat-content">
-            <h3>@(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0)</h3>
-            <p>Đã xác thực</p>
-        </div>
-    </div>
-
-    <div class="stat-card sales">
-        <div class="stat-icon">
-            <i class="fas fa-user-shield"></i>
-        </div>
-        <div class="stat-content">
-            <h3>@(ViewBag.UserStats?.ContainsKey("AdminUsers") == true ? ViewBag.UserStats["AdminUsers"] : 0)</h3>
-            <p>Quản trị viên</p>
-        </div>
-    </div>
-
-    <div class="stat-card orders">
-        <div class="stat-icon">
-            <i class="fas fa-user-clock"></i>
-        </div>
-        <div class="stat-content">
-            <h3>@(ViewBag.UserStats?.ContainsKey("ActiveUsers") == true ? ViewBag.UserStats["ActiveUsers"] : 0)</h3>
-            <p>Đang hoạt động</p>
-        </div>
+    <div class="d-flex">
+        <a href="@Url.Action("RevenueReport", "Report")" class="btn btn-primary mr-2">
+            <i class="fas fa-chart-line mr-1"></i>Báo cáo Doanh thu
+        </a>
+        <a href="@Url.Action("CreateProduct", "Admin")" class="btn btn-success">
+            <i class="fas fa-plus mr-1"></i>Thêm Sản phẩm
+        </a>
     </div>
 </div>
 
-<!-- Charts Section -->
-<div class="charts-section">
-    <div class="chart-card user-statistics">
-        <div class="chart-header">
-            <h4>Thống kê người dùng</h4>
-        </div>
-        <div class="chart-content">
-            <canvas id="userStatsChart" width="400" height="200"></canvas>
-        </div>
-    </div>
-
-    <div class="chart-card daily-sales">
-        <div class="chart-header">
-            <h4>Hoạt động gần đây</h4>
-            <div class="chart-actions">
-                <span class="date-range">Tuần này</span>
-                <button class="btn btn-sm btn-outline-light">
-                    Export <i class="fas fa-chevron-down"></i>
-                </button>
-            </div>
-        </div>
-        <div class="chart-content">
-            <div class="sales-amount">@(ViewBag.UserStats?.ContainsKey("TotalUsers") == true ? ViewBag.UserStats["TotalUsers"] : 0) người dùng</div>
-            <div class="sales-chart">
-                <canvas id="salesChart" width="300" height="100"></canvas>
+<!-- Key Metrics Row -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Tổng đối tác
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(ViewBag.PartnerStats?.ContainsKey("TotalPartners") == true ? ViewBag.PartnerStats["TotalPartners"] : 0)
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-handshake fa-2x text-gray-300"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Đã xác thực
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0)
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Tổng sản phẩm
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(ViewBag.ProductStats?.ContainsKey("TotalProducts") == true ? ViewBag.ProductStats["TotalProducts"] : 0)
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-box fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Danh mục
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(ViewBag.ProductStats?.ContainsKey("TotalCategories") == true ? ViewBag.ProductStats["TotalCategories"] : 0)
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tags fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Bottom Section -->
-<div class="bottom-section">
-    <div class="users-online-card">
-        <div class="card-content">
-            <h3>@(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0)</h3>
-            <p>Đã xác thực</p>
-            <span class="trend positive">+@(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? Math.Round((double)ViewBag.UserStats["VerifiedUsers"] / Math.Max(ViewBag.UserStats["TotalUsers"], 1) * 100, 1) : 0)%</span>
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Concept Statistics Chart -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Thống kê Concepts</h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                        <a class="dropdown-item" href="@Url.Action("Concepts", "Admin")">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="conceptStatsChart"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="mini-chart">
-            <canvas id="onlineChart" width="100" height="30"></canvas>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Thống kê nhanh</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Sản phẩm hoạt động</span>
+                        <span class="font-weight-bold">@(ViewBag.ProductStats?.ContainsKey("ActiveProducts") == true ? ViewBag.ProductStats["ActiveProducts"] : 0)</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 4px;">
+                        <div class="progress-bar bg-success" style="width: @(ViewBag.ProductStats?.ContainsKey("ActiveProducts") == true && ViewBag.ProductStats?.ContainsKey("TotalProducts") == true ? Math.Round((double)ViewBag.ProductStats["ActiveProducts"] / Math.Max(ViewBag.ProductStats["TotalProducts"], 1) * 100, 1) : 0)%"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Hết hàng</span>
+                        <span class="font-weight-bold text-warning">@(ViewBag.ProductStats?.ContainsKey("OutOfStock") == true ? ViewBag.ProductStats["OutOfStock"] : 0)</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 4px;">
+                        <div class="progress-bar bg-warning" style="width: @(ViewBag.ProductStats?.ContainsKey("OutOfStock") == true && ViewBag.ProductStats?.ContainsKey("TotalProducts") == true ? Math.Round((double)ViewBag.ProductStats["OutOfStock"] / Math.Max(ViewBag.ProductStats["TotalProducts"], 1) * 100, 1) : 0)%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Concepts</span>
+                        <span class="font-weight-bold text-info">@(ViewBag.ConceptStats?.ContainsKey("TotalConcepts") == true ? ViewBag.ConceptStats["TotalConcepts"] : 0)</span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Đã xác thực</span>
+                        <span class="font-weight-bold text-primary">@(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Management Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quản lý nhanh</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-left-primary h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-box fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-1">Sản phẩm</h6>
+                                        <p class="text-muted small mb-0">Quản lý sản phẩm</p>
+                                        <a href="@Url.Action("Products", "Admin")" class="btn btn-primary btn-sm mt-2">
+                                            <i class="fas fa-arrow-right mr-1"></i>Quản lý
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-left-success h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-tags fa-2x text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-1">Danh mục</h6>
+                                        <p class="text-muted small mb-0">Quản lý danh mục</p>
+                                        <a href="@Url.Action("ProductCategories", "Admin")" class="btn btn-success btn-sm mt-2">
+                                            <i class="fas fa-arrow-right mr-1"></i>Quản lý
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-left-info h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-users fa-2x text-info"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-1">Người dùng</h6>
+                                        <p class="text-muted small mb-0">Quản lý người dùng</p>
+                                        <a href="@Url.Action("Users", "Admin")" class="btn btn-info btn-sm mt-2">
+                                            <i class="fas fa-arrow-right mr-1"></i>Quản lý
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card border-left-warning h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-chart-line fa-2x text-warning"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-1">Báo cáo</h6>
+                                        <p class="text-muted small mb-0">Xem báo cáo</p>
+                                        <a href="@Url.Action("RevenueReport", "Report")" class="btn btn-warning btn-sm mt-2">
+                                            <i class="fas fa-arrow-right mr-1"></i>Xem báo cáo
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity Section -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Hoạt động gần đây</h6>
+            </div>
+            <div class="card-body">
+                <div class="activity-item d-flex align-items-center mb-3">
+                    <div class="activity-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0">Người dùng mới đăng ký</h6>
+                        <small class="text-muted">@(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0) người dùng đã xác thực</small>
+                    </div>
+                </div>
+                
+                <div class="activity-item d-flex align-items-center mb-3">
+                    <div class="activity-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0">Sản phẩm hoạt động</h6>
+                        <small class="text-muted">@(ViewBag.ProductStats?.ContainsKey("ActiveProducts") == true ? ViewBag.ProductStats["ActiveProducts"] : 0) sản phẩm đang bán</small>
+                    </div>
+                </div>
+                
+                <div class="activity-item d-flex align-items-center mb-3">
+                    <div class="activity-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0">Sản phẩm hết hàng</h6>
+                        <small class="text-muted">@(ViewBag.ProductStats?.ContainsKey("OutOfStock") == true ? ViewBag.ProductStats["OutOfStock"] : 0) sản phẩm cần bổ sung</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Tỷ lệ xác thực</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <div class="position-relative d-inline-block">
+                        <canvas id="verificationChart" width="150" height="150"></canvas>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <h4 class="mb-0">@(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true && ViewBag.UserStats?.ContainsKey("TotalUsers") == true ? Math.Round((double)ViewBag.UserStats["VerifiedUsers"] / Math.Max(ViewBag.UserStats["TotalUsers"], 1) * 100, 1) : 0)%</h4>
+                            <small class="text-muted">Đã xác thực</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        @(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0) / @(ViewBag.UserStats?.ContainsKey("TotalUsers") == true ? ViewBag.UserStats["TotalUsers"] : 0) người dùng
+                    </small>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js" 
-            integrity="sha256-vxkbYU4sKKW4VXnP7ZJVMMknEX5p9Xow9MWB8DT1c6Y=" 
-            crossorigin="anonymous"></script>
-    <script>
-        // Fallback for Chart.js if CDN fails
-        if (typeof Chart === 'undefined') {
-            console.warn('Primary Chart.js CDN failed, trying fallback...');
-            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"><\/script>');
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Initialize charts when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if Chart.js is loaded
             if (typeof Chart !== 'undefined') {
                 initializeDashboardCharts();
-            } else {
-                console.warn('Chart.js not loaded, displaying fallback message');
-                // Show fallback message if Chart.js fails to load
-                const chartContainers = document.querySelectorAll('.chart-content canvas');
-                chartContainers.forEach(canvas => {
-                    const parent = canvas.parentElement;
-                    if (parent) {
-                        parent.innerHTML = '<div class="text-center p-4 text-muted">Biểu đồ đang tải...</div>';
-                    }
-                });
-                
-                // Try to reload Chart.js after a delay
-                setTimeout(() => {
-                    if (typeof Chart !== 'undefined') {
-                        initializeDashboardCharts();
-                    }
-                }, 2000);
             }
         });
 
         function initializeDashboardCharts() {
-            try {
-                // User Statistics Chart with real data
-                const userStatsCtx = document.getElementById('userStatsChart');
-                if (userStatsCtx) {
-                    const totalUsers = @Html.Raw(ViewBag.UserStats?.ContainsKey("TotalUsers") == true ? ViewBag.UserStats["TotalUsers"] : 0);
-                    const verifiedUsers = @Html.Raw(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0);
-                    const adminUsers = @Html.Raw(ViewBag.UserStats?.ContainsKey("AdminUsers") == true ? ViewBag.UserStats["AdminUsers"] : 0);
-                    const activeUsers = @Html.Raw(ViewBag.UserStats?.ContainsKey("ActiveUsers") == true ? ViewBag.UserStats["ActiveUsers"] : 0);
+            // Concept Statistics Chart
+            const conceptStatsCtx = document.getElementById('conceptStatsChart');
+            if (conceptStatsCtx) {
+                const totalConcepts = @(ViewBag.ConceptStats?.ContainsKey("TotalConcepts") == true ? ViewBag.ConceptStats["TotalConcepts"] : 0);
+                const activeConcepts = @(ViewBag.ConceptStats?.ContainsKey("ActiveConcepts") == true ? ViewBag.ConceptStats["ActiveConcepts"] : 0);
+                const totalProducts = @(ViewBag.ProductStats?.ContainsKey("TotalProducts") == true ? ViewBag.ProductStats["TotalProducts"] : 0);
 
-                    new Chart(userStatsCtx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-                            datasets: [{
-                                label: 'Tổng người dùng',
-                                data: [
-                                    Math.round(totalUsers * 0.1), 
-                                    Math.round(totalUsers * 0.2), 
-                                    Math.round(totalUsers * 0.3), 
-                                    Math.round(totalUsers * 0.4), 
-                                    Math.round(totalUsers * 0.5), 
-                                    Math.round(totalUsers * 0.6), 
-                                    Math.round(totalUsers * 0.7), 
-                                    Math.round(totalUsers * 0.8), 
-                                    Math.round(totalUsers * 0.9), 
-                                    Math.round(totalUsers * 0.95), 
-                                    Math.round(totalUsers * 0.98), 
-                                    totalUsers
-                                ],
-                                borderColor: '#007bff',
-                                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                                fill: true,
-                                tension: 0.1
-                            }, {
-                                label: 'Đã xác thực',
-                                data: [
-                                    Math.round(verifiedUsers * 0.1), 
-                                    Math.round(verifiedUsers * 0.2), 
-                                    Math.round(verifiedUsers * 0.3), 
-                                    Math.round(verifiedUsers * 0.4), 
-                                    Math.round(verifiedUsers * 0.5), 
-                                    Math.round(verifiedUsers * 0.6), 
-                                    Math.round(verifiedUsers * 0.7), 
-                                    Math.round(verifiedUsers * 0.8), 
-                                    Math.round(verifiedUsers * 0.9), 
-                                    Math.round(verifiedUsers * 0.95), 
-                                    Math.round(verifiedUsers * 0.98), 
-                                    verifiedUsers
-                                ],
-                                borderColor: '#28a745',
-                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                                fill: true,
-                                tension: 0.1
-                            }, {
-                                label: 'Quản trị viên',
-                                data: [
-                                    Math.round(adminUsers * 0.1), 
-                                    Math.round(adminUsers * 0.2), 
-                                    Math.round(adminUsers * 0.3), 
-                                    Math.round(adminUsers * 0.4), 
-                                    Math.round(adminUsers * 0.5), 
-                                    Math.round(adminUsers * 0.6), 
-                                    Math.round(adminUsers * 0.7), 
-                                    Math.round(adminUsers * 0.8), 
-                                    Math.round(adminUsers * 0.9), 
-                                    Math.round(adminUsers * 0.95), 
-                                    Math.round(adminUsers * 0.98), 
-                                    adminUsers
-                                ],
-                                borderColor: '#6f42c1',
-                                backgroundColor: 'rgba(111, 66, 193, 0.1)',
-                                fill: true,
-                                tension: 0.1
-                            }]
+                new Chart(conceptStatsCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                        datasets: [{
+                            label: 'Tổng Concepts',
+                            data: [totalConcepts * 0.1, totalConcepts * 0.2, totalConcepts * 0.3, totalConcepts * 0.4, totalConcepts * 0.5, totalConcepts * 0.6, totalConcepts * 0.7, totalConcepts * 0.8, totalConcepts * 0.9, totalConcepts * 0.95, totalConcepts * 0.98, totalConcepts],
+                            backgroundColor: 'rgba(78, 115, 223, 0.6)',
+                            borderColor: '#4e73df',
+                            borderWidth: 1
+                        }, {
+                            label: 'Concepts hoạt động',
+                            data: [activeConcepts * 0.1, activeConcepts * 0.2, activeConcepts * 0.3, activeConcepts * 0.4, activeConcepts * 0.5, activeConcepts * 0.6, activeConcepts * 0.7, activeConcepts * 0.8, activeConcepts * 0.9, activeConcepts * 0.95, activeConcepts * 0.98, activeConcepts],
+                            backgroundColor: 'rgba(28, 200, 138, 0.6)',
+                            borderColor: '#1cc88a',
+                            borderWidth: 1
+                        }, {
+                            label: 'Sản phẩm',
+                            data: [totalProducts * 0.1, totalProducts * 0.2, totalProducts * 0.3, totalProducts * 0.4, totalProducts * 0.5, totalProducts * 0.6, totalProducts * 0.7, totalProducts * 0.8, totalProducts * 0.9, totalProducts * 0.95, totalProducts * 0.98, totalProducts],
+                            backgroundColor: 'rgba(54, 185, 204, 0.6)',
+                            borderColor: '#36b9cc',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
                                 }
                             },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
+                            x: {
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
                                 }
                             }
                         }
-                    });
-                }
+                    }
+                });
+            }
 
-                // Sales Chart (Activity Chart)
-                const salesCtx = document.getElementById('salesChart');
-                if (salesCtx) {
-                    const salesTotalUsers = @Html.Raw(ViewBag.UserStats?.ContainsKey("TotalUsers") == true ? ViewBag.UserStats["TotalUsers"] : 0);
-                    new Chart(salesCtx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-                            datasets: [{
-                                label: 'Hoạt động',
-                                data: [
-                                    Math.round(salesTotalUsers * 0.1), 
-                                    Math.round(salesTotalUsers * 0.15), 
-                                    Math.round(salesTotalUsers * 0.2), 
-                                    Math.round(salesTotalUsers * 0.25), 
-                                    Math.round(salesTotalUsers * 0.3), 
-                                    Math.round(salesTotalUsers * 0.35), 
-                                    Math.round(salesTotalUsers * 0.4)
-                                ],
-                                borderColor: 'rgba(255, 255, 255, 0.8)',
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                fill: true,
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    display: false
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    display: false
-                                },
-                                y: {
-                                    display: false
-                                }
-                            },
-                            elements: {
-                                point: {
-                                    radius: 0
-                                }
-                            }
-                        }
-                    });
-                }
+            // Verification Chart (Doughnut)
+            const verificationCtx = document.getElementById('verificationChart');
+            if (verificationCtx) {
+                const totalUsers = @(ViewBag.UserStats?.ContainsKey("TotalUsers") == true ? ViewBag.UserStats["TotalUsers"] : 0);
+                const verifiedUsers = @(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0);
+                const unverifiedUsers = totalUsers - verifiedUsers;
 
-                // Online Users Chart
-                const onlineCtx = document.getElementById('onlineChart');
-                if (onlineCtx) {
-                    const onlineVerifiedUsers = @Html.Raw(ViewBag.UserStats?.ContainsKey("VerifiedUsers") == true ? ViewBag.UserStats["VerifiedUsers"] : 0);
-                    new Chart(onlineCtx.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: ['', '', '', '', '', '', ''],
-                            datasets: [{
-                                label: 'Đã xác thực',
-                                data: [
-                                    Math.round(onlineVerifiedUsers * 0.1), 
-                                    Math.round(onlineVerifiedUsers * 0.2), 
-                                    Math.round(onlineVerifiedUsers * 0.3), 
-                                    Math.round(onlineVerifiedUsers * 0.4), 
-                                    Math.round(onlineVerifiedUsers * 0.5), 
-                                    Math.round(onlineVerifiedUsers * 0.6), 
-                                    Math.round(onlineVerifiedUsers * 0.7)
-                                ],
-                                borderColor: '#007bff',
-                                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                                fill: true,
-                                tension: 0.4
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    display: false
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    display: false
-                                },
-                                y: {
-                                    display: false
-                                }
-                            },
-                            elements: {
-                                point: {
-                                    radius: 0
-                                }
+                new Chart(verificationCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Đã xác thực', 'Chưa xác thực'],
+                        datasets: [{
+                            data: [verifiedUsers, unverifiedUsers],
+                            backgroundColor: ['#1cc88a', '#e74a3b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
                             }
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Error initializing charts:', error);
-                // Hide chart containers if they fail to load
-                const chartContainers = document.querySelectorAll('.chart-content canvas');
-                chartContainers.forEach(canvas => {
-                    const parent = canvas.parentElement;
-                    if (parent) {
-                        parent.innerHTML = '<div class="text-center p-4 text-muted">Biểu đồ không khả dụng</div>';
+                        },
+                        cutout: '70%'
                     }
                 });
             }

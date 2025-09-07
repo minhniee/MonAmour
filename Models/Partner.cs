@@ -23,6 +23,8 @@ public partial class Partner
 
     public DateTime? UpdatedAt { get; set; }
 
+    public string? Avatar { get; set; }
+
     public virtual ICollection<Location> Locations { get; set; } = new List<Location>();
 
     public virtual User? User { get; set; }

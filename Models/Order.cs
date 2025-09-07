@@ -26,8 +26,6 @@ public partial class Order
 
     public DateTime? UpdatedAt { get; set; }
 
-    public string? ShippingAddress { get; set; }
-
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual ICollection<PaymentDetail> PaymentDetails { get; set; } = new List<PaymentDetail>();
