@@ -1,4 +1,6 @@
-﻿namespace MonAmour.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MonAmour.Models;
 
 public partial class Role
 {

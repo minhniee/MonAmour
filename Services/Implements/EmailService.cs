@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
-using MonAmour.Models;
 using MonAmour.Services.Interfaces;
+using MonAmour.Util;
 using System.Net;
 using System.Net.Mail;
 
@@ -36,8 +36,8 @@ public class EmailService : IEmailService
         try
         {
             _logger.LogInformation("Sending verification email to: {Email}", email);
-            
-            var verificationLink = $"{_appSettings.GetFullUrl()}/Auth/VerifyEmail?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+
+            var verificationLink = $"{_appSettings.AppUrl}/Auth/VerifyEmail?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
 
             var mailMessage = new MailMessage
             {
@@ -104,7 +104,7 @@ public class EmailService : IEmailService
         try
         {
             _logger.LogInformation("Sending password reset email to: {Email}", email);
-            
+
             var resetLink = $"{_appSettings.GetFullUrl()}/Auth/ResetPassword?token={Uri.EscapeDataString(token)}";
 
             var mailMessage = new MailMessage
@@ -179,7 +179,7 @@ public class EmailService : IEmailService
         try
         {
             _logger.LogInformation("Sending welcome email to: {Email} for user: {Name}", email, name);
-            
+
             var mailMessage = new MailMessage
             {
                 From = new MailAddress(_emailSettings.From, "MonAmour"),

@@ -159,6 +159,27 @@ namespace MonAmour.Controllers
                 return NotFound();
             }
 
+            // Load reviews for this product
+            var reviews = _db.Reviews
+                .Include(r => r.User)
+                .Where(r => r.TargetType == "Product" && r.TargetId == id)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
+            // Determine verified purchasers (placed and received/completed)
+            var verifiedUserIds = _db.Orders
+                .Include(o => o.OrderItems)
+                .Where(o => o.UserId != null
+                            && (o.Status != null && (o.Status.ToLower() == "completed" || o.Status.ToLower() == "delivered")
+                                || o.DeliveredAt != null))
+                .Where(o => o.OrderItems.Any(oi => oi.ProductId == id))
+                .Select(o => o.UserId!.Value)
+                .Distinct()
+                .ToList();
+
+            ViewBag.Reviews = reviews;
+            ViewBag.VerifiedUserIds = new HashSet<int>(verifiedUserIds);
+
             // Load related products in the same category (exclude current)
             var related = _db.Products
                 .Include(p => p.ProductImgs)

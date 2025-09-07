@@ -32,7 +32,7 @@ namespace MonAmour.Controllers
             try
             {
                 var (success, errorMessage) = await _authService.LoginAsync(model);
-                
+
                 if (success)
                 {
                     // Check if there's a return URL
@@ -46,7 +46,7 @@ namespace MonAmour.Controllers
                     // Role-based redirect
                     var redirectUrl = AuthHelper.GetDefaultRedirectUrl(HttpContext);
                     TempData["SuccessMessage"] = "Đăng nhập thành công!";
-                    
+
                     if (AuthHelper.IsAdmin(HttpContext))
                     {
                         _logger.LogInformation("Admin user logged in: {Email}", model.Email);
@@ -89,7 +89,7 @@ namespace MonAmour.Controllers
             try
             {
                 var (success, errorMessage) = await _authService.SignupAsync(model);
-                
+
                 if (success)
                 {
                     TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.";
@@ -163,7 +163,7 @@ namespace MonAmour.Controllers
 
             try
             {
-                var isValid = await _authService.IsTokenValidAsync(token, "password_reset");
+                var isValid = await _authService.IsTokenValidAsync(token, "reset_password");
                 if (!isValid)
                 {
                     TempData["ErrorMessage"] = "Link đặt lại mật khẩu đã hết hạn hoặc không hợp lệ.";
@@ -192,7 +192,7 @@ namespace MonAmour.Controllers
             try
             {
                 var (success, errorMessage) = await _authService.ResetPasswordAsync(model);
-                
+
                 if (success)
                 {
                     ViewBag.IsSuccess = true;

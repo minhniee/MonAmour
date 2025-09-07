@@ -1,7 +1,5 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MonAmour.Models;
 using MonAmour.Helpers;
 using MonAmour.Services.Interfaces;
 using System.Text.Json;

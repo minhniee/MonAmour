@@ -55,6 +55,7 @@
     <div class="min-h-screen">
         @await Html.PartialAsync("_Header")
         <main>
+            @await Html.PartialAsync("_Notifications")
             @RenderBody()
         </main>
         @await Html.PartialAsync("_Footer")
