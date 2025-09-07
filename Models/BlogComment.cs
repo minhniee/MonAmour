@@ -20,8 +20,6 @@ public partial class BlogComment
     [Column("author_name")]
     public string? AuthorName { get; set; }
 
-    [StringLength(255)]
-    [Column("author_email")]
     public string? AuthorEmail { get; set; }
 
     [Required]
