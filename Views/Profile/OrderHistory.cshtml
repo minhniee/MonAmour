@@ -4,7 +4,7 @@
 }
 
 @using MonAmour.ViewModels
-@model OrderHistoryViewModel
+@model OrderHistoryUserViewModel
 
 <div class="min-h-screen py-8" style="background-color: #fbf1e6;">
     <div class="container mx-auto px-4 max-w-4xl">
@@ -103,7 +103,7 @@
         <div id="tab-concept" class="tab-content space-y-4 hidden">
             @{
                 var conceptCategory = Model.Categories.FirstOrDefault(c => c.Name == "Concept");
-                var conceptOrders = conceptCategory?.Orders ?? new List<OrderSummaryViewModel>();
+                var conceptOrders = conceptCategory?.Orders ?? new List<OrderSummaryUserViewModel>();
                 var initialConceptOrders = conceptOrders.Take(5);
                 var remainingConceptOrders = conceptOrders.Skip(5);
             }
@@ -164,7 +164,7 @@
         <div id="tab-giftbox" class="tab-content space-y-4 hidden">
             @{
                 var giftBoxCategory = Model.Categories.FirstOrDefault(c => c.Name == "Gift Box");
-                var giftBoxOrders = giftBoxCategory?.Orders ?? new List<OrderSummaryViewModel>();
+                var giftBoxOrders = giftBoxCategory?.Orders ?? new List<OrderSummaryUserViewModel>();
                 var initialGiftBoxOrders = giftBoxOrders.Take(5);
                 var remainingGiftBoxOrders = giftBoxOrders.Skip(5);
             }

@@ -1,17 +1,17 @@
 ﻿namespace MonAmour.ViewModels;
 
-public class OrderHistoryViewModel
+public class OrderHistoryUserViewModel
 {
-    public List<OrderCategoryViewModel> Categories { get; set; } = new();
+    public List<OrderCategoryUserViewModel> Categories { get; set; } = new();
 }
 
-public class OrderCategoryViewModel
+public class OrderCategoryUserViewModel
 {
     public string Name { get; set; } = string.Empty; // "Concept" or "Gift Box"
-    public List<OrderSummaryViewModel> Orders { get; set; } = new();
+    public List<OrderSummaryUserViewModel> Orders { get; set; } = new();
 }
 
-public class OrderSummaryViewModel
+public class OrderSummaryUserViewModel
 {
     public DateTime OrderDate { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
@@ -20,10 +20,10 @@ public class OrderSummaryViewModel
     public bool HasReview { get; set; }
     public int? ReviewId { get; set; }
     public decimal TotalAmount { get; set; }
-    public List<OrderItemViewModel> Items { get; set; } = new();
+    public List<OrderItemUserViewModel> Items { get; set; } = new();
 }
 
-public class OrderItemViewModel
+public class OrderItemUserViewModel
 {
     public int ItemId { get; set; }
     public string ItemType { get; set; } = string.Empty; // Product or Concept

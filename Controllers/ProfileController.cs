@@ -234,12 +234,12 @@ public class ProfileController : Controller
                 .OrderByDescending(b => b.CreatedAt)
                 .ToListAsync();
 
-            var model = new OrderHistoryViewModel
+            var model = new OrderHistoryUserViewModel
             {
-                Categories = new List<OrderCategoryViewModel>()
+                Categories = new List<OrderCategoryUserViewModel>()
             };
 
-            var giftBoxCategory = new OrderCategoryViewModel
+            var giftBoxCategory = new OrderCategoryUserViewModel
             {
                 Name = "Gift Box",
                 Orders = giftBoxOrders.Select(o =>
@@ -249,7 +249,7 @@ public class ProfileController : Controller
                     var review = firstProduct != null ? reviews.FirstOrDefault(r =>
                         r.TargetType == "Product" && r.TargetId == firstProduct) : null;
 
-                    return new OrderSummaryViewModel
+                    return new OrderSummaryUserViewModel
                     {
                         OrderDate = o.CreatedAt ?? DateTime.Now,
                         OrderNumber = $"ORD-{o.OrderId}",
@@ -258,7 +258,7 @@ public class ProfileController : Controller
                         HasReview = review != null,
                         ReviewId = review?.ReviewId,
                         TotalAmount = (o.TotalPrice) + (o.ShippingCost),
-                        Items = o.OrderItems.Select(oi => new OrderItemViewModel
+                        Items = o.OrderItems.Select(oi => new OrderItemUserViewModel
                         {
                             ItemId = oi.OrderItemId,
                             ItemType = "Product",
@@ -272,7 +272,7 @@ public class ProfileController : Controller
                 }).ToList()
             };
 
-            var conceptCategory = new OrderCategoryViewModel
+            var conceptCategory = new OrderCategoryUserViewModel
             {
                 Name = "Concept",
                 Orders = conceptBookings.Select(b =>
@@ -280,7 +280,7 @@ public class ProfileController : Controller
                     var review = reviews.FirstOrDefault(r =>
                         r.TargetType == "Concept" && r.TargetId == b.ConceptId);
 
-                    return new OrderSummaryViewModel
+                    return new OrderSummaryUserViewModel
                     {
                         OrderDate = b.CreatedAt ?? DateTime.Now,
                         OrderNumber = $"BK-{b.BookingId}",
@@ -289,9 +289,9 @@ public class ProfileController : Controller
                         HasReview = review != null,
                         ReviewId = review?.ReviewId,
                         TotalAmount = b.TotalPrice ?? 0m,
-                        Items = new List<OrderItemViewModel>
+                        Items = new List<OrderItemUserViewModel>
                         {
-                            new OrderItemViewModel
+                            new OrderItemUserViewModel
                             {
                                 ItemId = b.BookingId,
                                 ItemType = "Concept",
@@ -429,7 +429,7 @@ public class ProfileController : Controller
                 return RedirectToAction("OrderHistory");
             }
 
-            OrderDetailViewModel? model = null;
+            OrderDetailUserViewModel? model = null;
 
             if (type == "ORD") // Gift Box Order
             {
@@ -448,7 +448,7 @@ public class ProfileController : Controller
                     return RedirectToAction("OrderHistory");
                 }
 
-                model = new OrderDetailViewModel
+                model = new OrderDetailUserViewModel
                 {
                     OrderNumber = orderNumber,
                     OrderDate = order.CreatedAt ?? DateTime.Now,
@@ -460,7 +460,7 @@ public class ProfileController : Controller
                     PaymentStatus = order.PaymentDetails.FirstOrDefault()?.Payment?.Status,
                     PaymentDate = order.PaymentDetails.FirstOrDefault()?.Payment?.ProcessedAt,
                     TransactionId = order.PaymentDetails.FirstOrDefault()?.PaymentId.ToString(),
-                    Items = order.OrderItems.Select(oi => new OrderItemViewModel
+                    Items = order.OrderItems.Select(oi => new OrderItemUserViewModel
                     {
                         ItemId = oi.OrderItemId,
                         ItemType = "Product",
@@ -488,7 +488,7 @@ public class ProfileController : Controller
                     return RedirectToAction("OrderHistory");
                 }
 
-                model = new OrderDetailViewModel
+                model = new OrderDetailUserViewModel
                 {
                     OrderNumber = orderNumber,
                     OrderDate = booking.CreatedAt ?? DateTime.Now,
@@ -498,9 +498,9 @@ public class ProfileController : Controller
                     PaymentStatus = booking.PaymentDetails.FirstOrDefault()?.Payment?.Status,
                     PaymentDate = booking.PaymentDetails.FirstOrDefault()?.Payment?.ProcessedAt,
                     TransactionId = booking.PaymentDetails.FirstOrDefault()?.PaymentId.ToString(),
-                    Items = new List<OrderItemViewModel>
+                    Items = new List<OrderItemUserViewModel>
                     {
-                        new OrderItemViewModel
+                        new OrderItemUserViewModel
                         {
                             ItemId = booking.BookingId,
                             ItemType = "Concept",

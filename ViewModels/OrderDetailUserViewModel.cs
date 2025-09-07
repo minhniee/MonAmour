@@ -1,6 +1,6 @@
 namespace MonAmour.ViewModels;
 
-public class OrderDetailViewModel
+public class OrderDetailUserViewModel
 {
     public string OrderNumber { get; set; } = string.Empty;
     public DateTime OrderDate { get; set; }
@@ -14,5 +14,5 @@ public class OrderDetailViewModel
     public string? PaymentStatus { get; set; }
     public DateTime? PaymentDate { get; set; }
     public string? TransactionId { get; set; }
-    public List<OrderItemViewModel> Items { get; set; } = new();
+    public List<OrderItemUserViewModel> Items { get; set; } = new();
 }
