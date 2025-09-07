@@ -14,11 +14,13 @@ public class UserMenuFilter : IActionFilter
             {
                 controller.ViewBag.UserName = AuthHelper.GetUserName(controller.HttpContext);
                 controller.ViewBag.UserEmail = AuthHelper.GetUserEmail(controller.HttpContext);
+                controller.ViewBag.IsAdmin = AuthHelper.IsAdmin(controller.HttpContext);
                 controller.ViewBag.IsLoggedIn = true;
             }
             else
             {
                 controller.ViewBag.IsLoggedIn = false;
+                controller.ViewBag.IsAdmin = false;
             }
         }
     }

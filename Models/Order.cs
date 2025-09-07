@@ -16,8 +16,6 @@ public partial class Order
 
     public string? TrackingNumber { get; set; }
 
-    public string? ShippingAddress { get; set; }
-
     public DateOnly? EstimatedDelivery { get; set; }
 
     public DateTime? DeliveredAt { get; set; }

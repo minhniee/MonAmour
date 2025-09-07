@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MonAmour.Helpers;
+using MonAmour.Models;
 using MonAmour.Services.Interfaces;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace MonAmour.Controllers
@@ -142,7 +144,7 @@ namespace MonAmour.Controllers
             {
                 item.Quantity += quantity;
                 item.UnitPrice = product.Price.HasValue ? product.Price.Value : item.UnitPrice;
-                item.TotalPrice = (item.UnitPrice ?? 0m) * item.Quantity;
+                item.TotalPrice = (decimal)(item.UnitPrice * item.Quantity);
                 _db.OrderItems.Update(item);
             }
 
@@ -197,7 +199,7 @@ namespace MonAmour.Controllers
 
             // Update cart item
             item.Quantity = quantity;
-            item.TotalPrice = (item.UnitPrice ?? 0m) * item.Quantity;
+            item.TotalPrice = (decimal)(item.UnitPrice * item.Quantity);
             _db.OrderItems.Update(item);
 
             // Update product stock
@@ -407,9 +409,9 @@ namespace MonAmour.Controllers
                 // Check for new transactions in the last 24 hours (giảm thời gian kiểm tra vì có webhook)
                 var from = DateTime.UtcNow.AddHours(-24);
                 var to = DateTime.UtcNow;
-                
+
                 var response = await _cassoService.GetTransactionsAsync(from, to);
-                
+
                 var debugInfo = new List<string>();
                 debugInfo.Add($"Casso API Response: Code={response.Code}, HasData={response.Data != null}");
                 debugInfo.Add($"Response Description: {response.Desc}");
@@ -426,31 +428,31 @@ namespace MonAmour.Controllers
                 {
                     debugInfo.Add("No data returned from Casso API");
                 }
-                
+
                 if (response.Code != 0 || response.Data == null)
                 {
-                    var errorMessage = response.Code == 401 ? "API key không hợp lệ hoặc hết hạn" : 
+                    var errorMessage = response.Code == 401 ? "API key không hợp lệ hoặc hết hạn" :
                                      response.Code == 403 ? "Không có quyền truy cập API" :
                                      response.Code == 404 ? "API endpoint không tồn tại" :
                                      response.Code == 500 ? "Lỗi server Casso" :
                                      $"Lỗi API Casso (Code: {response.Code})";
-                    
+
                     return Json(new { success = false, message = errorMessage, debug = debugInfo });
                 }
 
                 var processedCount = 0;
-                
+
                 foreach (var transaction in response.Data.Records)
                 {
                     // Debug: Log transaction details
                     var transactionText = $"Transaction: Description='{transaction.Description}', Reference='{transaction.Reference}', Ref='{transaction.Ref}', Amount={transaction.Amount}";
                     debugInfo.Add(transactionText);
-                    
+
                     // Kiểm tra theo mã tham chiếu đơn hàng hoặc theo UserID (tương thích cũ)
                     var hasOrderRef = !string.IsNullOrWhiteSpace(cartOrderRef) && (transaction.Description?.Contains(cartOrderRef) == true || transaction.Reference?.Contains(cartOrderRef) == true || transaction.Ref?.Contains(cartOrderRef) == true);
                     var transactionUserId = ExtractUserIdFromTransaction(transaction);
                     debugInfo.Add($"HasOrderRef: {hasOrderRef}, OrderRef: {cartOrderRef}, Extracted UserID: {transactionUserId}, Current UserID: {userId}");
-                    
+
                     if (hasOrderRef || transactionUserId == userId)
                     {
                         var success = await _cassoService.ProcessPaymentAsync(transaction, userId.Value);
@@ -493,9 +495,10 @@ namespace MonAmour.Controllers
 
                 if (cartOrder == null)
                 {
-                    return Json(new { 
-                        success = true, 
-                        hasCart = false, 
+                    return Json(new
+                    {
+                        success = true,
+                        hasCart = false,
                         isPaid = false,
                         amount = 0m,
                         message = "Không có giỏ hàng"
@@ -503,11 +506,12 @@ namespace MonAmour.Controllers
                 }
 
                 var isPaid = cartOrder.PaymentDetails.Any(pd => pd.Payment?.Status == "completed");
-                var amount = cartOrder.TotalPrice ?? 0m;
+                var amount = cartOrder.TotalPrice;
 
-                return Json(new { 
-                    success = true, 
-                    hasCart = true, 
+                return Json(new
+                {
+                    success = true,
+                    hasCart = true,
                     isPaid = isPaid,
                     amount = amount,
                     orderId = cartOrder.OrderId,
@@ -542,15 +546,15 @@ namespace MonAmour.Controllers
                 return Json(new { success = false, message = "Không có giỏ hàng" });
             }
 
-            var amount = cart.TotalPrice ?? 0m;
+            var amount = cart.TotalPrice;
             // Nội dung chuyển khoản dùng mã tham chiếu theo đơn hàng, tương tự booking
             // Để ổn định khi khớp giao dịch, dùng dạng ngắn: ORDER{orderId}
             var paymentReference = $"ORDER{cart.OrderId}";
             var transferContent = paymentReference;
-            
+
             // Tạo QR code cho thanh toán
             var qrCodeUrl = _vietQRService.GetQRCodeUrl(amount, transferContent);
-            
+
             var instructions = new
             {
                 success = true,
@@ -575,7 +579,7 @@ namespace MonAmour.Controllers
         {
             // Try to extract user ID from various fields
             var textToSearch = $"{transaction.Description} {transaction.Reference} {transaction.Ref}";
-            
+
             // Look for patterns like "UserID123" hoặc "UserID:123" (hỗ trợ cả 2 format)
             var patterns = new[]
             {
@@ -625,15 +629,17 @@ namespace MonAmour.Controllers
             {
                 var from = DateTime.UtcNow.AddDays(-7);
                 var to = DateTime.UtcNow;
-                
+
                 var response = await _cassoService.GetTransactionsAsync(from, to);
-                
-                return Json(new { 
-                    success = true, 
+
+                return Json(new
+                {
+                    success = true,
                     code = response.Code,
                     hasData = response.Data != null,
                     recordCount = response.Data?.Records?.Count ?? 0,
-                    records = response.Data?.Records?.Take(5).Select(t => new {
+                    records = response.Data?.Records?.Take(5).Select(t => new
+                    {
                         description = t.Description,
                         reference = t.Reference,
                         ref_field = t.Ref,
@@ -728,10 +734,11 @@ namespace MonAmour.Controllers
             {
                 var from = DateTime.Now.AddDays(-1);
                 var to = DateTime.Now;
-                
+
                 var result = await _cassoService.GetTransactionsAsync(from, to);
-                
-                return Json(new { 
+
+                return Json(new
+                {
                     success = true,
                     code = result.Code,
                     desc = result.Desc,
@@ -742,7 +749,8 @@ namespace MonAmour.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { 
+                return Json(new
+                {
                     success = false,
                     error = ex.Message,
                     stackTrace = ex.StackTrace
@@ -760,18 +768,19 @@ namespace MonAmour.Controllers
                 using var httpClient = new HttpClient();
                 var apiKey = _config["Casso:ApiKey"];
                 var apiBase = _config["Casso:ApiBase"];
-                
+
                 httpClient.BaseAddress = new Uri(apiBase);
                 httpClient.DefaultRequestHeaders.Add("Authorization", $"Apikey {apiKey}");
-                
+
                 var from = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
                 var to = DateTime.Now.ToString("yyyy-MM-dd");
                 var url = $"/v2/transactions?from={from}&to={to}&page=1&pageSize=100";
-                
+
                 var response = await httpClient.GetAsync(url);
                 var content = await response.Content.ReadAsStringAsync();
-                
-                return Json(new { 
+
+                return Json(new
+                {
                     success = response.IsSuccessStatusCode,
                     statusCode = (int)response.StatusCode,
                     statusText = response.StatusCode.ToString(),
@@ -781,7 +790,8 @@ namespace MonAmour.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { 
+                return Json(new
+                {
                     success = false,
                     error = ex.Message,
                     stackTrace = ex.StackTrace
@@ -817,9 +827,10 @@ namespace MonAmour.Controllers
                 var hasSession = HttpContext.Session != null;
                 var isAuthenticated = AuthHelper.IsAuthenticated(HttpContext);
                 var userId = AuthHelper.GetUserId(HttpContext);
-                
-                return Json(new { 
-                    success = true, 
+
+                return Json(new
+                {
+                    success = true,
                     sessionId = sessionId,
                     hasSession = hasSession,
                     isAuthenticated = isAuthenticated,
@@ -829,8 +840,9 @@ namespace MonAmour.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { 
-                    success = false, 
+                return Json(new
+                {
+                    success = false,
                     error = ex.Message,
                     stackTrace = ex.StackTrace
                 });
