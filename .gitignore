@@ -386,7 +386,8 @@ $RECYCLE.BIN/
 # Mac
 .DS_Store
 
-# Application specific
+# Application specifics
+appsettings.json
 appsettings.Development.json
 appsettings.Production.json
 *.log

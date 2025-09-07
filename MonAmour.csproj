@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,10 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\VietQR\" />
     <Folder Include="Helpers\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="Services\Implements\" />
-    <Folder Include="Views\ZaloPay\" />
   </ItemGroup>
 
 </Project>

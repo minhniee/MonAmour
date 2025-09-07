@@ -231,6 +231,7 @@ CREATE TABLE [Order] (
     shipping_cost DECIMAL(18,2) DEFAULT 0,
     status VARCHAR(20) CHECK (status IN ('confirmed','shipping','completed')),
     shipping_option_id INT FOREIGN KEY REFERENCES ShippingOption(shipping_option_id),
+    shipping_address NVARCHAR(MAX),
     tracking_number NVARCHAR(100),
     estimated_delivery DATE,
     delivered_at DATETIME NULL,
@@ -261,7 +262,11 @@ CREATE TABLE Payment (
     status VARCHAR(20) CHECK (status IN ('pending','completed','failed')),
     payment_method_id INT FOREIGN KEY REFERENCES PaymentMethod(payment_method_id),
     created_at DATETIME DEFAULT GETDATE(),
-    processed_at DATETIME NULL
+    processed_at DATETIME NULL,
+    PaymentReference NVARCHAR(255) NULL,
+    TransactionId BIGINT NULL,
+    UserId INT NULL,
+    UpdatedAt DATETIME NULL
 );
 
 CREATE TABLE PaymentDetail (
@@ -271,6 +276,8 @@ CREATE TABLE PaymentDetail (
     booking_id INT NULL FOREIGN KEY REFERENCES Booking(booking_id),
     amount DECIMAL(18,2)
 );
+
+-- (Bỏ các extensions PaymentStatus, CassoTransactions theo yêu cầu)
 
 -- =========================
 -- 11. Review (Polymorphic)
@@ -441,6 +448,10 @@ INSERT INTO Email_Template (name, subject, body, template_type, variables) VALUE
 -- Insert payment methods
 INSERT INTO PaymentMethod (name) VALUES 
 ('Credit Card'), ('PayPal'), ('Bank Transfer'), ('Cash'), ('Crypto');
+IF NOT EXISTS (SELECT 1 FROM PaymentMethod WHERE name=N'Casso Bank Transfer')
+    INSERT INTO PaymentMethod(name) VALUES (N'Casso Bank Transfer');
+IF NOT EXISTS (SELECT 1 FROM PaymentMethod WHERE name=N'VietQR')
+    INSERT INTO PaymentMethod(name) VALUES (N'VietQR');
 
 -- Insert shipping options
 INSERT INTO ShippingOption (name) VALUES 
@@ -501,4 +512,32 @@ BEGIN
     ADD CONSTRAINT [CK_Order_Status]
     CHECK ([status] IN ('cart','confirmed','shipping','completed'));
 END
+GO
+
+-- View cập nhật theo schema mới
+IF OBJECT_ID('dbo.vw_PaymentDetails','V') IS NOT NULL DROP VIEW dbo.vw_PaymentDetails;
+GO
+CREATE VIEW dbo.vw_PaymentDetails AS
+SELECT 
+  p.payment_id,
+  p.amount,
+  p.status,
+  p.PaymentReference,
+  p.TransactionId,
+  p.created_at,
+  p.processed_at,
+  p.UpdatedAt,
+  p.UserId,
+  u.email,
+  u.name AS username,
+  pm.name AS PaymentMethodName,
+  o.order_id,
+  o.total_price,
+  o.status AS OrderStatus,
+  pd.amount AS PaymentDetailAmount
+FROM dbo.Payment p
+LEFT JOIN dbo.[User] u ON p.UserId = u.user_id
+LEFT JOIN dbo.PaymentMethod pm ON p.payment_method_id = pm.payment_method_id
+LEFT JOIN dbo.PaymentDetail pd ON p.payment_id = pd.payment_id
+LEFT JOIN dbo.[Order] o ON pd.order_id = o.order_id;
 GO

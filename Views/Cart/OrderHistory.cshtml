@@ -1,0 +1,137 @@
+@model List<MonAmour.Models.Order>
+
+@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+}
+
+<div class="min-h-screen bg-background">
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if (Model == null || !Model.Any())
+        {
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-heading text-xl text-foreground mb-2">Chưa có đơn hàng nào</h3>
+                <p class="text-muted-foreground mb-6">Bạn chưa có đơn hàng nào trong lịch sử mua hàng.</p>
+                <a href="/Gift_box/ListGiftbox" class="bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 transition-colors">
+                    Bắt đầu mua sắm
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Orders List -->
+            <div class="space-y-6">
+                @foreach (var order in Model)
+                {
+                    <div class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                        <!-- Order Header -->
+                        <div class="px-6 py-4 border-b border-border bg-muted/30">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-heading text-lg text-foreground">Đơn hàng #@order.OrderId</h3>
+                                    <p class="text-sm text-muted-foreground">
+                                        Ngày đặt: @(order.CreatedAt.HasValue ? order.CreatedAt.Value.ToString("dd/MM/yyyy") : "Chưa có")
+
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-semibold text-foreground">
+                                        @(order.TotalPrice?.ToString("#,##0"))₫
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        @(order.Status == "confirmed" ? "bg-green-100 text-green-800" :
+                                          order.Status == "pending" ? "bg-yellow-100 text-yellow-800" :
+                                          order.Status == "cancelled" ? "bg-red-100 text-red-800" :
+                                          "bg-gray-100 text-gray-800")">
+                                        @switch (order.Status)
+                                        {
+                                            case "confirmed":
+                                                <text>Đã xác nhận</text>
+                                                break;
+                                            case "pending":
+                                                <text>Đang chờ</text>
+                                                break;
+                                            case "cancelled":
+                                                <text>Đã hủy</text>
+                                                break;
+                                            case "shipped":
+                                                <text>Đã giao</text>
+                                                break;
+                                            case "delivered":
+                                                <text>Đã nhận</text>
+                                                break;
+                                            default:
+                                                <text>@order.Status</text>
+                                                break;
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div class="px-6 py-4">
+                            <div class="space-y-4">
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <div class="flex items-center space-x-4">
+                                        @if (item.Product?.ProductImgs?.Any() == true)
+                                        {
+                                            <img src="@item.Product.ProductImgs.First().ImgUrl" 
+                                                 alt="@item.Product.Name" 
+                                                 class="w-16 h-16 object-cover rounded-md">
+                                        }
+                                        else
+                                        {
+                                            <div class="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
+                                                <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                            </div>
+                                        }
+                                        <div class="flex-1">
+                                            <h4 class="font-medium text-foreground">@item.Product?.Name</h4>
+                                            <p class="text-sm text-muted-foreground">
+                                                Số lượng: @item.Quantity
+                                            </p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="font-medium text-foreground">
+                                                @(item.TotalPrice?.ToString("#,##0"))₫
+                                            </div>
+                                            <div class="text-sm text-muted-foreground">
+                                                @(item.UnitPrice?.ToString("#,##0"))₫ × @item.Quantity
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Order Footer -->
+                        <div class="px-6 py-4 border-t border-border bg-muted/10">
+                            <div class="flex justify-between items-center">
+                                <div class="text-sm text-muted-foreground">
+                                    @if (!string.IsNullOrEmpty(order.ShippingAddress))
+                                    {
+                                        <span>Địa chỉ giao hàng: @order.ShippingAddress</span>
+                                    }
+                                </div>
+                                <div class="text-lg font-semibold text-foreground">
+                                    Tổng cộng: @(order.TotalPrice?.ToString("#,##0"))₫
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

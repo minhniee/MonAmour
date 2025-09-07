@@ -17,6 +17,8 @@ public partial class MonAmourDbContext : DbContext
 
     public virtual DbSet<Booking> Bookings { get; set; }
 
+    public virtual DbSet<CassoTransaction> CassoTransactions { get; set; }
+
     public virtual DbSet<Concept> Concepts { get; set; }
 
     public virtual DbSet<ConceptAmbience> ConceptAmbiences { get; set; }
@@ -47,6 +49,8 @@ public partial class MonAmourDbContext : DbContext
 
     public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
 
+    public virtual DbSet<PaymentStatus> PaymentStatuses { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
@@ -65,17 +69,31 @@ public partial class MonAmourDbContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<VwPaymentDetail> VwPaymentDetails { get; set; }
+
     public virtual DbSet<WishList> WishLists { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("server =(local); database = MonAmourDb; uid=sa;pwd=123;Trusted_Connection=True;Encrypt=False");
+        => optionsBuilder.UseSqlServer("server=localhost;database=MonAmourDb;uid=sa;pwd=123;Trusted_Connection=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Configure DateOnly and TimeOnly converters for SQL Server
+        modelBuilder.Entity<Booking>()
+            .Property(e => e.BookingDate)
+            .HasConversion(
+                v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
+                v => v.HasValue ? DateOnly.FromDateTime(v.Value) : (DateOnly?)null);
+
+        modelBuilder.Entity<Booking>()
+            .Property(e => e.BookingTime)
+            .HasConversion(
+                v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
+                v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : (TimeOnly?)null);
         modelBuilder.Entity<Booking>(entity =>
         {
-            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B14B3C053C");
+            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B18F1D4649");
 
             entity.ToTable("Booking");
 
@@ -116,9 +134,34 @@ public partial class MonAmourDbContext : DbContext
                 .HasConstraintName("FK__Booking__user_id__797309D9");
         });
 
+        modelBuilder.Entity<CassoTransaction>(entity =>
+        {
+            entity.HasIndex(e => e.OrderId, "IX_CassoTransactions_OrderId");
+
+            entity.HasIndex(e => e.UserId, "IX_CassoTransactions_UserId");
+
+            entity.HasIndex(e => e.When, "IX_CassoTransactions_When");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.BankSubAccId).HasMaxLength(50);
+            entity.Property(e => e.CorrespondingAccount).HasMaxLength(50);
+            entity.Property(e => e.CorrespondingAccountName).HasMaxLength(255);
+            entity.Property(e => e.CorrespondingBankId).HasMaxLength(50);
+            entity.Property(e => e.CorrespondingBankName).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ProcessedAt).HasColumnType("datetime");
+            entity.Property(e => e.Ref).HasMaxLength(255);
+            entity.Property(e => e.Reference).HasMaxLength(255);
+            entity.Property(e => e.SubAccId).HasMaxLength(50);
+            entity.Property(e => e.VirtualAccount).HasMaxLength(50);
+            entity.Property(e => e.When).HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<Concept>(entity =>
         {
-            entity.HasKey(e => e.ConceptId).HasName("PK__Concept__7925FD2D42CC2A8D");
+            entity.HasKey(e => e.ConceptId).HasName("PK__Concept__7925FD2D23849D9A");
 
             entity.ToTable("Concept");
 
@@ -166,7 +209,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptAmbience>(entity =>
         {
-            entity.HasKey(e => e.AmbienceId).HasName("PK__Concept___5D801B582EC9BF31");
+            entity.HasKey(e => e.AmbienceId).HasName("PK__Concept___5D801B5861E7DD5C");
 
             entity.ToTable("Concept_Ambience");
 
@@ -178,7 +221,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Concept___D54EE9B440CC97AD");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Concept___D54EE9B476E3335C");
 
             entity.ToTable("Concept_Category");
 
@@ -196,7 +239,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptColor>(entity =>
         {
-            entity.HasKey(e => e.ColorId).HasName("PK__Concept___1143CECBF13BF9CC");
+            entity.HasKey(e => e.ColorId).HasName("PK__Concept___1143CECB8D8E39B2");
 
             entity.ToTable("Concept_Color");
 
@@ -211,7 +254,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ConceptImg>(entity =>
         {
-            entity.HasKey(e => e.ImgId).HasName("PK__Concept___6F16A71C497042AA");
+            entity.HasKey(e => e.ImgId).HasName("PK__Concept___6F16A71CBD820503");
 
             entity.ToTable("Concept_img");
 
@@ -244,7 +287,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Content>(entity =>
         {
-            entity.HasKey(e => e.ContentId).HasName("PK__Content__655FE51021E58B1A");
+            entity.HasKey(e => e.ContentId).HasName("PK__Content__655FE5107D65012E");
 
             entity.ToTable("Content");
 
@@ -276,11 +319,11 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<EmailTemplate>(entity =>
         {
-            entity.HasKey(e => e.TemplateId).HasName("PK__Email_Te__BE44E07974942BB9");
+            entity.HasKey(e => e.TemplateId).HasName("PK__Email_Te__BE44E0792149D512");
 
             entity.ToTable("Email_Template");
 
-            entity.HasIndex(e => e.Name, "UQ__Email_Te__72E12F1B997D2BFE").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Email_Te__72E12F1B063E9FC9").IsUnique();
 
             entity.Property(e => e.TemplateId).HasColumnName("template_id");
             entity.Property(e => e.Body).HasColumnName("body");
@@ -318,7 +361,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Location>(entity =>
         {
-            entity.HasKey(e => e.LocationId).HasName("PK__Location__771831EAA38CB2F9");
+            entity.HasKey(e => e.LocationId).HasName("PK__Location__771831EAA72D3B62");
 
             entity.ToTable("Location");
 
@@ -361,7 +404,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__E059842FBA1CDDA0");
+            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__E059842F5E9C768D");
 
             entity.ToTable("Notification");
 
@@ -397,7 +440,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__Order__46596229EAEB7409");
+            entity.HasKey(e => e.OrderId).HasName("PK__Order__46596229BADF7CC5");
 
             entity.ToTable("Order");
 
@@ -425,10 +468,16 @@ public partial class MonAmourDbContext : DbContext
             entity.Property(e => e.TrackingNumber)
                 .HasMaxLength(100)
                 .HasColumnName("tracking_number");
+            entity.Property(e => e.ShippingAddress)
+                .HasMaxLength(4000)
+                .HasColumnName("shipping_address");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedAt1)
+                .HasColumnType("datetime")
+                .HasColumnName("UpdatedAt");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.ShippingOption).WithMany(p => p.Orders)
@@ -442,7 +491,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__3764B6BCB010A350");
+            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__3764B6BCAA8EB486");
 
             entity.ToTable("OrderItem");
 
@@ -468,14 +517,11 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Partner>(entity =>
         {
-            entity.HasKey(e => e.PartnerId).HasName("PK__Partner__576F1B2725A33660");
+            entity.HasKey(e => e.PartnerId).HasName("PK__Partner__576F1B271BAFCF5F");
 
             entity.ToTable("Partner");
 
             entity.Property(e => e.PartnerId).HasColumnName("partner_id");
-            entity.Property(e => e.Avatar)
-                .HasMaxLength(255)
-                .HasColumnName("avatar");
             entity.Property(e => e.ContactInfo)
                 .HasMaxLength(255)
                 .HasColumnName("contact_info");
@@ -512,7 +558,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__ED1FC9EAB60D10B8");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__ED1FC9EA7BD182D3");
 
             entity.ToTable("Payment");
 
@@ -525,6 +571,7 @@ public partial class MonAmourDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.PaymentMethodId).HasColumnName("payment_method_id");
+            entity.Property(e => e.PaymentReference).HasMaxLength(255);
             entity.Property(e => e.ProcessedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("processed_at");
@@ -532,15 +579,18 @@ public partial class MonAmourDbContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("status");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.PaymentMethod).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.PaymentMethodId)
                 .HasConstraintName("FK__Payment__payment__245D67DE");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Payments).HasForeignKey(d => d.UserId);
         });
 
         modelBuilder.Entity<PaymentDetail>(entity =>
         {
-            entity.HasKey(e => e.PaymentDetailId).HasName("PK__PaymentD__C66E6E36C6AA507E");
+            entity.HasKey(e => e.PaymentDetailId).HasName("PK__PaymentD__C66E6E36678D2E3A");
 
             entity.ToTable("PaymentDetail");
 
@@ -567,7 +617,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.PaymentMethodId).HasName("PK__PaymentM__8A3EA9EBCF4FB4BE");
+            entity.HasKey(e => e.PaymentMethodId).HasName("PK__PaymentM__8A3EA9EB329C70EB");
 
             entity.ToTable("PaymentMethod");
 
@@ -577,9 +627,26 @@ public partial class MonAmourDbContext : DbContext
                 .HasColumnName("name");
         });
 
+        modelBuilder.Entity<PaymentStatus>(entity =>
+        {
+            entity.ToTable("PaymentStatus");
+
+            entity.HasIndex(e => e.PaymentId, "IX_PaymentStatus_PaymentId");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Payment).WithMany(p => p.PaymentStatuses)
+                .HasForeignKey(d => d.PaymentId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__Product__47027DF54807DCBE");
+            entity.HasKey(e => e.ProductId).HasName("PK__Product__47027DF5CA9C12F9");
 
             entity.ToTable("Product");
 
@@ -616,7 +683,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__Product___D54EE9B41F4BD1F8");
+            entity.HasKey(e => e.CategoryId).HasName("PK__Product___D54EE9B469629BC5");
 
             entity.ToTable("Product_Category");
 
@@ -628,7 +695,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ProductImg>(entity =>
         {
-            entity.HasKey(e => e.ImgId).HasName("PK__Product___6F16A71C510649A7");
+            entity.HasKey(e => e.ImgId).HasName("PK__Product___6F16A71CE7A99999");
 
             entity.ToTable("Product_img");
 
@@ -661,7 +728,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.HasKey(e => e.ReviewId).HasName("PK__Review__60883D90F5C1D425");
+            entity.HasKey(e => e.ReviewId).HasName("PK__Review__60883D90544C4A16");
 
             entity.ToTable("Review");
 
@@ -690,11 +757,11 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CCF0A6923F");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__760965CCEA25C033");
 
             entity.ToTable("Role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Role__783254B177421E18").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Role__783254B1CCD27224").IsUnique();
 
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.RoleName)
@@ -705,7 +772,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<ShippingOption>(entity =>
         {
-            entity.HasKey(e => e.ShippingOptionId).HasName("PK__Shipping__6B1300C871C028DE");
+            entity.HasKey(e => e.ShippingOptionId).HasName("PK__Shipping__6B1300C8B41876E6");
 
             entity.ToTable("ShippingOption");
 
@@ -717,7 +784,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<Token>(entity =>
         {
-            entity.HasKey(e => e.TokenId).HasName("PK__Token__CB3C9E17655CC4D6");
+            entity.HasKey(e => e.TokenId).HasName("PK__Token__CB3C9E174111CDFD");
 
             entity.ToTable("Token");
 
@@ -768,13 +835,13 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__B9BE370F8BB597BA");
+            entity.HasKey(e => e.UserId).HasName("PK__User__B9BE370FBBE4393B");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164D5EBC73F").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__AB6E6164BDEAD157").IsUnique();
 
-            entity.HasIndex(e => e.Phone, "UQ__User__B43B145F570692D5").IsUnique();
+            entity.HasIndex(e => e.Phone, "UQ__User__B43B145F8C22A302").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.Avatar)
@@ -818,7 +885,7 @@ public partial class MonAmourDbContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__User_Rol__6EDEA15398F9BAAB");
+            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__User_Rol__6EDEA153D1F4F13E");
 
             entity.ToTable("User_Role");
 
@@ -841,9 +908,49 @@ public partial class MonAmourDbContext : DbContext
                 .HasConstraintName("FK__User_Role__user___440B1D61");
         });
 
+        modelBuilder.Entity<VwPaymentDetail>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("vw_PaymentDetails");
+
+            entity.Property(e => e.Amount)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("amount");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("email");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.OrderStatus)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.PaymentDetailAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.PaymentId).HasColumnName("payment_id");
+            entity.Property(e => e.PaymentMethodName).HasMaxLength(50);
+            entity.Property(e => e.PaymentReference).HasMaxLength(255);
+            entity.Property(e => e.ProcessedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("processed_at");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("status");
+            entity.Property(e => e.TotalPrice)
+                .HasColumnType("decimal(18, 2)")
+                .HasColumnName("total_price");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.Username)
+                .HasMaxLength(255)
+                .HasColumnName("username");
+        });
+
         modelBuilder.Entity<WishList>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Wish_lis__3213E83F4C533205");
+            entity.HasKey(e => e.Id).HasName("PK__Wish_lis__3213E83F9142F152");
 
             entity.ToTable("Wish_list");
 

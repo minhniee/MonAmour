@@ -66,10 +66,27 @@
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
-                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
-                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
-                <div class="h-72 rounded-2xl bg-white border border-wine-red/10 shadow-sm"></div>
+                @{
+                    var top = ViewBag.TopProducts as IEnumerable<MonAmour.Models.Product>;
+                }
+                @if (top != null && top.Any())
+                {
+                    foreach (var p in top)
+                    {
+                        var img = p.ProductImgs?.OrderBy(pi => pi.DisplayOrder).FirstOrDefault()?.ImgUrl ?? "https://via.placeholder.com/600x400?text=No+Image";
+                        <a href="@Url.Action("ProductDetail", "Gift_box", new { id = p.ProductId })" class="block group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-wine-red/10">
+                            <img src="@img" alt="@p.Name" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+                            <div class="p-4">
+                                <div class="font-prata text-lg text-wine-red mb-1">@p.Name</div>
+                                <div class="text-wine-red font-prata text-xl">@String.Format("{0:N0}₫", p.Price)</div>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="col-span-4 text-center text-gray-600">Chưa có dữ liệu.</div>
+                }
             </div>
         </div>
     </div>
@@ -146,11 +163,22 @@
 
         </div>
 
-        <!-- Load More Button -->
-        <div class="text-center mt-12">
-            <button class="bg-wine-red text-beige px-8 py-4 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
-                Load More Gift Boxes
-            </button>
+        <!-- Pagination -->
+        <div class="flex items-center justify-center gap-2 mt-12">
+            @{ var page = (int)(ViewBag.Page ?? 1);
+               var totalPages = (int)(ViewBag.TotalPages ?? 1);
+               var selectedCategoryId = (int?)ViewBag.SelectedCategoryId;
+               var selectedPrice = (string)ViewBag.SelectedPrice;
+               var selectedSort = (string)ViewBag.SelectedSort; }
+
+            @if (totalPages > 1)
+            {
+                var prevDisabled = page <= 1 ? "opacity-50 pointer-events-none" : "";
+                var nextDisabled = page >= totalPages ? "opacity-50 pointer-events-none" : "";
+                <a class="px-4 py-2 border border-wine-red text-wine-red rounded @prevDisabled" href="@Url.Action("ListGiftbox", new { categoryId = selectedCategoryId, price = selectedPrice, sort = selectedSort, page = page - 1 })">Trước</a>
+                <span class="px-3 py-2 text-wine-red font-prata">Trang @(page)/@(totalPages)</span>
+                <a class="px-4 py-2 border border-wine-red text-wine-red rounded @nextDisabled" href="@Url.Action("ListGiftbox", new { categoryId = selectedCategoryId, price = selectedPrice, sort = selectedSort, page = page + 1 })">Sau</a>
+            }
         </div>
         </div>
     </div>

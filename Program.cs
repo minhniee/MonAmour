@@ -28,7 +28,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromDays(1); // Kéo dài thời gian session
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Cho phép HTTP trong development
 });
 
 // Add HttpContextAccessor
@@ -37,6 +37,18 @@ builder.Services.AddHttpContextAccessor();
 // Add Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ICassoService, CassoService>();
+builder.Services.AddScoped<IVietQRService, VietQRService>();
+
+// Add HttpClient for Casso API
+builder.Services.AddHttpClient<ICassoService, CassoService>();
+
+// Add HttpClient for VietQR API
+builder.Services.AddHttpClient<IVietQRService, VietQRService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["VietQR:ApiBase"] ?? "https://api.vietqr.io");
+});
+
 
 var app = builder.Build();
 
@@ -81,5 +93,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
 app.Run();
