@@ -167,30 +167,34 @@
 		<div class="container mx-auto px-4 text-center">
 			<h3 class="font-prata text-3xl text-wine-red mb-8">Đặt Lịch</h3>
 			<div class="max-w-md mx-auto bg-white border border-wine-red/20 rounded-2xl p-8 shadow-lg">
-				<form id="bookingForm">
-					<div class="grid grid-cols-2 gap-4 mb-6">
-						<div>
-							<label class="block text-wine-red font-prata text-sm mb-2">Ngày</label>
-							<input type="date" id="bookingDate" name="bookingDate" required 
-								   class="w-full px-4 py-3 border border-wine-red/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-wine-red/50 font-noto-serif"
-								   min="@DateTime.Now.ToString("yyyy-MM-dd")">
-						</div>
-						<div>
-							<label class="block text-wine-red font-prata text-sm mb-2">Giờ</label>
-							<input type="time" id="bookingTime" name="bookingTime" required 
-								   class="w-full px-4 py-3 border border-wine-red/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-wine-red/50 font-noto-serif"
-								   min="08:00" max="22:00" step="1800">
-							<p class="text-xs text-gray-500 mt-1">Chọn giờ từ 8:00 - 22:00 (bước 30 phút)</p>
-						</div>
+				
+					<form id="bookingForm">
+				<div class="grid grid-cols-2 gap-4 mb-6">
+					<div>
+						<label class="block text-wine-red font-prata text-sm mb-2">Ngày</label>
+						<input type="date" id="bookingDate" name="bookingDate" required 
+							   class="w-full px-4 py-3 border border-wine-red/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-wine-red/50 font-noto-serif"
+							   min="@DateTime.Now.ToString("yyyy-MM-dd")">
 					</div>
-					<div class="mb-6">
-						<div class="flex justify-between items-center p-4 bg-beige/50 rounded-lg">
-							<span class="font-prata text-lg text-wine-red">Tổng cộng:</span>
-							<span class="font-prata text-2xl font-bold text-wine-red">@String.Format("{0:N0}₫", Model.Price)</span>
-						</div>
+					<div>
+						<label class="block text-wine-red font-prata text-sm mb-2">Giờ</label>
+						<input type="time" id="bookingTime" name="bookingTime" required 
+							   class="w-full px-4 py-3 border border-wine-red/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-wine-red/50 font-noto-serif"
+							   min="08:00" max="22:00" step="1800">
+						<p class="text-xs text-gray-500 mt-1">Chọn giờ từ 8:00 - 22:00 (bước 30 phút)</p>
 					</div>
-					<button type="submit" id="bookNowBtn" 
-							class="w-full bg-wine-red text-beige py-4 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+				</div>
+				<div class="mb-6">
+					<div class="flex justify-between items-center p-4 bg-beige/50 rounded-lg">
+						<span class="font-prata text-lg text-wine-red">Tổng cộng:</span>
+						<span class="font-prata text-2xl font-bold text-wine-red">@String.Format("{0:N0}₫", Model.Price)</span>
+					</div>
+				</div>
+				@if (ViewBag.IsLoggedIn)
+				{
+
+					<button type="submit" id="bookNowBtn"
+					        class="w-full bg-wine-red text-beige py-4 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
 						<span id="btnText">Đặt ngay</span>
 						<span id="btnLoading" class="hidden">
 							<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -199,8 +203,18 @@
 							</svg>
 							Đang xử lý...
 						</span>
-					</button>
+						</button>
+					}
+					else
+					{
+						<a href="@Url.Action("Login","Auth")"
+						   id="bookNowBtn"
+						   class="w-full block text-center bg-wine-red text-beige py-4 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
+							<span id="btnText">Đặt ngay</span>
+						</a>
+					}
 				</form>
+				
 			</div>
 		</div>
 	</section>
