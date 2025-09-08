@@ -2874,6 +2874,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var categories = await _conceptService.GetConceptCategoriesAsync();
                 return View(categories);
             }
@@ -2881,6 +2882,7 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error in ConceptCategories action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách danh mục concept";
+                await SetAdminViewBagAsync();
                 return View(new List<ConceptCategoryDropdownViewModel>());
             }
         }
@@ -2890,8 +2892,9 @@ namespace MonAmour.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult CreateConceptCategory()
+        public async Task<IActionResult> CreateConceptCategory()
         {
+            await SetAdminViewBagAsync();
             return View();
         }
 
@@ -2941,6 +2944,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var category = await _conceptService.GetConceptCategoryByIdAsync(id);
                 if (category == null)
                 {
@@ -3037,6 +3041,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var colors = await _conceptService.GetConceptColorsAsync();
                 return View(colors);
             }
@@ -3044,6 +3049,7 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error in ConceptColors action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách màu sắc concept";
+                await SetAdminViewBagAsync();
                 return View(new List<ConceptColorDropdownViewModel>());
             }
         }
@@ -3053,8 +3059,9 @@ namespace MonAmour.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult CreateConceptColor()
+        public async Task<IActionResult> CreateConceptColor()
         {
+            await SetAdminViewBagAsync();
             return View();
         }
 
@@ -3104,6 +3111,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var color = await _conceptService.GetConceptColorByIdAsync(id);
                 if (color == null)
                 {
@@ -3200,6 +3208,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var ambiences = await _conceptService.GetConceptAmbiencesAsync();
                 return View(ambiences);
             }
@@ -3207,6 +3216,7 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error in ConceptAmbiences action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách không gian concept";
+                await SetAdminViewBagAsync();
                 return View(new List<ConceptAmbienceDropdownViewModel>());
             }
         }
@@ -3216,8 +3226,9 @@ namespace MonAmour.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult CreateConceptAmbience()
+        public async Task<IActionResult> CreateConceptAmbience()
         {
+            await SetAdminViewBagAsync();
             return View();
         }
 
@@ -3267,6 +3278,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var ambience = await _conceptService.GetConceptAmbienceByIdAsync(id);
                 if (ambience == null)
                 {
@@ -3359,6 +3371,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var concepts = await _conceptService.GetConceptsForDropdownAsync();
                 ViewBag.Concepts = concepts.Select(c => new SelectListItem
                 {
@@ -3406,6 +3419,7 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error in ConceptImages action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách hình ảnh concept";
+                await SetAdminViewBagAsync();
                 return View(new List<object>());
             }
         }

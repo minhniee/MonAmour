@@ -2,19 +2,45 @@ using Microsoft.AspNetCore.Mvc;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
 using MonAmour.Attributes;
+using MonAmour.Helpers;
 
 namespace MonAmour.Controllers
 {
-    [SessionAuthorize]
+    [AdminOnly]
     public class BlogManagementController : Controller
     {
         private readonly IBlogManagementService _blogService;
+        private readonly IUserManagementService _userManagementService;
         private readonly ILogger<BlogManagementController> _logger;
 
-        public BlogManagementController(IBlogManagementService blogService, ILogger<BlogManagementController> logger)
+        public BlogManagementController(IBlogManagementService blogService, IUserManagementService userManagementService, ILogger<BlogManagementController> logger)
         {
             _blogService = blogService;
+            _userManagementService = userManagementService;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Helper method to set common ViewBag data for admin pages
+        /// </summary>
+        private async Task SetAdminViewBagAsync()
+        {
+            try
+            {
+                var currentUserId = AuthHelper.GetUserId(HttpContext);
+                var currentUser = await _userManagementService.GetUserByIdAsync(currentUserId.Value);
+
+                ViewBag.UserName = AuthHelper.GetUserName(HttpContext);
+                ViewBag.UserEmail = AuthHelper.GetUserEmail(HttpContext);
+                ViewBag.UserAvatar = currentUser?.Avatar;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting admin ViewBag data");
+                ViewBag.UserName = AuthHelper.GetUserName(HttpContext);
+                ViewBag.UserEmail = AuthHelper.GetUserEmail(HttpContext);
+                ViewBag.UserAvatar = null;
+            }
         }
 
         #region Blog Actions
@@ -23,12 +49,14 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var blogs = await _blogService.GetAllBlogsAsync();
                 return View(blogs);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Blogs action");
+                await SetAdminViewBagAsync();
                 return View(new List<BlogListViewModel>());
             }
         }
@@ -37,6 +65,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var blog = await _blogService.GetBlogByIdAsync(id);
                 if (blog == null)
                 {
@@ -57,6 +86,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var model = await _blogService.GetCreateBlogViewModelAsync();
                 return View(model);
             }
@@ -106,6 +136,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var model = await _blogService.GetEditBlogViewModelAsync(id);
                 if (model == null)
                 {
@@ -165,19 +196,18 @@ namespace MonAmour.Controllers
                 var result = await _blogService.DeleteBlogAsync(id);
                 if (result)
                 {
-                    TempData["Success"] = "Xóa bài viết thành công";
+                    return Json(new { success = true, message = "Xóa bài viết thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Có lỗi xảy ra khi xóa bài viết";
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bài viết" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting blog: {BlogId}", id);
-                TempData["Error"] = "Có lỗi xảy ra khi xóa bài viết";
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bài viết" });
             }
-            return RedirectToAction("Blogs");
         }
 
         [HttpPost]
@@ -189,19 +219,18 @@ namespace MonAmour.Controllers
                 var result = await _blogService.ToggleBlogStatusAsync(id);
                 if (result)
                 {
-                    TempData["Success"] = "Cập nhật trạng thái bài viết thành công";
+                    return Json(new { success = true, message = "Cập nhật trạng thái bài viết thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái bài viết";
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái bài viết" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error toggling blog status: {BlogId}", id);
-                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái bài viết";
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái bài viết" });
             }
-            return RedirectToAction("Blogs");
         }
 
         [HttpPost]
@@ -213,19 +242,18 @@ namespace MonAmour.Controllers
                 var result = await _blogService.ToggleFeaturedStatusAsync(id);
                 if (result)
                 {
-                    TempData["Success"] = "Cập nhật trạng thái nổi bật thành công";
+                    return Json(new { success = true, message = "Cập nhật trạng thái nổi bật thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái nổi bật";
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái nổi bật" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error toggling featured status: {BlogId}", id);
-                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái nổi bật";
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái nổi bật" });
             }
-            return RedirectToAction("Blogs");
         }
 
         [HttpPost]
@@ -251,12 +279,14 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var categories = await _blogService.GetAllCategoriesAsync();
                 return View(categories);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in BlogCategories action");
+                await SetAdminViewBagAsync();
                 return View(new List<BlogCategoryListViewModel>());
             }
         }
@@ -265,6 +295,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var model = await _blogService.GetCreateCategoryViewModelAsync();
                 return View(model);
             }
@@ -367,19 +398,18 @@ namespace MonAmour.Controllers
                 var result = await _blogService.DeleteCategoryAsync(id);
                 if (result)
                 {
-                    TempData["Success"] = "Xóa danh mục thành công";
+                    return Json(new { success = true, message = "Xóa danh mục thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Không thể xóa danh mục có chứa bài viết";
+                    return Json(new { success = false, message = "Không thể xóa danh mục có chứa bài viết" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting category: {CategoryId}", id);
-                TempData["Error"] = "Có lỗi xảy ra khi xóa danh mục";
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa danh mục" });
             }
-            return RedirectToAction("BlogCategories");
         }
 
         [HttpPost]
@@ -391,19 +421,18 @@ namespace MonAmour.Controllers
                 var result = await _blogService.ToggleCategoryStatusAsync(id);
                 if (result)
                 {
-                    TempData["Success"] = "Cập nhật trạng thái danh mục thành công";
+                    return Json(new { success = true, message = "Cập nhật trạng thái danh mục thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái danh mục";
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái danh mục" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error toggling category status: {CategoryId}", id);
-                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái danh mục";
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái danh mục" });
             }
-            return RedirectToAction("BlogCategories");
         }
 
         #endregion
@@ -414,12 +443,14 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var comments = await _blogService.GetAllCommentsAsync();
                 return View(comments);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in BlogComments action");
+                await SetAdminViewBagAsync();
                 return View(new List<BlogCommentListViewModel>());
             }
         }
@@ -484,19 +515,18 @@ namespace MonAmour.Controllers
                 var result = await _blogService.DeleteCommentAsync(id);
                 if (result)
                 {
-                    TempData["Success"] = "Xóa bình luận thành công";
+                    return Json(new { success = true, message = "Xóa bình luận thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Có lỗi xảy ra khi xóa bình luận";
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bình luận" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting comment: {CommentId}", id);
-                TempData["Error"] = "Có lỗi xảy ra khi xóa bình luận";
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bình luận" });
             }
-            return RedirectToAction("BlogComments");
         }
 
         [HttpPost]
@@ -508,19 +538,18 @@ namespace MonAmour.Controllers
                 var result = await _blogService.ToggleCommentApprovalAsync(id);
                 if (result)
                 {
-                    TempData["Success"] = "Cập nhật trạng thái duyệt bình luận thành công";
+                    return Json(new { success = true, message = "Cập nhật trạng thái duyệt bình luận thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái duyệt bình luận";
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái duyệt bình luận" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error toggling comment approval: {CommentId}", id);
-                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái duyệt bình luận";
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái duyệt bình luận" });
             }
-            return RedirectToAction("BlogComments");
         }
 
         [HttpPost]

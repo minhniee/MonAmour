@@ -319,6 +319,44 @@
             $('#editCategoryModal').modal('show');
         }
         
+        // Ensure modal close functionality works
+        $(document).ready(function() {
+            // Handle edit modal close button
+            $('#editCategoryModal .close').on('click', function() {
+                console.log('Close button clicked');
+                $('#editCategoryModal').modal('hide');
+            });
+            
+            // Handle edit modal cancel button
+            $('#editCategoryModal .btn-secondary').on('click', function() {
+                console.log('Cancel button clicked');
+                $('#editCategoryModal').modal('hide');
+            });
+            
+            // Handle modal backdrop click
+            $('#editCategoryModal').on('click', function(e) {
+                if (e.target === this) {
+                    console.log('Backdrop clicked');
+                    $(this).modal('hide');
+                }
+            });
+            
+            // Reset form when modal is hidden
+            $('#editCategoryModal').on('hidden.bs.modal', function() {
+                console.log('Edit modal hidden');
+                $('#editCategoryForm')[0].reset();
+            });
+            
+            // Handle ESC key to close modal
+            $(document).on('keydown', function(e) {
+                if (e.keyCode === 27) { // ESC key
+                    if ($('#editCategoryModal').hasClass('show')) {
+                        $('#editCategoryModal').modal('hide');
+                    }
+                }
+            });
+        });
+        
         function deleteCategory(categoryId, categoryName, productCount) {
             console.log('deleteCategory called:', categoryId, categoryName, productCount);
             

@@ -66,7 +66,7 @@ namespace MonAmour.Services.Implements
                         UserId = p.UserId,
                         Email = p.Email,
                         Phone = p.Phone,
-                        //Avatar = p.Avatar,
+                        Avatar = p.Avatar,
                         Status = p.Status ?? "Active",
                         CreatedAt = p.CreatedAt,
                         UpdatedAt = p.UpdatedAt,
@@ -104,7 +104,7 @@ namespace MonAmour.Services.Implements
                     UserId = partner.UserId,
                     Email = partner.Email,
                     Phone = partner.Phone,
-                    //Avatar = partner.Avatar,
+                    Avatar = partner.Avatar,
                     Status = partner.Status ?? "Active",
                     CreatedAt = partner.CreatedAt,
                     UpdatedAt = partner.UpdatedAt,
@@ -147,16 +147,14 @@ namespace MonAmour.Services.Implements
                     UserId = model.UserId,
                     Email = model.Email,
                     Phone = model.Phone,
-                    //Avatar = model.Avatar,
+                    Avatar = model.Avatar,
                     Status = model.Status,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
 
-                //_logger.LogInformation("Partner entity created: PartnerId={PartnerId}, Name={Name}, Avatar={Avatar}", 
-                //    partner.PartnerId, partner.Name, partner.Avatar);
-                _logger.LogInformation("Partner entity created: PartnerId={PartnerId}, Name={Name}, Avatar={Avatar}",
-                    partner.PartnerId, partner.Name);
+                _logger.LogInformation("Partner entity created: PartnerId={PartnerId}, Name={Name}, Avatar={Avatar}", 
+                    partner.PartnerId, partner.Name, partner.Avatar);
 
                 _context.Partners.Add(partner);
                 
@@ -168,10 +166,8 @@ namespace MonAmour.Services.Implements
                 }
                 catch (Exception saveEx)
                 {
-                    //_logger.LogError(saveEx, "Error saving partner to database. Partner data: Name={Name}, UserId={UserId}, Avatar={Avatar}", 
-                    //    partner.Name, partner.UserId, partner.Avatar);
-                    _logger.LogError(saveEx, "Error saving partner to database. Partner data: Name={Name}, UserId={UserId}, Avatar={Avatar}",
-                        partner.Name, partner.UserId);
+                    _logger.LogError(saveEx, "Error saving partner to database. Partner data: Name={Name}, UserId={UserId}, Avatar={Avatar}", 
+                        partner.Name, partner.UserId, partner.Avatar);
                     throw;
                 }
             }
@@ -201,7 +197,7 @@ namespace MonAmour.Services.Implements
                 partner.UserId = model.UserId;
                 partner.Email = model.Email;
                 partner.Phone = model.Phone;
-                //partner.Avatar = model.Avatar;
+                partner.Avatar = model.Avatar;
                 partner.Status = model.Status;
                 partner.UpdatedAt = DateTime.Now;
 

@@ -2,19 +2,45 @@ using Microsoft.AspNetCore.Mvc;
 using MonAmour.Attributes;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
+using MonAmour.Helpers;
 
 namespace MonAmour.Controllers
 {
-    [SessionAuthorize]
+    [AdminOnly]
     public class BannerManagementController : Controller
     {
         private readonly IBannerService _bannerService;
+        private readonly IUserManagementService _userManagementService;
         private readonly ILogger<BannerManagementController> _logger;
 
-        public BannerManagementController(IBannerService bannerService, ILogger<BannerManagementController> logger)
+        public BannerManagementController(IBannerService bannerService, IUserManagementService userManagementService, ILogger<BannerManagementController> logger)
         {
             _bannerService = bannerService;
+            _userManagementService = userManagementService;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Helper method to set common ViewBag data for admin pages
+        /// </summary>
+        private async Task SetAdminViewBagAsync()
+        {
+            try
+            {
+                var currentUserId = AuthHelper.GetUserId(HttpContext);
+                var currentUser = await _userManagementService.GetUserByIdAsync(currentUserId.Value);
+
+                ViewBag.UserName = AuthHelper.GetUserName(HttpContext);
+                ViewBag.UserEmail = AuthHelper.GetUserEmail(HttpContext);
+                ViewBag.UserAvatar = currentUser?.Avatar;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting admin ViewBag data");
+                ViewBag.UserName = AuthHelper.GetUserName(HttpContext);
+                ViewBag.UserEmail = AuthHelper.GetUserEmail(HttpContext);
+                ViewBag.UserAvatar = null;
+            }
         }
 
         #region BannerService Actions
@@ -24,6 +50,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var banners = await _bannerService.GetAllBannerServicesAsync();
                 return View(banners);
             }
@@ -31,13 +58,15 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error loading banner services page");
                 TempData["Error"] = "Có lỗi xảy ra khi tải danh sách banner dịch vụ";
+                await SetAdminViewBagAsync();
                 return View(new List<BannerServiceListViewModel>());
             }
         }
 
         [HttpGet]
-        public IActionResult CreateBannerService()
+        public async Task<IActionResult> CreateBannerService()
         {
+            await SetAdminViewBagAsync();
             return View(new BannerServiceCreateViewModel());
         }
 
@@ -216,6 +245,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var banners = await _bannerService.GetAllBannerHomepagesAsync();
                 return View(banners);
             }
@@ -223,13 +253,15 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error loading banner homepages page");
                 TempData["Error"] = "Có lỗi xảy ra khi tải danh sách banner trang chủ";
+                await SetAdminViewBagAsync();
                 return View(new List<BannerHomepageListViewModel>());
             }
         }
 
         [HttpGet]
-        public IActionResult CreateBannerHomepage()
+        public async Task<IActionResult> CreateBannerHomepage()
         {
+            await SetAdminViewBagAsync();
             return View(new BannerHomepageCreateViewModel());
         }
 
@@ -408,6 +440,7 @@ namespace MonAmour.Controllers
         {
             try
             {
+                await SetAdminViewBagAsync();
                 var banners = await _bannerService.GetAllBannerProductsAsync();
                 return View(banners);
             }
@@ -415,13 +448,15 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error loading banner products page");
                 TempData["Error"] = "Có lỗi xảy ra khi tải danh sách banner sản phẩm";
+                await SetAdminViewBagAsync();
                 return View(new List<BannerProductListViewModel>());
             }
         }
 
         [HttpGet]
-        public IActionResult CreateBannerProduct()
+        public async Task<IActionResult> CreateBannerProduct()
         {
+            await SetAdminViewBagAsync();
             return View(new BannerProductCreateViewModel());
         }
 

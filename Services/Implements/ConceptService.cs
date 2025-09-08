@@ -302,16 +302,39 @@ namespace MonAmour.Services.Implements
         {
             try
             {
-                var concept = await _context.Concepts.FindAsync(id);
+                var concept = await _context.Concepts
+                    .Include(c => c.ConceptImgs)
+                    .Include(c => c.Bookings)
+                    .FirstOrDefaultAsync(c => c.ConceptId == id);
+                
                 if (concept == null) return false;
 
+                // Check if concept has bookings
+                if (concept.Bookings.Any())
+                {
+                    _logger.LogWarning("Cannot delete concept {ConceptId} because it has {BookingCount} bookings", 
+                        id, concept.Bookings.Count);
+                    return false; // Cannot delete concept with bookings
+                }
+
+                // Remove concept images first
+                if (concept.ConceptImgs.Any())
+                {
+                    _context.ConceptImgs.RemoveRange(concept.ConceptImgs);
+                    _logger.LogInformation("Removed {ImageCount} images for concept {ConceptId}", 
+                        concept.ConceptImgs.Count, id);
+                }
+
+                // Remove concept
                 _context.Concepts.Remove(concept);
                 var result = await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Successfully deleted concept {ConceptId}", id);
                 return result > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting concept");
+                _logger.LogError(ex, "Error deleting concept {ConceptId}", id);
                 throw;
             }
         }

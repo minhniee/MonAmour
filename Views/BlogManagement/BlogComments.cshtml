@@ -4,6 +4,8 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+@Html.AntiForgeryToken()
+
 <div class="container-fluid">
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -126,9 +128,6 @@
                                 <td>@(comment.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a asp-action="EditComment" asp-route-id="@comment.CommentId" class="btn btn-sm btn-warning" title="Chỉnh sửa">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
                                         <button type="button" class="btn btn-sm btn-@(comment.IsApproved == true ? "warning" : "success")" 
                                                 onclick="toggleCommentApproval(@comment.CommentId)" title="@(comment.IsApproved == true ? "Bỏ duyệt" : "Duyệt")">
                                             <i class="fas fa-@(comment.IsApproved == true ? "times" : "check")"></i>
@@ -189,13 +188,25 @@
 
         function toggleCommentApproval(commentId) {
             if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái duyệt bình luận này?')) {
-                $.post('@Url.Action("ToggleCommentApproval", "BlogManagement")', {
-                    id: commentId
-                }, function(result) {
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + result.message);
+                $.ajax({
+                    url: '@Url.Action("ToggleCommentApproval", "BlogManagement")',
+                    type: 'POST',
+                    data: {
+                        id: commentId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result && result.success) {
+                            showAlert('success', result.message);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showAlert('error', result && result.message ? result.message : 'Có lỗi xảy ra khi cập nhật trạng thái duyệt bình luận');
+                        }
+                    },
+                    error: function() {
+                        showAlert('error', 'Có lỗi xảy ra khi cập nhật trạng thái duyệt bình luận');
                     }
                 });
             }
@@ -203,13 +214,33 @@
 
         function deleteComment(commentId) {
             if (confirm('Bạn có chắc chắn muốn xóa bình luận này? Hành động này không thể hoàn tác!')) {
-                $.post('@Url.Action("DeleteComment", "BlogManagement")', {
-                    id: commentId
-                }, function(result) {
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + result.message);
+                $.ajax({
+                    url: '@Url.Action("DeleteComment", "BlogManagement")',
+                    type: 'POST',
+                    data: {
+                        id: commentId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result && result.success) {
+                            showAlert('success', result.message);
+                            // Remove the row from table instead of reloading
+                            $('#commentTable tbody tr').each(function() {
+                                var row = $(this);
+                                var deleteBtn = row.find('button[onclick*="deleteComment(' + commentId + ')"]');
+                                if (deleteBtn.length > 0) {
+                                    row.fadeOut(500, function() {
+                                        $(this).remove();
+                                    });
+                                    return false;
+                                }
+                            });
+                        } else {
+                            showAlert('error', result && result.message ? result.message : 'Có lỗi xảy ra khi xóa bình luận');
+                        }
+                    },
+                    error: function() {
+                        showAlert('error', 'Có lỗi xảy ra khi xóa bình luận');
                     }
                 });
             }
@@ -245,6 +276,41 @@
                 // Implementation for bulk delete
                 alert('Tính năng xóa hàng loạt sẽ được triển khai');
             }
+        }
+
+        function showAlert(type, message) {
+            var alertClass, iconClass;
+            
+            switch(type) {
+                case 'success':
+                    alertClass = 'alert-success';
+                    iconClass = 'check-circle';
+                    break;
+                case 'error':
+                    alertClass = 'alert-danger';
+                    iconClass = 'exclamation-circle';
+                    break;
+                default:
+                    alertClass = 'alert-secondary';
+                    iconClass = 'info-circle';
+            }
+            
+            var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                '<i class="fas fa-' + iconClass + ' me-2"></i>' +
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>';
+            
+            // Remove existing alerts
+            $('.alert').remove();
+            
+            // Add new alert
+            $('.container-fluid').prepend(alertHtml);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut();
+            }, 5000);
         }
     </script>
 }

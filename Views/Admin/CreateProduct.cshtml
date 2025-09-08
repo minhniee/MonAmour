@@ -99,7 +99,6 @@
                             <select asp-for="Status" class="form-select" required>
                                 <option value="active">Hoạt động</option>
                                 <option value="inactive">Không hoạt động</option>
-                                <option value="draft">Bản nháp</option>
                             </select>
                             <span asp-validation-for="Status" class="text-danger"></span>
                         </div>
@@ -178,7 +177,7 @@
     </div>
 </div>
 
-@section Scripts {
+@* @section Scripts {
     <script>
         $(document).ready(function() {
             // Auto-save draft functionality
@@ -191,30 +190,7 @@
                     saveDraft();
                 }, 2000); // Auto-save after 2 seconds of inactivity
             });
-            
-            function saveDraft() {
-                const formData = form.serialize();
-                localStorage.setItem('productDraft', formData);
-                console.log('Draft saved automatically');
-            }
-            
-            // Load draft on page load
-            const savedDraft = localStorage.getItem('productDraft');
-            if (savedDraft) {
-                const urlParams = new URLSearchParams(savedDraft);
-                urlParams.forEach((value, key) => {
-                    const field = form.find(`[name="${key}"]`);
-                    if (field.length > 0) {
-                        field.val(value);
-                    }
-                });
-                console.log('Draft loaded');
-            }
-            
-            // Clear draft after successful submission
-            form.on('submit', function() {
-                localStorage.removeItem('productDraft');
-            });
+
             
             // Price formatting
             $('#Price').on('input', function() {
@@ -273,5 +249,5 @@
                 }
             });
         });
-    </script>
+    </script> *@
 }

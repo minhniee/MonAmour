@@ -5,6 +5,9 @@
 }
 
 <div class="container-fluid">
+    <!-- Anti-forgery token -->
+    @Html.AntiForgeryToken()
+    
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Quản lý Blog</h1>
@@ -213,13 +216,25 @@
 
         function toggleBlogStatus(blogId) {
             if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái bài viết này?')) {
-                $.post('@Url.Action("ToggleBlogStatus", "BlogManagement")', {
-                    id: blogId
-                }, function(result) {
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + result.message);
+                $.ajax({
+                    url: '@Url.Action("ToggleBlogStatus", "BlogManagement")',
+                    type: 'POST',
+                    data: {
+                        id: blogId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            showAlert('success', result.message);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showAlert('error', result.message);
+                        }
+                    },
+                    error: function() {
+                        showAlert('error', 'Có lỗi xảy ra khi cập nhật trạng thái bài viết');
                     }
                 });
             }
@@ -227,30 +242,106 @@
 
         function toggleFeaturedStatus(blogId) {
             if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái nổi bật của bài viết này?')) {
-                $.post('@Url.Action("ToggleFeaturedStatus", "BlogManagement")', {
-                    id: blogId
-                }, function(result) {
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + result.message);
+                $.ajax({
+                    url: '@Url.Action("ToggleFeaturedStatus", "BlogManagement")',
+                    type: 'POST',
+                    data: {
+                        id: blogId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result.success) {
+                            showAlert('success', result.message);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showAlert('error', result.message);
+                        }
+                    },
+                    error: function() {
+                        showAlert('error', 'Có lỗi xảy ra khi cập nhật trạng thái nổi bật');
                     }
                 });
             }
         }
 
         function deleteBlog(blogId) {
-            if (confirm('Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác!')) {
-                $.post('@Url.Action("DeleteBlog", "BlogManagement")', {
-                    id: blogId
-                }, function(result) {
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + result.message);
+            if (confirm('Bạn có chắc chắn muốn xóa bài viết này? Bài viết sẽ được ẩn khỏi danh sách nhưng vẫn có thể khôi phục.')) {
+                // Show loading state
+                showAlert('info', 'Đang xóa bài viết...');
+                
+                $.ajax({
+                    url: '@Url.Action("DeleteBlog", "BlogManagement")',
+                    type: 'POST',
+                    data: {
+                        id: blogId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                        if (result && result.success) {
+                            showAlert('success', result.message || 'Xóa bài viết thành công');
+                            // Remove the row from table instead of reloading
+                            $('#blogTable tbody tr').each(function() {
+                                var row = $(this);
+                                var deleteBtn = row.find('button[onclick*="deleteBlog(' + blogId + ')"]');
+                                if (deleteBtn.length > 0) {
+                                    row.fadeOut(500, function() {
+                                        $(this).remove();
+                                    });
+                                    return false;
+                                }
+                            });
+                        } else {
+                            showAlert('error', result && result.message ? result.message : 'Có lỗi xảy ra khi xóa bài viết');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Delete blog error:', error);
+                        showAlert('error', 'Có lỗi xảy ra khi xóa bài viết: ' + (error || 'Unknown error'));
                     }
                 });
             }
+        }
+
+        function showAlert(type, message) {
+            var alertClass, iconClass;
+            
+            switch(type) {
+                case 'success':
+                    alertClass = 'alert-success';
+                    iconClass = 'check-circle';
+                    break;
+                case 'error':
+                    alertClass = 'alert-danger';
+                    iconClass = 'exclamation-circle';
+                    break;
+                case 'info':
+                    alertClass = 'alert-info';
+                    iconClass = 'info-circle';
+                    break;
+                default:
+                    alertClass = 'alert-secondary';
+                    iconClass = 'info-circle';
+            }
+            
+            var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                '<i class="fas fa-' + iconClass + ' me-2"></i>' +
+                message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>';
+            
+            // Remove existing alerts
+            $('.alert').remove();
+            
+            // Add new alert
+            $('.container-fluid').prepend(alertHtml);
+            
+            // Auto-hide after 5 seconds (except for info which hides after 3 seconds)
+            var hideDelay = type === 'info' ? 3000 : 5000;
+            setTimeout(function() {
+                $('.alert').fadeOut();
+            }, hideDelay);
         }
     </script>
 }

@@ -25,7 +25,6 @@ namespace MonAmour.Services.Implements
             try
             {
                 var banners = await _context.BannerServices
-                    .Where(b => b.IsActive)
                     .OrderBy(b => b.DisplayOrder)
                     .ThenBy(b => b.CreatedAt)
                     .Select(b => new BannerServiceListViewModel
@@ -257,7 +256,6 @@ namespace MonAmour.Services.Implements
             try
             {
                 var banners = await _context.BannerHomepages
-                    .Where(b => b.IsActive)
                     .OrderBy(b => b.DisplayOrder)
                     .ThenBy(b => b.CreatedAt)
                     .Select(b => new BannerHomepageListViewModel
@@ -487,7 +485,6 @@ namespace MonAmour.Services.Implements
             try
             {
                 var banners = await _context.BannerProducts
-                    .Where(b => b.IsActive)
                     .OrderBy(b => b.DisplayOrder)
                     .ThenBy(b => b.CreatedAt)
                     .Select(b => new BannerProductListViewModel

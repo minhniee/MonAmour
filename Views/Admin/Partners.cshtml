@@ -145,15 +145,26 @@
                                         <div class="d-flex align-items-center">
                                             @if (!string.IsNullOrEmpty(partner.Avatar))
                                             {
-                                                <img class="rounded-circle mr-2" src="@partner.Avatar" alt="Avatar" width="32" height="32">
+                                                <div class="avatar-container avatar-status-indicator has-avatar mr-2" title="Có avatar">
+                                                    <img class="rounded-circle current-avatar" src="@partner.Avatar" alt="Avatar" width="32" height="32" 
+                                                         style="object-fit: cover;" 
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                </div>
                                             }
                                             else
                                             {
-                                                <div class="rounded-circle mr-2 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                                <div class="rounded-circle avatar-status-indicator no-avatar mr-2 bg-light text-muted d-flex align-items-center justify-content-center" 
+                                                     style="width: 32px; height: 32px; border: 1px dashed #dee2e6;" title="Chưa có avatar">
                                                     <i class="fas fa-user fa-sm"></i>
                                                 </div>
                                             }
-                                            <strong>@partner.Name</strong>
+                                            <div class="ml-2">
+                                                <strong>@partner.Name</strong>
+                                                @if (!string.IsNullOrEmpty(partner.ContactInfo))
+                                                {
+                                                    <br><small class="text-muted">@partner.ContactInfo</small>
+                                                }
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
@@ -311,9 +322,44 @@
                             <label class="custom-file-label" for="editPartnerAvatarFile">Chọn ảnh avatar...</label>
                         </div>
                         <small class="form-text text-muted">Chọn ảnh đại diện cho đối tác (JPG, PNG, GIF)</small>
-                        <div id="currentAvatarPreview" class="mt-2" style="display: none;">
-                            <img id="currentAvatarImg" src="" alt="Avatar hiện tại" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
-                            <small class="form-text text-muted">Ảnh hiện tại</small>
+                        
+                        <!-- Current Avatar Display -->
+                        <div id="currentAvatarPreview" class="mt-3" style="display: none;">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-container">
+                                    <img id="currentAvatarImg" src="" alt="Avatar hiện tại" 
+                                         class="img-thumbnail rounded-circle current-avatar" 
+                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                </div>
+                                <div class="ml-3">
+                                    <h6 class="mb-1">Ảnh hiện tại</h6>
+                                    <small class="text-muted">Chọn ảnh mới để thay thế</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- No Avatar Message - Only show when no avatar exists -->
+                        <div id="noAvatarMessage" class="mt-3" style="display: none;">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-light text-muted d-flex align-items-center justify-content-center" 
+                                     style="width: 80px; height: 80px; border: 2px dashed #dee2e6;">
+                                    <i class="fas fa-user fa-2x"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h6 class="mb-1 text-muted">Chưa có avatar</h6>
+                                    <small class="text-muted">Chọn ảnh để thêm avatar</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Avatar Info Message - Show when avatar exists -->
+                        <div id="avatarInfoMessage" class="mt-3" style="display: none;">
+                            <div class="alert alert-info d-flex align-items-center">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <div>
+                                    <strong>Avatar hiện tại:</strong> Đối tác đã có ảnh đại diện. Chọn ảnh mới để thay thế.
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -372,6 +418,61 @@
 </div>
 
 @section Scripts {
+    <style>
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .avatar-container img {
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-container:hover img {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .avatar-preview img {
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-preview:hover img {
+            transform: scale(1.05);
+        }
+        
+        .current-avatar {
+            border: 2px solid #e3e6f0;
+            transition: border-color 0.3s ease;
+        }
+        
+        .current-avatar:hover {
+            border-color: #007bff;
+        }
+        
+        .avatar-status-indicator {
+            position: relative;
+        }
+        
+        .avatar-status-indicator::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .avatar-status-indicator.has-avatar::after {
+            background-color: #28a745;
+        }
+        
+        .avatar-status-indicator.no-avatar::after {
+            background-color: #6c757d;
+        }
+    </style>
     <script>
         function editPartner(partnerId, partnerName) {
             // Load partner data via AJAX
@@ -395,11 +496,15 @@
                         loadUsersForEditModal(partner.userId);
                         
                         // Show current avatar if exists
-                        if (partner.avatar) {
+                        if (partner.avatar && partner.avatar.trim() !== '') {
                             $('#currentAvatarImg').attr('src', partner.avatar);
                             $('#currentAvatarPreview').show();
+                            $('#noAvatarMessage').hide();
+                            $('#avatarInfoMessage').show();
                         } else {
                             $('#currentAvatarPreview').hide();
+                            $('#noAvatarMessage').show();
+                            $('#avatarInfoMessage').hide();
                         }
                         
                         // Reset file input
@@ -614,13 +719,23 @@
                         
                         // Add new preview
                         $('#editPartnerAvatarFile').closest('.form-group').append(
-                            '<div class="mt-2 avatar-preview">' +
-                            '<img src="' + e.target.result + '" alt="Preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">' +
-                            '<small class="form-text text-muted">Ảnh mới</small>' +
+                            '<div class="mt-3 avatar-preview">' +
+                            '<div class="d-flex align-items-center">' +
+                            '<div class="avatar-container">' +
+                            '<img src="' + e.target.result + '" alt="Preview" class="img-thumbnail rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #28a745;">' +
+                            '</div>' +
+                            '<div class="ml-3">' +
+                            '<h6 class="mb-1 text-success">Ảnh mới</h6>' +
+                            '<small class="text-muted">Ảnh sẽ được cập nhật khi lưu</small>' +
+                            '</div>' +
+                            '</div>' +
                             '</div>'
                         );
                     };
                     reader.readAsDataURL(this.files[0]);
+                } else {
+                    // Remove preview if no file selected
+                    $('.avatar-preview').remove();
                 }
             });
             

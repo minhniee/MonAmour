@@ -94,28 +94,29 @@
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Đánh giá TB
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Đối tác hoạt động
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="averageRating">
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="activePartners">
                                 @{
-                                    var averageRating = ViewBag.PerformanceData != null && ((List<MonAmour.ViewModels.PartnerPerformanceViewModel>)ViewBag.PerformanceData).Any() ? 
-                                        ((List<MonAmour.ViewModels.PartnerPerformanceViewModel>)ViewBag.PerformanceData).Average(p => p.AverageRating) : 0;
+                                    var activePartners = ViewBag.PerformanceData != null ? 
+                                        ((List<MonAmour.ViewModels.PartnerPerformanceViewModel>)ViewBag.PerformanceData).Count(p => p.Status == "active") : 0;
                                 }
-                                @averageRating.ToString("F1")
+                                @activePartners
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                            <i class="fas fa-user-check fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Charts Row -->
@@ -164,7 +165,6 @@
                                     <th>Đối tác</th>
                                     <th>Doanh thu</th>
                                     <th>Số đặt chỗ</th>
-                                    <th>Đánh giá TB</th>
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
@@ -188,17 +188,6 @@
                                             </td>
                                             <td>@partner.TotalRevenue.ToString("N0") VNĐ</td>
                                             <td>@partner.BookingCount</td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="mr-2">
-                                                        @for (int i = 1; i <= 5; i++)
-                                                        {
-                                                            <i class="fas fa-star @(i <= partner.AverageRating ? "text-warning" : "text-gray-300")"></i>
-                                                        }
-                                                    </div>
-                                                    <span>@partner.AverageRating.ToString("F1")</span>
-                                                </div>
-                                            </td>
                                             <td>
                                                 <span class="badge @(partner.Status == "active" ? "badge-success" : "badge-secondary")">
                                                     @(partner.Status == "active" ? "Hoạt động" : "Không hoạt động")
@@ -263,7 +252,6 @@
                     ConceptCount: 5,
                     BookingCount: 10,
                     TotalRevenue: 5000000,
-                    AverageRating: 4.5,
                     Status: "active"
                 },
                 {
@@ -275,7 +263,6 @@
                     ConceptCount: 3,
                     BookingCount: 7,
                     TotalRevenue: 3000000,
-                    AverageRating: 4.2,
                     Status: "active"
                 }
             ];
@@ -304,17 +291,16 @@
             
             const totalRevenue = (performanceData || []).reduce((sum, p) => sum + (p.TotalRevenue || p.totalRevenue || 0), 0);
             const totalBookings = (performanceData || []).reduce((sum, p) => sum + (p.BookingCount || p.bookingCount || 0), 0);
-            const averageRating = (performanceData || []).length > 0 ? 
-                (performanceData || []).reduce((sum, p) => sum + (p.AverageRating || p.averageRating || 0), 0) / (performanceData || []).length : 0;
+            const activePartners = (performanceData || []).filter(p => (p.Status || p.status) === "active").length;
             
-            console.log('Calculated totals:', { totalRevenue, totalBookings, averageRating });
+            console.log('Calculated totals:', { totalRevenue, totalBookings, activePartners });
             
             // Only update if we have data
             if ((performanceData || []).length > 0) {
                 // Update summary cards with JavaScript calculations
                 document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString() + ' VNĐ';
                 document.getElementById('totalBookings').textContent = totalBookings.toString();
-                document.getElementById('averageRating').textContent = averageRating.toFixed(1);
+                document.getElementById('activePartners').textContent = activePartners.toString();
                 
                 // Update total partners count
                 document.getElementById('totalPartners').textContent = (performanceData || []).length.toString();

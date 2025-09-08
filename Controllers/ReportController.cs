@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
 using MonAmour.Helpers;
+using MonAmour.Attributes;
 using System.Diagnostics;
 
 namespace MonAmour.Controllers
 {
+    [AdminOnly]
     public class ReportController : Controller
     {
         private readonly IReportService _reportService;

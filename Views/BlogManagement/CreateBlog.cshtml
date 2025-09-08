@@ -82,7 +82,8 @@
 
                         <div class="mb-3">
                             <label asp-for="PublishedDate" class="form-label">Ngày xuất bản</label>
-                            <input asp-for="PublishedDate" type="datetime-local" class="form-control" />
+                            <input asp-for="PublishedDate" type="datetime-local" class="form-control" id="publishedDateInput" />
+                            <small class="form-text text-muted">Để trống để sử dụng thời gian hiện tại</small>
                             <span asp-validation-for="PublishedDate" class="text-danger"></span>
                         </div>
 
@@ -159,6 +160,13 @@
             var now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('PublishedDate').value = now.toISOString().slice(0, 16);
+            
+            // Auto-set current time when form is submitted
+            $('form').on('submit', function() {
+                var currentTime = new Date();
+                currentTime.setMinutes(currentTime.getMinutes() - currentTime.getTimezoneOffset());
+                $('#publishedDateInput').val(currentTime.toISOString().slice(0, 16));
+            });
         });
     </script>
 }

@@ -25,6 +25,7 @@ namespace MonAmour.Services.Implements
             try
             {
                 var blogs = await _context.Blogs
+                    .Where(b => b.IsDeleted != true) // Only get non-deleted blogs
                     .OrderByDescending(b => b.CreatedAt)
                     .ToListAsync();
 
@@ -286,10 +287,11 @@ namespace MonAmour.Services.Implements
                 var blog = await _context.Blogs.FindAsync(id);
                 if (blog == null) return false;
 
-                // Delete associated image file
-                await _fileUploadService.DeleteBlogImageAsync(blog.FeaturedImage);
+                // Soft delete - mark as deleted instead of removing from database
+                blog.IsDeleted = true;
+                blog.DeletedAt = DateTime.Now;
+                blog.UpdatedAt = DateTime.Now;
 
-                _context.Blogs.Remove(blog);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -344,7 +346,9 @@ namespace MonAmour.Services.Implements
         {
             try
             {
-                var query = _context.Blogs.AsQueryable();
+                var query = _context.Blogs
+                    .Where(b => b.IsDeleted != true) // Only get non-deleted blogs
+                    .AsQueryable();
 
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
@@ -401,16 +405,27 @@ namespace MonAmour.Services.Implements
                     .OrderBy(c => c.Name)
                     .ToListAsync();
 
-                return categories.Select(c => new BlogCategoryListViewModel
+                var result = new List<BlogCategoryListViewModel>();
+                
+                foreach (var category in categories)
                 {
-                    CategoryId = c.CategoryId,
-                    Name = c.Name,
-                    Description = c.Description,
-                    Slug = c.Slug,
-                    IsActive = c.IsActive,
-                    CreatedAt = c.CreatedAt,
-                    BlogCount = c.Blogs.Count
-                }).ToList();
+                    // Count blogs for this category (excluding deleted blogs)
+                    var blogCount = await _context.Blogs
+                        .CountAsync(b => b.CategoryId == category.CategoryId && b.IsDeleted != true);
+                    
+                    result.Add(new BlogCategoryListViewModel
+                    {
+                        CategoryId = category.CategoryId,
+                        Name = category.Name,
+                        Description = category.Description,
+                        Slug = category.Slug,
+                        IsActive = category.IsActive,
+                        CreatedAt = category.CreatedAt,
+                        BlogCount = blogCount
+                    });
+                }
+                
+                return result;
             }
             catch (Exception ex)
             {

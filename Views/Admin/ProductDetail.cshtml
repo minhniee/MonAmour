@@ -210,10 +210,6 @@
                         {
                             <span class="badge badge-secondary badge-lg">Không hoạt động</span>
                         }
-                        else
-                        {
-                            <span class="badge badge-warning badge-lg">Bản nháp</span>
-                        }
                     </div>
                     
                     <div class="mb-3">
@@ -315,17 +311,6 @@
                             </form>
                         }
                         
-                        @if (Model.Status != "draft")
-                        {
-                            <form method="post" action="@Url.Action("ToggleProductStatus", "Admin")" style="display: inline;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@Model.ProductId" />
-                                <input type="hidden" name="status" value="draft" />
-                                <button type="submit" class="btn btn-warning btn-block">
-                                    <i class="fas fa-edit mr-2"></i>Chuyển thành bản nháp
-                                </button>
-                            </form>
-                        }
                     </div>
                 </div>
             </div>

@@ -106,7 +106,6 @@
                             <select asp-for="Status" class="form-select" required>
                                                         <option value="active" selected="@(Model.Status == "active")">Hoạt động</option>
                         <option value="inactive" selected="@(Model.Status == "inactive")">Không hoạt động</option>
-                        <option value="draft" selected="@(Model.Status == "draft")">Bản nháp</option>
                             </select>
                             <span asp-validation-for="Status" class="text-danger"></span>
                         </div>
@@ -172,10 +171,6 @@
                         {
                             <span class="badge badge-secondary">Không hoạt động</span>
                         }
-                        else
-                        {
-                            <span class="badge badge-warning">Bản nháp</span>
-                        }
                     </div>
                 </div>
             </div>
@@ -192,9 +187,6 @@
                         <a href="@Url.Action("ProductDetail", "Admin", new { id = Model.ProductId })" class="list-group-item list-group-item-action">
                             <i class="fas fa-eye mr-2 text-info"></i>Xem chi tiết
                         </a>
-                        <button type="button" class="list-group-item list-group-item-action" onclick="duplicateProduct()">
-                            <i class="fas fa-copy mr-2 text-warning"></i>Nhân bản sản phẩm
-                        </button>
                         <a href="@Url.Action("Products", "Admin")" class="list-group-item list-group-item-action">
                             <i class="fas fa-list mr-2 text-primary"></i>Danh sách sản phẩm
                         </a>
@@ -235,17 +227,6 @@
                             </form>
                         }
                         
-                        @if (Model.Status != "draft")
-                        {
-                            <form method="post" action="@Url.Action("ToggleProductStatus", "Admin")" style="display: inline;">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@Model.ProductId" />
-                                <input type="hidden" name="status" value="draft" />
-                                <button type="submit" class="btn btn-warning btn-block">
-                                    <i class="fas fa-edit mr-2"></i>Chuyển thành bản nháp
-                                </button>
-                            </form>
-                        }
                     </div>
                 </div>
             </div>
@@ -418,16 +399,6 @@
             }
         }
         
-        function duplicateProduct() {
-            if (confirm('Bạn có muốn tạo bản sao của sản phẩm này?')) {
-                // Store current form data
-                const formData = $('#editProductForm').serialize();
-                localStorage.setItem('duplicateProductData', formData);
-                
-                // Redirect to create product page
-                window.location.href = '@Url.Action("CreateProduct", "Admin")';
-            }
-        }
         
         function showAlert(type, message) {
             const alertHtml = `
