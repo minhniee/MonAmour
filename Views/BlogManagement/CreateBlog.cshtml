@@ -50,10 +50,10 @@
 
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label asp-for="FeaturedImage" class="form-label">Hình ảnh đại diện</label>
-                            <input asp-for="FeaturedImage" class="form-control" placeholder="URL hình ảnh" />
-                            <small class="form-text text-muted">Nhập URL hình ảnh hoặc để trống</small>
-                            <span asp-validation-for="FeaturedImage" class="text-danger"></span>
+                            <label asp-for="ImageFile" class="form-label">Hình ảnh đại diện</label>
+                            <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                            <small class="form-text text-muted">Chọn file hình ảnh từ máy tính (JPG, PNG, GIF, WebP - tối đa 5MB)</small>
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">

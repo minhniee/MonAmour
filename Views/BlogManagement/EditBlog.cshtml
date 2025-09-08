@@ -52,10 +52,25 @@
 
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label asp-for="FeaturedImage" class="form-label">Hình ảnh đại diện</label>
-                            <input asp-for="FeaturedImage" class="form-control" placeholder="URL hình ảnh" />
-                            <small class="form-text text-muted">Nhập URL hình ảnh hoặc để trống</small>
-                            <span asp-validation-for="FeaturedImage" class="text-danger"></span>
+                            <label asp-for="ImageFile" class="form-label">Hình ảnh đại diện mới</label>
+                            <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                            <small class="form-text text-muted">Chọn file hình ảnh mới từ máy tính (JPG, PNG, GIF, WebP - tối đa 5MB)</small>
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Hình ảnh hiện tại</label>
+                            <div class="current-image">
+                                @if (!string.IsNullOrEmpty(Model.FeaturedImage))
+                                {
+                                    <img src="@Model.FeaturedImage" alt="Current Blog Image" class="img-thumbnail" style="max-width: 200px;" />
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning">Chưa có hình ảnh</div>
+                                }
+                                <div class="form-text mt-2">Hình ảnh hiện tại của bài viết</div>
+                            </div>
                         </div>
 
                         <div class="mb-3">

@@ -1,0 +1,149 @@
+@model MonAmour.ViewModels.BannerProductCreateViewModel
+@{
+    ViewData["Title"] = "Tạo Banner Sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-plus me-2"></i>
+                        Tạo Banner Sản phẩm Mới
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="CreateBannerProduct" method="post" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="ImageFile" class="form-label">Hình ảnh Banner <span class="text-danger">*</span></label>
+                                    <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                    <div class="form-text">Chọn file hình ảnh từ máy tính (JPG, PNG, GIF, WebP - tối đa 5MB)</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Description" class="form-label">Mô tả</label>
+                                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Nhập mô tả cho banner"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                    <div class="form-text">Mô tả ngắn gọn về banner này</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label asp-for="DisplayOrder" class="form-label">Thứ tự hiển thị</label>
+                                            <input asp-for="DisplayOrder" type="number" class="form-control" min="0" value="0" />
+                                            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                                            <div class="form-text">Số càng nhỏ càng hiển thị trước</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input asp-for="IsPrimary" class="form-check-input" type="checkbox" />
+                                                <label asp-for="IsPrimary" class="form-check-label">
+                                                    Banner chính
+                                                </label>
+                                            </div>
+                                            <div class="form-text">Chỉ có 1 banner chính được hiển thị nổi bật</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                        <label asp-for="IsActive" class="form-check-label">
+                                            Kích hoạt banner
+                                        </label>
+                                    </div>
+                                    <div class="form-text">Banner sẽ được hiển thị khi được kích hoạt</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">Preview Banner</h6>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div id="bannerPreview" class="banner-preview-container">
+                                            <img id="previewImage" src="" alt="Banner Preview" class="img-fluid" style="max-height: 200px; display: none;" />
+                                            <div id="noPreview" class="text-muted">
+                                                <i class="fas fa-image fa-3x mb-2"></i>
+                                                <p>Nhập URL để xem preview</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("BannerProducts", "BannerManagement")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                Tạo Banner
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Preview banner image
+            $('#ImageFile').on('change', function() {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewImage').attr('src', e.target.result).show();
+                        $('#noPreview').hide();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#previewImage').hide();
+                    $('#noPreview').show();
+                }
+            });
+
+            // Form validation
+            $('form').on('submit', function(e) {
+                var imageFile = $('#ImageFile')[0].files[0];
+                if (!imageFile) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn hình ảnh banner');
+                    return false;
+                }
+                
+                // Check file size (5MB)
+                if (imageFile.size > 5 * 1024 * 1024) {
+                    e.preventDefault();
+                    alert('Kích thước file không được vượt quá 5MB');
+                    return false;
+                }
+            });
+        });
+    </script>
+}

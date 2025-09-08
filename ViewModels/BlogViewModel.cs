@@ -32,7 +32,8 @@ namespace MonAmour.ViewModels
         [StringLength(500, ErrorMessage = "Tóm tắt không được vượt quá 500 ký tự")]
         public string? Excerpt { get; set; }
 
-        [StringLength(255, ErrorMessage = "Đường dẫn hình ảnh không được vượt quá 255 ký tự")]
+        public IFormFile? ImageFile { get; set; }
+        
         public string? FeaturedImage { get; set; }
 
         public int? AuthorId { get; set; }
@@ -69,7 +70,8 @@ namespace MonAmour.ViewModels
         [StringLength(500, ErrorMessage = "Tóm tắt không được vượt quá 500 ký tự")]
         public string? Excerpt { get; set; }
 
-        [StringLength(255, ErrorMessage = "Đường dẫn hình ảnh không được vượt quá 255 ký tự")]
+        public IFormFile? ImageFile { get; set; }
+        
         public string? FeaturedImage { get; set; }
 
         public int? AuthorId { get; set; }

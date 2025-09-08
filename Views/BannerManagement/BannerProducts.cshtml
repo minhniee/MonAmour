@@ -1,0 +1,175 @@
+@model List<MonAmour.ViewModels.BannerProductListViewModel>
+@{
+    ViewData["Title"] = "Quản lý Banner Sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        Quản lý Banner Sản phẩm
+                    </h4>
+                    <a href="@Url.Action("CreateBannerProduct", "BannerManagement")" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>
+                        Thêm Banner Mới
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="bannerTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Hình ảnh</th>
+                                        <th>Mô tả</th>
+                                        <th>Thứ tự</th>
+                                        <th>Trạng thái</th>
+                                        <th>Banner chính</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var banner in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="banner-preview">
+                                                    <img src="@banner.ImgUrl" alt="Banner" class="img-thumbnail" style="width: 80px; height: 50px; object-fit: cover;">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="banner-description">
+                                                    <strong>@(banner.Description?.Length > 50 ? banner.Description.Substring(0, 50) + "..." : banner.Description)</strong>
+                                                    <br>
+                                                    <small class="text-muted">@banner.ImgUrl</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@banner.DisplayOrder</span>
+                                            </td>
+                                            <td>
+                                                @if (banner.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Hoạt động</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Tạm dừng</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (banner.IsPrimary)
+                                                {
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-star me-1"></i>
+                                                        Chính
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-light text-dark">Phụ</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small>@banner.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("EditBannerProduct", "BannerManagement", new { id = banner.BannerId })" 
+                                                       class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    @if (!banner.IsPrimary)
+                                                    {
+                                                        <form method="post" action="@Url.Action("SetPrimaryBannerProduct", "BannerManagement")" class="d-inline">
+                                                            <input type="hidden" name="id" value="@banner.BannerId" />
+                                                            <button type="submit" class="btn btn-sm btn-outline-warning" 
+                                                                    title="Đặt làm banner chính" 
+                                                                    onclick="return confirm('Bạn có chắc chắn muốn đặt banner này làm banner chính?')">
+                                                                <i class="fas fa-star"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    
+                                                    <form method="post" action="@Url.Action("ToggleBannerProductStatus", "BannerManagement")" class="d-inline">
+                                                        <input type="hidden" name="id" value="@banner.BannerId" />
+                                                        <button type="submit" class="btn btn-sm @(banner.IsActive ? "btn-outline-secondary" : "btn-outline-success")" 
+                                                                title="@(banner.IsActive ? "Tạm dừng" : "Kích hoạt")">
+                                                            <i class="fas @(banner.IsActive ? "fa-pause" : "fa-play")"></i>
+                                                        </button>
+                                                    </form>
+                                                    
+                                                    <form method="post" action="@Url.Action("DeleteBannerProduct", "BannerManagement")" class="d-inline">
+                                                        <input type="hidden" name="id" value="@banner.BannerId" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                                title="Xóa" 
+                                                                onclick="return confirm('Bạn có chắc chắn muốn xóa banner này?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có banner nào</h5>
+                            <p class="text-muted">Hãy thêm banner đầu tiên để bắt đầu quản lý</p>
+                            <a href="@Url.Action("CreateBannerProduct", "BannerManagement")" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Thêm Banner Đầu Tiên
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#bannerTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
+                },
+                "pageLength": 25,
+                "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+                "responsive": true,
+                "autoWidth": false,
+                "order": [[5, "desc"]]
+            });
+        });
+    </script>
+}

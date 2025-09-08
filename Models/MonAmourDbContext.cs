@@ -79,6 +79,12 @@ public partial class MonAmourDbContext : DbContext
 
     public virtual DbSet<BlogComment> BlogComments { get; set; }
 
+    public virtual DbSet<BannerService> BannerServices { get; set; }
+
+    public virtual DbSet<BannerHomepage> BannerHomepages { get; set; }
+
+    public virtual DbSet<BannerProduct> BannerProducts { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -1099,6 +1105,51 @@ public partial class MonAmourDbContext : DbContext
                 .WithMany(p => p.BlogComments)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_BlogComment_User");
+        });
+
+        // Configure BannerService
+        modelBuilder.Entity<BannerService>(entity =>
+        {
+            entity.HasKey(e => e.BannerId);
+            entity.ToTable("BannerService");
+            entity.Property(e => e.BannerId).HasColumnName("banner_id");
+            entity.Property(e => e.ImgUrl).HasColumnName("img_url").HasMaxLength(500);
+            entity.Property(e => e.IsPrimary).HasColumnName("is_primary");
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(1000);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+        });
+
+        // Configure BannerHomepage
+        modelBuilder.Entity<BannerHomepage>(entity =>
+        {
+            entity.HasKey(e => e.BannerId);
+            entity.ToTable("BannerHomepage");
+            entity.Property(e => e.BannerId).HasColumnName("banner_id");
+            entity.Property(e => e.ImgUrl).HasColumnName("img_url").HasMaxLength(500);
+            entity.Property(e => e.IsPrimary).HasColumnName("is_primary");
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(1000);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+        });
+
+        // Configure BannerProduct
+        modelBuilder.Entity<BannerProduct>(entity =>
+        {
+            entity.HasKey(e => e.BannerId);
+            entity.ToTable("BannerProduct");
+            entity.Property(e => e.BannerId).HasColumnName("banner_id");
+            entity.Property(e => e.ImgUrl).HasColumnName("img_url").HasMaxLength(500);
+            entity.Property(e => e.IsPrimary).HasColumnName("is_primary");
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(1000);
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
         });
 
         OnModelCreatingPartial(modelBuilder);

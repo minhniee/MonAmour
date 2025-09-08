@@ -9,11 +9,13 @@ namespace MonAmour.Services.Implements
     {
         private readonly MonAmourDbContext _context;
         private readonly ILogger<BlogManagementService> _logger;
+        private readonly IFileUploadService _fileUploadService;
 
-        public BlogManagementService(MonAmourDbContext context, ILogger<BlogManagementService> logger)
+        public BlogManagementService(MonAmourDbContext context, ILogger<BlogManagementService> logger, IFileUploadService fileUploadService)
         {
             _context = context;
             _logger = logger;
+            _fileUploadService = fileUploadService;
         }
 
         #region Blog Methods
@@ -188,12 +190,28 @@ namespace MonAmour.Services.Implements
         {
             try
             {
+                string? featuredImage = null;
+                
+                if (model.ImageFile != null)
+                {
+                    featuredImage = await _fileUploadService.UploadBlogImageAsync(model.ImageFile);
+                    if (string.IsNullOrEmpty(featuredImage))
+                    {
+                        _logger.LogError("Failed to upload blog image");
+                        return false;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(model.FeaturedImage))
+                {
+                    featuredImage = model.FeaturedImage;
+                }
+
                 var blog = new Blog
                 {
                     Title = model.Title,
                     Content = model.Content,
                     Excerpt = model.Excerpt,
-                    FeaturedImage = model.FeaturedImage,
+                    FeaturedImage = featuredImage,
                     AuthorId = model.AuthorId,
                     CategoryId = model.CategoryId,
                     Tags = model.Tags,
@@ -224,10 +242,24 @@ namespace MonAmour.Services.Implements
                 var blog = await _context.Blogs.FindAsync(model.BlogId);
                 if (blog == null) return false;
 
+                // Handle image update
+                if (model.ImageFile != null)
+                {
+                    var newImageUrl = await _fileUploadService.UpdateBlogImageAsync(model.ImageFile, blog.FeaturedImage);
+                    if (!string.IsNullOrEmpty(newImageUrl))
+                    {
+                        blog.FeaturedImage = newImageUrl;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(model.FeaturedImage))
+                {
+                    blog.FeaturedImage = model.FeaturedImage;
+                }
+                // If no new image and no FeaturedImage provided, keep existing FeaturedImage
+
                 blog.Title = model.Title;
                 blog.Content = model.Content;
                 blog.Excerpt = model.Excerpt;
-                blog.FeaturedImage = model.FeaturedImage;
                 blog.AuthorId = model.AuthorId;
                 blog.CategoryId = model.CategoryId;
                 blog.Tags = model.Tags;
@@ -253,6 +285,9 @@ namespace MonAmour.Services.Implements
             {
                 var blog = await _context.Blogs.FindAsync(id);
                 if (blog == null) return false;
+
+                // Delete associated image file
+                await _fileUploadService.DeleteBlogImageAsync(blog.FeaturedImage);
 
                 _context.Blogs.Remove(blog);
                 await _context.SaveChangesAsync();

@@ -229,6 +229,30 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="menu-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BannerManagement" ? "active" : "")">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#bannerSubmenu">
+                            <i class="fas fa-images"></i>
+                            <span>Quản lý Banner</span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <div class="collapse @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BannerManagement" ? "show" : "")" id="bannerSubmenu">
+                            <div class="submenu">
+                                <a href="@Url.Action("BannerHomepages", "BannerManagement")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "BannerHomepages" ? "active" : "")">
+                                    <i class="fas fa-home"></i>
+                                    <span>Banner trang chủ</span>
+                                </a>
+                                <a href="@Url.Action("BannerServices", "BannerManagement")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "BannerServices" ? "active" : "")">
+                                    <i class="fas fa-cogs"></i>
+                                    <span>Banner dịch vụ</span>
+                                </a>
+                                <a href="@Url.Action("BannerProducts", "BannerManagement")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "BannerProducts" ? "active" : "")">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <span>Banner sản phẩm</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="menu-section">
