@@ -131,7 +131,7 @@
         });
     }
 
-    // Auto submit quantity change
+    // Auto submit quantity change (revert to original behavior)
     document.querySelectorAll('.cart-qty-input').forEach(function(input){
         input.addEventListener('change', function(){
             const form = this.closest('.auto-update-form');
@@ -141,7 +141,6 @@
         input.addEventListener('input', function(){
             const form = this.closest('.auto-update-form');
             if (!form) return;
-            // Debounce minor typing by delaying submit
             clearTimeout(this._debounceTimer);
             this._debounceTimer = setTimeout(()=>form.submit(), 600);
         });
@@ -253,15 +252,15 @@
     const cassoRefreshBtn = document.getElementById('casso-refresh-btn');
     
     async function showCassoInstructions() {
-        try {
-            const res = await fetch('/Cart/GetPaymentInstructions', { credentials: 'same-origin' });
-            const data = await res.json();
-            
-            if (data.success) {
+            try {
+                const res = await fetch('/Cart/GetPaymentInstructions', { credentials: 'same-origin' });
+                const data = await res.json();
+                
+                if (data.success) {
                 if (data.qrCodeUrl) {
                     cassoQrCode.innerHTML = `
                         <div class="bg-white rounded-lg p-3 border-2 border-dashed border-wine-red/30 mb-3">
-                            <img src="${data.qrCodeUrl}" alt="QR Code" class="mx-auto max-w-full h-auto" style="max-height: 150px;">
+                            
                         </div>
                         <p class="text-xs text-wine-red/70 mb-2">Quét mã QR bằng ứng dụng ngân hàng</p>
                     `;
@@ -269,16 +268,16 @@
                     cassoQrCode.innerHTML = '';
                 }
                 
-                cassoInstructions.innerHTML = data.instructions.map(instruction => 
-                    `<div>• ${instruction}</div>`
-                ).join('');
-                cassoWrap.classList.remove('hidden');
-            } else {
-                alert(data.message || 'Không thể lấy hướng dẫn thanh toán');
+                    cassoInstructions.innerHTML = data.instructions.map(instruction => 
+                        `<div>• ${instruction}</div>`
+                    ).join('');
+                    cassoWrap.classList.remove('hidden');
+                } else {
+                    alert(data.message || 'Không thể lấy hướng dẫn thanh toán');
+                }
+            } catch (err) {
+                alert('Lỗi khi lấy hướng dẫn thanh toán: ' + (err && err.message ? err.message : err));
             }
-        } catch (err) {
-            alert('Lỗi khi lấy hướng dẫn thanh toán: ' + (err && err.message ? err.message : err));
-        }
     }
    
     if (cassoCheckBtn) {

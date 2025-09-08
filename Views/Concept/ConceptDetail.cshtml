@@ -135,12 +135,30 @@
 		<div class="container mx-auto px-4 text-center">
 			<h3 class="font-prata text-3xl text-wine-red mb-4">Tông màu chủ đạo</h3>
 			<p class="font-noto-serif text-lg text-gray-700 mb-8 max-w-2xl mx-auto">Mô tả về tông màu và phong cách thiết kế</p>
-			<div class="flex justify-center space-x-4">
-				<div class="w-16 h-16 rounded-full bg-wine-red shadow-lg"></div>
-				<div class="w-16 h-16 rounded-full bg-beige border-2 border-wine-red shadow-lg"></div>
-				<div class="w-16 h-16 rounded-full bg-gray-300 shadow-lg"></div>
-				<div class="w-16 h-16 rounded-full bg-gray-600 shadow-lg"></div>
-			</div>
+			@{
+				var palette = Model.ConceptColorJunctions?
+					.Select(j => j.Color)
+					.Where(c => c != null && !string.IsNullOrWhiteSpace(c.Code))
+					.ToList();
+			}
+			@if (palette != null && palette.Any())
+			{
+				<div class="flex justify-center space-x-4">
+					@foreach (var color in palette)
+					{
+						<div class="w-16 h-16 rounded-full shadow-lg border-2 border-wine-red" style="background-color: @color.Code"></div>
+					}
+				</div>
+			}
+			else
+			{
+				<div class="flex justify-center space-x-4">
+					<div class="w-16 h-16 rounded-full bg-wine-red shadow-lg"></div>
+					<div class="w-16 h-16 rounded-full bg-beige border-2 border-wine-red shadow-lg"></div>
+					<div class="w-16 h-16 rounded-full bg-gray-300 shadow-lg"></div>
+					<div class="w-16 h-16 rounded-full bg-gray-600 shadow-lg"></div>
+				</div>
+			}
 		</div>
 	</section>
 

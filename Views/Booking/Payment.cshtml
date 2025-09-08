@@ -145,6 +145,7 @@
 <script>
     let autoCheckInterval;
     let autoCheckCountdown = 30;
+    let isChecking = false;
     
     // Set payment reference when page loads (fallback for manual transfer)
     document.addEventListener('DOMContentLoaded', function() {
@@ -233,29 +234,32 @@
     function startAutoCheck() {
         const autoCheckBtn = document.getElementById('autoCheckBtn');
         autoCheckCountdown = 30;
-        
+
         autoCheckInterval = setInterval(async function() {
             autoCheckCountdown--;
             autoCheckBtn.textContent = `Tự động kiểm tra (${autoCheckCountdown}s)`;
-            
+
             if (autoCheckCountdown <= 0) {
-                clearInterval(autoCheckInterval);
-                autoCheckBtn.textContent = 'Tự động kiểm tra (30s)';
-                
-                // Check payment
+                autoCheckCountdown = 30; // reset for next cycle
+
+                if (isChecking) {
+                    return; // avoid overlapping checks
+                }
+
                 try {
+                    isChecking = true;
                     const response = await fetch('@Url.Action("CheckPayment", "Booking", new { bookingId = Model.BookingId })');
                     const result = await response.json();
-                    
+
                     if (result.success && result.redirectUrl) {
                         window.location.href = result.redirectUrl;
                     } else if (result.success) {
-                        // Continue auto checking
-                        startAutoCheck();
+                        // stays on page; loop continues automatically
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    startAutoCheck();
+                } finally {
+                    isChecking = false;
                 }
             }
         }, 1000);

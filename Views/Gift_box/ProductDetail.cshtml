@@ -130,12 +130,12 @@
                     </div>
 
                     <!-- Quantity Selector -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center gap-4">
                         <span class="font-noto-serif text-wine-red/80">Số lượng:</span>
-                        <div class="flex items-center border border-wine-red/30 rounded-lg bg-beige/60">
-                            <button class="px-3 py-2 text-gray-600 hover:text-wine-red transition-colors" onclick="decreaseQuantity()">-</button>
-                            <input type="number" id="quantity" value="1" min="1" class="w-16 text-center border-0 focus:ring-0 font-noto-serif">
-                            <button class="px-3 py-2 text-gray-600 hover:text-wine-red transition-colors" onclick="increaseQuantity()">+</button>
+                        <div class="qty-control">
+                            <button type="button" class="qty-btn" onclick="decreaseQuantity()" aria-label="Giảm">−</button>
+                            <input type="number" id="quantity" value="1" min="1" class="qty-input" />
+                            <button type="button" class="qty-btn" onclick="increaseQuantity()" aria-label="Tăng">＋</button>
                         </div>
                     </div>
 
@@ -346,6 +346,37 @@
     
     .tab-content.hidden {
         display: none;
+    }
+
+    /* Quantity control styles */
+    .qty-control {
+        display: inline-flex;
+        align-items: center;
+        background: #fbf1e6; /* beige */
+        border: 1px solid rgba(98, 0, 13, .3); /* wine red/30 */
+        border-radius: 9999px; /* pill */
+        overflow: hidden;
+    }
+    .qty-btn {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280; /* gray-500 */
+        background: transparent;
+        transition: background-color .2s, color .2s;
+    }
+    .qty-btn:hover { background-color: rgba(98, 0, 13, .06); color: #62000d; }
+    .qty-input {
+        width: 64px;
+        text-align: center;
+        border: 0;
+        outline: none;
+        background: transparent;
+        font-family: 'Noto Serif', serif;
+        padding: 0 4px;
+        height: 40px;
     }
 </style>
 

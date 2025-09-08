@@ -329,7 +329,7 @@ namespace MonAmour.Controllers
 
                                 Console.WriteLine("Saving to database...");
                                 await _db.SaveChangesAsync();
-                                Console.WriteLine("✅ Database saved successfully!");
+                                Console.WriteLine("Database saved successfully!");
 
                                 return Json(new { 
                                     success = true, 

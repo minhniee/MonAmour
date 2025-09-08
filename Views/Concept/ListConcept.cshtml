@@ -8,6 +8,9 @@
 	var page = ViewBag.Page ?? 1;
 	var totalPages = ViewBag.TotalPages ?? 1;
 	var currentPage = ViewBag.Page ?? 1;
+	var cities = ViewBag.Cities as List<string>;
+	string selectedCity = ViewBag.SelectedCity as string;
+	string search = ViewBag.Search as string;
 }
 
 <div class="min-h-screen bg-beige">
@@ -30,13 +33,21 @@
 						var img = concept?.ConceptImgs?.FirstOrDefault(img => img.IsPrimary == true)?.ImgUrl ?? concept?.ConceptImgs?.FirstOrDefault()?.ImgUrl ?? "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=500&h=400&fit=crop";
 						
 						<div class="concept-card flex-shrink-0 w-64 transition-all duration-300 cursor-pointer" data-index="@i" onclick="selectCard(@i)">
-							<div class="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300" style="background-color: white; border: 1px solid #62000d;">
-								<img src="@img" alt="@(concept?.Name ?? "Concept")" class="w-full h-64 object-cover">
-							</div>
 							@if (concept != null)
 							{
-								<div class="mt-3 text-center">
-									<h3 class="font-prata text-lg font-bold" style="color: #62000d;">@concept.Name</h3>
+								<a href="@Url.Action("ConceptDetail","Concept", new { id = concept.ConceptId })" class="group block focus:outline-none">
+									<div class="carousel-card rounded-lg overflow-hidden shadow-lg transition-all duration-300">
+										<img src="@img" alt="@concept.Name" class="w-full h-64 object-cover transform transition-transform duration-300 group-hover:scale-105">
+									</div>
+									<div class="mt-3 text-center">
+										<h3 class="font-prata text-lg font-bold group-hover:underline" style="color: #62000d;">@concept.Name</h3>
+									</div>
+								</a>
+							}
+							else
+							{
+								<div class="carousel-card rounded-lg overflow-hidden shadow-lg transition-all duration-300">
+									<img src="@img" alt="Concept" class="w-full h-64 object-cover">
 								</div>
 							}
 						</div>
@@ -79,13 +90,43 @@
 			<div class="text-center mb-12">
 				<h2 class="font-prata text-4xl md:text-5xl mb-8" style="color: #62000d;">Gói dịch vụ</h2>
 				
+				<!-- Search and City Filter -->
+				<form method="get" action="@Url.Action("ListConcept","Concept")" class="max-w-5xl mx-auto mb-10">
+					<input type="hidden" name="categoryId" value="@(selectedCat?.ToString() ?? "")" />
+					<div class="filter-bar flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4">
+						<input name="q" value="@search" placeholder="Tìm theo địa chỉ, khu vực, thành phố..."
+							class="input w-full md:flex-1" />
+						<select name="city" class="select w-full md:w-60">
+							<option value="">Tất cả thành phố</option>
+							@if (cities != null)
+							{
+								foreach (var c in cities)
+								{
+									@if (selectedCity == c)
+									{
+										<option value="@c" selected="selected">@c</option>
+									}
+									else
+									{
+										<option value="@c">@c</option>
+									}
+								}
+							}
+						</select>
+						<div class="flex gap-3 md:ml-2">
+							<button type="submit" class="btn-primary">Lọc</button>
+							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = 1 })" class="btn-outline">Xóa lọc</a>
+						</div>
+					</div>
+				</form>
+
 				<!-- Category Filter Tabs -->
-				<div class="flex flex-wrap items-center justify-center gap-4 mb-12">
-					<a href="@Url.Action("ListConcept","Concept", new { categoryId = (int?)null, page = 1 })" class="px-6 py-3 text-sm font-medium rounded-lg border @((selectedCat==null)?"text-white":"text-white")" style="@((selectedCat==null)?"background-color: #62000d; border-color: #62000d;":"background-color: #f0e6d2; border-color: #62000d; color: #62000d;")" onmouseover="if(!@((selectedCat==null).ToString().ToLower())) {this.style.backgroundColor='#e6d4c0';}" onmouseout="if(!@((selectedCat==null).ToString().ToLower())) {this.style.backgroundColor='#f0e6d2';}">Tất cả dịch vụ</a>
+				<div class="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-12">
+					<a href="@Url.Action("ListConcept","Concept", new { categoryId = (int?)null, page = 1, city = selectedCity, q = search })" class="pill @(selectedCat==null?"pill-active":"")">Tất cả dịch vụ</a>
 					@foreach (var cat in categories)
 					{
 						var active = selectedCat == cat.CategoryId;
-						<a href="@Url.Action("ListConcept","Concept", new { categoryId = cat.CategoryId, page = 1 })" class="px-6 py-3 text-sm font-medium rounded-lg border @(active?"text-white":"text-white")" style="@(active?"background-color: #62000d; border-color: #62000d;":"background-color: #f0e6d2; border-color: #62000d; color: #62000d;")" onmouseover="if(!@(active.ToString().ToLower())) {this.style.backgroundColor='#e6d4c0';}" onmouseout="if(!@(active.ToString().ToLower())) {this.style.backgroundColor='#f0e6d2';}">@cat.Name</a>
+						<a href="@Url.Action("ListConcept","Concept", new { categoryId = cat.CategoryId, page = 1, city = selectedCity, q = search })" class="pill @(active?"pill-active":"")">@cat.Name</a>
 					}
 				</div>
 			</div>
@@ -155,7 +196,7 @@
 										</div>
 									}
 
-											<a href="@Url.Action("ConceptDetail", "Concept", new { id = c.ConceptId })" class="w-full py-2 rounded-lg font-medium transition-colors duration-200 block text-center" style="background-color: #62000d; color: #fbf1e6;" onmouseover="this.style.backgroundColor='#4a0009'" onmouseout="this.style.backgroundColor='#62000d'">
+											<a href="@Url.Action("ConceptDetail", "Concept", new { id = c.ConceptId })" class="w-full py-2 rounded-lg font-medium transition-colors duration-200 block text-center cta-btn" style="background-color: #62000d; color: #fbf1e6;" onmouseover="this.style.backgroundColor='#4a0009'" onmouseout="this.style.backgroundColor='#62000d'">
 												Liên hệ ngay
 											</a>
 								</div>
@@ -173,7 +214,7 @@
 						<!-- Previous Button -->
 						@if (currentPage > 1)
 						{
-							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = currentPage - 1 })" 
+							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = currentPage - 1, city = selectedCity, q = search })" 
 							   class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -198,7 +239,7 @@
 								// Show first page if not in range
 								if (startPage > 1)
 								{
-									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = 1 })" 
+									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = 1, city = selectedCity, q = search })" 
 									   class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
 										1
 									</a>
@@ -211,7 +252,7 @@
 								// Show page numbers in range
 								for (int p = startPage; p <= endPage; p++)
 								{
-									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = p })" 
+									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = p, city = selectedCity, q = search })" 
 									   class="flex items-center justify-center w-10 h-10 rounded-full @(p == currentPage ? "bg-wine-red text-beige" : "bg-beige text-wine-red hover:bg-wine-red hover:text-beige") transition-colors duration-200 font-prata">
 										@p
 									</a>
@@ -224,7 +265,7 @@
 									{
 										<span class="text-wine-red font-prata">...</span>
 									}
-									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = totalPages })" 
+									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = totalPages, city = selectedCity, q = search })" 
 									   class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
 										@totalPages
 									</a>
@@ -235,7 +276,7 @@
 						<!-- Next Button -->
 						@if (currentPage < totalPages)
 						{
-							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = currentPage + 1 })" 
+							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = currentPage + 1, city = selectedCity, q = search })" 
 							   class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -258,6 +299,109 @@
 </div>
 
 <style>
+	/* Inputs & buttons */
+	.input {
+		padding: 0.75rem 1rem;
+		border-radius: 0.5rem;
+		border: 1px solid #62000d;
+		background: #fff;
+		color: #62000d;
+	}
+	.select {
+		padding: 0.75rem 1rem;
+		border-radius: 0.5rem;
+		border: 1px solid #62000d;
+		background: #fff;
+		color: #62000d;
+	}
+	.btn-primary {
+		padding: 0.6rem 1.25rem;
+		border-radius: 0.5rem;
+		background-color: #62000d;
+		color: #fbf1e6;
+		transition: background-color .2s ease, box-shadow .2s ease;
+		box-shadow: 0 4px 12px rgba(98, 0, 13, 0.2);
+	}
+	.btn-primary:hover { background-color: #4a0009; }
+	.btn-outline {
+		padding: 0.6rem 1.25rem;
+		border-radius: 0.5rem;
+		border: 1px solid #62000d;
+		color: #62000d;
+		background: transparent;
+	}
+
+	/* Force original CTA colors */
+	.cta-btn {
+		background: #62000d !important;
+		background-image: none !important;
+		color: #fbf1e6 !important;
+		border: 1px solid #62000d !important;
+		opacity: 1 !important;
+		filter: none !important;
+		box-shadow: none !important;
+		cursor: pointer !important;
+		text-shadow: none !important;
+	}
+	/* Extra specificity inside concept grid */
+	.concept-grid a.cta-btn {
+		background: #62000d !important;
+		background-image: none !important;
+		color: #fbf1e6 !important;
+		border-color: #62000d !important;
+		opacity: 1 !important;
+		filter: none !important;
+		box-shadow: none !important;
+	}
+	.cta-btn:hover,
+	.concept-grid a.cta-btn:hover {
+		background: #4a0009 !important;
+		background-image: none !important;
+		color: #fbf1e6 !important;
+		border-color: #4a0009 !important;
+	}
+
+	/* Category pills */
+	.pill {
+		padding: 0.65rem 1rem;
+		border-radius: 9999px;
+		border: 1px solid #62000d;
+		color: #62000d;
+		background-color: #f0e6d2;
+		font-size: .9rem;
+		transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+	}
+	.pill:hover { background-color: #e6d4c0; }
+	.pill-active {
+		background-color: #62000d;
+		border-color: #62000d;
+		color: #fbf1e6;
+		box-shadow: 0 6px 16px rgba(98,0,13,.25);
+	}
+
+	/* Concept card polish */
+	.concept-grid .rounded-lg {
+		border: 1px solid #d7c2b8 !important;
+		border-radius: 14px !important;
+		background: linear-gradient(180deg, #ffffff, #fbf1e6) !important;
+		box-shadow: 0 8px 20px rgba(98, 0, 13, 0.12) !important;
+		transition: transform .2s ease, box-shadow .2s ease !important;
+	}
+	.concept-grid .rounded-lg:hover {
+		transform: translateY(-4px) !important;
+		box-shadow: 0 14px 28px rgba(98, 0, 13, 0.18) !important;
+	}
+	.concept-grid .aspect-square { border-bottom: 1px solid #ead8cd; }
+	.concept-grid .group:hover .aspect-square img { transform: scale(1.05); }
+	.concept-grid .p-6 { padding: 1.1rem 1rem !important; }
+	.concept-grid .font-prata.text-lg { font-size: 1.15rem; }
+	.concept-grid .font-noto-serif.mb-2 { font-weight: 600; }
+	.concept-grid .w-full.py-2 { margin-top: .6rem; }
+
+	/* Top carousel cards */
+	.carousel-card { background: #ffffff; border: 1px solid #62000d; }
+	#conceptCarousel .group:hover .carousel-card { box-shadow: 0 12px 24px rgba(98,0,13,.18); }
+
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;

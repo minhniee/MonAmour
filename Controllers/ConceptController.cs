@@ -16,13 +16,22 @@ namespace MonAmour.Controllers
 			_db = db;
 		}
 
-		public async Task<IActionResult> ListConcept(int? categoryId, int page = 1)
+		public async Task<IActionResult> ListConcept(int? categoryId, int page = 1, string? city = null, string? q = null)
 		{
 			const int pageSize = 8;
 			if (page < 1) page = 1;
 
 			var categories = await _db.ConceptCategories
 				.OrderBy(c => c.Name)
+				.ToListAsync();
+
+			// Cities for filter
+			var cities = await _db.Locations
+				.AsNoTracking()
+				.Where(l => l.City != null && l.City != "")
+				.Select(l => l.City!)
+				.Distinct()
+				.OrderBy(c => c)
 				.ToListAsync();
 
 			var query = _db.Concepts
@@ -35,6 +44,26 @@ namespace MonAmour.Controllers
 			if (categoryId.HasValue)
 			{
 				query = query.Where(c => c.CategoryId == categoryId.Value);
+			}
+
+			// Filter by city
+			if (!string.IsNullOrWhiteSpace(city))
+			{
+				query = query.Where(c => c.Location != null && c.Location.City != null && c.Location.City.Contains(city));
+			}
+
+			// Search by address/district/city
+			if (!string.IsNullOrWhiteSpace(q))
+			{
+				var keyword = q.Trim();
+				query = query.Where(c =>
+					(c.Location != null && (
+						(c.Location.Address ?? "").Contains(keyword) ||
+						(c.Location.District ?? "").Contains(keyword) ||
+						(c.Location.City ?? "").Contains(keyword)
+					)) ||
+					(c.Name != null && c.Name.Contains(keyword))
+				);
 			}
 
 			query = query.OrderByDescending(c => c.CreatedAt).ThenByDescending(c => c.ConceptId);
@@ -55,6 +84,9 @@ namespace MonAmour.Controllers
 			ViewBag.TotalPages = totalPages;
 			ViewBag.TotalItems = totalItems;
 			ViewBag.PageSize = pageSize;
+			ViewBag.Cities = cities;
+			ViewBag.SelectedCity = city;
+			ViewBag.Search = q;
 
 			return View(items);
 		}
