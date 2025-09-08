@@ -1,0 +1,149 @@
+@model List<MonAmour.ViewModels.BlogCategoryListViewModel>
+@{
+    ViewData["Title"] = "Quản lý danh mục blog";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý danh mục blog</h1>
+        <a asp-action="CreateCategory" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Tạo danh mục mới
+        </a>
+    </div>
+
+    <!-- Categories List -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách danh mục</h6>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshCategories()">
+                    <i class="fas fa-sync-alt"></i> Làm mới
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="categoryTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Tên danh mục</th>
+                            <th>Mô tả</th>
+                            <th>Slug</th>
+                            <th>Số bài viết</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@category.Name</strong>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(category.Description))
+                                    {
+                                        @(category.Description.Length > 100 ? category.Description.Substring(0, 100) + "..." : category.Description)
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có mô tả</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(category.Slug))
+                                    {
+                                        <code>@category.Slug</code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@category.BlogCount</span>
+                                </td>
+                                <td>
+                                    @if (category.IsActive == true)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Không hoạt động</span>
+                                    }
+                                </td>
+                                <td>@(category.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditCategory" asp-route-id="@category.CategoryId" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-@(category.IsActive == true ? "warning" : "success")" 
+                                                onclick="toggleCategoryStatus(@category.CategoryId)" title="@(category.IsActive == true ? "Vô hiệu hóa" : "Kích hoạt")">
+                                            <i class="fas fa-@(category.IsActive == true ? "pause" : "play")"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteCategory(@category.CategoryId)" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#categoryTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 25,
+                "order": [[5, "desc"]]
+            });
+        });
+
+        function refreshCategories() {
+            location.reload();
+        }
+
+        function toggleCategoryStatus(categoryId) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái danh mục này?')) {
+                $.post('@Url.Action("ToggleCategoryStatus", "BlogManagement")', {
+                    id: categoryId
+                }, function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + result.message);
+                    }
+                });
+            }
+        }
+
+        function deleteCategory(categoryId) {
+            if (confirm('Bạn có chắc chắn muốn xóa danh mục này? Hành động này không thể hoàn tác!')) {
+                $.post('@Url.Action("DeleteCategory", "BlogManagement")', {
+                    id: categoryId
+                }, function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + result.message);
+                    }
+                });
+            }
+        }
+    </script>
+}

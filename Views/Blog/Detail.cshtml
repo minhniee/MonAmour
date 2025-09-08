@@ -1,4 +1,4 @@
-﻿@model MonAmour.Models.BlogDetailViewModel
+﻿@model MonAmour.ViewModels.BlogDetailViewModel
 @{
     ViewData["Title"] = Model.Title + " - MonAmour Blog";
 }
@@ -27,11 +27,11 @@
                 </div>
                 <div class="p-8">
                     <div class="flex items-center text-sm text-gray-500 mb-4">
-                        <span>@Model.Category</span>
+                        <span>@Model.CategoryName</span>
                         <span class="mx-2">•</span>
-                        <span>@Model.Author</span>
+                        <span>@Model.AuthorName</span>
                         <span class="mx-2">•</span>
-                        <span>@Model.PublishedDate.ToString("dd/MM/yyyy")</span>
+                        <span>@Model.PublishedDate?.ToString("dd/MM/yyyy")</span>
                         <span class="mx-2">•</span>
                         <span>@Model.ReadTime phút đọc</span>
                     </div>
@@ -95,7 +95,7 @@
                 <div id="commentsList" class="space-y-6">
                     @foreach (var comment in Model.Comments)
                     {
-                        <div class="comment-item border-b border-gray-200 pb-6" data-comment-id="@comment.Id">
+                        <div class="comment-item border-b border-gray-200 pb-6" data-comment-id="@comment.CommentId">
                             <div class="flex items-start space-x-4">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style="background-color: #62000d;">
                                     @comment.AuthorName.Substring(0, 1).ToUpper()
@@ -104,12 +104,12 @@
                                     <div class="flex items-center justify-between mb-2">
                                         <div class="flex items-center space-x-2">
                                             <h4 class="font-semibold text-gray-800">@comment.AuthorName</h4>
-                                            <span class="text-sm text-gray-500">@comment.CreatedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                            <span class="text-sm text-gray-500">@comment.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</span>
                                         </div>
                                         <!-- Delete button for admin or comment author -->
-                                        @if (ViewBag.CurrentUserId != null && (comment.BlogPostId == ViewBag.CurrentUserId || ViewBag.IsAdmin == true))
+                                        @if (ViewBag.CurrentUserId != null && (comment.UserId == ViewBag.CurrentUserId || ViewBag.IsAdmin == true))
                                         {
-                                            <button onclick="deleteComment(@comment.Id)" class="text-red-500 hover:text-red-700 text-sm">
+                                            <button onclick="deleteComment(@comment.CommentId)" class="text-red-500 hover:text-red-700 text-sm">
                                                 <i class="fas fa-trash"></i> Xóa
                                             </button>
                                         }
@@ -132,7 +132,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     @for (int i = 1; i <= 3; i++)
                     {
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="openBlogDetail(@(Model.Id + i))">
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="openBlogDetail(@(Model.BlogId + i))">
                             <div class="aspect-video bg-gray-200 flex items-center justify-center">
                                 <span class="text-gray-400 text-sm">Related Post @i</span>
                             </div>
@@ -165,7 +165,7 @@ const connection = new signalR.HubConnectionBuilder()
 connection.start().then(function () {
     console.log("SignalR Connected");
     // Join the blog group
-    connection.invoke("JoinBlogGroup", "@Model.Id");
+    connection.invoke("JoinBlogGroup", "@Model.BlogId");
 }).catch(function (err) {
     console.error("SignalR Connection Error: ", err.toString());
 });
@@ -203,7 +203,7 @@ document.getElementById('commentForm').addEventListener('submit', function(e) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `blogId=@Model.Id&authorName=${encodeURIComponent(authorName)}&authorEmail=${encodeURIComponent(authorEmail)}&content=${encodeURIComponent(content)}`
+        body: `blogId=@Model.BlogId&authorName=${encodeURIComponent(authorName)}&authorEmail=${encodeURIComponent(authorEmail)}&content=${encodeURIComponent(content)}`
     })
     .then(response => response.json())
     .then(data => {
@@ -255,7 +255,7 @@ function deleteComment(commentId) {
 function addCommentToUI(comment) {
     const commentsList = document.getElementById('commentsList');
     const commentHtml = `
-        <div class="comment-item border-b border-gray-200 pb-6" data-comment-id="${comment.Id}">
+        <div class="comment-item border-b border-gray-200 pb-6" data-comment-id="${comment.CommentId}">
             <div class="flex items-start space-x-4">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style="background-color: #62000d;">
                     ${comment.AuthorName.charAt(0).toUpperCase()}
@@ -266,7 +266,7 @@ function addCommentToUI(comment) {
                             <h4 class="font-semibold text-gray-800">${comment.AuthorName}</h4>
                             <span class="text-sm text-gray-500">${comment.CreatedDate}</span>
                         </div>
-                        ${comment.CanDelete ? `<button onclick="deleteComment(${comment.Id})" class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash"></i> Xóa</button>` : ''}
+                        ${comment.CanDelete ? `<button onclick="deleteComment(${comment.CommentId})" class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash"></i> Xóa</button>` : ''}
                     </div>
                     <p class="text-gray-700 leading-relaxed" style="font-family: 'Noto Serif', serif;">
                         ${comment.Content}
@@ -314,7 +314,7 @@ function openBlogDetail(id) {
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
     if (connection) {
-        connection.invoke("LeaveBlogGroup", "@Model.Id");
+        connection.invoke("LeaveBlogGroup", "@Model.BlogId");
     }
 });
 </script>

@@ -1,3 +1,5 @@
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,17 +12,11 @@ public partial class Blog
     [Column("blog_id")]
     public int BlogId { get; set; }
 
-    [Required]
-    [StringLength(255)]
-    [Column("title")]
-    public string Title { get; set; } = "";
+    public string Title { get; set; } = null!;
 
-    [Column("content")]
-    public string Content { get; set; } = "";
+    public string Content { get; set; } = null!;
 
-    [StringLength(500)]
-    [Column("excerpt")]
-    public string Excerpt { get; set; } = "";
+    public string? Excerpt { get; set; }
 
     [StringLength(255)]
     [Column("featured_image")]
@@ -39,29 +35,21 @@ public partial class Blog
     [Column("published_date")]
     public DateTime? PublishedDate { get; set; }
 
-    [Column("is_featured")]
-    public bool IsFeatured { get; set; } = false;
+    public bool? IsFeatured { get; set; }
 
-    [Column("is_published")]
-    public bool IsPublished { get; set; } = false;
+    public bool? IsPublished { get; set; }
 
-    [Column("read_time")]
-    public int ReadTime { get; set; } = 0;
+    public int? ReadTime { get; set; }
 
-    [Column("view_count")]
-    public int ViewCount { get; set; } = 0;
+    public int? ViewCount { get; set; }
 
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; }
 
-    [Column("updated_at")]
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
-    [ForeignKey("AuthorId")]
     public virtual User? Author { get; set; }
 
-    [ForeignKey("CategoryId")]
     public virtual BlogCategory? Category { get; set; }
 
     public virtual ICollection<BlogComment> Comments { get; set; } = new List<BlogComment>();

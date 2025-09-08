@@ -87,10 +87,10 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <small>@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                    <small>@(comment.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "")</small>
                                 </td>
                                 <td>
-                                    @if (comment.IsApproved)
+                                    @if (comment.IsApproved == true)
                                     {
                                         <span class="badge bg-success">Đã duyệt</span>
                                     }
@@ -101,7 +101,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        @if (!comment.IsApproved)
+                                        @if (comment.IsApproved != true)
                                         {
                                             <form method="post" action="@Url.Action("ApproveComment", "Admin")" class="d-inline">
                                                 <input type="hidden" name="commentId" value="@comment.CommentId" />

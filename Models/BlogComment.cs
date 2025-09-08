@@ -1,3 +1,5 @@
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,23 +24,16 @@ public partial class BlogComment
 
     public string? AuthorEmail { get; set; }
 
-    [Required]
-    [Column("content")]
-    public string Content { get; set; } = "";
+    public string Content { get; set; } = null!;
 
-    [Column("is_approved")]
-    public bool IsApproved { get; set; } = false;
+    public bool? IsApproved { get; set; }
 
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; }
 
-    [Column("updated_at")]
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
-    [ForeignKey("BlogId")]
     public virtual Blog Blog { get; set; } = null!;
 
-    [ForeignKey("UserId")]
     public virtual User? User { get; set; }
 }

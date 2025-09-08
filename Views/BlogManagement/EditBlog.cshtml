@@ -1,0 +1,161 @@
+@model MonAmour.ViewModels.BlogEditViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa bài viết";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa bài viết</h1>
+        <a asp-action="Blogs" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+        </a>
+    </div>
+
+    <!-- Edit Blog Form -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin bài viết</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="EditBlog" method="post" enctype="multipart/form-data">
+                <input asp-for="BlogId" type="hidden" />
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài viết" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Excerpt" class="form-label">Tóm tắt</label>
+                            <textarea asp-for="Excerpt" class="form-control" rows="3" placeholder="Nhập tóm tắt bài viết (tùy chọn)"></textarea>
+                            <span asp-validation-for="Excerpt" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label">Nội dung <span class="text-danger">*</span></label>
+                            <textarea asp-for="Content" class="form-control" id="contentEditor" rows="15" placeholder="Nhập nội dung bài viết"></textarea>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Tags" class="form-label">Tags</label>
+                            <input asp-for="Tags" class="form-control" placeholder="Nhập tags, phân cách bằng dấu phẩy" />
+                            <small class="form-text text-muted">Ví dụ: du lịch, ẩm thực, văn hóa</small>
+                            <span asp-validation-for="Tags" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="FeaturedImage" class="form-label">Hình ảnh đại diện</label>
+                            <input asp-for="FeaturedImage" class="form-control" placeholder="URL hình ảnh" />
+                            <small class="form-text text-muted">Nhập URL hình ảnh hoặc để trống</small>
+                            <span asp-validation-for="FeaturedImage" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AuthorId" class="form-label">Tác giả</label>
+                            <select asp-for="AuthorId" class="form-select">
+                                <option value="">Chọn tác giả</option>
+                                @foreach (var author in Model.Authors)
+                                {
+                                    <option value="@author.UserId">@author.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="AuthorId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Danh mục</label>
+                            <select asp-for="CategoryId" class="form-select">
+                                <option value="">Chọn danh mục</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.CategoryId">@category.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PublishedDate" class="form-label">Ngày xuất bản</label>
+                            <input asp-for="PublishedDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="PublishedDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ReadTime" class="form-label">Thời gian đọc (phút)</label>
+                            <input asp-for="ReadTime" type="number" class="form-control" min="1" max="60" placeholder="5" />
+                            <span asp-validation-for="ReadTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsPublished" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsPublished" class="form-check-label">
+                                    Xuất bản
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsFeatured" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsFeatured" class="form-check-label">
+                                    Bài viết nổi bật
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Blogs" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Cập nhật bài viết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize CKEditor
+            ClassicEditor
+                .create(document.querySelector('#contentEditor'), {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'outdent', 'indent', '|',
+                            'blockQuote', 'insertTable', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    language: 'vi'
+                })
+                .then(editor => {
+                    window.editor = editor;
+                })
+                .catch(error => {
+                    console.error('Error initializing CKEditor:', error);
+                });
+        });
+    </script>
+}

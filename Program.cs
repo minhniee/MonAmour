@@ -35,6 +35,9 @@ builder.Services.AddSession(options =>
 // Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
+// Add Authorization (using custom SessionAuthorizeAttribute)
+builder.Services.AddAuthorization();
+
 // Add Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -46,6 +49,18 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddScoped<IBlogManagementService, BlogManagementService>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IPartnerService, PartnerService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IConceptService, ConceptService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // Add SignalR
 builder.Services.AddSignalR();
@@ -96,14 +111,31 @@ app.UseRouting();
 // Add Session middleware
 app.UseSession();
 
+// Add Authentication middleware
+app.UseAuthentication();
+
 // Add Remember Me middleware
 app.UseMiddleware<RememberMeMiddleware>();
 
 app.UseAuthorization();
 
+// Add 404 handling middleware
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map Error routes
+app.MapControllerRoute(
+    name: "error",
+    pattern: "Error/{statusCode}",
+    defaults: new { controller = "Error", action = "HttpStatusCodeHandler" });
+
+app.MapControllerRoute(
+    name: "notfound",
+    pattern: "NotFound",
+    defaults: new { controller = "Error", action = "NotFound" });
 
 // Map SignalR Hub
 app.MapHub<MonAmour.Hubs.CommentHub>("/commentHub");

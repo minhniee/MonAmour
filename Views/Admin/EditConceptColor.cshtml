@@ -1,0 +1,185 @@
+@model MonAmour.ViewModels.ConceptColorDropdownViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa màu sắc concept";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1><i class="fas fa-edit"></i> Chỉnh sửa màu sắc concept</h1>
+                    <p>Cập nhật thông tin màu sắc concept: <strong>@Model.Name</strong></p>
+                </div>
+                <div class="page-actions">
+                    <a href="@Url.Action("ConceptColors", "Admin")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Edit Form -->
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-palette"></i> Thông tin màu sắc concept
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="EditConceptColor" method="post" id="editForm">
+                                @Html.AntiForgeryToken()
+                                <input asp-for="ColorId" type="hidden" />
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label asp-for="Name" class="form-label">
+                                                <i class="fas fa-tag"></i> Tên màu sắc <span class="text-danger">*</span>
+                                            </label>
+                                            <input asp-for="Name" class="form-control" placeholder="Nhập tên màu sắc concept" required />
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label asp-for="Code" class="form-label">
+                                                <i class="fas fa-code"></i> Mã màu (Hex)
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">#</span>
+                                                <input asp-for="Code" class="form-control" placeholder="FFFFFF" 
+                                                       pattern="[0-9A-Fa-f]{6}" maxlength="6" id="colorCode" />
+                                                <button type="button" class="btn btn-outline-secondary" id="colorPickerBtn">
+                                                    <i class="fas fa-eye-dropper"></i>
+                                                </button>
+                                            </div>
+                                            <input type="color" id="colorPicker" class="form-control form-control-color mt-2" 
+                                                   style="width: 60px; height: 40px;" />
+                                            <small class="form-text text-muted">
+                                                Nhập mã màu hex (6 ký tự) hoặc sử dụng color picker bên dưới.
+                                            </small>
+                                            <span asp-validation-for="Code" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <div class="color-preview-container">
+                                                <label class="form-label">Xem trước màu:</label>
+                                                <div id="colorPreview" class="color-preview-large" style="width: 100px; height: 60px; background-color: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; margin-top: 10px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="@Url.Action("ConceptColors", "Admin")" class="btn btn-secondary">
+                                                <i class="fas fa-times"></i> Hủy
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Cập nhật màu sắc
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize color preview with existing value
+            var existingCode = $('#colorCode').val();
+            if (existingCode && existingCode.length === 6) {
+                var color = '#' + existingCode;
+                $('#colorPreview').css('background-color', color);
+                $('#colorPicker').val(color);
+            }
+
+            // Color picker functionality
+            $('#colorPicker').on('change', function() {
+                var color = $(this).val();
+                var hexColor = color.substring(1); // Remove # symbol
+                $('#colorCode').val(hexColor.toUpperCase());
+                updateColorPreview();
+            });
+
+            $('#colorCode').on('input', function() {
+                var code = $(this).val();
+                if (code.length === 6) {
+                    updateColorPreview();
+                }
+            });
+
+            function updateColorPreview() {
+                var code = $('#colorCode').val();
+                if (code && code.length === 6) {
+                    var color = '#' + code;
+                    $('#colorPreview').css('background-color', color);
+                    $('#colorPicker').val(color);
+                }
+            }
+
+            // Form validation
+            $('#editForm').on('submit', function(e) {
+                var name = $('#Name').val().trim();
+                var code = $('#colorCode').val().trim();
+                
+                if (name === '') {
+                    e.preventDefault();
+                    alert('Vui lòng nhập tên màu sắc concept!');
+                    $('#Name').focus();
+                    return false;
+                }
+                
+                if (name.length < 2) {
+                    e.preventDefault();
+                    alert('Tên màu sắc phải có ít nhất 2 ký tự!');
+                    $('#Name').focus();
+                    return false;
+                }
+
+                if (code && code.length !== 6) {
+                    e.preventDefault();
+                    alert('Mã màu phải có đúng 6 ký tự hex!');
+                    $('#colorCode').focus();
+                    return false;
+                }
+                
+                // Ensure code is uppercase and doesn't have # prefix
+                if (code) {
+                    code = code.toUpperCase().replace('#', '');
+                    $('#colorCode').val(code);
+                }
+            });
+
+            // Auto-focus on name field
+            $('#Name').focus();
+        });
+    </script>
+}

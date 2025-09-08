@@ -4,6 +4,7 @@ using MonAmour.Models;
 using MonAmour.Services.Interfaces;
 using MonAmour.Hubs;
 using MonAmour.Helpers;
+using MonAmour.ViewModels;
 
 namespace MonAmour.Controllers;
 
@@ -50,43 +51,43 @@ public class BlogController : Controller
         
         var viewModel = new BlogIndexViewModel
         {
-            FeaturedPosts = featuredBlogs.Take(1).Select(b => new BlogPost
+            FeaturedPosts = featuredBlogs.Take(1).Select(b => new BlogListViewModel
             {
-                Id = b.BlogId,
+                BlogId = b.BlogId,
                 Title = b.Title,
                 Excerpt = b.Excerpt ?? "",
-                Author = b.Author?.Name ?? "Admin",
-                Category = b.Category?.Name ?? "General",
+                AuthorName = b.Author?.Name ?? "Admin",
+                CategoryName = b.Category?.Name ?? "General",
                 PublishedDate = b.PublishedDate ?? DateTime.Now,
                 FeaturedImage = b.FeaturedImage ?? "",
-                ReadTime = b.ReadTime,
-                IsFeatured = b.IsFeatured
+                ReadTime = b.ReadTime ?? 0,
+                IsFeatured = b.IsFeatured ?? false
             }).ToList(),
-            RecentPosts = allBlogs.Skip(1).Take(4).Select(b => new BlogPost
+            RecentPosts = allBlogs.Skip(1).Take(4).Select(b => new BlogListViewModel
             {
-                Id = b.BlogId,
+                BlogId = b.BlogId,
                 Title = b.Title,
                 Excerpt = b.Excerpt ?? "",
-                Author = b.Author?.Name ?? "Admin",
-                Category = b.Category?.Name ?? "General",
+                AuthorName = b.Author?.Name ?? "Admin",
+                CategoryName = b.Category?.Name ?? "General",
                 PublishedDate = b.PublishedDate ?? DateTime.Now,
                 FeaturedImage = b.FeaturedImage ?? "",
-                ReadTime = b.ReadTime,
-                IsFeatured = b.IsFeatured
+                ReadTime = b.ReadTime ?? 0,
+                IsFeatured = b.IsFeatured ?? false
             }).ToList(),
-            DailyPosts = allBlogs.Skip(5).Take(3).Select(b => new BlogPost
+            DailyPosts = allBlogs.Skip(5).Take(3).Select(b => new BlogListViewModel
             {
-                Id = b.BlogId,
+                BlogId = b.BlogId,
                 Title = b.Title,
                 Excerpt = b.Excerpt ?? "",
-                Author = b.Author?.Name ?? "Admin",
-                Category = b.Category?.Name ?? "General",
+                AuthorName = b.Author?.Name ?? "Admin",
+                CategoryName = b.Category?.Name ?? "General",
                 PublishedDate = b.PublishedDate ?? DateTime.Now,
                 FeaturedImage = b.FeaturedImage ?? "",
-                ReadTime = b.ReadTime,
-                IsFeatured = b.IsFeatured
+                ReadTime = b.ReadTime ?? 0,
+                IsFeatured = b.IsFeatured ?? false
             }).ToList(),
-            SearchQuery = searchTerm,
+            SearchTerm = searchTerm,
             SelectedFilter = filter
         };
 
@@ -97,7 +98,7 @@ public class BlogController : Controller
     public async Task<IActionResult> Detail(int id)
     {
         var blog = await _blogService.GetBlogByIdWithDetailsAsync(id);
-        if (blog == null || !blog.IsPublished)
+        if (blog == null || !(blog.IsPublished ?? false))
         {
             return NotFound();
         }
@@ -112,24 +113,24 @@ public class BlogController : Controller
 
         var viewModel = new BlogDetailViewModel
         {
-            Id = blog.BlogId,
+            BlogId = blog.BlogId,
             Title = blog.Title,
             Content = blog.Content,
             Excerpt = blog.Excerpt ?? "",
-            Author = blog.Author?.Name ?? "Admin",
-            Category = blog.Category?.Name ?? "General",
+            AuthorName = blog.Author?.Name ?? "Admin",
+            CategoryName = blog.Category?.Name ?? "General",
             PublishedDate = blog.PublishedDate ?? DateTime.Now,
             FeaturedImage = blog.FeaturedImage ?? "",
-            ReadTime = blog.ReadTime,
-            Tags = !string.IsNullOrEmpty(blog.Tags) ? blog.Tags.Split(',').ToList() : new List<string>(),
-            Comments = blog.Comments.Select(c => new Comment
+            ReadTime = blog.ReadTime ?? 0,
+            Tags = !string.IsNullOrEmpty(blog.Tags) ? string.Join(", ", blog.Tags.Split(',')) : "",
+            Comments = blog.Comments.Select(c => new BlogComment
             {
-                Id = c.CommentId,
+                CommentId = c.CommentId,
                 AuthorName = c.User?.Name ?? c.AuthorName ?? "Anonymous",
                 AuthorEmail = c.AuthorEmail ?? "",
                 Content = c.Content,
-                CreatedDate = c.CreatedAt,
-                BlogPostId = c.BlogId
+                CreatedAt = c.CreatedAt ?? DateTime.Now,
+                BlogId = c.BlogId
             }).ToList()
         };
 
@@ -156,21 +157,21 @@ public class BlogController : Controller
 
         var viewModel = new BlogIndexViewModel
         {
-            FeaturedPosts = new List<BlogPost>(),
-            RecentPosts = new List<BlogPost>(),
-            DailyPosts = blogs.Select(b => new BlogPost
+            FeaturedPosts = new List<BlogListViewModel>(),
+            RecentPosts = new List<BlogListViewModel>(),
+            DailyPosts = blogs.Select(b => new BlogListViewModel
             {
-                Id = b.BlogId,
+                BlogId = b.BlogId,
                 Title = b.Title,
                 Excerpt = b.Excerpt ?? "",
-                Author = b.Author?.Name ?? "Admin",
-                Category = b.Category?.Name ?? "General",
+                AuthorName = b.Author?.Name ?? "Admin",
+                CategoryName = b.Category?.Name ?? "General",
                 PublishedDate = b.PublishedDate ?? DateTime.Now,
                 FeaturedImage = b.FeaturedImage ?? "",
-                ReadTime = b.ReadTime,
-                IsFeatured = b.IsFeatured
+                ReadTime = b.ReadTime ?? 0,
+                IsFeatured = b.IsFeatured ?? false
             }).ToList(),
-            SearchQuery = $"Category: {category.Name}",
+            SearchTerm = $"Category: {category.Name}",
             SelectedFilter = ""
         };
 
@@ -207,12 +208,12 @@ public class BlogController : Controller
             // Prepare comment data for SignalR
             var commentData = new
             {
-                Id = createdComment.CommentId,
+                CommentId = createdComment.CommentId,
                 AuthorName = createdComment.User?.Name ?? createdComment.AuthorName ?? "Anonymous",
                 AuthorEmail = createdComment.AuthorEmail ?? "",
                 Content = createdComment.Content,
-                CreatedDate = createdComment.CreatedAt.ToString("dd/MM/yyyy HH:mm"),
-                BlogPostId = createdComment.BlogId,
+                CreatedDate = (createdComment.CreatedAt ?? DateTime.Now).ToString("dd/MM/yyyy HH:mm"),
+                BlogId = createdComment.BlogId,
                 UserId = createdComment.UserId,
                 IsCurrentUser = createdComment.UserId == currentUserId,
                 CanDelete = currentUserId.HasValue && (createdComment.UserId == currentUserId || AuthHelper.IsAdmin(HttpContext))

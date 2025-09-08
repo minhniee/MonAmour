@@ -553,7 +553,7 @@ namespace MonAmour.Controllers
             var transferContent = paymentReference;
 
             // Tạo QR code cho thanh toán
-            var qrCodeUrl = _vietQRService.GetQRCodeUrl(amount, transferContent);
+            var qrCodeUrl = _vietQRService.GetQRCodeUrl(amount ?? 0, transferContent);
 
             var instructions = new
             {

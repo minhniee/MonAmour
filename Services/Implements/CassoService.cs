@@ -133,7 +133,7 @@ namespace MonAmour.Services.Implements
                 System.Diagnostics.Debug.WriteLine($"Found cart order: {cartOrder.OrderId}, Total: {cartOrder.TotalPrice}");
 
                 // Check if amount matches (with some tolerance for rounding)
-                var expectedAmount = (long)Math.Round((cartOrder.TotalPrice)); // Casso trả về VND, không phải cents
+                var expectedAmount = (long)Math.Round((cartOrder.TotalPrice ?? 0)); // Casso trả về VND, không phải cents
                 var amountDifference = Math.Abs(transaction.Amount - expectedAmount);
 
                 System.Diagnostics.Debug.WriteLine($"Amount check: Expected={expectedAmount}, Received={transaction.Amount}, Difference={amountDifference}");

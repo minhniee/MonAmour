@@ -30,7 +30,7 @@ public class BlogService : IBlogService
         return await _context.Blogs
             .Include(b => b.Author)
             .Include(b => b.Category)
-            .Where(b => b.IsPublished)
+            .Where(b => b.IsPublished == true)
             .OrderByDescending(b => b.PublishedDate)
             .ToListAsync();
     }
@@ -40,7 +40,7 @@ public class BlogService : IBlogService
         return await _context.Blogs
             .Include(b => b.Author)
             .Include(b => b.Category)
-            .Where(b => b.IsPublished && b.IsFeatured)
+            .Where(b => b.IsPublished == true && b.IsFeatured == true)
             .OrderByDescending(b => b.PublishedDate)
             .ToListAsync();
     }
@@ -58,7 +58,7 @@ public class BlogService : IBlogService
         return await _context.Blogs
             .Include(b => b.Author)
             .Include(b => b.Category)
-            .Include(b => b.Comments.Where(c => c.IsApproved))
+            .Include(b => b.Comments.Where(c => c.IsApproved == true))
                 .ThenInclude(c => c.User)
             .FirstOrDefaultAsync(b => b.BlogId == id);
     }
@@ -68,7 +68,7 @@ public class BlogService : IBlogService
         return await _context.Blogs
             .Include(b => b.Author)
             .Include(b => b.Category)
-            .Where(b => b.CategoryId == categoryId && b.IsPublished)
+            .Where(b => b.CategoryId == categoryId && b.IsPublished == true)
             .OrderByDescending(b => b.PublishedDate)
             .ToListAsync();
     }
@@ -78,10 +78,10 @@ public class BlogService : IBlogService
         return await _context.Blogs
             .Include(b => b.Author)
             .Include(b => b.Category)
-            .Where(b => b.IsPublished && 
+            .Where(b => b.IsPublished == true && 
                    (b.Title.Contains(searchTerm) || 
                     b.Content.Contains(searchTerm) || 
-                    b.Excerpt.Contains(searchTerm) ||
+                    (b.Excerpt != null && b.Excerpt.Contains(searchTerm)) ||
                     (b.Tags != null && b.Tags.Contains(searchTerm))))
             .OrderByDescending(b => b.PublishedDate)
             .ToListAsync();
@@ -189,7 +189,7 @@ public class BlogService : IBlogService
     public async Task<IEnumerable<BlogCategory>> GetActiveCategoriesAsync()
     {
         return await _context.BlogCategories
-            .Where(c => c.IsActive)
+            .Where(c => c.IsActive == true)
             .OrderBy(c => c.Name)
             .ToListAsync();
     }
@@ -263,7 +263,7 @@ public class BlogService : IBlogService
     {
         return await _context.BlogComments
             .Include(c => c.User)
-            .Where(c => c.BlogId == blogId && c.IsApproved)
+            .Where(c => c.BlogId == blogId && c.IsApproved == true)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
     }

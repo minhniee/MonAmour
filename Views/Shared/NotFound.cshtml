@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"] = "Trang không tồn tại";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="text-center py-5">
+                <!-- 404 Icon -->
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 5rem;"></i>
+                </div>
+                
+                <!-- Error Code -->
+                <h1 class="display-1 fw-bold text-primary">404</h1>
+                
+                <!-- Error Message -->
+                <h2 class="h3 mb-3">Trang không tồn tại</h2>
+                <p class="lead text-muted mb-4">
+                    Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
+                </p>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>
+                        Về trang chủ
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Quay lại
+                    </button>
+                </div>
+                
+                <!-- Help Text -->
+                <div class="mt-5">
+                    <p class="text-muted small">
+                        Nếu bạn tin rằng đây là lỗi, vui lòng 
+                        <a href="mailto:support@monamour.com" class="text-decoration-none">liên hệ với chúng tôi</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Help Section -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Có thể bạn đang tìm kiếm:</h5>
+                    <div class="row mt-3">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="@Url.Action("Index", "Home")" class="text-decoration-none">
+                                <div class="p-3 border rounded">
+                                    <i class="fas fa-home text-primary mb-2"></i>
+                                    <div>Trang chủ</div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="@Url.Action("Index", "Blog")" class="text-decoration-none">
+                                <div class="p-3 border rounded">
+                                    <i class="fas fa-blog text-success mb-2"></i>
+                                    <div>Blog</div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="@Url.Action("Index", "Concept")" class="text-decoration-none">
+                                <div class="p-3 border rounded">
+                                    <i class="fas fa-heart text-danger mb-2"></i>
+                                    <div>Concept</div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="@Url.Action("Index", "Cart")" class="text-decoration-none">
+                                <div class="p-3 border rounded">
+                                    <i class="fas fa-shopping-cart text-warning mb-2"></i>
+                                    <div>Giỏ hàng</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn {
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .display-1 {
+        background: linear-gradient(45deg, #007bff, #6f42c1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+</style>

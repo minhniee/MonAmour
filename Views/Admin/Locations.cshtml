@@ -1,0 +1,581 @@
+@model List<MonAmour.ViewModels.LocationViewModel>
+@{
+    ViewData["Title"] = "Quản lý Địa điểm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Địa điểm</h1>
+        <div>
+            <a href="@Url.Action("CreateLocation", "Admin")" class="btn btn-primary shadow-sm mr-2">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Thêm Địa điểm
+            </a>
+            <a href="@Url.Action("Partners", "Admin")" class="d-none d-sm-inline-block btn btn-secondary shadow-sm">
+                <i class="fas fa-handshake fa-sm text-white-50"></i> Quản lý Đối tác
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng địa điểm</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-map-marker-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Địa điểm hoạt động</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(l => l.Status == "Active")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Địa điểm có concept</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(l => l.ConceptCount > 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-lightbulb fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tổng concept</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Sum(l => l.ConceptCount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-cubes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Locations Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Địa điểm</h6>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                     aria-labelledby="dropdownMenuLink">
+                    <div class="dropdown-header">Tùy chọn:</div>
+                    <a class="dropdown-item" href="@Url.Action("Partners", "Admin")">
+                        <i class="fas fa-handshake fa-sm fa-fw mr-2 text-gray-400"></i>Quản lý Đối tác
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" onclick="exportLocations()">
+                        <i class="fas fa-download fa-sm fa-fw mr-2 text-gray-400"></i>Xuất Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="locationsTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên địa điểm</th>
+                                <th>Địa chỉ</th>
+                                <th>Thành phố</th>
+                                <th>Đối tác</th>
+                                <th>Số concept</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var location in Model)
+                            {
+                                <tr>
+                                    <td>@location.LocationId</td>
+                                    <td>
+                                        <strong>@location.Name</strong>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 200px;" title="@location.Address">
+                                            @location.Address
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(location.City))
+                                        {
+                                            <span class="badge badge-info">@location.City</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(location.PartnerName))
+                                        {
+                                            <span class="badge badge-primary">@location.PartnerName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (location.ConceptCount > 0)
+                                        {
+                                            <span class="badge badge-success">@location.ConceptCount</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">0</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (location.Status == "Active")
+                                        {
+                                            <span class="badge badge-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-warning">Tạm dừng</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("LocationDetail", "Admin", new { id = location.LocationId })" 
+                                               class="btn btn-info btn-sm" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-warning btn-sm" title="Chỉnh sửa"
+                                                    onclick="editLocation(@location.LocationId, '@Html.Raw(location.Name.Replace("'", "\\'"))')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            @if (location.Status == "Active")
+                                            {
+                                                <button type="button" class="btn btn-secondary btn-sm" title="Tạm dừng"
+                                                        onclick="toggleLocationStatus(@location.LocationId, 'Inactive')">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-success btn-sm" title="Kích hoạt"
+                                                        onclick="toggleLocationStatus(@location.LocationId, 'Active')">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                            }
+                                            <button type="button" class="btn btn-outline-danger btn-sm" title="Xóa"
+                                                    onclick="deleteLocation(@location.LocationId, '@Html.Raw(location.Name.Replace("'", "\\'"))', @location.ConceptCount)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có địa điểm nào</h5>
+                    <p class="text-muted">Hãy tạo địa điểm đầu tiên để bắt đầu</p>
+                    <a href="@Url.Action("CreateLocation", "Admin")" class="btn btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Thêm Địa điểm
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit Location Modal -->
+<div class="modal fade" id="editLocationModal" tabindex="-1" role="dialog" aria-labelledby="editLocationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editLocationModalLabel">Chỉnh sửa Địa điểm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editLocationForm" method="post" action="@Url.Action("EditLocation", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editLocationId" name="LocationId" />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editLocationName" class="form-label">Tên địa điểm <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="editLocationName" name="Name" required 
+                                       placeholder="Nhập tên địa điểm..." maxlength="100">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editLocationStatus" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                <select class="form-control" id="editLocationStatus" name="Status" required>
+                                    <option value="Active">Hoạt động</option>
+                                    <option value="Inactive">Tạm dừng</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocationAddress" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editLocationAddress" name="Address" required 
+                               placeholder="Nhập địa chỉ..." maxlength="200">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editLocationDistrict" class="form-label">Quận/Huyện</label>
+                                <input type="text" class="form-control" id="editLocationDistrict" name="District" 
+                                       placeholder="Nhập quận/huyện..." maxlength="50">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editLocationCity" class="form-label">Thành phố</label>
+                                <input type="text" class="form-control" id="editLocationCity" name="City" 
+                                       placeholder="Nhập thành phố..." maxlength="50">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocationPartner" class="form-label">Đối tác</label>
+                        <select class="form-control" id="editLocationPartner" name="PartnerId">
+                            <option value="">-- Chọn đối tác (tùy chọn) --</option>
+                            <!-- Options sẽ được load bằng JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLocationGgmapLink" class="form-label">Link Google Maps</label>
+                        <input type="url" class="form-control" id="editLocationGgmapLink" name="GgmapLink" 
+                               placeholder="Nhập link Google Maps..." maxlength="500">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save mr-2"></i>Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteLocationModal" tabindex="-1" role="dialog" aria-labelledby="deleteLocationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteLocationModalLabel">Xác nhận xóa địa điểm</h5>
+                <button type="button" class="close" onclick="closeDeleteLocationModal()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="deleteLocationInfo">
+                    <p>Bạn có chắc chắn muốn xóa địa điểm "<span id="locationNameToDelete"></span>"?</p>
+                    <div id="conceptCountWarning" class="alert alert-warning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Cảnh báo:</strong> Địa điểm này có <span id="conceptCount"></span> concept. 
+                        Bạn cần xóa hoặc chuyển các concept này trước khi xóa địa điểm.
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Lưu ý:</strong> Hành động này không thể hoàn tác!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteLocationModal()">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteLocation" onclick="confirmDeleteLocation()">
+                    <i class="fas fa-trash mr-2"></i>Xóa địa điểm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editLocation(locationId, locationName) {
+            $('#editLocationId').val(locationId);
+            $('#editLocationName').val(locationName);
+            
+            // Load location details and partners
+            loadLocationForEdit(locationId);
+            loadPartnersForEditModal();
+            
+            $('#editLocationModal').modal('show');
+        }
+        
+        function loadLocationForEdit(locationId) {
+            $.ajax({
+                url: '@Url.Action("GetLocationForEdit", "Admin")',
+                type: 'GET',
+                data: { id: locationId },
+                success: function(data) {
+                    if (data.success && data.location) {
+                        var location = data.location;
+                        
+                        // Populate form fields
+                        $('#editLocationId').val(location.locationId);
+                        $('#editLocationName').val(location.name);
+                        $('#editLocationAddress').val(location.address);
+                        $('#editLocationDistrict').val(location.district);
+                        $('#editLocationCity').val(location.city);
+                        $('#editLocationGgmapLink').val(location.ggmapLink);
+                        $('#editLocationStatus').val(location.status);
+                        
+                        // Set partner selection after partners are loaded
+                        setTimeout(function() {
+                            $('#editLocationPartner').val(location.partnerId);
+                        }, 500);
+                        
+                        console.log('Location loaded for edit:', location);
+                    } else {
+                        console.error('Failed to load location:', data.message);
+                    }
+                },
+                error: function() {
+                    console.error('AJAX Error: Cannot load location for edit');
+                }
+            });
+        }
+        
+        function loadPartnersForEditModal() {
+            $.ajax({
+                url: '@Url.Action("GetPartnersForDropdown", "Admin")',
+                type: 'GET',
+                success: function(data) {
+                    if (data.success && data.partners) {
+                        var dropdown = $('#editLocationPartner');
+                        dropdown.empty();
+                        dropdown.append('<option value="">-- Chọn đối tác (tùy chọn) --</option>');
+                        
+                        $.each(data.partners, function(index, partner) {
+                            dropdown.append('<option value="' + partner.id + '">' + partner.name + '</option>');
+                        });
+                        
+                        console.log('Partners loaded for edit modal:', data.partners.length);
+                    } else {
+                        console.error('Failed to load partners for edit modal:', data.message);
+                    }
+                },
+                error: function() {
+                    console.error('AJAX Error: Cannot load partners for edit modal');
+                }
+            });
+        }
+        
+        function deleteLocation(locationId, locationName, conceptCount) {
+            console.log('deleteLocation called:', locationId, locationName, conceptCount);
+            
+            $('#locationNameToDelete').text(locationName);
+            
+            if (conceptCount > 0) {
+                $('#conceptCount').text(conceptCount);
+                $('#conceptCountWarning').show();
+                $('#confirmDeleteLocation').prop('disabled', true);
+            } else {
+                $('#conceptCountWarning').hide();
+                $('#confirmDeleteLocation').prop('disabled', false);
+            }
+            
+            $('#deleteLocationModal').data('locationId', locationId);
+            $('#deleteLocationModal').modal('show');
+        }
+        
+        function closeDeleteLocationModal() {
+            console.log('closeDeleteLocationModal called');
+            $('#deleteLocationModal').modal('hide');
+        }
+        
+        function confirmDeleteLocation() {
+            console.log('confirmDeleteLocation called');
+            
+            var locationId = $('#deleteLocationModal').data('locationId');
+            
+            $('#confirmDeleteLocation').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang xóa...');
+            
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': '@Url.Action("DeleteLocation", "Admin")'
+            });
+            
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            if (!token) {
+                token = $('meta[name="__RequestVerificationToken"]').attr('content');
+            }
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': '__RequestVerificationToken',
+                'value': token
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'id',
+                'value': locationId
+            }));
+            
+            $('body').append(form);
+            form.submit();
+            
+            return false;
+        }
+        
+        function toggleLocationStatus(locationId, status) {
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': '@Url.Action("ToggleLocationStatus", "Admin")'
+            });
+            
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            if (!token) {
+                token = $('meta[name="__RequestVerificationToken"]').attr('content');
+            }
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': '__RequestVerificationToken',
+                'value': token
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'id',
+                'value': locationId
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'status',
+                'value': status
+            }));
+            
+            $('body').append(form);
+            form.submit();
+        }
+        
+        function exportLocations() {
+            alert('Tính năng xuất Excel sẽ được phát triển sau');
+        }
+        
+        // Form validation
+        $(document).ready(function() {
+            $('#editLocationForm').validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100
+                    },
+                    Address: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 200
+                    },
+                    Status: {
+                        required: true
+                    },
+                    District: {
+                        maxlength: 50
+                    },
+                    City: {
+                        maxlength: 50
+                    },
+                    GgmapLink: {
+                        url: true,
+                        maxlength: 500
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "Vui lòng nhập tên địa điểm",
+                        minlength: "Tên địa điểm phải có ít nhất 2 ký tự",
+                        maxlength: "Tên địa điểm không được vượt quá 100 ký tự"
+                    },
+                    Address: {
+                        required: "Vui lòng nhập địa chỉ",
+                        minlength: "Địa chỉ phải có ít nhất 5 ký tự",
+                        maxlength: "Địa chỉ không được vượt quá 200 ký tự"
+                    },
+                    Status: {
+                        required: "Vui lòng chọn trạng thái"
+                    },
+                    District: {
+                        maxlength: "Quận/Huyện không được vượt quá 50 ký tự"
+                    },
+                    City: {
+                        maxlength: "Thành phố không được vượt quá 50 ký tự"
+                    },
+                    GgmapLink: {
+                        url: "Link Google Maps không hợp lệ",
+                        maxlength: "Link Google Maps không được vượt quá 500 ký tự"
+                    }
+                }
+            });
+            
+            // Initialize DataTable
+            $('#locationsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 25,
+                "order": [[0, "asc"]], // Sort by ID asc
+                "columnDefs": [
+                    { "orderable": false, "targets": [7] } // Disable sorting for action column
+                ]
+            });
+        });
+    </script>
+}

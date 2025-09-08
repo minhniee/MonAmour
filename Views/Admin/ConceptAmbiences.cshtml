@@ -1,0 +1,155 @@
+@model List<MonAmour.ViewModels.ConceptAmbienceDropdownViewModel>
+@{
+    ViewData["Title"] = "Quản lý không gian concept";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1><i class="fas fa-home"></i> Quản lý không gian concept</h1>
+                    <p>Quản lý các không gian concept trong hệ thống</p>
+                </div>
+                <div class="page-actions">
+                    <a href="@Url.Action("CreateConceptAmbience", "Admin")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Thêm không gian mới
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Ambiences Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list"></i> Danh sách không gian concept
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="ambiencesTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên không gian</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ambience in Model)
+                                    {
+                                        <tr>
+                                            <td>@ambience.AmbienceId</td>
+                                            <td>
+                                                <strong>@ambience.Name</strong>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("EditConceptAmbience", "Admin", new { id = ambience.AmbienceId })" 
+                                                       class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="deleteAmbience(@ambience.AmbienceId, '@ambience.Name')" title="Xóa">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-home fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có không gian concept nào</h5>
+                            <p class="text-muted">Hãy tạo không gian concept đầu tiên để bắt đầu quản lý.</p>
+                            <a href="@Url.Action("CreateConceptAmbience", "Admin")" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm không gian đầu tiên
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Xác nhận xóa
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa không gian concept <strong id="ambienceName"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Lưu ý:</strong> Nếu không gian này đang được sử dụng bởi các concept, bạn sẽ không thể xóa.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#ambiencesTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json"
+                },
+                "pageLength": 10,
+                "order": [[0, "desc"]],
+                "columnDefs": [
+                    { "orderable": false, "targets": 2 }
+                ]
+            });
+        });
+
+        function deleteAmbience(id, name) {
+            $('#ambienceName').text(name);
+            $('#deleteForm').attr('action', '@Url.Action("DeleteConceptAmbience", "Admin")/' + id);
+            $('#deleteModal').modal('show');
+        }
+    </script>
+}

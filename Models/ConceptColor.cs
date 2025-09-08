@@ -11,5 +11,5 @@ public partial class ConceptColor
 
     public string? Code { get; set; }
 
-    public virtual ICollection<Concept> Concepts { get; set; } = new List<Concept>();
+    public virtual ICollection<ConceptColorJunction> ConceptColorJunctions { get; set; } = new List<ConceptColorJunction>();
 }

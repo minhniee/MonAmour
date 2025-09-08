@@ -1,3 +1,5 @@
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,10 +12,7 @@ public partial class BlogCategory
     [Column("category_id")]
     public int CategoryId { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    [Column("name")]
-    public string Name { get; set; } = "";
+    public string Name { get; set; } = null!;
 
     [StringLength(255)]
     [Column("description")]
@@ -23,14 +22,11 @@ public partial class BlogCategory
     [Column("slug")]
     public string? Slug { get; set; }
 
-    [Column("is_active")]
-    public bool IsActive { get; set; } = true;
+    public bool? IsActive { get; set; }
 
-    [Column("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; }
 
-    [Column("updated_at")]
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();

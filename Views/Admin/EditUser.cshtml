@@ -24,7 +24,7 @@
                     Thông tin người dùng
                 </div>
                 <div class="card-body">
-                    <form asp-action="EditUser" method="post">
+                    <form asp-action="EditUser" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
                         <input asp-for="UserId" type="hidden" />
                         
@@ -90,10 +90,20 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label asp-for="Avatar" class="form-label">Avatar</label>
-                            <input asp-for="Avatar" class="form-control" placeholder="URL hình ảnh avatar" />
+                            <label for="avatarFile" class="form-label">Avatar</label>
+                            <input type="file" id="avatarFile" name="AvatarFile" class="form-control" accept="image/*" onchange="previewAvatar(this)">
                             <span asp-validation-for="Avatar" class="text-danger"></span>
-                            <small class="form-text text-muted">Nhập URL hình ảnh hoặc để trống</small>
+                            <small class="form-text text-muted">Hỗ trợ: JPG, PNG, GIF. Kích thước tối đa: 5MB. Để trống nếu không muốn thay đổi avatar.</small>
+                            <div id="avatarPreview" class="mt-2" style="display: none;">
+                                <img id="previewAvatarImg" src="" alt="Avatar Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Avatar))
+                            {
+                                <div class="mt-2">
+                                    <small class="text-muted">Avatar hiện tại:</small>
+                                    <img src="@Model.Avatar" alt="Current Avatar" class="img-thumbnail ms-2" style="max-width: 100px; max-height: 100px;">
+                                </div>
+                            }
                         </div>
 
                         <div class="form-group mb-3">
@@ -193,5 +203,24 @@
                 roleError.textContent = '';
             }
         });
+
+        // Preview avatar function
+        function previewAvatar(input) {
+            const preview = document.getElementById('avatarPreview');
+            const previewImg = document.getElementById('previewAvatarImg');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
     </script>
 }

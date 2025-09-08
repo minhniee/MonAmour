@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Truy cập bị từ chối";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-h-screen flex items-center justify-center" style="background-color: #fbf1e6;">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+        <div class="mb-6">
+            <i class="fas fa-exclamation-triangle text-6xl text-yellow-500 mb-4"></i>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2" style="font-family: 'Prata', serif;">
+                Truy cập bị từ chối
+            </h1>
+            <p class="text-gray-600 mb-6">
+                Bạn không có quyền truy cập vào trang này. Vui lòng đăng nhập với tài khoản có quyền phù hợp.
+            </p>
+        </div>
+
+        <div class="space-y-4">
+            <a href="@Url.Action("Login", "Auth")" 
+               class="inline-block w-full bg-[#62000d] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#4a0009] transition-colors">
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Đăng nhập lại
+            </a>
+            
+            <a href="@Url.Action("Index", "Home")" 
+               class="inline-block w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                <i class="fas fa-home mr-2"></i>
+                Về trang chủ
+            </a>
+        </div>
+
+        <div class="mt-8 text-sm text-gray-500">
+            <p>Nếu bạn cho rằng đây là lỗi, vui lòng liên hệ với quản trị viên.</p>
+        </div>
+    </div>
+</div>

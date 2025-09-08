@@ -1,0 +1,65 @@
+@model List<MonAmour.ViewModels.BlogCommentListViewModel>
+
+@foreach (var comment in Model)
+{
+    <tr>
+        <td>
+            <input type="checkbox" class="comment-checkbox" value="@comment.CommentId" />
+        </td>
+        <td>
+            <strong>@comment.BlogTitle</strong>
+        </td>
+        <td>
+            @(comment.AuthorName ?? "Ẩn danh")
+            @if (!string.IsNullOrEmpty(comment.UserName))
+            {
+                <br><small class="text-muted">(@comment.UserName)</small>
+            }
+        </td>
+        <td>
+            @if (!string.IsNullOrEmpty(comment.AuthorEmail))
+            {
+                <a href="mailto:@comment.AuthorEmail">@comment.AuthorEmail</a>
+            }
+            else
+            {
+                <span class="text-muted">N/A</span>
+            }
+        </td>
+        <td>
+            @if (comment.Content.Length > 100)
+            {
+                <span title="@comment.Content">@comment.Content.Substring(0, 100)...</span>
+            }
+            else
+            {
+                @comment.Content
+            }
+        </td>
+        <td>
+            @if (comment.IsApproved == true)
+            {
+                <span class="badge bg-success">Đã duyệt</span>
+            }
+            else
+            {
+                <span class="badge bg-warning">Chờ duyệt</span>
+            }
+        </td>
+        <td>@(comment.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+        <td>
+            <div class="btn-group" role="group">
+                <a asp-action="EditComment" asp-route-id="@comment.CommentId" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-@(comment.IsApproved == true ? "warning" : "success")" 
+                        onclick="toggleCommentApproval(@comment.CommentId)" title="@(comment.IsApproved == true ? "Bỏ duyệt" : "Duyệt")">
+                    <i class="fas fa-@(comment.IsApproved == true ? "times" : "check")"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="deleteComment(@comment.CommentId)" title="Xóa">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+}

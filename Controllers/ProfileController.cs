@@ -257,7 +257,7 @@ public class ProfileController : Controller
                         CanReview = string.Equals(NormalizeStatus(o.Status), "Completed", StringComparison.OrdinalIgnoreCase),
                         HasReview = review != null,
                         ReviewId = review?.ReviewId,
-                        TotalAmount = (o.TotalPrice) + (o.ShippingCost),
+                        TotalAmount = (o.TotalPrice ?? 0) + (o.ShippingCost ?? 0),
                         Items = o.OrderItems.Select(oi => new OrderItemUserViewModel
                         {
                             ItemId = oi.OrderItemId,
@@ -453,7 +453,7 @@ public class ProfileController : Controller
                     OrderNumber = orderNumber,
                     OrderDate = order.CreatedAt ?? DateTime.Now,
                     Status = NormalizeStatus(order.Status),
-                    TotalAmount = order.TotalPrice,
+                    TotalAmount = order.TotalPrice ?? 0,
                     ShippingCost = order.ShippingCost,
                     ShippingAddress = order.ShippingAddress,
                     PaymentMethod = order.PaymentDetails.FirstOrDefault()?.Payment?.PaymentMethod?.Name,
@@ -468,7 +468,7 @@ public class ProfileController : Controller
                         Name = oi.Product?.Name ?? "",
                         Quantity = oi.Quantity ?? 0,
                         UnitPrice = oi.UnitPrice ?? 0m,
-                        TotalPrice = order.ShippingCost + order.TotalPrice
+                        TotalPrice = (order.ShippingCost ?? 0) + (order.TotalPrice ?? 0)
                     }).ToList()
                 };
             }

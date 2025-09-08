@@ -64,7 +64,8 @@ namespace MonAmour.Controllers
 			var concept = await _db.Concepts
 				.Include(c => c.ConceptImgs)
 				.Include(c => c.Category)
-				.Include(c => c.Color)
+				.Include(c => c.ConceptColorJunctions)
+					.ThenInclude(ccj => ccj.Color)
 				.Include(c => c.Ambience)
 				.Include(c => c.Location)
 				.FirstOrDefaultAsync(c => c.ConceptId == id);

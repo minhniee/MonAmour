@@ -15,8 +15,6 @@ public partial class Concept
 
     public int? LocationId { get; set; }
 
-    public int? ColorId { get; set; }
-
     public int? CategoryId { get; set; }
 
     public int? AmbienceId { get; set; }
@@ -35,11 +33,11 @@ public partial class Concept
 
     public virtual ConceptCategory? Category { get; set; }
 
-    public virtual ConceptColor? Color { get; set; }
-
     public virtual ICollection<ConceptImg> ConceptImgs { get; set; } = new List<ConceptImg>();
 
     public virtual Location? Location { get; set; }
 
     public virtual ICollection<WishList> WishLists { get; set; } = new List<WishList>();
+
+    public virtual ICollection<ConceptColorJunction> ConceptColorJunctions { get; set; } = new List<ConceptColorJunction>();
 }

@@ -1,0 +1,250 @@
+@model List<MonAmour.ViewModels.BlogCommentListViewModel>
+@{
+    ViewData["Title"] = "Quản lý bình luận blog";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý bình luận blog</h1>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshComments()">
+                <i class="fas fa-sync-alt"></i> Làm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và lọc</h6>
+        </div>
+        <div class="card-body">
+            <form id="searchForm" class="row g-3">
+                <div class="col-md-6">
+                    <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Nhập nội dung, tác giả, email...">
+                </div>
+                <div class="col-md-4">
+                    <label for="isApproved" class="form-label">Trạng thái duyệt</label>
+                    <select class="form-select" id="isApproved" name="isApproved">
+                        <option value="">Tất cả</option>
+                        <option value="true">Đã duyệt</option>
+                        <option value="false">Chờ duyệt</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Comments List -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách bình luận</h6>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-success" onclick="approveAllSelected()">
+                    <i class="fas fa-check"></i> Duyệt tất cả
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="deleteAllSelected()">
+                    <i class="fas fa-trash"></i> Xóa tất cả
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="commentTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" />
+                            </th>
+                            <th>Bài viết</th>
+                            <th>Tác giả</th>
+                            <th>Email</th>
+                            <th>Nội dung</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="commentTableBody">
+                        @foreach (var comment in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="comment-checkbox" value="@comment.CommentId" />
+                                </td>
+                                <td>
+                                    <strong>@comment.BlogTitle</strong>
+                                </td>
+                                <td>
+                                    @(comment.AuthorName ?? "Ẩn danh")
+                                    @if (!string.IsNullOrEmpty(comment.UserName))
+                                    {
+                                        <br><small class="text-muted">(@comment.UserName)</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(comment.AuthorEmail))
+                                    {
+                                        <a href="mailto:@comment.AuthorEmail">@comment.AuthorEmail</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (comment.Content.Length > 100)
+                                    {
+                                        <span title="@comment.Content">@comment.Content.Substring(0, 100)...</span>
+                                    }
+                                    else
+                                    {
+                                        @comment.Content
+                                    }
+                                </td>
+                                <td>
+                                    @if (comment.IsApproved == true)
+                                    {
+                                        <span class="badge bg-success">Đã duyệt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Chờ duyệt</span>
+                                    }
+                                </td>
+                                <td>@(comment.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="EditComment" asp-route-id="@comment.CommentId" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-@(comment.IsApproved == true ? "warning" : "success")" 
+                                                onclick="toggleCommentApproval(@comment.CommentId)" title="@(comment.IsApproved == true ? "Bỏ duyệt" : "Duyệt")">
+                                            <i class="fas fa-@(comment.IsApproved == true ? "times" : "check")"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteComment(@comment.CommentId)" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#commentTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 25,
+                "order": [[6, "desc"]]
+            });
+
+            // Select all checkbox
+            $('#selectAll').on('change', function() {
+                $('.comment-checkbox').prop('checked', this.checked);
+            });
+
+            // Search form submission
+            $('#searchForm').on('submit', function(e) {
+                e.preventDefault();
+                searchComments();
+            });
+        });
+
+        function refreshComments() {
+            location.reload();
+        }
+
+        function searchComments() {
+            var searchTerm = $('#searchTerm').val();
+            var isApproved = $('#isApproved').val();
+
+            $.post('@Url.Action("SearchComments", "BlogManagement")', {
+                searchTerm: searchTerm,
+                isApproved: isApproved
+            }, function(data) {
+                $('#commentTableBody').html(data);
+            });
+        }
+
+        function toggleCommentApproval(commentId) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái duyệt bình luận này?')) {
+                $.post('@Url.Action("ToggleCommentApproval", "BlogManagement")', {
+                    id: commentId
+                }, function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + result.message);
+                    }
+                });
+            }
+        }
+
+        function deleteComment(commentId) {
+            if (confirm('Bạn có chắc chắn muốn xóa bình luận này? Hành động này không thể hoàn tác!')) {
+                $.post('@Url.Action("DeleteComment", "BlogManagement")', {
+                    id: commentId
+                }, function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + result.message);
+                    }
+                });
+            }
+        }
+
+        function approveAllSelected() {
+            var selectedIds = $('.comment-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (selectedIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một bình luận');
+                return;
+            }
+
+            if (confirm('Bạn có chắc chắn muốn duyệt tất cả bình luận đã chọn?')) {
+                // Implementation for bulk approve
+                alert('Tính năng duyệt hàng loạt sẽ được triển khai');
+            }
+        }
+
+        function deleteAllSelected() {
+            var selectedIds = $('.comment-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (selectedIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một bình luận');
+                return;
+            }
+
+            if (confirm('Bạn có chắc chắn muốn xóa tất cả bình luận đã chọn? Hành động này không thể hoàn tác!')) {
+                // Implementation for bulk delete
+                alert('Tính năng xóa hàng loạt sẽ được triển khai');
+            }
+        }
+    </script>
+}

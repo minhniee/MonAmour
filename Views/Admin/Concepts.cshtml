@@ -1,0 +1,288 @@
+@model List<MonAmour.ViewModels.ConceptViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý Concept";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Concept</h1>
+        <div class="btn-group">
+            <a href="@Url.Action("CreateConcept", "Admin")" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Tạo Concept Mới
+            </a>
+            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="@Url.Action("ConceptImages", "Admin")">
+                    <i class="fas fa-images"></i> Quản lý Hình ảnh
+                </a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng Concept
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-lightbulb fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Concepts Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Concept</h6>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="conceptsTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên Concept</th>
+                                <th>Mô tả</th>
+                                <th>Giá</th>
+                                <th>Địa điểm</th>
+                                <th>Danh mục</th>
+                                <th>Màu sắc</th>
+                                <th>Không gian</th>
+                                <th>Trạng thái</th>
+                                <th>Hình ảnh</th>
+                                <th>Booking</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var concept in Model)
+                            {
+                                <tr>
+                                    <td>@concept.ConceptId</td>
+                                    <td>
+                                        <strong>@concept.Name</strong>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(concept.Description))
+                                        {
+                                            <span title="@concept.Description">
+                                                @(concept.Description.Length > 50 ? concept.Description.Substring(0, 50) + "..." : concept.Description)
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (concept.Price.HasValue)
+                                        {
+                                            <span class="text-success font-weight-bold">@concept.Price.Value.ToString("N0") VNĐ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có giá</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(concept.LocationName))
+                                        {
+                                            <span class="badge badge-info">@concept.LocationName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa chọn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(concept.CategoryName))
+                                        {
+                                            <span class="badge badge-secondary">@concept.CategoryName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa chọn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (concept.ColorNames != null && concept.ColorNames.Any())
+                                        {
+                                            @foreach (var colorName in concept.ColorNames)
+                                            {
+                                                <span class="badge badge-warning">@colorName</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa chọn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(concept.AmbienceName))
+                                        {
+                                            <span class="badge badge-primary">@concept.AmbienceName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa chọn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (concept.AvailabilityStatus)
+                                        {
+                                            <span class="badge badge-success">Có sẵn</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">Không có sẵn</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-info">@concept.ImageCount hình</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary">@concept.BookingCount booking</span>
+                                    </td>
+                                    <td>
+                                        @if (concept.CreatedAt.HasValue)
+                                        {
+                                            @concept.CreatedAt.Value.ToString("dd/MM/yyyy")
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("ConceptDetail", "Admin", new { id = concept.ConceptId })" 
+                                               class="btn btn-info btn-sm" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("EditConcept", "Admin", new { id = concept.ConceptId })" 
+                                               class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-@(concept.AvailabilityStatus ? "secondary" : "success") btn-sm" 
+                                                    onclick="toggleConceptStatus(@concept.ConceptId, @concept.AvailabilityStatus.ToString().ToLower())"
+                                                    title="@(concept.AvailabilityStatus ? "Tắt trạng thái" : "Bật trạng thái")">
+                                                <i class="fas fa-@(concept.AvailabilityStatus ? "pause" : "play")"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="deleteConcept(@concept.ConceptId, '@concept.Name')"
+                                                    title="Xóa concept">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-lightbulb fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-600">Chưa có concept nào</h5>
+                    <p class="text-gray-500">Hãy tạo concept đầu tiên để bắt đầu quản lý.</p>
+                    <a href="@Url.Action("CreateConcept", "Admin")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Tạo Concept Mới
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConceptModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa Concept</h5>
+                <button type="button" class="close" data-bs-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa concept <strong id="deleteConceptName"></strong>?</p>
+                <p class="text-danger"><small>Hành động này không thể hoàn tác!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteConceptForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Xóa Concept</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#conceptsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 50,
+                "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tất cả"]],
+                "order": [[0, "desc"]],
+                "responsive": true,
+                "autoWidth": false
+            });
+        });
+
+        function toggleConceptStatus(conceptId, currentStatus) {
+            const newStatus = !currentStatus;
+            const action = newStatus ? 'bật' : 'tắt';
+            
+            if (confirm(`Bạn có chắc chắn muốn ${action} trạng thái concept này?`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("ToggleConceptStatus", "Admin")';
+                
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '__RequestVerificationToken';
+                token.value = $('input[name="__RequestVerificationToken"]').val();
+                form.appendChild(token);
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = conceptId;
+                form.appendChild(idInput);
+                
+                const statusInput = document.createElement('input');
+                statusInput.type = 'hidden';
+                statusInput.name = 'status';
+                statusInput.value = newStatus;
+                form.appendChild(statusInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function deleteConcept(conceptId, conceptName) {
+            $('#deleteConceptName').text(conceptName);
+            $('#deleteConceptForm').attr('action', '@Url.Action("DeleteConcept", "Admin")/' + conceptId);
+            $('#deleteConceptModal').modal('show');
+        }
+    </script>
+}

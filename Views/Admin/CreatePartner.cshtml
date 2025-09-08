@@ -1,0 +1,256 @@
+@model MonAmour.ViewModels.PartnerCreateViewModel
+@{
+    ViewData["Title"] = "Tạo Đối tác Mới";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Tạo Đối tác Mới</h1>
+        <div>
+            <a href="@Url.Action("Partners", "Admin")" class="d-none d-sm-inline-block btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin Đối tác</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="@Url.Action("CreatePartner", "Admin")" id="createPartnerForm" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Name" class="form-label">Tên đối tác <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="Name" name="Name" required 
+                                           placeholder="Nhập tên đối tác..." maxlength="100" value="@Model.Name">
+                                    <small class="form-text text-muted">Tối đa 100 ký tự</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                                                <select class="form-control" id="Status" name="Status" required>
+                                <option value="Active" selected="@(Model.Status == "Active")">Hoạt động</option>
+                                <option value="Inactive" selected="@(Model.Status == "Inactive")">Tạm dừng</option>
+                            </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="Email" name="Email" 
+                                           placeholder="Nhập email..." maxlength="100" value="@Model.Email">
+                                    <small class="form-text text-muted">Email liên hệ của đối tác</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Phone" class="form-label">Điện thoại</label>
+                                    <input type="tel" class="form-control" id="Phone" name="Phone" 
+                                           placeholder="Nhập số điện thoại..." maxlength="20" value="@Model.Phone">
+                                    <small class="form-text text-muted">Số điện thoại liên hệ</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ContactInfo" class="form-label">Thông tin liên hệ</label>
+                            <textarea class="form-control" id="ContactInfo" name="ContactInfo" rows="4" 
+                                      placeholder="Nhập thông tin liên hệ chi tiết..." maxlength="500">@Model.ContactInfo</textarea>
+                            <small class="form-text text-muted">Tối đa 500 ký tự</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="AvatarFile" class="form-label">Avatar</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="AvatarFile" name="AvatarFile" accept="image/*">
+                                <label class="custom-file-label" for="AvatarFile">Chọn ảnh avatar...</label>
+                            </div>
+                            <small class="form-text text-muted">Chọn ảnh đại diện cho đối tác (JPG, PNG, GIF)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="UserId" class="form-label">Người dùng liên kết</label>
+                            <select class="form-control" id="UserId" name="UserId">
+                                <option value="">-- Chọn người dùng (tùy chọn) --</option>
+                                <!-- Options sẽ được load bằng JavaScript -->
+                            </select>
+                            <small class="form-text text-muted">Liên kết với tài khoản người dùng (không bắt buộc)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>Tạo Đối tác
+                            </button>
+                            <a href="@Url.Action("Partners", "Admin")" class="btn btn-secondary ml-2">
+                                <i class="fas fa-times mr-2"></i>Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Hướng dẫn</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="fas fa-handshake fa-3x text-primary mb-3"></i>
+                        <h5>Tạo Đối tác Mới</h5>
+                        <p class="text-muted">Điền đầy đủ thông tin để tạo đối tác mới</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6 class="font-weight-bold">Thông tin bắt buộc:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success mr-2"></i>Tên đối tác</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Trạng thái</li>
+                    </ul>
+                    
+                    <h6 class="font-weight-bold">Thông tin tùy chọn:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-info text-info mr-2"></i>Email liên hệ</li>
+                        <li><i class="fas fa-info text-info mr-2"></i>Số điện thoại</li>
+                        <li><i class="fas fa-info text-info mr-2"></i>Thông tin liên hệ</li>
+                        <li><i class="fas fa-info text-info mr-2"></i>Avatar URL</li>
+                        <li><i class="fas fa-info text-info mr-2"></i>Người dùng liên kết</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>Mẹo:</strong> Sau khi tạo đối tác, bạn có thể thêm địa điểm cho đối tác này.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load users for dropdown
+            loadUsersForDropdown();
+            
+            // Handle file input change
+            $('#AvatarFile').on('change', function() {
+                var fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').html(fileName || 'Chọn ảnh avatar...');
+                
+                // Preview image
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Remove existing preview
+                        $('.avatar-preview').remove();
+                        
+                        // Add new preview
+                        $('#AvatarFile').closest('.form-group').append(
+                            '<div class="mt-2 avatar-preview">' +
+                            '<img src="' + e.target.result + '" alt="Preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">' +
+                            '<small class="form-text text-muted">Ảnh mới</small>' +
+                            '</div>'
+                        );
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+            
+            // Form validation
+            $('#createPartnerForm').validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100
+                    },
+                    Status: {
+                        required: true
+                    },
+                    Email: {
+                        email: true,
+                        maxlength: 100
+                    },
+                    Phone: {
+                        maxlength: 20
+                    },
+                    ContactInfo: {
+                        maxlength: 500
+                    },
+                    AvatarFile: {
+                        accept: "image/*"
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "Vui lòng nhập tên đối tác",
+                        minlength: "Tên đối tác phải có ít nhất 2 ký tự",
+                        maxlength: "Tên đối tác không được vượt quá 100 ký tự"
+                    },
+                    Status: {
+                        required: "Vui lòng chọn trạng thái"
+                    },
+                    Email: {
+                        email: "Email không hợp lệ",
+                        maxlength: "Email không được vượt quá 100 ký tự"
+                    },
+                    Phone: {
+                        maxlength: "Số điện thoại không được vượt quá 20 ký tự"
+                    },
+                    ContactInfo: {
+                        maxlength: "Thông tin liên hệ không được vượt quá 500 ký tự"
+                    },
+                    AvatarFile: {
+                        accept: "Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF)"
+                    }
+                },
+                submitHandler: function(form) {
+                    // Show loading state
+                    var submitBtn = $(form).find('button[type="submit"]');
+                    var originalText = submitBtn.html();
+                    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang tạo...');
+                    
+                    // Submit form
+                    form.submit();
+                }
+            });
+        });
+        
+        function loadUsersForDropdown() {
+            $.ajax({
+                url: '@Url.Action("GetUsersForDropdown", "Admin")',
+                type: 'GET',
+                success: function(data) {
+                    if (data.success) {
+                        var dropdown = $('#UserId');
+                        dropdown.empty();
+                        dropdown.append('<option value="">-- Chọn người dùng (tùy chọn) --</option>');
+                        
+                        data.users.forEach(function(user) {
+                            dropdown.append('<option value="' + user.id + '">' + user.name + ' (' + user.email + ')</option>');
+                        });
+                    } else {
+                        console.error('Error loading users:', data.message);
+                    }
+                },
+                error: function() {
+                    console.error('Error loading users for dropdown');
+                }
+            });
+        }
+    </script>
+}

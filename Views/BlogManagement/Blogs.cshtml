@@ -1,0 +1,256 @@
+@model List<MonAmour.ViewModels.BlogListViewModel>
+@{
+    ViewData["Title"] = "Quản lý Blog";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Blog</h1>
+        <a asp-action="CreateBlog" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Tạo bài viết mới
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm và lọc</h6>
+        </div>
+        <div class="card-body">
+            <form id="searchForm" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Nhập tiêu đề, nội dung, tags...">
+                </div>
+                <div class="col-md-3">
+                    <label for="categoryId" class="form-label">Danh mục</label>
+                    <select class="form-select" id="categoryId" name="categoryId">
+                        <option value="">Tất cả danh mục</option>
+                        <!-- Categories will be loaded via AJAX -->
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="isPublished" class="form-label">Trạng thái</label>
+                    <select class="form-select" id="isPublished" name="isPublished">
+                        <option value="">Tất cả</option>
+                        <option value="true">Đã xuất bản</option>
+                        <option value="false">Chưa xuất bản</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Blog List -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách bài viết</h6>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshBlogs()">
+                    <i class="fas fa-sync-alt"></i> Làm mới
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="blogTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Hình ảnh</th>
+                            <th>Tiêu đề</th>
+                            <th>Tác giả</th>
+                            <th>Danh mục</th>
+                            <th>Ngày tạo</th>
+                            <th>Lượt xem</th>
+                            <th>Bình luận</th>
+                            <th>Trạng thái</th>
+                            <th>Nổi bật</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blogTableBody">
+                        @foreach (var blog in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(blog.FeaturedImage))
+                                    {
+                                        <img src="@blog.FeaturedImage" alt="@blog.Title" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@blog.Title</div>
+                                    @if (!string.IsNullOrEmpty(blog.Excerpt))
+                                    {
+                                        <small class="text-muted">@(blog.Excerpt.Length > 100 ? blog.Excerpt.Substring(0, 100) + "..." : blog.Excerpt)</small>
+                                    }
+                                </td>
+                                <td>@(blog.AuthorName ?? "N/A")</td>
+                                <td>@(blog.CategoryName ?? "N/A")</td>
+                                <td>@(blog.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                <td>
+                                    <span class="badge bg-info">@(blog.ViewCount ?? 0)</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@blog.CommentCount</span>
+                                </td>
+                                <td>
+                                    @if (blog.IsPublished == true)
+                                    {
+                                        <span class="badge bg-success">Đã xuất bản</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Chưa xuất bản</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (blog.IsFeatured == true)
+                                    {
+                                        <span class="badge bg-primary">Nổi bật</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark">Thường</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="BlogDetail" asp-route-id="@blog.BlogId" class="btn btn-sm btn-info" title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="EditBlog" asp-route-id="@blog.BlogId" class="btn btn-sm btn-warning" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-@(blog.IsPublished == true ? "warning" : "success")" 
+                                                onclick="toggleBlogStatus(@blog.BlogId)" title="@(blog.IsPublished == true ? "Ẩn" : "Hiện")">
+                                            <i class="fas fa-@(blog.IsPublished == true ? "eye-slash" : "eye")"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-@(blog.IsFeatured == true ? "secondary" : "primary")" 
+                                                onclick="toggleFeaturedStatus(@blog.BlogId)" title="@(blog.IsFeatured == true ? "Bỏ nổi bật" : "Đặt nổi bật")">
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteBlog(@blog.BlogId)" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#blogTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 25,
+                "order": [[4, "desc"]]
+            });
+
+            // Load categories for filter
+            loadCategories();
+
+            // Search form submission
+            $('#searchForm').on('submit', function(e) {
+                e.preventDefault();
+                searchBlogs();
+            });
+        });
+
+        function loadCategories() {
+            $.get('@Url.Action("GetCategories", "BlogManagement")', function(data) {
+                var categorySelect = $('#categoryId');
+                categorySelect.empty();
+                categorySelect.append('<option value="">Tất cả danh mục</option>');
+                $.each(data, function(index, category) {
+                    categorySelect.append('<option value="' + category.categoryId + '">' + category.name + '</option>');
+                });
+            });
+        }
+
+        function searchBlogs() {
+            var searchTerm = $('#searchTerm').val();
+            var categoryId = $('#categoryId').val();
+            var isPublished = $('#isPublished').val();
+
+            $.post('@Url.Action("SearchBlogs", "BlogManagement")', {
+                searchTerm: searchTerm,
+                categoryId: categoryId,
+                isPublished: isPublished
+            }, function(data) {
+                $('#blogTableBody').html(data);
+            });
+        }
+
+        function refreshBlogs() {
+            location.reload();
+        }
+
+        function toggleBlogStatus(blogId) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái bài viết này?')) {
+                $.post('@Url.Action("ToggleBlogStatus", "BlogManagement")', {
+                    id: blogId
+                }, function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + result.message);
+                    }
+                });
+            }
+        }
+
+        function toggleFeaturedStatus(blogId) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái nổi bật của bài viết này?')) {
+                $.post('@Url.Action("ToggleFeaturedStatus", "BlogManagement")', {
+                    id: blogId
+                }, function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + result.message);
+                    }
+                });
+            }
+        }
+
+        function deleteBlog(blogId) {
+            if (confirm('Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác!')) {
+                $.post('@Url.Action("DeleteBlog", "BlogManagement")', {
+                    id: blogId
+                }, function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + result.message);
+                    }
+                });
+            }
+        }
+    </script>
+}

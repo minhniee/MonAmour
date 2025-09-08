@@ -1,4 +1,7 @@
-﻿namespace MonAmour.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace MonAmour.Models;
 
 public partial class Order
 {
@@ -6,9 +9,9 @@ public partial class Order
 
     public int? UserId { get; set; }
 
-    public decimal TotalPrice { get; set; }
+    public decimal? TotalPrice { get; set; }
 
-    public decimal ShippingCost { get; set; }
+    public decimal? ShippingCost { get; set; }
 
     public string? Status { get; set; }
 
