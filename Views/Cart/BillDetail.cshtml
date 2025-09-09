@@ -1,0 +1,176 @@
+@model MonAmour.Models.Order
+@{
+    ViewData["Title"] = "Chi tiết hóa đơn";
+}
+
+<div class="min-h-screen bg-beige">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="font-prata text-3xl md:text-4xl text-wine-red mb-2">Hóa đơn thanh toán</h1>
+            <p class="text-wine-red/70">Cảm ơn bạn đã mua sắm tại MonAmour</p>
+        </div>
+
+        <!-- Bill Content -->
+        <div class="bg-white border border-wine-red/20 rounded-xl p-8 shadow-lg">
+            <!-- Bill Header -->
+            <div class="flex justify-between items-start mb-6 pb-6 border-b border-wine-red/20">
+                <div>
+                    <h2 class="font-prata text-2xl text-wine-red mb-2">MonAmour</h2>
+                    <p class="text-wine-red/70 text-sm">Địa chỉ: 123 Đường ABC, Quận 1, TP.HCM</p>
+                    <p class="text-wine-red/70 text-sm">Điện thoại: 0123 456 789</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-wine-red/70 text-sm">Mã đơn hàng:</p>
+                    <p class="font-prata text-lg text-wine-red">#@Model.OrderId</p>
+                    <p class="text-wine-red/70 text-sm">Ngày: @(Model.CreatedAt?.ToString("dd/MM/yyyy") ?? "N/A")</p>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="mb-6 pb-6 border-b border-wine-red/20">
+                <h3 class="font-prata text-lg text-wine-red mb-3">Thông tin khách hàng</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-wine-red/70 text-sm">Tên khách hàng:</p>
+                        <p class="text-wine-red font-medium">@(Model.User?.Name ?? "Khách hàng")</p>
+                    </div>
+                    <div>
+                        <p class="text-wine-red/70 text-sm">Email:</p>
+                        <p class="text-wine-red font-medium">@(Model.User?.Email ?? "N/A")</p>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.ShippingAddress))
+                {
+                    <div class="mt-4">
+                        <p class="text-wine-red/70 text-sm">Địa chỉ giao hàng:</p>
+                        <p class="text-wine-red font-medium">@Model.ShippingAddress</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Order Items -->
+            <div class="mb-6 pb-6 border-b border-wine-red/20">
+                <h3 class="font-prata text-lg text-wine-red mb-4">Chi tiết đơn hàng</h3>
+                <div class="space-y-4">
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <div class="flex items-center justify-between p-4 bg-beige/30 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                @if (item.Product?.ProductImgs?.FirstOrDefault() != null)
+                                {
+                                    <img src="@item.Product.ProductImgs.FirstOrDefault()?.ImgUrl" 
+                                         alt="@item.Product.Name" 
+                                         class="w-16 h-16 object-cover rounded-lg">
+                                }
+                                <div>
+                                    <h4 class="font-prata text-wine-red">@item.Product?.Name</h4>
+                                    <p class="text-wine-red/70 text-sm">Số lượng: @item.Quantity</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-prata text-wine-red">@String.Format("{0:N0}₫", item.TotalPrice)</p>
+                                <p class="text-wine-red/70 text-sm">@String.Format("{0:N0}₫", item.UnitPrice) × @item.Quantity</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Payment Info -->
+            @if (Model.PaymentDetails?.FirstOrDefault()?.Payment != null)
+            {
+                var payment = Model.PaymentDetails.FirstOrDefault().Payment;
+                <div class="mb-6 pb-6 border-b border-wine-red/20">
+                    <h3 class="font-prata text-lg text-wine-red mb-3">Thông tin thanh toán</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-wine-red/70 text-sm">Phương thức thanh toán:</p>
+                            <p class="text-wine-red font-medium">Chuyển khoản ngân hàng</p>
+                        </div>
+                        <div>
+                            <p class="text-wine-red/70 text-sm">Trạng thái:</p>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Đã thanh toán
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-wine-red/70 text-sm">Ngày thanh toán:</p>
+                            <p class="text-wine-red font-medium">@(payment.ProcessedAt?.ToString("dd/MM/yyyy") ?? "N/A")</p>
+                        </div>
+                        <div>
+                            <p class="text-wine-red/70 text-sm">Mã giao dịch:</p>
+                            <p class="text-wine-red font-medium">@(payment.TransactionId?.ToString() ?? "N/A")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Total -->
+            <div class="flex justify-between items-center mb-6">
+                <span class="font-prata text-xl text-wine-red">Tổng cộng:</span>
+                <span class="font-prata text-2xl text-wine-red">@String.Format("{0:N0}₫", Model.TotalPrice)</span>
+            </div>
+
+            <!-- Status -->
+            <div class="text-center mb-6">
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    Đơn hàng đã được xác nhận
+                </span>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="@Url.Action("Index", "Home")" 
+                   class="px-6 py-3 bg-wine-red text-beige rounded-lg hover:bg-wine-red/90 transition-colors text-center">
+                    Tiếp tục mua sắm
+                </a>
+                <a href="@Url.Action("OrderHistory", "Cart")" 
+                   class="px-6 py-3 border border-wine-red text-wine-red rounded-lg hover:bg-wine-red/5 transition-colors text-center">
+                    Xem lịch sử đơn hàng
+                </a>
+                <button onclick="window.print()" 
+                        class="px-6 py-3 border border-wine-red text-wine-red rounded-lg hover:bg-wine-red/5 transition-colors">
+                    In hóa đơn
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Styles -->
+<style media="print">
+    body * {
+        visibility: hidden;
+    }
+    .min-h-screen, .min-h-screen * {
+        visibility: visible;
+    }
+    .min-h-screen {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .bg-beige {
+        background: white !important;
+    }
+    .text-wine-red {
+        color: black !important;
+    }
+    .border-wine-red\/20 {
+        border-color: #ccc !important;
+    }
+    .bg-wine-red {
+        background: black !important;
+    }
+    .text-beige {
+        color: white !important;
+    }
+    button {
+        display: none !important;
+    }
+</style>

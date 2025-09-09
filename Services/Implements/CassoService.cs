@@ -145,20 +145,18 @@ namespace MonAmour.Services.Implements
                     return false;
                 }
 
-                // Check if transaction description contains user ID (hỗ trợ cả "UserID1" và "1")
-                var userIdStr = userId.ToString();
-                var hasUserId = transaction.Description?.Contains($"UserID{userIdStr}") == true ||
-                               transaction.Description?.Contains(userIdStr) == true ||
-                               transaction.Reference?.Contains($"UserID{userIdStr}") == true ||
-                               transaction.Reference?.Contains(userIdStr) == true ||
-                               transaction.Ref?.Contains($"UserID{userIdStr}") == true ||
-                               transaction.Ref?.Contains(userIdStr) == true;
+                // Chỉ kiểm tra theo mã đơn hàng để tránh trùng lặp
+                // Hỗ trợ cả format cũ ORDER{id} và format mới ORDER{id}_{timestamp}
+                var orderRefShort = $"ORDER{cartOrder.OrderId}";
+                var hasOrderRef = transaction.Description?.Contains(orderRefShort) == true ||
+                                 transaction.Reference?.Contains(orderRefShort) == true ||
+                                 transaction.Ref?.Contains(orderRefShort) == true;
 
-                System.Diagnostics.Debug.WriteLine($"UserID check: Description='{transaction.Description}', Reference='{transaction.Reference}', Ref='{transaction.Ref}', HasUserId={hasUserId}");
+                System.Diagnostics.Debug.WriteLine($"OrderRef check: OrderRef='{orderRefShort}', Description='{transaction.Description}', Reference='{transaction.Reference}', Ref='{transaction.Ref}', HasOrderRef={hasOrderRef}");
 
-                if (!hasUserId)
+                if (!hasOrderRef)
                 {
-                    System.Diagnostics.Debug.WriteLine("UserID not found in transaction details");
+                    System.Diagnostics.Debug.WriteLine("Order reference not found in transaction details");
                     return false;
                 }
 

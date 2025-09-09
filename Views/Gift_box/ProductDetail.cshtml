@@ -132,42 +132,51 @@
                     <!-- Quantity Selector -->
                     <div class="flex items-center gap-4">
                         <span class="font-noto-serif text-wine-red/80">Số lượng:</span>
-                        <div class="qty-control">
-                            <button type="button" class="qty-btn" onclick="decreaseQuantity()" aria-label="Giảm">−</button>
-                            <input type="number" id="quantity" value="1" min="1" class="qty-input" />
-                            <button type="button" class="qty-btn" onclick="increaseQuantity()" aria-label="Tăng">＋</button>
+                        <div class="qty-control @(Model.StockQuantity.HasValue && Model.StockQuantity.Value <= 0 ? "opacity-50 pointer-events-none" : "")">
+                            <button type="button" class="qty-btn" onclick="decreaseQuantity()" aria-label="Giảm" @(Model.StockQuantity.HasValue && Model.StockQuantity.Value <= 0 ? "disabled" : "")>−</button>
+                            <input type="number" id="quantity" value="1" min="1" class="qty-input" @(Model.StockQuantity.HasValue && Model.StockQuantity.Value <= 0 ? "disabled" : "") />
+                            <button type="button" class="qty-btn" onclick="increaseQuantity()" aria-label="Tăng" @(Model.StockQuantity.HasValue && Model.StockQuantity.Value <= 0 ? "disabled" : "")>＋</button>
                         </div>
                     </div>
+                    
+                    @{
+                        var currentCartQuantity = ViewBag.CurrentCartQuantity as int? ?? 0;
+                    }
+                    @if (currentCartQuantity > 0)
+                    {
+                        <div class="text-sm text-wine-red/70 mt-2">
+                            <span class="inline-flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                                </svg>
+                                Bạn đã có @currentCartQuantity sản phẩm này trong giỏ hàng
+                            </span>
+                        </div>
+                    }
 
                     <!-- Add to Cart Button -->
                     <div class="pt-4">
-                        <form asp-controller="Cart" asp-action="Add" method="post" class="w-full" id="add-to-cart-form">
-                            <input type="hidden" name="productId" value="@Model.ProductId" />
-                            <input type="hidden" name="quantity" id="cartQuantity" value="1" />
-                            <button type="submit" class="w-full bg-wine-red text-beige px-8 py-4 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
-                                Add to cart
-                            </button>
-                        </form>
+                        @if (Model.StockQuantity.HasValue && Model.StockQuantity.Value <= 0)
+                        {
+                            <div class="w-full bg-gray-400 text-white px-8 py-4 rounded-lg font-prata text-lg text-center cursor-not-allowed">
+                                Sản phẩm đã hết hàng
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2 text-center">Vui lòng chọn sản phẩm khác hoặc liên hệ để được thông báo khi có hàng.</p>
+                        }
+                        else
+                        {
+                            <form asp-controller="Cart" asp-action="Add" method="post" class="w-full" id="add-to-cart-form">
+                                <input type="hidden" name="productId" value="@Model.ProductId" />
+                                <input type="hidden" name="quantity" id="cartQuantity" value="1" />
+                                <button type="submit" class="w-full bg-wine-red text-beige px-8 py-4 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
+                                    Add to cart
+                                </button>
+                            </form>
+                        }
                     </div>
 
                     <!-- Payment Methods -->
-                    <div class="pt-6 border-t border-wine-red/20">
-                        <h3 class="font-prata text-lg font-semibold text-wine-red mb-4">Payment method</h3>
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-8 bg-beige rounded border border-wine-red/40 flex items-center justify-center">
-                                <span class="text-wine-red text-xs font-bold">VISA</span>
-                            </div>
-                            <div class="w-12 h-8 bg-beige rounded border border-wine-red/40 flex items-center justify-center">
-                                <span class="text-wine-red text-xs font-bold">MC</span>
-                            </div>
-                            <div class="w-12 h-8 bg-beige rounded border border-wine-red/40 flex items-center justify-center">
-                                <span class="text-wine-red text-xs font-bold">AE</span>
-                            </div>
-                            <div class="w-12 h-8 bg-beige rounded border border-wine-red/40 flex items-center justify-center">
-                                <span class="text-wine-red text-xs font-bold">MoMo</span>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -410,6 +419,23 @@
         const cartQuantity = document.getElementById('cartQuantity');
         const currentValue = parseInt(quantityInput.value);
         const newValue = currentValue + 1;
+        
+        // Check stock availability including current cart items
+        const stockQuantity = @(Model.StockQuantity?.ToString() ?? "null");
+        const currentCartQuantity = @(ViewBag.CurrentCartQuantity?.ToString() ?? "0");
+        
+        if (stockQuantity !== null) {
+            const totalRequested = currentCartQuantity + newValue;
+            if (totalRequested > stockQuantity) {
+                if (currentCartQuantity > 0) {
+                    alert(`Bạn đã có ${currentCartQuantity} sản phẩm này trong giỏ hàng và muốn thêm ${newValue} sản phẩm nữa, nhưng chỉ còn ${stockQuantity} sản phẩm trong kho. Tổng cộng bạn cần ${totalRequested} sản phẩm nhưng chỉ còn ${stockQuantity} sản phẩm. Vui lòng giảm số lượng hoặc xóa bớt sản phẩm trong giỏ hàng.`);
+                } else {
+                    alert(`Số lượng sản phẩm không còn đủ. Bạn muốn thêm ${newValue} sản phẩm nhưng chỉ còn ${stockQuantity} sản phẩm trong kho. Vui lòng chọn số lượng phù hợp.`);
+                }
+                return;
+            }
+        }
+        
         quantityInput.value = newValue;
         cartQuantity.value = newValue;
     }
@@ -468,7 +494,28 @@
     const cartQty = document.getElementById('cartQuantity');
     if (qtyInput && cartQty) {
         qtyInput.addEventListener('input', () => {
-            cartQty.value = Math.max(1, parseInt(qtyInput.value || '1'));
+            const newValue = Math.max(1, parseInt(qtyInput.value || '1'));
+            
+            // Check stock availability when user manually types quantity
+            const stockQuantity = @(Model.StockQuantity?.ToString() ?? "null");
+            const currentCartQuantity = @(ViewBag.CurrentCartQuantity?.ToString() ?? "0");
+            
+            if (stockQuantity !== null) {
+                const totalRequested = currentCartQuantity + newValue;
+                if (totalRequested > stockQuantity) {
+                    if (currentCartQuantity > 0) {
+                        alert(`Bạn đã có ${currentCartQuantity} sản phẩm này trong giỏ hàng và muốn thêm ${newValue} sản phẩm nữa, nhưng chỉ còn ${stockQuantity} sản phẩm trong kho. Tổng cộng bạn cần ${totalRequested} sản phẩm nhưng chỉ còn ${stockQuantity} sản phẩm. Vui lòng giảm số lượng hoặc xóa bớt sản phẩm trong giỏ hàng.`);
+                    } else {
+                        alert(`Số lượng sản phẩm không còn đủ. Bạn muốn thêm ${newValue} sản phẩm nhưng chỉ còn ${stockQuantity} sản phẩm trong kho. Vui lòng chọn số lượng phù hợp.`);
+                    }
+                    const maxAllowed = Math.max(1, stockQuantity - currentCartQuantity);
+                    qtyInput.value = maxAllowed;
+                    cartQty.value = maxAllowed;
+                    return;
+                }
+            }
+            
+            cartQty.value = newValue;
         });
     }
 
@@ -511,6 +558,24 @@
         if(!form) return;
         form.addEventListener('submit', async function(e){
             e.preventDefault();
+            
+            // Pre-check stock before submitting
+            const quantity = parseInt(document.getElementById('cartQuantity').value);
+            const stockQuantity = @(Model.StockQuantity?.ToString() ?? "null");
+            const currentCartQuantity = @(ViewBag.CurrentCartQuantity?.ToString() ?? "0");
+            
+            if (stockQuantity !== null) {
+                const totalRequested = currentCartQuantity + quantity;
+                if (totalRequested > stockQuantity) {
+                    if (currentCartQuantity > 0) {
+                        alert(`Bạn đã có ${currentCartQuantity} sản phẩm này trong giỏ hàng và muốn thêm ${quantity} sản phẩm nữa, nhưng chỉ còn ${stockQuantity} sản phẩm trong kho. Tổng cộng bạn cần ${totalRequested} sản phẩm nhưng chỉ còn ${stockQuantity} sản phẩm. Vui lòng giảm số lượng hoặc xóa bớt sản phẩm trong giỏ hàng.`);
+                    } else {
+                        alert(`Số lượng sản phẩm không còn đủ. Bạn muốn thêm ${quantity} sản phẩm nhưng chỉ còn ${stockQuantity} sản phẩm trong kho. Vui lòng giảm số lượng hoặc chọn sản phẩm khác.`);
+                    }
+                    return;
+                }
+            }
+            
             try {
                 const formData = new FormData(form);
                 const res = await fetch(form.action, {
@@ -521,7 +586,7 @@
                 const data = await res.json();
                 if (data && data.success) {
                     const toast = document.createElement('div');
-                    toast.textContent = data.message || 'Đã thêm vào giỏ hàng';
+                    toast.textContent = data.message || 'Đã thêm sản phẩm vào giỏ hàng thành công!';
                     toast.className = 'fixed bottom-6 right-6 bg-wine-red text-beige px-4 py-3 rounded-lg shadow-lg';
                     toast.style.zIndex = '9999';
                     document.body.appendChild(toast);
@@ -530,10 +595,10 @@
                     window.location.href = '@Url.Action("Login","Auth")';
                 } else {
                     const errorData = await res.json();
-                    alert(errorData.message || 'Không thể thêm vào giỏ hàng.');
+                    alert(errorData.message || 'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng kiểm tra lại số lượng và thử lại.');
                 }
             } catch (err) {
-                alert('Đã xảy ra lỗi.');
+                alert('Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.');
             }
         });
     })();
@@ -544,7 +609,7 @@
             const params = new URLSearchParams(window.location.search);
             if (params.get('added') === 'true') {
                 const toast = document.createElement('div');
-                toast.textContent = 'Đã thêm vào giỏ hàng';
+                toast.textContent = 'Đã thêm sản phẩm vào giỏ hàng thành công!';
                 toast.className = 'fixed bottom-6 right-6 bg-wine-red text-beige px-4 py-3 rounded-lg shadow-lg';
                 toast.style.zIndex = '9999';
                 document.body.appendChild(toast);

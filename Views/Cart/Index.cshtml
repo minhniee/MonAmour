@@ -84,6 +84,38 @@
 
 <script>
 (function(){
+    // Function để validate số điện thoại Việt Nam
+    function isValidVietnamesePhone(phone) {
+        if (!phone || phone.trim() === '') return false;
+        
+        // Loại bỏ khoảng trắng và ký tự đặc biệt
+        phone = phone.replace(/[\s\-\(\)]/g, '');
+        
+        // Kiểm tra độ dài (chỉ 10 số)
+        if (phone.length !== 10) return false;
+        
+        // Phải bắt đầu bằng 0
+        if (!phone.startsWith('0')) return false;
+        
+        // Kiểm tra đầu số Việt Nam hợp lệ
+        const validPrefixes = [
+            '032', '033', '034', '035', '036', '037', '038', '039', // Viettel
+            '070', '076', '077', '078', '079', // Mobifone
+            '081', '082', '083', '084', '085', // Vinaphone
+            '056', '058', // Vietnamobile
+            '059', // Gmobile
+            '020', '021', '022', '023', '024', '025', '026', '027', '028', '029', // Landline
+            '030', '031', '040', '041', '042', '043', '044', '045', '046', '047', '048', '049', // Landline
+            '050', '051', '052', '053', '054', '055', '057', // Landline
+            '060', '061', '062', '063', '064', '065', '066', '067', '068', '069', // Landline
+            '090', '091', '092', '093', '094', '095', '096', '097', '098', '099', // Mobile
+            '086', '087', '088', '089' // Mobile
+        ];
+        
+        // Kiểm tra 3 số đầu
+        const prefix = phone.substring(0, 3);
+        return validPrefixes.includes(prefix);
+    }
     // Show toast when redirected back after payment
     const paid = @paid.ToString().ToLower();
     const cartSuccess = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["CartSuccess"] as string ?? ""));
@@ -158,7 +190,7 @@
             const addr = addressInput.value.trim();
             const phone = (phoneInput ? phoneInput.value.trim() : '');
             if (!addr) { addressStatus.textContent = 'Vui lòng nhập địa chỉ giao hàng'; return; }
-            if (!/^0[0-9]{9,10}$/.test(phone)) { addressStatus.textContent = 'Vui lòng nhập số điện thoại hợp lệ'; return; }
+            if (!isValidVietnamesePhone(phone)) { addressStatus.textContent = 'Vui lòng nhập số điện thoại 10 số hợp lệ theo đầu số Việt Nam'; return; }
             addressStatus.textContent = 'Đang lưu...';
             const fd = new FormData();
             fd.append('address', addr);
@@ -198,8 +230,8 @@
                     addressInput.focus();
                     return;
                 }
-                if (!/^0[0-9]{9,10}$/.test(phone)) {
-                    alert('Vui lòng nhập số điện thoại hợp lệ trước khi thanh toán');
+                if (!isValidVietnamesePhone(phone)) {
+                    alert('Vui lòng nhập số điện thoại 10 số hợp lệ theo đầu số Việt Nam trước khi thanh toán');
                     phoneInput && phoneInput.focus();
                     return;
                 }
@@ -260,7 +292,7 @@
                 if (data.qrCodeUrl) {
                     cassoQrCode.innerHTML = `
                         <div class="bg-white rounded-lg p-3 border-2 border-dashed border-wine-red/30 mb-3">
-                            
+                            <img src="${data.qrCodeUrl}" alt="QR Code" class="mx-auto max-w-full h-auto" style="max-height: 150px;">
                         </div>
                         <p class="text-xs text-wine-red/70 mb-2">Quét mã QR bằng ứng dụng ngân hàng</p>
                     `;
@@ -299,10 +331,14 @@
                     toast.style.zIndex = '9999';
                     toast.style.fontFamily = 'Noto Serif, serif';
                     document.body.appendChild(toast);
-                    setTimeout(()=>{ toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 3000);
+                    setTimeout(()=>{ toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 2000);
                     
-                    // Reload page after successful payment
-                    setTimeout(() => { window.location.reload(); }, 2000);
+                    // Redirect to bill detail page after successful payment
+                    if (data.redirectUrl) {
+                        setTimeout(() => { window.location.href = data.redirectUrl; }, 1500);
+                    } else {
+                        setTimeout(() => { window.location.reload(); }, 2000);
+                    }
                 } else {
                     alert(data.message || 'Chưa có giao dịch nào phù hợp');
                 }
@@ -332,15 +368,21 @@
                 const data = await res.json();
                 
                 if (data.success && data.hasCart && data.isPaid) {
-                    // Payment completed, stop auto-refresh and reload page
+                    // Payment completed, stop auto-refresh and redirect to bill detail
                     clearInterval(autoRefreshInterval);
                     const toast = document.createElement('div');
-                    toast.textContent = '🎉 Thanh toán thành công! Đang cập nhật...';
+                    toast.textContent = '🎉 Thanh toán thành công! Đang chuyển hướng...';
                     toast.className = 'fixed bottom-6 right-6 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg';
                     toast.style.zIndex = '9999';
                     toast.style.fontFamily = 'Noto Serif, serif';
                     document.body.appendChild(toast);
-                    setTimeout(() => { window.location.reload(); }, 2000);
+                    setTimeout(() => { 
+                        if (data.orderId) {
+                            window.location.href = '/Cart/BillDetail/' + data.orderId;
+                        } else {
+                            window.location.reload(); 
+                        }
+                    }, 2000);
                 }
             } catch (err) {
                 console.log('Auto-refresh error:', err);

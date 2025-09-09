@@ -189,6 +189,18 @@ namespace MonAmour.Controllers
 
             ViewBag.RelatedProducts = related;
 
+            // Get current cart quantity for this product
+            var userId = AuthHelper.GetUserId(HttpContext);
+            var currentCartQuantity = 0;
+            if (userId.HasValue)
+            {
+                currentCartQuantity = _db.OrderItems
+                    .Include(oi => oi.Order)
+                    .Where(oi => oi.ProductId == id && oi.Order != null && oi.Order.UserId == userId && oi.Order.Status == "cart")
+                    .Sum(oi => oi.Quantity) ?? 0;
+            }
+            ViewBag.CurrentCartQuantity = currentCartQuantity;
+
             return View(product);
         }
 
