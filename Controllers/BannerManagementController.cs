@@ -67,15 +67,24 @@ namespace MonAmour.Controllers
         public async Task<IActionResult> CreateBannerService()
         {
             await SetAdminViewBagAsync();
-            return View(new BannerServiceCreateViewModel());
+            var model = new BannerServiceCreateViewModel();
+            model.DisplayOrder = await _bannerService.GetNextServiceDisplayOrderAsync();
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBannerService(BannerServiceCreateViewModel model)
         {
+            // Validate display order
+            if (await _bannerService.IsServiceDisplayOrderExistsAsync(model.DisplayOrder))
+            {
+                ModelState.AddModelError("DisplayOrder", "Số thứ tự này đã tồn tại. Vui lòng chọn số khác.");
+            }
+
             if (!ModelState.IsValid)
             {
+                await SetAdminViewBagAsync();
                 return View(model);
             }
 
@@ -98,6 +107,7 @@ namespace MonAmour.Controllers
                 TempData["Error"] = "Có lỗi xảy ra khi tạo banner dịch vụ";
             }
 
+            await SetAdminViewBagAsync();
             return View(model);
         }
 
@@ -137,8 +147,15 @@ namespace MonAmour.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditBannerService(BannerServiceEditViewModel model)
         {
+            // Validate display order (exclude current banner)
+            if (await _bannerService.IsServiceDisplayOrderExistsAsync(model.DisplayOrder, model.BannerId))
+            {
+                ModelState.AddModelError("DisplayOrder", "Số thứ tự này đã tồn tại. Vui lòng chọn số khác.");
+            }
+
             if (!ModelState.IsValid)
             {
+                await SetAdminViewBagAsync();
                 return View(model);
             }
 
@@ -262,15 +279,24 @@ namespace MonAmour.Controllers
         public async Task<IActionResult> CreateBannerHomepage()
         {
             await SetAdminViewBagAsync();
-            return View(new BannerHomepageCreateViewModel());
+            var model = new BannerHomepageCreateViewModel();
+            model.DisplayOrder = await _bannerService.GetNextDisplayOrderAsync();
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBannerHomepage(BannerHomepageCreateViewModel model)
         {
+            // Validate display order
+            if (await _bannerService.IsDisplayOrderExistsAsync(model.DisplayOrder))
+            {
+                ModelState.AddModelError("DisplayOrder", "Số thứ tự này đã tồn tại. Vui lòng chọn số khác.");
+            }
+
             if (!ModelState.IsValid)
             {
+                await SetAdminViewBagAsync();
                 return View(model);
             }
 
@@ -293,6 +319,7 @@ namespace MonAmour.Controllers
                 TempData["Error"] = "Có lỗi xảy ra khi tạo banner trang chủ";
             }
 
+            await SetAdminViewBagAsync();
             return View(model);
         }
 
@@ -332,8 +359,15 @@ namespace MonAmour.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditBannerHomepage(BannerHomepageEditViewModel model)
         {
+            // Validate display order (exclude current banner)
+            if (await _bannerService.IsDisplayOrderExistsAsync(model.DisplayOrder, model.BannerId))
+            {
+                ModelState.AddModelError("DisplayOrder", "Số thứ tự này đã tồn tại. Vui lòng chọn số khác.");
+            }
+
             if (!ModelState.IsValid)
             {
+                await SetAdminViewBagAsync();
                 return View(model);
             }
 
@@ -457,15 +491,24 @@ namespace MonAmour.Controllers
         public async Task<IActionResult> CreateBannerProduct()
         {
             await SetAdminViewBagAsync();
-            return View(new BannerProductCreateViewModel());
+            var model = new BannerProductCreateViewModel();
+            model.DisplayOrder = await _bannerService.GetNextProductDisplayOrderAsync();
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBannerProduct(BannerProductCreateViewModel model)
         {
+            // Validate display order
+            if (await _bannerService.IsProductDisplayOrderExistsAsync(model.DisplayOrder))
+            {
+                ModelState.AddModelError("DisplayOrder", "Số thứ tự này đã tồn tại. Vui lòng chọn số khác.");
+            }
+
             if (!ModelState.IsValid)
             {
+                await SetAdminViewBagAsync();
                 return View(model);
             }
 
@@ -488,6 +531,7 @@ namespace MonAmour.Controllers
                 TempData["Error"] = "Có lỗi xảy ra khi tạo banner sản phẩm";
             }
 
+            await SetAdminViewBagAsync();
             return View(model);
         }
 
@@ -527,8 +571,15 @@ namespace MonAmour.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditBannerProduct(BannerProductEditViewModel model)
         {
+            // Validate display order (exclude current banner)
+            if (await _bannerService.IsProductDisplayOrderExistsAsync(model.DisplayOrder, model.BannerId))
+            {
+                ModelState.AddModelError("DisplayOrder", "Số thứ tự này đã tồn tại. Vui lòng chọn số khác.");
+            }
+
             if (!ModelState.IsValid)
             {
+                await SetAdminViewBagAsync();
                 return View(model);
             }
 

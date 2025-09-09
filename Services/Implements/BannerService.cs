@@ -709,5 +709,128 @@ namespace MonAmour.Services.Implements
         }
 
         #endregion
+
+        #region Display Order Validation Methods
+
+        public async Task<bool> IsDisplayOrderExistsAsync(int displayOrder, int? excludeId = null)
+        {
+            try
+            {
+                var query = _context.BannerHomepages.Where(b => b.DisplayOrder == displayOrder);
+                
+                if (excludeId.HasValue)
+                {
+                    query = query.Where(b => b.BannerId != excludeId.Value);
+                }
+
+                return await query.AnyAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking if display order exists: {DisplayOrder}", displayOrder);
+                return false;
+            }
+        }
+
+        public async Task<int> GetNextDisplayOrderAsync()
+        {
+            try
+            {
+                var maxOrder = await _context.BannerHomepages
+                    .Where(b => b.IsActive)
+                    .MaxAsync(b => (int?)b.DisplayOrder);
+
+                return (maxOrder ?? 0) + 1;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting next display order");
+                return 1;
+            }
+        }
+
+        #endregion
+
+        #region Service Display Order Validation Methods
+
+        public async Task<bool> IsServiceDisplayOrderExistsAsync(int displayOrder, int? excludeId = null)
+        {
+            try
+            {
+                var query = _context.BannerServices.Where(b => b.DisplayOrder == displayOrder);
+                
+                if (excludeId.HasValue)
+                {
+                    query = query.Where(b => b.BannerId != excludeId.Value);
+                }
+
+                return await query.AnyAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking if service display order exists: {DisplayOrder}", displayOrder);
+                return false;
+            }
+        }
+
+        public async Task<int> GetNextServiceDisplayOrderAsync()
+        {
+            try
+            {
+                var maxOrder = await _context.BannerServices
+                    .Where(b => b.IsActive)
+                    .MaxAsync(b => (int?)b.DisplayOrder);
+
+                return (maxOrder ?? 0) + 1;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting next service display order");
+                return 1;
+            }
+        }
+
+        #endregion
+
+        #region Product Display Order Validation Methods
+
+        public async Task<bool> IsProductDisplayOrderExistsAsync(int displayOrder, int? excludeId = null)
+        {
+            try
+            {
+                var query = _context.BannerProducts.Where(b => b.DisplayOrder == displayOrder);
+                
+                if (excludeId.HasValue)
+                {
+                    query = query.Where(b => b.BannerId != excludeId.Value);
+                }
+
+                return await query.AnyAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking if product display order exists: {DisplayOrder}", displayOrder);
+                return false;
+            }
+        }
+
+        public async Task<int> GetNextProductDisplayOrderAsync()
+        {
+            try
+            {
+                var maxOrder = await _context.BannerProducts
+                    .Where(b => b.IsActive)
+                    .MaxAsync(b => (int?)b.DisplayOrder);
+
+                return (maxOrder ?? 0) + 1;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting next product display order");
+                return 1;
+            }
+        }
+
+        #endregion
     }
 }

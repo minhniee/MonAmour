@@ -44,10 +44,10 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label asp-for="DisplayOrder" class="form-label">Thứ tự hiển thị</label>
-                                            <input asp-for="DisplayOrder" type="number" class="form-control" min="0" value="0" />
+                                            <label asp-for="DisplayOrder" class="form-label">Thứ tự hiển thị <span class="text-danger">*</span></label>
+                                            <input asp-for="DisplayOrder" type="number" class="form-control" min="1" />
                                             <span asp-validation-for="DisplayOrder" class="text-danger"></span>
-                                            <div class="form-text">Số càng nhỏ càng hiển thị trước</div>
+                                            <div class="form-text">Số càng nhỏ càng hiển thị trước (bắt đầu từ 1)</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -148,6 +148,14 @@
                 if (imageFile.size > 5 * 1024 * 1024) {
                     e.preventDefault();
                     alert('Kích thước file không được vượt quá 5MB');
+                    return false;
+                }
+                
+                // Validate display order
+                var displayOrder = parseInt($('#DisplayOrder').val());
+                if (displayOrder < 1) {
+                    e.preventDefault();
+                    alert('Số thứ tự phải bắt đầu từ 1');
                     return false;
                 }
             });

@@ -13,6 +13,8 @@ namespace MonAmour.Services.Interfaces
         Task<bool> DeleteBannerServiceAsync(int id);
         Task<bool> ToggleBannerServiceStatusAsync(int id);
         Task<bool> SetPrimaryBannerServiceAsync(int id);
+        Task<bool> IsServiceDisplayOrderExistsAsync(int displayOrder, int? excludeId = null);
+        Task<int> GetNextServiceDisplayOrderAsync();
 
         // BannerHomepage methods
         Task<List<BannerHomepageListViewModel>> GetAllBannerHomepagesAsync();
@@ -22,6 +24,8 @@ namespace MonAmour.Services.Interfaces
         Task<bool> DeleteBannerHomepageAsync(int id);
         Task<bool> ToggleBannerHomepageStatusAsync(int id);
         Task<bool> SetPrimaryBannerHomepageAsync(int id);
+        Task<bool> IsDisplayOrderExistsAsync(int displayOrder, int? excludeId = null);
+        Task<int> GetNextDisplayOrderAsync();
 
         // BannerProduct methods
         Task<List<BannerProductListViewModel>> GetAllBannerProductsAsync();
@@ -31,5 +35,7 @@ namespace MonAmour.Services.Interfaces
         Task<bool> DeleteBannerProductAsync(int id);
         Task<bool> ToggleBannerProductStatusAsync(int id);
         Task<bool> SetPrimaryBannerProductAsync(int id);
+        Task<bool> IsProductDisplayOrderExistsAsync(int displayOrder, int? excludeId = null);
+        Task<int> GetNextProductDisplayOrderAsync();
     }
 }
