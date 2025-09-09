@@ -107,6 +107,13 @@ namespace MonAmour.Controllers
 				return NotFound();
 			}
 
+			// Chặn truy cập nếu concept đang không khả dụng
+			if (concept.AvailabilityStatus != true)
+			{
+				TempData["ConceptError"] = "Concept hiện không khả dụng.";
+				return RedirectToAction("ListConcept");
+			}
+
 			// Lấy các concept liên quan (cùng category)
 			var relatedConcepts = await _db.Concepts
 				.Include(c => c.ConceptImgs)

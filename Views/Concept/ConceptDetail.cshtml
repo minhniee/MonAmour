@@ -178,9 +178,23 @@
 					</div>
 					<div>
 						<label class="block text-wine-red font-prata text-sm mb-2">Giờ</label>
-						<input type="time" id="bookingTime" name="bookingTime" required 
+						<div class="relative">
+							<input type="text" id="bookingTime" name="bookingTime" required 
 							   class="w-full px-4 py-3 border border-wine-red/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-wine-red/50 font-noto-serif"
-							   min="08:00" max="22:00" step="1800">
+							   placeholder="--:--" readonly onclick="showTimePicker()" onfocus="showTimePicker()">
+							<div id="customTimePicker" class="hidden absolute left-0 right-0 mt-2 bg-white border border-wine-red/20 rounded-xl shadow-2xl w-full z-50">
+								<div class="timepicker grid grid-rows-[auto_1fr]">
+									<div class="grid grid-cols-2 text-center text-wine-red/80 font-prata text-sm border-b border-wine-red/10">
+										<div class="py-2">Giờ</div>
+										<div class="py-2">Phút</div>
+									</div>
+									<div class="grid grid-cols-2 divide-x divide-wine-red/10">
+										<div id="hoursColumn" class="max-h-56 overflow-auto"></div>
+										<div id="minutesColumn" class="max-h-56 overflow-auto"></div>
+									</div>
+								</div>
+							</div>
+						</div>
 						<p class="text-xs text-gray-500 mt-1">Chọn giờ từ 8:00 - 22:00 (bước 30 phút)</p>
 					</div>
 				</div>
@@ -306,9 +320,101 @@
 		from { opacity: 1; }
 		to { opacity: 0; }
 	}
+
+	.timepicker button { transition: background-color .15s ease, color .15s ease; }
+	.timepicker button:hover { background-color: rgba(127, 29, 29, 0.08); }
+	.timepicker button.active { background-color: rgba(127, 29, 29, 0.12); color: #7f1d1d; font-weight: 600; }
 </style>
 
 <script>
+	function showTimePicker() {
+		const picker = document.getElementById('customTimePicker');
+		const hoursCol = document.getElementById('hoursColumn');
+		const minutesCol = document.getElementById('minutesColumn');
+		const input = document.getElementById('bookingTime');
+
+		if (!hoursCol.dataset.initialized) {
+			// Populate hours 08 - 22
+			let hoursHtml = '';
+			for (let h = 8; h <= 22; h++) {
+				const hh = h.toString().padStart(2, '0');
+				hoursHtml += `<button type="button" data-hour="${hh}" class="block w-full text-left px-4 py-2">${hh}</button>`;
+			}
+			hoursCol.innerHTML = hoursHtml;
+
+			// Populate minutes 00, 30
+			minutesCol.innerHTML = ['00','30']
+				.map(m => `<button type=\"button\" data-minute=\"${m}\" class=\"block w-full text-left px-4 py-2\">${m}</button>`)
+				.join('');
+
+			// Selection handling
+			let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
+			let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
+
+			const updateActive = () => {
+				[...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
+				[...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
+			};
+
+			const scrollIntoViewSmooth = (btn, container) => {
+				if (!btn) return;
+				const top = btn.offsetTop - container.clientHeight / 2 + btn.clientHeight / 2;
+				container.scrollTo({ top, behavior: 'smooth' });
+			};
+
+			const commit = () => {
+				if (selectedHour && selectedMinute) {
+					input.value = `${selectedHour}:${selectedMinute}`;
+					hideTimePicker();
+				}
+			};
+
+			hoursCol.addEventListener('click', (e) => {
+				const btn = e.target.closest('button[data-hour]');
+				if (!btn) return;
+				selectedHour = btn.getAttribute('data-hour');
+				updateActive();
+				scrollIntoViewSmooth(btn, hoursCol);
+				commit();
+			});
+
+			minutesCol.addEventListener('click', (e) => {
+				const btn = e.target.closest('button[data-minute]');
+				if (!btn) return;
+				selectedMinute = btn.getAttribute('data-minute');
+				updateActive();
+				scrollIntoViewSmooth(btn, minutesCol);
+				commit();
+			});
+
+			// Mark as initialized
+			hoursCol.dataset.initialized = 'true';
+		}
+
+		picker.classList.remove('hidden');
+
+		// If value exists, set active and center it
+		let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
+		let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
+		[...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
+		[...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
+		scrollIntoViewSmooth(hoursCol.querySelector('button.active'), hoursCol);
+		scrollIntoViewSmooth(minutesCol.querySelector('button.active'), minutesCol);
+
+		// Click outside to close
+		const outsideHandler = (ev) => {
+			if (!picker.contains(ev.target) && ev.target !== input) {
+				hideTimePicker();
+				document.removeEventListener('click', outsideHandler);
+			}
+		};
+		setTimeout(() => document.addEventListener('click', outsideHandler), 0);
+	}
+
+	function hideTimePicker() {
+		const picker = document.getElementById('customTimePicker');
+		picker.classList.add('hidden');
+	}
 	function openLightbox(imageSrc, imageAlt) {
 		const lightbox = document.getElementById('lightbox');
 		const lightboxImage = document.getElementById('lightboxImage');
