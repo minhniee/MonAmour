@@ -1,15 +1,127 @@
-﻿<section class="py-16 bg-muted">
+﻿@model List<MonAmour.ViewModels.PartnerViewModel>
+<div class="bg-white pb-12">
 	<div class="container mx-auto px-4">
-		<h2 class="text-3xl font-bold text-center text-foreground mb-12 text-balance">OUR PARTNERS</h2>
-		<div class="grid grid-cols-4 md:grid-cols-8 gap-6">
-			@for (int i = 1; i <= 16; i++)
-			{
-				<div class="aspect-square bg-card rounded-lg flex items-center justify-center hover:scale-105 transition-transform cursor-pointer border border-border">
-					<div class="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-						<span class="text-xs text-muted-foreground font-medium">@i</span>
-					</div>
+		<h2 class="text-3xl font-bold text-center text-black mb-12 pt-12">OUR PARTNERS</h2>
+		
+		<!-- Partners Infinite Loop with Controls -->
+		<div class="relative max-w-6xl mx-auto">
+			<!-- Navigation Arrows -->
+			<button class="partners-prev absolute left-0 top-1/2 -translate-y-1/2 bg-gray-800/70 hover:bg-gray-800 text-white p-3 rounded-full transition-all duration-300 z-10 @(Model != null && Model.Count < 10 ? "hidden" : "")">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+				</svg>
+			</button>
+			<button class="partners-next absolute right-0 top-1/2 -translate-y-1/2 bg-gray-800/70 hover:bg-gray-800 text-white p-3 rounded-full transition-all duration-300 z-10 @(Model != null && Model.Count < 10 ? "hidden" : "")">
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+				</svg>
+			</button>
+			<div class="partners-viewport overflow-hidden">
+				<div class="partners-track flex">
+					@{
+						var partners = Model ?? new List<MonAmour.ViewModels.PartnerViewModel>();
+						var repeated = (partners.Count >= 10 ? partners.Concat(partners) : partners).ToList();
+					}
+					@if (repeated.Any())
+					{
+						foreach (var partner in repeated)
+						{
+							<div class="partners-item inline-flex flex-col items-center px-6">
+								<div class="w-20 h-20 rounded-full flex items-center justify-center mb-3 hover:scale-105 transition-transform cursor-pointer overflow-hidden bg-gray-200">
+									@if (!string.IsNullOrWhiteSpace(partner.Avatar))
+									{
+										<img src="@partner.Avatar" alt="@partner.Name" class="w-full h-full object-cover" />
+									}
+									else
+									{
+										<span class="text-sm text-gray-600 font-medium">@partner.Name.Substring(0, Math.Min(2, partner.Name.Length)).ToUpper()</span>
+									}
+								</div>
+								<span class="text-sm text-black">@partner.Name</span>
+							</div>
+						}
+					}
+					else
+					{
+						for (int i = 1; i <= 8; i++)
+						{
+							<div class="partners-item inline-flex flex-col items-center px-6">
+								<div class="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mb-3">
+									<span class="text-sm text-gray-600 font-medium">@i</span>
+								</div>
+								<span class="text-sm text-black">Partner @i</span>
+							</div>
+						}
+					}
 				</div>
-			}
+			</div>
 		</div>
 	</div>
-</section>
+
+	<!-- Partners Infinite Loop Styles -->
+	<style>
+		.partners-item { width: 12.5%; }
+		@@media (max-width: 768px) { .partners-item { width: 25%; } }
+	</style>
+
+	<!-- Partners Infinite Loop Script -->
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const track = document.querySelector('.partners-track');
+			const viewport = document.querySelector('.partners-viewport');
+			const prevBtn = document.querySelector('.partners-prev');
+			const nextBtn = document.querySelector('.partners-next');
+			let translateX = 0;
+			let speed = 0.6;
+			let isPaused = false;
+			let halfWidth = 0;
+			let itemStep = 120;
+
+			// Nếu ít hơn 10 partner, không chạy carousel
+			const partnerItems = track ? track.querySelectorAll('.partners-item').length : 0;
+			if (partnerItems < 10) {
+				if (track) track.style.transform = 'translateX(0px)';
+				return;
+			}
+
+			function measure() {
+				const totalWidth = track.scrollWidth;
+				halfWidth = totalWidth / 2;
+				const firstItem = track.querySelector('.partners-item');
+				if (firstItem) { itemStep = firstItem.offsetWidth; }
+			}
+
+			function loop() {
+				if (!isPaused) {
+					translateX -= speed;
+					if (-translateX >= halfWidth) {
+						translateX += halfWidth;
+					}
+					track.style.transform = `translateX(${translateX}px)`;
+				}
+				requestAnimationFrame(loop);
+			}
+
+			function stepNext() {
+				translateX -= itemStep;
+				if (-translateX >= halfWidth) translateX += halfWidth;
+				track.style.transform = `translateX(${translateX}px)`;
+			}
+
+			function stepPrev() {
+				translateX += itemStep;
+				if (translateX > 0) translateX -= halfWidth;
+				track.style.transform = `translateX(${translateX}px)`;
+			}
+
+			nextBtn.addEventListener('click', stepNext);
+			prevBtn.addEventListener('click', stepPrev);
+			viewport.addEventListener('mouseenter', () => { isPaused = true; });
+			viewport.addEventListener('mouseleave', () => { isPaused = false; });
+			window.addEventListener('resize', measure);
+
+			measure();
+			loop();
+		});
+	</script>
+</div>

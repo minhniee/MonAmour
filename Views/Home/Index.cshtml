@@ -1,9 +1,10 @@
-﻿@{
+﻿@model MonAmour.ViewModels.HomeIndexViewModel
+@{
 	ViewData["Title"] = "Trang chủ";
 }
 
-@await Html.PartialAsync("_HeroSection")
-@await Html.PartialAsync("_ServiceSection")
+@await Html.PartialAsync("_HeroSection", Model.HomepageBanners)
+@await Html.PartialAsync("_ServiceSection", Model.ServiceBanners)
 @await Html.PartialAsync("_AboutSection")
 @await Html.PartialAsync("_TestimonialsSection")
-@await Html.PartialAsync("_PartnersSection")
+@await Html.PartialAsync("_PartnersSection", Model.Partners)

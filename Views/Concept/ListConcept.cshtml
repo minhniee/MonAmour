@@ -1,16 +1,17 @@
+
 @using MonAmour.Models
 @model IEnumerable<Concept>
 
 @{
 	ViewData["Title"] = "Gói dịch vụ - MonAmour";
-	var categories = ViewBag.Categories as List<ConceptCategory>;
+    var categories = ViewBag.Categories as List<ConceptCategory> ?? new List<ConceptCategory>();
 	var selectedCat = ViewBag.SelectedCategoryId as int?;
 	var page = ViewBag.Page ?? 1;
 	var totalPages = ViewBag.TotalPages ?? 1;
 	var currentPage = ViewBag.Page ?? 1;
-	var cities = ViewBag.Cities as List<string>;
-	string selectedCity = ViewBag.SelectedCity as string;
-	string search = ViewBag.Search as string;
+    var cities = ViewBag.Cities as List<string> ?? new List<string>();
+    string selectedCity = ViewBag.SelectedCity?.ToString() ?? "";
+    string search = ViewBag.Search?.ToString() ?? "";
 }
 
 <div class="min-h-screen bg-beige">
@@ -24,60 +25,96 @@
 				</h1>
 			</div>
 			
-			<!-- Image Carousel -->
-			<div class="relative overflow-hidden p-8 rounded-2xl" style="background-color: #f0e6d2; border: 2px solid #62000d;">
-				<div class="flex items-center space-x-6 transition-transform duration-500 ease-in-out" id="conceptCarousel" style="transform: translateX(0px);">
-					@for (int i = 0; i < 5; i++)
-					{
-						var concept = Model?.Skip(i).FirstOrDefault();
-						var img = concept?.ConceptImgs?.FirstOrDefault(img => img.IsPrimary == true)?.ImgUrl ?? concept?.ConceptImgs?.FirstOrDefault()?.ImgUrl ?? "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=500&h=400&fit=crop";
-						
-						<div class="concept-card flex-shrink-0 w-64 transition-all duration-300 cursor-pointer" data-index="@i" onclick="selectCard(@i)">
-							@if (concept != null)
-							{
-								<a href="@Url.Action("ConceptDetail","Concept", new { id = concept.ConceptId })" class="group block focus:outline-none">
-									<div class="carousel-card rounded-lg overflow-hidden shadow-lg transition-all duration-300">
-										<img src="@img" alt="@concept.Name" class="w-full h-64 object-cover transform transition-transform duration-300 group-hover:scale-105">
+            <!-- Enhanced Carousel Section -->
+            <div class="carousel-section mb-16">
+                <div class="carousel-container relative overflow-hidden h-[450px] md:h-[360px] flex items-center justify-center" id="carouselContainer">
+                    <div class="carousel-track flex transition-transform duration-600 ease-in-out" id="track">
+                        @if (Model != null && Model.Any())
+                        {
+                            var concepts = Model.Take(5).ToList();
+                             // Add last item as first clone for infinite loop
+                             var lastConcept = concepts.LastOrDefault();
+                             if (lastConcept != null)
+                             {
+                                 var lastImg = lastConcept.ConceptImgs?.OrderBy(i => i.DisplayOrder).FirstOrDefault(img => img.IsPrimary == true)?.ImgUrl ?? lastConcept.ConceptImgs?.FirstOrDefault()?.ImgUrl ?? "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop";
+                                 <div class="carousel-item flex-shrink-0 w-[280px] h-[360px] mx-4 rounded-lg overflow-hidden shadow-md transition-all duration-600 ease-in-out">
+                                     <a href="@Url.Action("ConceptDetail", "Concept", new { id = lastConcept.ConceptId })" class="block h-full relative">
+                                         <img src="@lastImg" alt="@lastConcept.Name" class="w-full h-full object-cover">
+                                         <div class="carousel-caption absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3 opacity-0 transition-opacity duration-300">
+                                             <h3 class="text-sm font-medium">@lastConcept.Name</h3>
+                                             <p class="text-xs line-clamp-2">@lastConcept.Description</p>
+                                         </div>
+                                     </a>
+                                 </div>
+                             }
+                            @foreach (var concept in concepts)
+                            {
+                                var img = concept.ConceptImgs?.OrderBy(i => i.DisplayOrder).FirstOrDefault(img => img.IsPrimary == true)?.ImgUrl ?? concept.ConceptImgs?.FirstOrDefault()?.ImgUrl ?? "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop";
+                                <div class="carousel-item flex-shrink-0 w-[280px] h-[360px] mx-4 rounded-lg overflow-hidden shadow-md transition-all duration-600 ease-in-out">
+                                    <a href="@Url.Action("ConceptDetail", "Concept", new { id = concept.ConceptId })" class="block h-full relative">
+                                        <img src="@img" alt="@concept.Name" class="w-full h-full object-cover">
+                                        <div class="carousel-caption absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3 opacity-0 transition-opacity duration-300">
+                                            <h3 class="text-sm font-medium">@concept.Name</h3>
+                                            <p class="text-xs line-clamp-2">@concept.Description</p>
+                                        </div>
+                                    </a>
 									</div>
-									<div class="mt-3 text-center">
-										<h3 class="font-prata text-lg font-bold group-hover:underline" style="color: #62000d;">@concept.Name</h3>
+                            }
+                             // Add first item as last clone for infinite loop
+                             var firstConcept = concepts.FirstOrDefault();
+                             if (firstConcept != null)
+                             {
+                                 var firstImg = firstConcept.ConceptImgs?.OrderBy(i => i.DisplayOrder).FirstOrDefault(img => img.IsPrimary == true)?.ImgUrl ?? firstConcept.ConceptImgs?.FirstOrDefault()?.ImgUrl ?? "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop";
+                                 <div class="carousel-item flex-shrink-0 w-[280px] h-[360px] mx-4 rounded-lg overflow-hidden shadow-md transition-all duration-600 ease-in-out">
+                                     <a href="@Url.Action("ConceptDetail", "Concept", new { id = firstConcept.ConceptId })" class="block h-full relative">
+                                         <img src="@firstImg" alt="@firstConcept.Name" class="w-full h-full object-cover">
+                                         <div class="carousel-caption absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3 opacity-0 transition-opacity duration-300">
+                                             <h3 class="text-sm font-medium">@firstConcept.Name</h3>
+                                             <p class="text-xs line-clamp-2">@firstConcept.Description</p>
 									</div>
 								</a>
+                                 </div>
+                             }
 							}
 							else
 							{
-								<div class="carousel-card rounded-lg overflow-hidden shadow-lg transition-all duration-300">
-									<img src="@img" alt="Concept" class="w-full h-64 object-cover">
+                            // Fallback placeholder items
+                            for (int i = 0; i < 5; i++)
+                            {
+                                <div class="carousel-item flex-shrink-0 w-[280px] h-[360px] mx-4 rounded-lg overflow-hidden shadow-md transition-all duration-600 ease-in-out">
+                                    <div class="h-full relative">
+                                        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop" alt="Placeholder" class="w-full h-full object-cover">
+                                        <div class="carousel-caption absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3 opacity-0 transition-opacity duration-300">
+                                            <h3 class="text-sm font-medium">Placeholder</h3>
+                                            <p class="text-xs line-clamp-2">Mô tả ngắn gọn cho hình ảnh placeholder.</p>
+                                        </div>
+                                    </div>
 								</div>
 							}
-						</div>
 					}
 				</div>
 			</div>
 			
-			<!-- Bottom Section -->
-			<div class="mt-16 flex items-center justify-between">
-				<!-- Left: Highlights -->
-				<div class="flex-1">
-					<h2 class="font-prata text-2xl mb-4" style="color: #62000d;">NỔI BẬT</h2>
-					<p class="font-noto-serif leading-relaxed max-w-md" style="color: #62000d;">
-						Khám phá những gói dịch vụ đặc biệt được thiết kế riêng cho từng cặp đôi, 
-						tạo nên những khoảnh khắc đáng nhớ và ý nghĩa nhất.
+                <!-- Navigation and Highlights -->
+                <div class="flex items-end justify-between mt-6">
+                    <div class="max-w-xl">
+                        <h2 class="text-2xl font-bold mb-4" style="color: #62000d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">NỔI BẬT</h2>
+                        <p class="text-sm leading-relaxed" style="color: #62000d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                            Khám phá những trải nghiệm đặc biệt được tuyển chọn, mang đến cảm xúc khó quên cho bạn và người ấy.
 					</p>
 				</div>
-				
-				<!-- Right: Navigation Arrows -->
-				<div class="flex space-x-2">
-					<button id="prevBtnBottom" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200" style="background-color: #62000d; color: #fbf1e6;" onmouseover="this.style.backgroundColor='#4a0009'" onmouseout="this.style.backgroundColor='#62000d'">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-4">
+                        <button id="prevBtnBottom" class="nav-arrow w-10 h-10 rounded-full border border-[#62000d] text-[#62000d] hover:bg-[#62000d] hover:text-[#fbf1e6] transition-all duration-200 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
 						</svg>
 					</button>
-					<button id="nextBtnBottom" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200" style="background-color: #62000d; color: #fbf1e6;" onmouseover="this.style.backgroundColor='#4a0009'" onmouseout="this.style.backgroundColor='#62000d'">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="nextBtnBottom" class="nav-arrow w-10 h-10 rounded-full border border-[#62000d] text-[#62000d] hover:bg-[#62000d] hover:text-[#fbf1e6] transition-all duration-200 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
 						</svg>
 					</button>
+                    </div>
 				</div>
 			</div>
 		</div>
@@ -91,42 +128,31 @@
 				<h2 class="font-prata text-4xl md:text-5xl mb-8" style="color: #62000d;">Gói dịch vụ</h2>
 				
 				<!-- Search and City Filter -->
-				<form method="get" action="@Url.Action("ListConcept","Concept")" class="max-w-5xl mx-auto mb-10">
+                <form method="get" action="@Url.Action("ListConcept", "Concept")" class="max-w-5xl mx-auto mb-10">
 					<input type="hidden" name="categoryId" value="@(selectedCat?.ToString() ?? "")" />
 					<div class="filter-bar flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4">
-						<input name="q" value="@search" placeholder="Tìm theo địa chỉ, khu vực, thành phố..."
-							class="input w-full md:flex-1" />
+                        <input name="q" value="@search" placeholder="Tìm theo địa chỉ, khu vực, thành phố..." class="input w-full md:flex-1" />
 						<select name="city" class="select w-full md:w-60">
 							<option value="">Tất cả thành phố</option>
-							@if (cities != null)
-							{
-								foreach (var c in cities)
-								{
-									@if (selectedCity == c)
-									{
-										<option value="@c" selected="selected">@c</option>
-									}
-									else
-									{
-										<option value="@c">@c</option>
-									}
-								}
+                             @foreach (var c in cities)
+                             {
+                                 <option value="@c" selected="@(selectedCity == c)">@c</option>
 							}
 						</select>
 						<div class="flex gap-3 md:ml-2">
 							<button type="submit" class="btn-primary">Lọc</button>
-							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = 1 })" class="btn-outline">Xóa lọc</a>
+                            <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = 1 })" class="btn-outline">Xóa lọc</a>
 						</div>
 					</div>
 				</form>
 
 				<!-- Category Filter Tabs -->
 				<div class="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-12">
-					<a href="@Url.Action("ListConcept","Concept", new { categoryId = (int?)null, page = 1, city = selectedCity, q = search })" class="pill @(selectedCat==null?"pill-active":"")">Tất cả dịch vụ</a>
+                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = (int?)null, page = 1, city = selectedCity, q = search })" class="pill @(selectedCat == null ? "pill-active" : "")">Tất cả dịch vụ</a>
 					@foreach (var cat in categories)
 					{
 						var active = selectedCat == cat.CategoryId;
-						<a href="@Url.Action("ListConcept","Concept", new { categoryId = cat.CategoryId, page = 1, city = selectedCity, q = search })" class="pill @(active?"pill-active":"")">@cat.Name</a>
+                        <a href="@Url.Action("ListConcept", "Concept", new { categoryId = cat.CategoryId, page = 1, city = selectedCity, q = search })" class="pill @(active ? "pill-active" : "")">@cat.Name</a>
 					}
 				</div>
 			</div>
@@ -142,15 +168,16 @@
 				<!-- Service Grid -->
 				<div class="concept-grid mb-12">
 					@foreach (var c in Model)
-					
-					{ <div> @{
+                     {
+                         <div>
+                             @{
 						var firstImg = c.ConceptImgs?.OrderBy(i => i.DisplayOrder).FirstOrDefault();
 						<a href="@Url.Action("ConceptDetail", "Concept", new { id = c.ConceptId })" class="group block">
 							<div class="rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300" style="background-color: white; border: 1px solid #62000d;">
 								<div class="aspect-square overflow-hidden" style="background-color: #f0e6d2;">
-									@if (!string.IsNullOrWhiteSpace(firstImg?.ImgUrl))
+                                             @if (firstImg != null && !string.IsNullOrWhiteSpace(firstImg.ImgUrl))
 									{
-										<img src="@firstImg.ImgUrl" alt="@firstImg?.AltText" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                 <img src="@firstImg.ImgUrl" alt="@(firstImg.AltText ?? c.Name)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
 									}
 									else
 									{
@@ -167,8 +194,6 @@
 									{
 										<p class="font-noto-serif text-sm mb-3 line-clamp-2" style="color: #62000d;">@c.Description</p>
 									}
-									
-									<!-- Location Info - Compact -->
 									@if (c.Location != null)
 									{
 										<div class="mb-3">
@@ -195,7 +220,6 @@
 											}
 										</div>
 									}
-
 											<a href="@Url.Action("ConceptDetail", "Concept", new { id = c.ConceptId })" class="w-full py-2 rounded-lg font-medium transition-colors duration-200 block text-center cta-btn" style="background-color: #62000d; color: #fbf1e6;" onmouseover="this.style.backgroundColor='#4a0009'" onmouseout="this.style.backgroundColor='#62000d'">
 												Liên hệ ngay
 											</a>
@@ -211,11 +235,9 @@
 				@if (totalPages > 1)
 				{
 					<div class="flex items-center justify-center gap-4 mt-8">
-						<!-- Previous Button -->
 						@if (currentPage > 1)
 						{
-							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = currentPage - 1, city = selectedCity, q = search })" 
-							   class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
+                            <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = currentPage - 1, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
 								</svg>
@@ -230,17 +252,14 @@
 							</div>
 						}
 
-						<!-- Page Numbers -->
 						<div class="flex items-center gap-2">
 							@{
 								int startPage = Math.Max(1, currentPage - 2);
 								int endPage = Math.Min(totalPages, currentPage + 2);
 								
-								// Show first page if not in range
 								if (startPage > 1)
 								{
-									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = 1, city = selectedCity, q = search })" 
-									   class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
+                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = 1, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
 										1
 									</a>
 									if (startPage > 2)
@@ -249,35 +268,29 @@
 									}
 								}
 								
-								// Show page numbers in range
 								for (int p = startPage; p <= endPage; p++)
 								{
-									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = p, city = selectedCity, q = search })" 
-									   class="flex items-center justify-center w-10 h-10 rounded-full @(p == currentPage ? "bg-wine-red text-beige" : "bg-beige text-wine-red hover:bg-wine-red hover:text-beige") transition-colors duration-200 font-prata">
+                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = p, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full @(p == currentPage ? "bg-wine-red text-beige" : "bg-beige text-wine-red hover:bg-wine-red hover:text-beige") transition-colors duration-200 font-prata">
 										@p
 									</a>
 								}
 								
-								// Show last page if not in range
 								if (endPage < totalPages)
 								{
 									if (endPage < totalPages - 1)
 									{
 										<span class="text-wine-red font-prata">...</span>
 									}
-									<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = totalPages, city = selectedCity, q = search })" 
-									   class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
+                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = totalPages, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
 										@totalPages
 									</a>
 								}
 							}
 						</div>
 
-						<!-- Next Button -->
 						@if (currentPage < totalPages)
 						{
-							<a href="@Url.Action("ListConcept","Concept", new { categoryId = selectedCat, page = currentPage + 1, city = selectedCity, q = search })" 
-							   class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
+                            <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = currentPage + 1, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
 								</svg>
@@ -299,7 +312,7 @@
 </div>
 
 <style>
-	/* Inputs & buttons */
+    /* Existing styles retained */
 	.input {
 		padding: 0.75rem 1rem;
 		border-radius: 0.5rem;
@@ -330,38 +343,6 @@
 		color: #62000d;
 		background: transparent;
 	}
-
-	/* Force original CTA colors */
-	.cta-btn {
-		background: #62000d !important;
-		background-image: none !important;
-		color: #fbf1e6 !important;
-		border: 1px solid #62000d !important;
-		opacity: 1 !important;
-		filter: none !important;
-		box-shadow: none !important;
-		cursor: pointer !important;
-		text-shadow: none !important;
-	}
-	/* Extra specificity inside concept grid */
-	.concept-grid a.cta-btn {
-		background: #62000d !important;
-		background-image: none !important;
-		color: #fbf1e6 !important;
-		border-color: #62000d !important;
-		opacity: 1 !important;
-		filter: none !important;
-		box-shadow: none !important;
-	}
-	.cta-btn:hover,
-	.concept-grid a.cta-btn:hover {
-		background: #4a0009 !important;
-		background-image: none !important;
-		color: #fbf1e6 !important;
-		border-color: #4a0009 !important;
-	}
-
-	/* Category pills */
 	.pill {
 		padding: 0.65rem 1rem;
 		border-radius: 9999px;
@@ -378,8 +359,11 @@
 		color: #fbf1e6;
 		box-shadow: 0 6px 16px rgba(98,0,13,.25);
 	}
-
-	/* Concept card polish */
+    .concept-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 1.5rem;
+    }
 	.concept-grid .rounded-lg {
 		border: 1px solid #d7c2b8 !important;
 		border-radius: 14px !important;
@@ -397,111 +381,230 @@
 	.concept-grid .font-prata.text-lg { font-size: 1.15rem; }
 	.concept-grid .font-noto-serif.mb-2 { font-weight: 600; }
 	.concept-grid .w-full.py-2 { margin-top: .6rem; }
+    .cta-btn {
+        background: #62000d !important;
+        color: #fbf1e6 !important;
+        border: 1px solid #62000d !important;
+    }
+    .cta-btn:hover {
+        background: #4a0009 !important;
+        border-color: #4a0009 !important;
+    }
 
-	/* Top carousel cards */
-	.carousel-card { background: #ffffff; border: 1px solid #62000d; }
-	#conceptCarousel .group:hover .carousel-card { box-shadow: 0 12px 24px rgba(98,0,13,.18); }
-
+    /* Enhanced Carousel Styles */
+    .carousel-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+    .carousel-track {
+        display: flex;
+    }
+    .carousel-item {
+        flex: 0 0 280px;
+        height: 360px;
+        margin: 0 16px;
+        border-radius: 16px;
+        transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out, box-shadow 0.3s ease;
+    }
+    .carousel-item.active {
+        transform: scale(1.15);
+        opacity: 1;
+        z-index: 2;
+        box-shadow: 0 8px 24px rgba(98, 0, 13, 0.2);
+    }
+    .carousel-item.side {
+        transform: scale(0.95);
+        opacity: 0.8;
+        z-index: 1;
+    }
+    .carousel-item.far {
+        transform: scale(0.8);
+        opacity: 0.5;
+        z-index: 0;
+    }
+    .carousel-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .carousel-caption {
+        opacity: 0;
+    }
+    .carousel-item.active .carousel-caption {
+        opacity: 1;
+    }
+    .nav-arrow {
+        transition: all 0.2s ease;
+    }
+    .nav-arrow:hover {
+        background-color: #62000d;
+        color: #fbf1e6;
+    }
+     @@media (max-width: 768px) {
+         .carousel-container {
+             height: 300px;
+         }
+         .carousel-item {
+             flex: 0 0 200px;
+             height: 240px;
+             margin: 0 8px;
+         }
+     }
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
-	.line-clamp-3 {
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-	
-	/* Force 4 columns on desktop */
-	.concept-grid {
-		display: grid !important;
-		grid-template-columns: repeat(4, 1fr) !important;
-		gap: 1.5rem;
-	}
-	
-	/* Responsive breakpoints */
 	@@media (max-width: 1200px) {
 		.concept-grid {
 			grid-template-columns: repeat(3, 1fr) !important;
 		}
 	}
-	
 	@@media (max-width: 900px) {
 		.concept-grid {
 			grid-template-columns: repeat(2, 1fr) !important;
 		}
 	}
-	
 	@@media (max-width: 600px) {
 		.concept-grid {
 			grid-template-columns: 1fr !important;
 		}
 	}
-	
 </style>
 
 <script>
-	// Concept Carousel
-	let currentIndex = 0;
-	const totalCards = 5;
-	const carousel = document.getElementById('conceptCarousel');
-	const prevBtnBottom = document.getElementById('prevBtnBottom');
-	const nextBtnBottom = document.getElementById('nextBtnBottom');
-	const cardWidth = 280; // w-64 + gap (256px + 24px)
-	const centerCardWidth = 320; // w-80 for center card
+    document.addEventListener('DOMContentLoaded', () => {
+        const track = document.getElementById('track');
+        const container = document.getElementById('carouselContainer');
+        const prevBtn = document.getElementById('prevBtnBottom');
+        const nextBtn = document.getElementById('nextBtnBottom');
+        
+        if (!track || !container || !prevBtn || !nextBtn) {
+            console.warn('Carousel elements not found');
+            return;
+        }
 
-	function updateCarousel() {
-		// Calculate translateX to center the current card
-		const containerWidth = carousel.parentElement.offsetWidth;
-		const totalCardsWidth = (totalCards * cardWidth) - cardWidth + centerCardWidth;
-		const startOffset = (containerWidth - totalCardsWidth) / 2;
-		const translateX = startOffset - (currentIndex * cardWidth);
-		carousel.style.transform = `translateX(${translateX}px)`;
-		
-		// Update card sizes - center card is larger
-		const cards = carousel.querySelectorAll('.concept-card');
-		cards.forEach((card, index) => {
-			card.classList.remove('w-80', 'w-64');
-			if (index === currentIndex) {
-				card.classList.add('w-80');
-				// Add special styling for center card
-				card.style.transform = 'scale(1.05)';
-				card.style.zIndex = '10';
-				card.style.boxShadow = '0 15px 30px rgba(98, 0, 13, 0.2)';
-			} else {
-				card.classList.add('w-64');
-				// Reset styling for non-center cards
-				card.style.transform = 'scale(1)';
-				card.style.zIndex = '1';
-				card.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
-			}
-		});
-	}
+        let items = Array.from(track.children);
+        if (items.length === 0) {
+            console.warn('No carousel items found');
+            return;
+        }
 
-	function selectCard(index) {
-		currentIndex = index;
-		updateCarousel();
-	}
+        const itemWidth = 280 + 32; // width + margin
+        let current = 1; // Start at first real item (after first clone)
+        let isTransitioning = false;
+        let autoPlayInterval = null;
 
-	function moveCarousel(direction) {
-		if (direction === 'prev') {
-			currentIndex = (currentIndex - 1 + totalCards) % totalCards;
-		} else {
-			currentIndex = (currentIndex + 1) % totalCards;
-		}
-		updateCarousel();
-	}
+        function updateCarousel(animate = true) {
+            if (isTransitioning && animate) return;
+            
+            if (!animate) {
+                track.style.transition = 'none';
+            } else {
+                track.style.transition = 'transform 0.6s ease-in-out';
+                isTransitioning = true;
+            }
 
-	// Event listeners for bottom arrows only
-	prevBtnBottom.addEventListener('click', () => moveCarousel('prev'));
-	nextBtnBottom.addEventListener('click', () => moveCarousel('next'));
+            const offset = (track.clientWidth / 2) - (itemWidth / 2) - (current * itemWidth);
+            track.style.transform = `translateX(${offset}px)`;
 
-	// Initialize carousel
-	updateCarousel();
+            items.forEach((item, index) => {
+                item.classList.remove('active', 'side', 'far');
+                if (index === current) {
+                    item.classList.add('active');
+                } else if (Math.abs(index - current) === 1) {
+                    item.classList.add('side');
+                } else {
+                    item.classList.add('far');
+                }
+            });
+        }
 
-	// Recalculate on window resize
-	window.addEventListener('resize', updateCarousel);
+        function startAutoplay() {
+            stopAutoplay();
+            autoPlayInterval = setInterval(() => {
+                if (!isTransitioning) {
+                    current++;
+                    updateCarousel();
+                }
+            }, 4000);
+        }
+
+        function stopAutoplay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!isTransitioning) {
+                current--;
+                updateCarousel();
+            }
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!isTransitioning) {
+                current++;
+                updateCarousel();
+            }
+        });
+
+        track.addEventListener('transitionend', () => {
+            isTransitioning = false;
+            
+            if (current === items.length - 1) {
+                current = 1;
+                updateCarousel(false);
+            } else if (current === 0) {
+                current = items.length - 2;
+                updateCarousel(false);
+            }
+        });
+
+        // Hover pause
+        container.addEventListener('mouseenter', stopAutoplay);
+        container.addEventListener('mouseleave', startAutoplay);
+
+        // Touch support
+        let startX = 0;
+        container.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            stopAutoplay();
+        }, { passive: true });
+
+        container.addEventListener('touchend', (e) => {
+            const distX = e.changedTouches[0].clientX - startX;
+            if (Math.abs(distX) > 50 && !isTransitioning) {
+                if (distX > 0) {
+                    current--;
+                } else {
+                    current++;
+                }
+                updateCarousel();
+            }
+            setTimeout(startAutoplay, 2000);
+        }, { passive: true });
+
+        // Resize handling
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                updateCarousel(false);
+            }, 100);
+        });
+
+        // Initialize
+        updateCarousel(false);
+        startAutoplay();
+    });
 </script>
+
+    

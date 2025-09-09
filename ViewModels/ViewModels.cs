@@ -1,5 +1,12 @@
 ﻿namespace MonAmour.ViewModels;
 
+public class HomeIndexViewModel
+{
+    public List<BannerHomepageListViewModel> HomepageBanners { get; set; } = new();
+    public List<BannerServiceListViewModel> ServiceBanners { get; set; } = new();
+    public List<PartnerViewModel> Partners { get; set; } = new();
+}
+
 public class OrderHistoryUserViewModel
 {
     public List<OrderCategoryUserViewModel> Categories { get; set; } = new();

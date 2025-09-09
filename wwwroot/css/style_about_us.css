@@ -1,0 +1,375 @@
+﻿/* About Us Page Styles */
+body {
+    font-family: 'Noto Serif', serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fbf1e6; /* beige background */
+    color: #62000d; /* wine-red text */
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Intro Section */
+.intro-section {
+    background-color: #fbf1e6;
+    padding: 60px 0;
+}
+
+.intro-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+.intro-text {
+    flex: 1;
+}
+
+.intro-text h1 {
+    font-family: 'Prata', serif;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #62000d; /* wine-red */
+    font-weight: 400;
+}
+
+.intro-text p {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.intro-visuals {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.main-visual {
+    background-color: #e5e5e5;
+    padding: 40px 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.main-visual h2 {
+    font-family: 'Prata', serif;
+    font-size: 1.8em;
+    color: #62000d;
+    margin: 0;
+}
+
+.secondary-visuals {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.visual-item {
+    background-color: #e5e5e5;
+    height: 80px;
+    border-radius: 8px;
+}
+
+/* History Section */
+.history-section {
+    background-color: #fbf1e6;
+    padding: 60px 0;
+}
+
+.history-content {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.history-image {
+    flex: 1;
+}
+
+.image-carousel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.carousel-item {
+    background-color: #e5e5e5;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.carousel-item.active {
+    width: 200px;
+    height: 150px;
+    z-index: 3;
+}
+
+.carousel-item:not(.active) {
+    width: 150px;
+    height: 120px;
+    opacity: 0.7;
+    z-index: 2;
+}
+
+.carousel-item:not(.active):last-child {
+    z-index: 1;
+}
+
+.carousel-nav {
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #62000d;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 4;
+}
+
+.history-text {
+    flex: 1;
+    text-align: right;
+}
+
+.history-text h2 {
+    font-family: 'Prata', serif;
+    font-size: 2.2em;
+    color: #62000d;
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.history-text p {
+    margin-bottom: 20px;
+    color: #333;
+    text-align: right;
+}
+
+.cta-button {
+    background-color: #62000d;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-family: 'Noto Serif', serif;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #4a0009;
+}
+
+/* Team Section */
+.team-section {
+    background-color: #fbf1e6;
+    padding: 60px 0;
+    text-align: center;
+}
+
+.team-section h2 {
+    font-family: 'Prata', serif;
+    font-size: 2.2em;
+    color: #62000d;
+    margin-bottom: 15px;
+}
+
+.team-section p {
+    margin-bottom: 40px;
+    color: #333;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.team-members {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.team-member {
+    flex: 0 0 150px;
+    text-align: center;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    overflow: hidden;
+    background-color: #e5e5e5;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.team-member h3 {
+    font-family: 'Prata', serif;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    color: #62000d;
+    font-weight: 600;
+}
+
+.team-member p {
+    font-size: 0.9em;
+    color: #666;
+    margin: 0;
+}
+
+/* Contact Section */
+.contact-section {
+    background-color: #fbf1e6;
+    padding: 60px 0;
+    text-align: center;
+}
+
+.contact-section h2 {
+    font-family: 'Prata', serif;
+    font-size: 2.2em;
+    color: #62000d;
+    margin-bottom: 15px;
+}
+
+.contact-section p {
+    margin-bottom: 40px;
+    color: #333;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.contact-form {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #f5f5f5;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row input {
+    flex: 1;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-family: 'Noto Serif', serif;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: #62000d;
+}
+
+.submit-button {
+    background-color: #62000d;
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-family: 'Noto Serif', serif;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #4a0009;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .intro-content {
+        flex-direction: column;
+    }
+    
+    .history-content {
+        flex-direction: column;
+    }
+    
+    .history-text {
+        text-align: center;
+    }
+    
+    .history-text h2,
+    .history-text p {
+        text-align: center;
+    }
+    
+    .team-members {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .team-member {
+        margin-bottom: 30px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .carousel-nav {
+        left: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .intro-section,
+    .history-section,
+    .team-section,
+    .contact-section {
+        padding: 40px 0;
+    }
+    
+    .intro-text h1 {
+        font-size: 2em;
+    }
+    
+    .history-text h2,
+    .team-section h2,
+    .contact-section h2 {
+        font-size: 1.8em;
+    }
+}

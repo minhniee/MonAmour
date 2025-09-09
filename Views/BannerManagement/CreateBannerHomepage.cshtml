@@ -79,13 +79,66 @@
                                     <div class="card-header">
                                         <h6 class="card-title mb-0">Preview Banner</h6>
                                     </div>
-                                    <div class="card-body text-center">
-                                        <div id="bannerPreview" class="banner-preview-container">
-                                            <img id="previewImage" src="" alt="Banner Preview" class="img-fluid" style="max-height: 200px; display: none;" />
-                                            <div id="noPreview" class="text-muted">
-                                                <i class="fas fa-image fa-3x mb-2"></i>
-                                                <p>Nhập URL để xem preview</p>
+                                    <div class="card-body p-0">
+                                        <div id="bannerPreview" class="banner-preview-container position-relative">
+                                            <!-- Hero Banner Preview -->
+                                            <div class="preview-section mb-3">
+                                                <div class="preview-label bg-dark text-white p-2">
+                                                    <i class="fas fa-desktop me-1"></i> Hero Banner Preview
+                                                </div>
+                                                <div class="preview-frame bg-black" style="aspect-ratio: 16/9; position: relative;">
+                                                    <div class="position-absolute inset-0 d-flex align-items-center justify-content-center">
+                                                        <img id="previewImageHero" src="" alt="Hero Preview" 
+                                                             style="display: none; width: 100%; height: 100%; object-fit: contain;" />
+                                                        <div id="noPreviewHero" class="d-flex align-items-center justify-content-center h-100 w-100 bg-light">
+                                                            <div class="text-muted text-center">
+                                                                <i class="fas fa-image fa-2x mb-2"></i>
+                                                                <p class="small mb-0">Hero Banner Preview</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            <!-- Mobile Preview -->
+                                            <div class="preview-section">
+                                                <div class="preview-label bg-dark text-white p-2">
+                                                    <i class="fas fa-mobile-alt me-1"></i> Mobile Preview
+                                                </div>
+                                                <div class="preview-frame bg-black" style="aspect-ratio: 9/16; max-width: 250px; margin: 0 auto; position: relative;">
+                                                    <div class="position-absolute inset-0 d-flex align-items-center justify-content-center">
+                                                        <img id="previewImageMobile" src="" alt="Mobile Preview" 
+                                                             style="display: none; width: 100%; height: 100%; object-fit: contain;" />
+                                                        <div id="noPreviewMobile" class="d-flex align-items-center justify-content-center h-100 w-100 bg-light">
+                                                            <div class="text-muted text-center">
+                                                                <i class="fas fa-mobile-alt fa-2x mb-2"></i>
+                                                                <p class="small mb-0">Mobile Preview</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Image Info -->
+                                            <div id="imageInfo" class="mt-3 px-3 pb-3" style="display: none;">
+                                                <div class="alert alert-info mb-0">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <i class="fas fa-info-circle me-2"></i>
+                                                        <strong>Thông tin ảnh:</strong>
+                                                    </div>
+                                                    <div class="small">
+                                                        <div>Kích thước: <span id="imageDimensions">-</span></div>
+                                                        <div>Dung lượng: <span id="imageSize">-</span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer bg-light p-3">
+                                        <div class="form-text text-muted small">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Kích thước đề xuất: 1920x1080px (16:9)
                                         </div>
                                     </div>
                                 </div>
@@ -116,15 +169,40 @@
             $('#ImageFile').on('change', function() {
                 var file = this.files[0];
                 if (file) {
+                    // Show image info
+                    $('#imageInfo').show();
+                    $('#imageDimensions').text('Đang tải...');
+                    $('#imageSize').text(formatFileSize(file.size));
+
                     var reader = new FileReader();
                     reader.onload = function(e) {
-                        $('#previewImage').attr('src', e.target.result).show();
-                        $('#noPreview').hide();
+                        // Create temporary image to get dimensions
+                        var img = new Image();
+                        img.onload = function() {
+                            $('#imageDimensions').text(this.width + ' x ' + this.height + 'px');
+                            
+                            // Check aspect ratio
+                            var ratio = this.width / this.height;
+                            if (Math.abs(ratio - 16/9) > 0.1) { // Allow small deviation
+                                $('#imageInfo .alert')
+                                    .removeClass('alert-info')
+                                    .addClass('alert-warning')
+                                    .append('<div class="small mt-2 text-warning">' +
+                                        '<i class="fas fa-exclamation-triangle me-1"></i> ' +
+                                        'Tỷ lệ ảnh không phải 16:9, có thể bị cắt khi hiển thị</div>');
+                            }
+                        };
+                        img.src = e.target.result;
+
+                        // Update both previews
+                        $('#previewImageHero, #previewImageMobile').attr('src', e.target.result).show();
+                        $('#noPreviewHero, #noPreviewMobile').hide();
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    $('#previewImage').hide();
-                    $('#noPreview').show();
+                    $('#previewImageHero, #previewImageMobile').hide();
+                    $('#noPreviewHero, #noPreviewMobile').show();
+                    $('#imageInfo').hide();
                 }
             });
 
@@ -145,5 +223,14 @@
                 }
             });
         });
+
+        // Helper function to format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
     </script>
 }

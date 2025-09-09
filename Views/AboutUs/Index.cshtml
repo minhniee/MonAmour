@@ -1,0 +1,114 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model MonAmour.ViewModels.AboutUsModel
+@{
+    ViewData["Title"] = "About Us";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/style_about_us.css">
+
+<section class="intro-section">
+    <div class="container">
+        <div class="intro-content">
+            <div class="intro-text">
+                <h1>Bông Hoa Nở Muộn (NVT Remix) Mon Amour</h1>
+                <p>Bông hoa nở muộn, nở trong vườn cây tú tài cỏ dại. Qua mùa trăng tròn Bông hoa nở muộn nay tỏa sáng lùi lùm lùm lan? Vâng bông nhan rực rỡ, nở có ai trông đợi. Đợi nhức nhối là rung. Môi khôn dám mơ huyền thoại Nơi mà anh cam. Cả đời anh khôn dám mơ huyền thoại vi mạch của xa xưa. Luyến thoái tình thâm khôn dám mơ huyền thoại vi mạch của xa xưa. Chuyền thủ buôn thinh khôn dám mơ huyền thoại vi mạch của xa xưa. Mai sủng trông hằng ngày, hằng van lạy Ngài bông hoa kia sáp phai, cháu con ai sểnh đi. Hoa héo úa, héo héo. Quên rồi, quên hết. Hoa héo úa, héo héo. Quên rồi, quên hết.</p>
+                <p>Hoa nở muộn, bên hè phố. Quên rồi, quên hết. Đêm mai. Môi mòn đợi thâu đêm. Ngài mà anh cam thây cuộc đời này hoa doi ai thua dục. Ngài mà anh cam thây cuộc đời này doi ai thua dục.</p>
+            </div>
+            <div class="intro-visuals">
+                <div class="main-visual">
+                    <h2>Bông Hoa Nở Muộn (NVT Remix) Mon Amour</h2>
+                </div>
+                <div class="secondary-visuals">
+                    <div class="visual-item"></div>
+                    <div class="visual-item"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="history-section">
+    <div class="container">
+        <div class="history-content">
+            <div class="history-image">
+                <div class="image-carousel">
+                    <div class="carousel-item active"></div>
+                    <div class="carousel-item"></div>
+                    <div class="carousel-item"></div>
+                    <button class="carousel-nav prev">‹‹</button>
+                </div>
+            </div>
+            <div class="history-text">
+                <h2>LỊCH SỬ HÌNH THÀNH</h2>
+                <p>Ngay hôm nay hoang hoải, ta trôi trốt đà chia qua Vệt tinh có chua vơi nghen ngào này. Đêm nay mền mộng. Bên em Ngài hôm ấy đã náng bông xiệp vòa Tinh hông lông. Ấm ôm của em dòa nghẹt ngào khát Vòa dìn. Cùng vò vò Tinh hông lông 10 aim ôi em dòa nghẹt ngào khát Vòa dìn sào. Con giò hầm đêm. Giữa lêi sào tát ôi dine em. Môi nai Chê bay phò bàng Vay ai vòn lôc tát dòu. Kháng lông tào châm hâm lạm phái. Ngay dy âm thurmg ngợi dò là dia rong Anh trach hoi ham chi dề. Cái hư vông Trôi khói khôn nghè nuta guit ta nit chài vò cành Nutic mút trào. Trò nhur rât lôu rôi lôc hòd.</p>
+                @* <button class="cta-button">XEM THÊM</button> *@
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="team-section">
+    <div class="container">
+        <h2>Meet Our Team Members</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipiscing elit volutpat gravida malesuada quam commodo id integer nam.</p>
+        <div class="team-members">
+            <div class="team-member">
+                <div class="avatar">
+                    <img src="~/Imagine/about_us/huu_quyen.png" alt="Team Member"/>
+                </div>
+                <h3>Nguyễn Hữu Quyền</h3>
+                @* <p>Lorem ipsum dolor</p> *@
+            </div>
+            <div class="team-member">
+                <div class="avatar">
+                    <img src="~/Imagine/about_us/no_name.jpg" alt="Team Member"/>
+                </div>
+                <h3>No-name</h3>
+                @* <p>Lorem ipsum dolor</p> *@
+            </div>
+            <div class="team-member">
+                <div class="avatar">
+                    <img src="~/Imagine/about_us/van_anh.png" alt="Team Member"/>
+                </div>
+                <h3>Nguyễn Thị Vân Anh</h3>
+                @* <p>Lorem ipsum dolor</p> *@
+            </div>
+            <div class="team-member">
+                <div class="avatar">
+                    <img src="~/Imagine/about_us/to_uyen.jpg" alt="Team Member"/>
+                </div>
+                <h3>Nguyễn Tố Uyên</h3>
+                @* <p>Lorem ipsum dolor</p> *@
+            </div>
+            <div class="team-member">
+                <div class="avatar">
+                    <img src="~/Imagine/about_us/dinh_han.jpg" alt="Team Member"/>
+                </div>
+                <h3>Hoàng Đinh Hân</h3>
+                @* <p>Lorem ipsum dolor</p> *@
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="contact-section">
+    <div class="container">
+        <h2>Nhận Ưu Đãi Từ Mon Amour</h2>
+        <p>Nhập thông tin của bạn để nhận các thông tin ưu đãi từ Mon Amour...</p>
+        <form class="contact-form" method="post">
+            <div class="form-row">
+                <input type="text" placeholder="Tên" asp-for="Name" value="Hoang Long" required>
+                <input type="email" placeholder="Email" asp-for="Email" value="example@email.com" required>
+            </div>
+            <textarea placeholder="Please type your message here.." asp-for="Message" required></textarea>
+            <div class="form-row">
+                <input type="tel" placeholder="Số điện thoại" asp-for="Phone" value="01234473932" required>
+                <input type="text" placeholder="Địa chỉ" asp-for="Address" value="HN" required>
+            </div>
+            <button type="submit" class="submit-button">Send message</button>
+        </form>
+    </div>
+</section>
+
+

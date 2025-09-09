@@ -1,0 +1,159 @@
+@model MonAmour.ViewModels.BannerUploadViewModel
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Upload Banner</h1>
+
+        <form asp-action="Upload" method="post" enctype="multipart/form-data" class="space-y-6">
+            <div asp-validation-summary="ModelOnly" class="text-red-500"></div>
+
+            <!-- Image Upload -->
+            <div class="space-y-2">
+                <label class="block font-medium">Chọn Ảnh</label>
+                <input type="file" asp-for="ImageFile" accept="image/*" class="w-full" 
+                       onchange="previewImage(event)" />
+                <span asp-validation-for="ImageFile" class="text-red-500"></span>
+                
+                <!-- Image Preview -->
+                <div id="imagePreview" class="hidden mt-4">
+                    <img id="preview" src="#" alt="Preview" class="max-w-full h-auto rounded-lg shadow-lg" />
+                    <div class="mt-2 text-sm text-gray-600">
+                        Kích thước: <span id="imageDimensions"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banner Type -->
+            <div class="space-y-2">
+                <label class="block font-medium">Loại Banner</label>
+                <select asp-for="BannerType" class="w-full rounded-lg border-gray-300" onchange="updateResizeDefaults()">
+                    <option value="">-- Chọn loại banner --</option>
+                    @foreach (var type in ViewBag.BannerTypes)
+                    {
+                        <option value="@type.Value" 
+                                data-max-width="@type.DefaultMaxWidth" 
+                                data-max-height="@type.DefaultMaxHeight">
+                            @type.Label
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="BannerType" class="text-red-500"></span>
+            </div>
+
+            <!-- Primary Flag -->
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" asp-for="IsPrimary" class="rounded border-gray-300" />
+                <label asp-for="IsPrimary" class="font-medium">Banner Chính</label>
+            </div>
+
+            <!-- Display Order -->
+            <div class="space-y-2">
+                <label asp-for="DisplayOrder" class="block font-medium">Thứ tự hiển thị</label>
+                <input type="number" asp-for="DisplayOrder" class="w-full rounded-lg border-gray-300" />
+                <span asp-validation-for="DisplayOrder" class="text-red-500"></span>
+            </div>
+
+            <!-- Description -->
+            <div class="space-y-2">
+                <label asp-for="Description" class="block font-medium">Mô tả</label>
+                <textarea asp-for="Description" rows="3" class="w-full rounded-lg border-gray-300"></textarea>
+                <span asp-validation-for="Description" class="text-red-500"></span>
+            </div>
+
+            <!-- Active Status -->
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" asp-for="IsActive" class="rounded border-gray-300" />
+                <label asp-for="IsActive" class="font-medium">Kích hoạt</label>
+            </div>
+
+            <!-- Resize Options -->
+            <div class="space-y-4 border rounded-lg p-4">
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" asp-for="EnableResize" class="rounded border-gray-300" 
+                           onchange="toggleResizeOptions()" />
+                    <label asp-for="EnableResize" class="font-medium">Resize Ảnh</label>
+                </div>
+
+                <div id="resizeOptions" class="space-y-4 hidden">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label asp-for="MaxWidth" class="block font-medium">Chiều rộng tối đa</label>
+                            <input type="number" asp-for="MaxWidth" class="w-full rounded-lg border-gray-300" />
+                        </div>
+                        <div class="space-y-2">
+                            <label asp-for="MaxHeight" class="block font-medium">Chiều cao tối đa</label>
+                            <input type="number" asp-for="MaxHeight" class="w-full rounded-lg border-gray-300" />
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" asp-for="MaintainAspectRatio" class="rounded border-gray-300" />
+                        <label asp-for="MaintainAspectRatio" class="font-medium">Giữ tỷ lệ khung hình</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="javascript:history.back()" 
+                   class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    Quay lại
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Upload
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById('preview');
+            const imagePreview = document.getElementById('imagePreview');
+            const dimensionsSpan = document.getElementById('imageDimensions');
+            const file = event.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    
+                    // Get image dimensions
+                    const img = new Image();
+                    img.onload = function() {
+                        dimensionsSpan.textContent = `${this.width}px × ${this.height}px`;
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
+            }
+        }
+
+        function toggleResizeOptions() {
+            const resizeOptions = document.getElementById('resizeOptions');
+            const enableResize = document.getElementById('EnableResize');
+            resizeOptions.classList.toggle('hidden', !enableResize.checked);
+        }
+
+        function updateResizeDefaults() {
+            const select = document.querySelector('[name="BannerType"]');
+            const option = select.options[select.selectedIndex];
+            
+            if (option) {
+                document.getElementById('MaxWidth').value = option.dataset.maxWidth || '';
+                document.getElementById('MaxHeight').value = option.dataset.maxHeight || '';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleResizeOptions();
+            updateResizeDefaults();
+        });
+    </script>
+}

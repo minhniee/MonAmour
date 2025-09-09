@@ -1,26 +1,170 @@
-﻿<section class="relative bg-gradient-to-br from-background to-muted py-20 lg:py-32">
-    <div class="container mx-auto px-4">
-        <div class="max-w-4xl mx-auto text-center">
-            <h1 class="font-prata text-4xl md:text-6xl lg:text-7xl font-normal text-foreground mb-6 leading-tight">
-                Tạo Nên Những
-                <span class="text-primary">Khoảnh Khắc</span>
-                Đáng Nhớ
-            </h1>
-            <p class="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                MonAmour mang đến những trải nghiệm lãng mạn độc đáo, biến mỗi khoảnh khắc thành kỷ niệm vĩnh cửu cho tình yêu của bạn.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="@Url.Action("ListConcept","Concept")" class="px-8 py-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium text-lg transition-colors">
-                    Đặt Lịch Ngay
-                </a>
-                @* <a href="" class="px-8 py-4 border border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-lg font-medium text-lg transition-colors"> *@
-                @*     Tư Vấn Miễn Phí *@
-                @* </a> *@
-            </div>
+﻿@model List<MonAmour.ViewModels.BannerHomepageListViewModel>
+<section class="relative h-[70vh] md:h-[80vh] lg:h-[85vh] overflow-hidden">
+    <!-- Carousel Container -->
+    <div class="relative w-full h-full">
+        <!-- Carousel Images -->
+        <div class="carousel-container relative w-full h-full">
+            @if (Model != null && Model.Any())
+            {
+                var index = 0;
+                foreach (var banner in Model)
+                {
+                    var isActive = index == 0 ? "active" : string.Empty;
+                    <div class="carousel-slide @isActive">
+                        <div class="w-full h-full flex items-center justify-center overflow-hidden">
+                            <img src="@banner.ImgUrl" alt="Banner @banner.BannerId" class="min-w-full min-h-full w-auto h-auto object-cover">
+                        </div>
+                        <div class="absolute inset-0 bg-black/30"></div>
+                    </div>
+                    index++;
+                }
+            }
+            else
+            {
+                <div class="carousel-slide active">
+                    <div class="w-full h-full flex items-center justify-center overflow-hidden">
+                        <img src="~/images/placeholder-hero.jpg" alt="Hero Placeholder" class="min-w-full min-h-full w-auto h-auto object-cover">
+                    </div>
+                    <div class="absolute inset-0 bg-black/30"></div>
+                </div>
+            }
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button class="carousel-nav carousel-prev absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-gray-800/70 hover:bg-gray-800 text-white p-2 md:p-3 rounded-full transition-all duration-300 z-10">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+        <button class="carousel-nav carousel-next absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-gray-800/70 hover:bg-gray-800 text-white p-2 md:p-3 rounded-full transition-all duration-300 z-10">
+            <svg class="w-4 h-4 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
+
+        <!-- Pagination Indicators -->
+        <div class="absolute bottom-16 md:bottom-20 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+            @{
+                var dotsCount = (Model != null && Model.Any()) ? Model.Count : 1;
+                for (var i = 0; i < dotsCount; i++)
+                {
+                    var active = i == 0 ? "active" : string.Empty;
+                    <button class="carousel-dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white/70 hover:bg-white transition-all duration-300 @active"></button>
+                }
+            }
+        </div>
+
+        <!-- Call to Action Button -->
+        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+            <a href="@Url.Action("ListConcept","Concept")" class="px-8 md:px-12 py-3 md:py-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+                Đặt Lịch Ngay
+            </a>
         </div>
     </div>
 
-    <!-- Decorative elements -->
-    <div class="absolute top-10 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
-    <div class="absolute bottom-10 right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+    <!-- Carousel Styles -->
+    <style>
+        .carousel-container {
+            position: relative;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+        }
+
+        .carousel-slide img {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .carousel-dot.active {
+            background-color: white;
+        }
+
+        .carousel-nav:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .carousel-nav {
+                opacity: 0.8;
+            }
+            
+            .carousel-nav:hover {
+                opacity: 1;
+            }
+        }
+
+        /* Ensure carousel fits well on all screen sizes */
+        @@media (max-height: 600px) {
+            section {
+                height: 60vh !important;
+            }
+        }
+
+        @@media (min-height: 900px) {
+            section {
+                height: 75vh !important;
+            }
+        }
+    </style>
+
+    <!-- Carousel JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots = document.querySelectorAll('.carousel-dot');
+            const prevBtn = document.querySelector('.carousel-prev');
+            const nextBtn = document.querySelector('.carousel-next');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === index);
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            }
+
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            }
+
+            function prevSlide() {
+                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                showSlide(currentSlide);
+            }
+
+            // Event listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentSlide = index;
+                    showSlide(currentSlide);
+                });
+            });
+
+            // Auto-play
+            setInterval(nextSlide, 5000);
+        });
+    </script>
 </section>
