@@ -1,120 +1,393 @@
 @{
-    ViewData["Title"] = "Trang không tồn tại";
+    ViewData["Title"] = "404 - Trang không tồn tại";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8 col-sm-10">
-            <div class="text-center py-5">
-                <!-- 404 Icon -->
-                <div class="mb-4">
-                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 5rem;"></i>
-                </div>
-                
-                <!-- Error Code -->
-                <h1 class="display-1 fw-bold text-primary">404</h1>
-                
-                <!-- Error Message -->
-                <h2 class="h3 mb-3">Trang không tồn tại</h2>
-                <p class="lead text-muted mb-4">
-                    Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
-                </p>
-                
-                <!-- Action Buttons -->
-                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary btn-lg">
-                        <i class="fas fa-home me-2"></i>
-                        Về trang chủ
-                    </a>
-                    <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
-                        <i class="fas fa-arrow-left me-2"></i>
-                        Quay lại
-                    </button>
-                </div>
-                
-                <!-- Help Text -->
-                <div class="mt-5">
-                    <p class="text-muted small">
-                        Nếu bạn tin rằng đây là lỗi, vui lòng 
-                        <a href="mailto:support@monamour.com" class="text-decoration-none">liên hệ với chúng tôi</a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="error-page">
+    <!-- 404 Error Section -->
+    <section class="error-section">
+        <!-- Decorative Elements -->
+        <div class="decoration decoration-1"></div>
+        <div class="decoration decoration-2"></div>
+        <div class="decoration decoration-3"></div>
 
-<!-- Additional Help Section -->
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 bg-light">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Có thể bạn đang tìm kiếm:</h5>
-                    <div class="row mt-3">
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <a href="@Url.Action("Index", "Home")" class="text-decoration-none">
-                                <div class="p-3 border rounded">
-                                    <i class="fas fa-home text-primary mb-2"></i>
-                                    <div>Trang chủ</div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <a href="@Url.Action("Index", "Blog")" class="text-decoration-none">
-                                <div class="p-3 border rounded">
-                                    <i class="fas fa-blog text-success mb-2"></i>
-                                    <div>Blog</div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <a href="@Url.Action("Index", "Concept")" class="text-decoration-none">
-                                <div class="p-3 border rounded">
-                                    <i class="fas fa-heart text-danger mb-2"></i>
-                                    <div>Concept</div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <a href="@Url.Action("Index", "Cart")" class="text-decoration-none">
-                                <div class="p-3 border rounded">
-                                    <i class="fas fa-shopping-cart text-warning mb-2"></i>
-                                    <div>Giỏ hàng</div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        <!-- Floating Hearts -->
+        <div class="floating-heart">♥</div>
+        <div class="floating-heart">♥</div>
+        <div class="floating-heart">♥</div>
+        <div class="floating-heart">♥</div>
+        <div class="floating-heart">♥</div>
+
+        <div class="error-container">
+            <div class="error-number">404</div>
+            <h1 class="error-title">Trang không tồn tại</h1>
+            <p class="error-message">
+                Rất tiếc, trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.
+                Hãy quay về trang chủ để khám phá những dịch vụ tuyệt vời của chúng tôi.
+            </p>
+
+            <div class="error-actions">
+                <a href="@Url.Action("Index", "Home")" class="btn-primary">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Về trang chủ
+                </a>
+
+                <a href="@Url.Action("ListConcept", "Concept")" class="btn-secondary">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                    </svg>
+                    Xem dịch vụ
+                </a>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <style>
-    .btn {
+    /* 404 Page Styles */
+    .error-page {
+        background: linear-gradient(135deg, #fbf1e6 0%, #f0e6d2 100%);
+        min-height: calc(100vh - 120px);
+        overflow-x: hidden;
+    }
+
+    .error-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 120px);
+        padding: 60px 5%;
+        text-align: center;
+        position: relative;
+    }
+
+    .error-container {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    .error-number {
+        font-size: clamp(120px, 20vw, 200px);
+        font-weight: bold;
+        color: #62000d;
+        line-height: 0.8;
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: fadeInScale 1s ease forwards 0.3s;
+        position: relative;
+        cursor: pointer;
+    }
+
+        .error-number::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(98, 0, 13, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+    .error-title {
+        font-size: clamp(24px, 4vw, 36px);
+        font-weight: 600;
+        color: #62000d;
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: fadeInUp 1s ease forwards 0.6s;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .error-message {
+        font-size: 18px;
+        color: #62000d;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        opacity: 0.8;
+        opacity: 0;
+        animation: fadeInUp 1s ease forwards 0.9s;
+        font-family: 'Noto Serif', serif;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        opacity: 0;
+        animation: fadeInUp 1s ease forwards 1.2s;
+    }
+
+    .error-page .btn-primary {
+        padding: 15px 30px;
+        background-color: #62000d !important;
+        color: #fbf1e6 !important;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
         transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(98, 0, 13, 0.3);
+        border: none;
     }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    
-    .card {
+
+        .error-page .btn-primary:hover {
+            background-color: #4a0009 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(98, 0, 13, 0.4);
+            color: #fbf1e6 !important;
+        }
+
+    .error-page .btn-secondary {
+        padding: 15px 30px;
+        background-color: transparent !important;
+        color: #62000d !important;
+        text-decoration: none;
+        border: 2px solid #62000d !important;
+        border-radius: 8px;
+        font-weight: 500;
         transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
     }
-    
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+        .error-page .btn-secondary:hover {
+            background-color: #62000d !important;
+            color: #fbf1e6 !important;
+            transform: translateY(-2px);
+        }
+
+    /* Decorative Elements */
+    .decoration {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(98, 0, 13, 0.1), rgba(240, 230, 210, 0.3));
+        z-index: 1;
     }
+
+    .decoration-1 {
+        top: 20%;
+        left: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .decoration-2 {
+        bottom: 20%;
+        right: 15%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .decoration-3 {
+        top: 60%;
+        left: 5%;
+        width: 150px;
+        height: 150px;
+        animation: float 7s ease-in-out infinite;
+    }
+
+    /* Heart Animation */
+    .floating-heart {
+        position: absolute;
+        color: #62000d;
+        font-size: 20px;
+        opacity: 0.3;
+        animation: heartFloat 10s linear infinite;
+        pointer-events: none;
+    }
+
+        .floating-heart:nth-child(2) {
+            animation-delay: -2s;
+            left: 20%;
+        }
+
+        .floating-heart:nth-child(3) {
+            animation-delay: -4s;
+            left: 40%;
+        }
+
+        .floating-heart:nth-child(4) {
+            animation-delay: -6s;
+            left: 60%;
+        }
+
+        .floating-heart:nth-child(5) {
+            animation-delay: -8s;
+            left: 80%;
+        }
+
+    /* Animations */
+    @@keyframes fadeInScale {
+        from
+
+    {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    }
+
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    @@keyframes float {
+        0%, 100%
+
+    {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    }
+
     
-    .display-1 {
-        background: linear-gradient(45deg, #007bff, #6f42c1);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+    @@keyframes heartFloat {
+        0%
+
+    {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.3;
+    }
+
+    90% {
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .error-actions
+
+    {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .error-page .btn-primary,
+    .error-page .btn-secondary {
+        width: 200px;
+        justify-content: center;
+    }
+
+    .decoration {
+        width: 150px;
+        height: 150px;
+    }
+
+    .decoration-3 {
+        width: 100px;
+        height: 100px;
+    }
+
+    }
+
+    @@media (max-width: 480px) {
+        .error-section
+
+    {
+        padding: 40px 4%;
+    }
+
+    .error-message {
+        font-size: 16px;
+    }
+
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add click effect to error number
+        const errorNumber = document.querySelector('.error-number');
+        if (errorNumber) {
+            errorNumber.addEventListener('click', function() {
+                this.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        }
+
+        // Add mouse move effect for decorations
+        document.addEventListener('mousemove', function(e) {
+            const decorations = document.querySelectorAll('.decoration');
+            decorations.forEach((decoration, index) => {
+                const speed = (index + 1) * 0.005;
+                const x = (e.clientX - window.innerWidth / 2) * speed;
+                const y = (e.clientY - window.innerHeight / 2) * speed;
+                decoration.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+
+        // Add dynamic heart generation
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.innerHTML = '♥';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = (Math.random() * 5 + 8) + 's';
+            heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
+
+            const errorSection = document.querySelector('.error-section');
+            if (errorSection) {
+                errorSection.appendChild(heart);
+
+                setTimeout(() => {
+                    if (heart.parentNode) {
+                        heart.remove();
+                    }
+                }, 10000);
+            }
+        }
+
+        // Generate hearts periodically
+        const heartInterval = setInterval(createFloatingHeart, 2000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            clearInterval(heartInterval);
+        });
+    });
+</script>

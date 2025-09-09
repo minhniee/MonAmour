@@ -39,42 +39,77 @@
             <!-- Featured Post - Takes up 3 columns -->
             <div class="lg:col-span-7">
                 <h3 class="text-lg font-medium mb-6 text-gray-700" style="font-family: 'Noto Serif', serif;">Bài viết nổi bật</h3>
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(1)">
-                    <div class="h-[350px] bg-gray-200 flex items-center justify-center">
-                        <img src="/romantic-dinner-setup.jpg" alt="Featured Post" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-8">
-                        <div class="flex items-center text-sm text-gray-500 mb-3">
-                            <span>Sự kiện Mới</span>
-                            <span class="mx-2">•</span>
-                            <span>15/08/2025</span>
+                @if (Model.FeaturedPosts.Any())
+                {
+                    var featured = Model.FeaturedPosts.First();
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" 
+                         onclick="openBlogDetail(@featured.BlogId)">
+                        <div class="h-[350px] bg-gray-200 flex items-center justify-center">
+                            @if (!string.IsNullOrEmpty(featured.FeaturedImage))
+                            {
+                                <img src="@featured.FeaturedImage" alt="@featured.Title" class="w-full h-full object-cover">
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-gray-400 text-sm uppercase">@featured.CategoryName</span>
+                                </div>
+                            }
                         </div>
-                        <h2 class="text-2xl font-bold mb-4 text-gray-800" style="font-family: 'Prata', serif;">
-                            EMPOWERING AT-RISK AND DISADVANTAGED YOUTH IN VIETNAM
-                        </h2>
-                        <p class="text-gray-600 leading-relaxed line-clamp-3 text-base" style="font-family: 'Noto Serif', serif;">
-                            Khám phá những trải nghiệm lãng mạn độc đáo được thiết kế đặc biệt cho các cặp đôi.
-                            Từ bữa tối dưới ánh nến đến những chuyến picnic riêng tư...
-                        </p>
+                        <div class="p-8">
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <span>@featured.CategoryName</span>
+                                <span class="mx-2">•</span>
+                                <span>@featured.PublishedDate?.ToString("dd/MM/yyyy")</span>
+                                @if (featured.ReadTime > 0)
+                                {
+                                    <span class="mx-2">•</span>
+                                    <span>@featured.ReadTime phút đọc</span>
+                                }
+                            </div>
+                            <h2 class="text-2xl font-bold mb-4 text-gray-800" style="font-family: 'Prata', serif;">
+                                @featured.Title
+                            </h2>
+                            <p class="text-gray-600 leading-relaxed line-clamp-3 text-base" style="font-family: 'Noto Serif', serif;">
+                                @featured.Excerpt
+                            </p>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
 
             <!-- Side Posts - Takes up 2 columns, arranged in 2x2 grid -->
             <div class="lg:col-span-5 mt-8 lg:mt-0">
                 <div class="grid grid-cols-2 mt-[50px] gap-6">
-                    @for (int i = 2; i <= 5; i++)
+                    @foreach (var post in Model.RecentPosts)
                     {
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="openBlogDetail(@i)">
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" 
+                             onclick="openBlogDetail(@post.BlogId)">
                             <div class="bg-gray-200 flex items-center justify-center h-[150px]">
-                                <span class="text-gray-400 text-sm uppercase">WE ARE KOTO</span>
+                                @if (!string.IsNullOrEmpty(post.FeaturedImage))
+                                {
+                                    <img src="@post.FeaturedImage" alt="@post.Title" class="w-full h-full object-cover">
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-sm uppercase">@post.CategoryName</span>
+                                }
                             </div>
                             <div class="p-5">
+                                <div class="flex items-center text-xs text-gray-500 mb-2">
+                                    <span>@post.CategoryName</span>
+                                    @if (post.ReadTime > 0)
+                                    {
+                                        <span class="mx-2">•</span>
+                                        <span>@post.ReadTime phút</span>
+                                    }
+                                </div>
                                 <h3 class="font-semibold text-gray-800 text-base mb-3" style="font-family: 'Prata', serif;">
-                                    WE ARE KOTO
+                                    @post.Title
                                 </h3>
                                 <p class="text-gray-600 text-sm leading-relaxed line-clamp-2" style="font-family: 'Noto Serif', serif;">
-                                    Lorem ipsum dolor sit amet consectetur. Ac hac sociis arcu aen...
+                                    @post.Excerpt
+                                </p>
                             </div>
                         </div>
                     }
@@ -94,50 +129,37 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- The History Post -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(6)">
-                    <div class="aspect-video bg-gray-200 flex items-center justify-center">
-                        <img src="/romantic-picnic-setup.jpg" alt="History" class="w-full h-full object-cover">
+                @foreach (var post in Model.DailyPosts)
+                {
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" 
+                         onclick="openBlogDetail(@post.BlogId)">
+                        <div class="aspect-video bg-gray-200 flex items-center justify-center">
+                            @if (!string.IsNullOrEmpty(post.FeaturedImage))
+                            {
+                                <img src="@post.FeaturedImage" alt="@post.Title" class="w-full h-full object-cover">
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-gray-400 text-sm uppercase">@post.CategoryName</span>
+                                </div>
+                            }
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center text-sm text-gray-500 mb-3">
+                                <span>@post.CategoryName</span>
+                                <span class="mx-2">•</span>
+                                <span>@post.PublishedDate?.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <h3 class="text-lg font-bold mb-3 text-gray-800" style="font-family: 'Prata', serif;">
+                                @post.Title
+                            </h3>
+                            <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3" style="font-family: 'Noto Serif', serif;">
+                                @post.Excerpt
+                            </p>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold mb-3 text-gray-800" style="font-family: 'Prata', serif;">
-                            THE HISTORY OF KOTO
-                        </h3>
-                        <p class="text-gray-600 text-sm leading-relaxed mb-4" style="font-family: 'Noto Serif', serif;">
-                            Jimmy Pham has been in Vietnam in 1996 and moved to Australia as a young child with his brother and mother, spending his formative years in Sydney...
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Founder's Message -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(7)">
-                    <div class="aspect-video bg-gray-200 flex items-center justify-center">
-                        <img src="/luxury-anniversary-gift-box.jpg" alt="Founder" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold mb-3 text-gray-800" style="font-family: 'Prata', serif;">
-                            FOUNDER'S MESSAGE
-                        </h3>
-                        <p class="text-gray-600 text-sm leading-relaxed mb-4" style="font-family: 'Noto Serif', serif;">
-                            I am humbled that my dreams to provide a mixed medium with training, a stable income and just workplace in a social business such as I hope has...
-                        </p>
-                    </div>
-                </div>
-
-                <!-- News -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openBlogDetail(8)">
-                    <div class="aspect-video bg-gray-200 flex items-center justify-center">
-                        <img src="/rooftop-cinema-romantic-setup.jpg" alt="News" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold mb-3 text-gray-800" style="font-family: 'Prata', serif;">
-                            NEWS
-                        </h3>
-                        <p class="text-gray-600 text-sm leading-relaxed mb-4" style="font-family: 'Noto Serif', serif;">
-                            KOTO staff and volunteers are privileged to visit the business initiatives from Hanoi, the foundation's key young...
-                        </p>
-                    </div>
-                </div>
+                }
             </div>
         </div>
     </div>

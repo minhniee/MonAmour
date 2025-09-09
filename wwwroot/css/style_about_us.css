@@ -198,18 +198,18 @@ body {
 .team-members {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 40px;
     flex-wrap: wrap;
 }
 
 .team-member {
-    flex: 0 0 150px;
+    flex: 0 0 220px;
     text-align: center;
 }
 
 .avatar {
-    width: 100px;
-    height: 100px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     margin: 0 auto 15px;
     overflow: hidden;
