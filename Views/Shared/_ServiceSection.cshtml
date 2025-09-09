@@ -1,127 +1,155 @@
 ﻿@model List<MonAmour.ViewModels.BannerServiceListViewModel>
-<section class="py-4">
-    <div class="container mx-auto px-4">
+<section class="py-16 bg-white relative z-10 mb-16 overflow-hidden service-section" style="margin-bottom: 4rem; clear: both;">
+    <div class="container mx-auto px-4 relative">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-foreground mb-4 text-balance">Our Service</h2>
-            <p class="text-muted-foreground max-w-3xl mx-auto text-pretty">
+            <h2 class="text-3xl font-bold text-black mb-4">Our Service</h2>
+            <p class="text-gray-600 max-w-3xl mx-auto">
                 Health Clubs with Simplicity. Value. And Your Good health in mind. These qualities form the bedrock of Fitness Evolution, the next generation of health and fitness centers. With our low-cost, no long-term-contract memberships and high-quality equipment, you can realize your fitness goals in a comfortable, safe environment.
             </p>
         </div>
 
-        <!-- Tailwind Grid Layout - 1/2 + 1/2 split -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto min-h-[600px]">
+        <!-- Grid Layout - 1/2 + 1/2 split -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto min-h-[600px]">
             <!-- Large Block - Left (1/2 width) -->
-            <div class="md:col-span-1">
-                <div class=" border-0 rounded-lg shadow-sm h-full overflow-hidden">
+            <div class="lg:col-span-1">
+                <div class="bg-gray-100 rounded-lg shadow-sm h-full overflow-hidden relative group cursor-pointer">
                     @if (Model != null && Model.Any())
                     {
                         var primary = Model.FirstOrDefault(b => b.IsPrimary);
                         if (primary != null)
                         {
-                            <img src="@primary.ImgUrl" alt="Service Banner @primary.BannerId" class="w-full h-full object-contain mx-auto" />
+                            <img src="@primary.ImgUrl" alt="Service Banner @primary.BannerId" class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                            <div class="absolute inset-0 p-6 flex flex-col justify-between">
+                                <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg w-fit">Setup</div>
+                                <div class="text-white">
+                                    <h3 class="font-sans font-medium text-lg text-white uppercase leading-tight">EMPOWERING AT-RISK AND DISADVANTAGED YOUTH IN VIETNAM</h3>
+                                </div>
+                            </div>
                         }
-                        @* else *@
-                        @* { *@
-                        @*     <div class="p-6 h-full flex flex-col justify-center items-center text-center"> *@
-                        @*         <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-4 w-fit">Setup</div> *@
-                        @*         <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">Please set a primary banner</h3> *@
-                        @*     </div> *@
-                        @* } *@
+                        else
+                        {
+                            <div class="p-6 h-full flex flex-col justify-center items-center text-center">
+                                <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-4 w-fit">Setup</div>
+                                <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">Please set a primary banner</h3>
+                            </div>
+                        }
                     }
-                    @* else *@
-                    @* { *@
-                    @*     <div class="p-6 h-full flex flex-col justify-center items-center text-center"> *@
-                    @*         <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-4 w-fit">Setup</div> *@
-                    @*         <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">No service banners</h3> *@
-                    @*     </div> *@
-                    @* } *@
+                    else
+                    {
+                        <div class="p-6 h-full flex flex-col justify-center items-center text-center">
+                            <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-4 w-fit">Setup</div>
+                            <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">No service banners</h3>
+                        </div>
+                    }
                 </div>
             </div>
 
             <!-- Right Side Container (1/2 width) -->
-            <div class="md:col-span-1">
+            <div class="lg:col-span-1">
                 <div class="grid grid-rows-2 gap-6 h-full">
                     <!-- Top Right Block -->
-                    <div class=" border-0 rounded-lg shadow-sm overflow-hidden">
+                    <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
                         @if (Model != null && Model.Any())
                         {
                             var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).ToList();
                             if (nonPrimaryBanners.Any())
                             {
                                 var banner = nonPrimaryBanners.First();
-                                <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-contain mx-auto" />
+                                <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
+                                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                                <div class="absolute inset-0 p-4 flex flex-col justify-between">
+                                    <div class="bg-black text-white px-3 py-1 text-xs font-medium rounded w-fit">Setup</div>
+                                    <div class="text-white">
+                                        <h3 class="font-sans font-medium text-base text-white uppercase leading-tight">WE ARE KOTO - The first social enterprise in Vietnam.</h3>
+                                    </div>
+                                </div>
                             }
-                            @* else *@
-                            @* { *@
-                            @*     <div class="p-4 h-full flex flex-col justify-center items-center text-center"> *@
-                            @*         <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div> *@
-                            @*         <h3 class="font-sans font-medium text-base text-black uppercase leading-tight">Add more service banners</h3> *@
-                            @*     </div> *@
-                            @* } *@
+                            else
+                            {
+                                <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                    <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
+                                    <h3 class="font-sans font-medium text-base text-black uppercase leading-tight">Add more service banners</h3>
+                                </div>
+                            }
                         }
-                        @* else *@
-                        @* { *@
-                        @*     <div class="p-4 h-full flex flex-col justify-center items-center text-center"> *@
-                        @*         <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div> *@
-                        @*         <h3 class="font-sans font-medium text-base text-black uppercase leading-tight">Add more service banners</h3> *@
-                        @*     </div> *@
-                        @* } *@
+                        else
+                        {
+                            <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
+                                <h3 class="font-sans font-medium text-base text-black uppercase leading-tight">Add more service banners</h3>
+                            </div>
+                        }
                     </div>
 
                     <!-- Bottom Right Blocks Container -->
                     <div class="grid grid-cols-2 gap-6">
                         <!-- Bottom Right 1 -->
-                        <div class=" border-0 rounded-lg shadow-sm overflow-hidden">
+                        <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
                             @if (Model != null && Model.Any())
                             {
                                 var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(1).ToList();
                                 if (nonPrimaryBanners.Any())
                                 {
                                     var banner = nonPrimaryBanners.First();
-                                    <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-contain mx-auto" />
+                                    <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
+                                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                                    <div class="absolute inset-0 p-4 flex flex-col justify-end">
+                                        <div class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2">Setup</div>
+                                        <div class="text-white">
+                                            <h3 class="font-sans font-medium text-sm text-white uppercase">WE ARE KOTO</h3>
+                                        </div>
+                                    </div>
                                 }
-                                @* else *@
-                                @* { *@
-                                @*     <div class="p-4 h-full flex flex-col justify-center items-center text-center"> *@
-                                @*         <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div> *@
-                                @*         <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3> *@
-                                @*     </div> *@
-                                @* } *@
+                                else
+                                {
+                                    <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                        <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
+                                        <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
+                                    </div>
+                                }
                             }
-                            @* else *@
-                            @* { *@
-                            @*     <div class="p-4 h-full flex flex-col justify-center items-center text-center"> *@
-                            @*         <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div> *@
-                            @*         <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3> *@
-                            @*     </div> *@
-                            @* } *@
+                            else
+                            {
+                                <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                    <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
+                                    <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
+                                </div>
+                            }
                         </div>
 
                         <!-- Bottom Right 2 -->
-                        <div class=" border-0 rounded-lg shadow-sm overflow-hidden">
+                        <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
                             @if (Model != null && Model.Any())
                             {
                                 var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(2).ToList();
                                 if (nonPrimaryBanners.Any())
                                 {
                                     var banner = nonPrimaryBanners.First();
-                                    <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-contain mx-auto" />
+                                    <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
+                                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                                    <div class="absolute inset-0 p-4 flex flex-col justify-end">
+                                        <div class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2">Gift</div>
+                                        <div class="text-white">
+                                            <h3 class="font-sans font-medium text-sm text-white uppercase">WE ARE KOTO</h3>
+                                        </div>
+                                    </div>
                                 }
-                                @* else *@
-                                @* { *@
-                                @*     <div class="p-4 h-full flex flex-col justify-center items-center text-center"> *@
-                                @*         <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Gift</div> *@
-                                @*         <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3> *@
-                                @*     </div> *@
-                                @* } *@
+                                else
+                                {
+                                    <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                        <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Gift</div>
+                                        <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
+                                    </div>
+                                }
                             }
-                            @* else *@
-                            @* { *@
-                            @*     <div class="p-4 h-full flex flex-col justify-center items-center text-center"> *@
-                            @*         <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Gift</div> *@
-                            @*         <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3> *@
-                            @*     </div> *@
-                            @* } *@
+                            else
+                            {
+                                <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                    <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Gift</div>
+                                    <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -129,3 +157,52 @@
         </div>
     </div>
 </section>
+
+<style>
+    /* Ensure Service Section is properly contained */
+    .service-section {
+        position: relative;
+        z-index: 10;
+        background: white;
+        margin-bottom: 4rem;
+        clear: both;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Prevent any overlap issues */
+    .service-section * {
+        position: relative;
+        z-index: inherit;
+    }
+    
+    /* Force clear separation */
+    .service-section::after {
+        content: "";
+        display: block;
+        clear: both;
+        height: 0;
+        visibility: hidden;
+    }
+    
+    /* Ensure no floating elements interfere */
+    .service-section {
+        float: none;
+        overflow: visible;
+    }
+    
+    /* Global section separation */
+    section, div[class*="section"] {
+        clear: both;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Prevent any absolute positioning from causing overlaps */
+    .service-section, .about-section {
+        position: relative !important;
+        transform: none !important;
+    }
+</style>

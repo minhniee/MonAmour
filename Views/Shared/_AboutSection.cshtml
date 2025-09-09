@@ -1,13 +1,10 @@
-﻿<div class="py-16 bg-white">
-	<div class="container mx-auto px-4">
+﻿<div class="py-16 relative z-20 mt-16 overflow-hidden about-section" style="margin-top: 4rem; clear: both;">
+	<div class="container mx-auto px-4 relative">
 		<div class="grid lg:grid-cols-5 gap-12 items-center">
 			<!-- Left Column - Image Placeholder (40-45% width) -->
 			<div class="lg:col-span-2">
-				<div class="bg-gray-200 rounded-lg h-80 flex items-center justify-center">
-					<div class="text-gray-500 text-sm">
-						<img src="Imagine/about_us/van_anh.png" alt="MonAmour Logo" class="h-auto w-auto" />
-
-					</div>
+				<div class="h-80 image-container">
+					<img src="Imagine/about_us/van_anh.png" alt="MonAmour Logo" />
 				</div>
 			</div>
 			
@@ -33,3 +30,77 @@
 		</div>
 	</div>
 </div>
+
+<style>
+    /* Ensure About Section is properly contained */
+    .about-section {
+        position: relative;
+        z-index: 20;
+        margin-top: 4rem;
+        clear: both;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Prevent any overlap issues */
+    .about-section * {
+        position: relative;
+        z-index: inherit;
+    }
+    
+    /* Clear any floating elements */
+    .about-section::before {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    
+    /* Force clear separation */
+    .about-section::after {
+        content: "";
+        display: block;
+        clear: both;
+        height: 0;
+        visibility: hidden;
+    }
+    
+    /* Ensure no floating elements interfere */
+    .about-section {
+        float: none;
+        overflow: visible;
+    }
+    
+    /* Global section separation */
+    section, div[class*="section"] {
+        clear: both;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Prevent any absolute positioning from causing overlaps */
+    .service-section, .about-section {
+        position: relative !important;
+        transform: none !important;
+    }
+    
+    /* Image styling for full display without cropping */
+    .about-section img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        max-width: 100%;
+        max-height: 100%;
+    }
+    
+    /* Ensure image container takes full space */
+    .about-section .image-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
