@@ -10,12 +10,14 @@ namespace MonAmour.Controllers
     public class BlogManagementController : Controller
     {
         private readonly IBlogManagementService _blogService;
+        private readonly IBlogService _blogHardDeleteService;
         private readonly IUserManagementService _userManagementService;
         private readonly ILogger<BlogManagementController> _logger;
 
-        public BlogManagementController(IBlogManagementService blogService, IUserManagementService userManagementService, ILogger<BlogManagementController> logger)
+        public BlogManagementController(IBlogManagementService blogService, IBlogService blogHardDeleteService, IUserManagementService userManagementService, ILogger<BlogManagementController> logger)
         {
             _blogService = blogService;
+            _blogHardDeleteService = blogHardDeleteService;
             _userManagementService = userManagementService;
             _logger = logger;
         }
@@ -193,7 +195,7 @@ namespace MonAmour.Controllers
         {
             try
             {
-                var result = await _blogService.DeleteBlogAsync(id);
+                var result = await _blogHardDeleteService.DeleteBlogAsync(id);
                 if (result)
                 {
                     return Json(new { success = true, message = "Xóa bài viết thành công" });
