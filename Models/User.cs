@@ -33,7 +33,6 @@ public partial class User
 
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual ICollection<Content> Contents { get; set; } = new List<Content>();
 

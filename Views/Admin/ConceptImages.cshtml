@@ -14,18 +14,23 @@
         </div>
     </div>
 
-    <!-- Concept Filter -->
+    <!-- Concept Search and Filter -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-filter mr-2"></i>Lọc theo Concept
+                <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc Concept
             </h6>
         </div>
         <div class="card-body">
             <form method="get" class="row align-items-end">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Tìm kiếm theo tên:</label>
+                    <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                           placeholder="Nhập tên concept..." value="@ViewBag.SearchTerm">
+                </div>
+                <div class="col-md-4">
                     <label for="conceptId" class="form-label">Chọn Concept:</label>
-                    <select id="conceptId" name="conceptId" class="form-control" onchange="this.form.submit()">
+                    <select id="conceptId" name="conceptId" class="form-control">
                         <option value="">-- Tất cả concept --</option>
                         @if (ViewBag.Concepts != null)
                         {
@@ -44,9 +49,9 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search mr-2"></i>Lọc
+                        <i class="fas fa-search mr-2"></i>Tìm kiếm
                     </button>
                     <a href="@Url.Action("ConceptImages", "Admin")" class="btn btn-outline-secondary ml-2">
                         <i class="fas fa-times mr-2"></i>Xóa bộ lọc

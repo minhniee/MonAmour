@@ -29,14 +29,9 @@ namespace MonAmour.Services.Interfaces
         Task<List<ProductCategoryDistributionViewModel>> GetProductCategoryDistributionAsync();
         Task<List<LowStockProductViewModel>> GetLowStockProductsAsync(int threshold = 10);
 
-        // Booking Statistics
-        Task<BookingStatisticsViewModel> GetBookingStatisticsAsync(DateTime? fromDate = null, DateTime? toDate = null);
-        Task<List<ConceptPopularityViewModel>> GetConceptPopularityAsync(DateTime? fromDate = null, DateTime? toDate = null);
-        Task<List<BookingStatusDistributionViewModel>> GetBookingStatusDistributionAsync(DateTime? fromDate = null, DateTime? toDate = null);
 
         // Partner Statistics
         Task<PartnerStatisticsViewModel> GetPartnerStatisticsAsync();
-        Task<List<PartnerPerformanceViewModel>> GetPartnerPerformanceAsync(DateTime? fromDate = null, DateTime? toDate = null);
 
         // Dashboard Summary
         Task<DashboardSummaryViewModel> GetDashboardSummaryAsync();

@@ -47,3 +47,35 @@ public class RatingViewModel
     public string? Comment { get; set; }
     public DateTime ReviewDate { get; set; } = DateTime.Now;
 }
+
+public class ConceptDropdownViewModel
+{
+    public int ConceptId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public decimal? Price { get; set; }
+    public string? LocationName { get; set; }
+}
+
+public class PaymentMethodDropdownViewModel
+{
+    public int PaymentMethodId { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+
+public class PaymentDetailViewModel
+{
+    public int PaymentDetailId { get; set; }
+    public int PaymentId { get; set; }
+    public int? OrderId { get; set; }
+    public decimal? Amount { get; set; }
+    public string? PaymentMethodName { get; set; }
+    public string? PaymentStatus { get; set; }
+    public DateTime? CreatedAt { get; set; }
+}
+
+public class UserDropdownViewModel
+{
+    public int UserId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}

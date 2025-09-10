@@ -23,8 +23,8 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
+    <div class="row mb-3">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -64,27 +64,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Tổng đặt chỗ
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalBookings">
-                                @(ViewBag.BookingStats?.TotalBookings ?? 0)
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -225,54 +205,6 @@
         </div>
     </div>
 
-    <!-- Popular Concepts -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Concept phổ biến nhất</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Concept</th>
-                                    <th>Danh mục</th>
-                                    <th>Số đặt chỗ</th>
-                                    <th>Doanh thu</th>
-                                    <th>Giá trung bình</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (ViewBag.PopularConcepts != null)
-                                {
-                                    @foreach (var concept in ViewBag.PopularConcepts)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    @if (!string.IsNullOrEmpty(concept.ConceptImage))
-                                                    {
-                                                        <img src="@concept.ConceptImage" class="img-thumbnail mr-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                                    }
-                                                    <span>@concept.ConceptName</span>
-                                                </div>
-                                            </td>
-                                            <td>@concept.CategoryName</td>
-                                            <td>@concept.BookingCount</td>
-                                            <td>@concept.TotalRevenue.ToString("N0") VNĐ</td>
-                                            <td>@concept.AveragePrice.ToString("N0") VNĐ</td>
-                                        </tr>
-                                    }
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section Scripts {

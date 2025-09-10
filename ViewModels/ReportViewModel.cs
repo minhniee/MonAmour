@@ -7,17 +7,12 @@ namespace MonAmour.ViewModels
     {
         public decimal TotalRevenue { get; set; }
         public decimal OrderRevenue { get; set; }
-        public decimal BookingRevenue { get; set; }
         public decimal GrowthRate { get; set; }
         public int TotalOrders { get; set; }
-        public int TotalBookings { get; set; }
         public decimal AverageOrderValue { get; set; }
-        public decimal AverageBookingValue { get; set; }
         public decimal OrderPercentage { get; set; }
-        public decimal BookingPercentage { get; set; }
         // Aliases for view compatibility
         public int OrderCount => TotalOrders;
-        public int BookingCount => TotalBookings;
         public List<MonthlyRevenueViewModel> MonthlyData { get; set; } = new List<MonthlyRevenueViewModel>();
     }
 
@@ -28,7 +23,6 @@ namespace MonAmour.ViewModels
         public string MonthName { get; set; } = string.Empty;
         public decimal Revenue { get; set; }
         public int OrderCount { get; set; }
-        public int BookingCount { get; set; }
         public decimal GrowthRate { get; set; }
     }
 
@@ -37,7 +31,6 @@ namespace MonAmour.ViewModels
         public DateTime Date { get; set; }
         public decimal Revenue { get; set; }
         public int OrderCount { get; set; }
-        public int BookingCount { get; set; }
     }
 
     // User Statistics
@@ -67,7 +60,6 @@ namespace MonAmour.ViewModels
         public DateTime Date { get; set; }
         public int ActiveUsers { get; set; }
         public int NewOrders { get; set; }
-        public int NewBookings { get; set; }
     }
 
     public class GenderDistributionViewModel
@@ -143,38 +135,7 @@ namespace MonAmour.ViewModels
         public string Status { get; set; } = string.Empty;
     }
 
-    // Booking Statistics
-    public class BookingStatisticsViewModel
-    {
-        public int TotalBookings { get; set; }
-        public int PendingBookings { get; set; }
-        public int ConfirmedBookings { get; set; }
-        public int CancelledBookings { get; set; }
-        public int CompletedBookings { get; set; }
-        public decimal TotalBookingValue { get; set; }
-        public decimal AverageBookingValue { get; set; }
-        public List<BookingStatusDistributionViewModel> StatusDistribution { get; set; } = new List<BookingStatusDistributionViewModel>();
-    }
 
-    public class BookingStatusDistributionViewModel
-    {
-        public string Status { get; set; } = string.Empty;
-        public string StatusName { get; set; } = string.Empty;
-        public int Count { get; set; }
-        public decimal Percentage { get; set; }
-        public decimal Revenue { get; set; }
-    }
-
-    public class ConceptPopularityViewModel
-    {
-        public int ConceptId { get; set; }
-        public string ConceptName { get; set; } = string.Empty;
-        public string CategoryName { get; set; } = string.Empty;
-        public int BookingCount { get; set; }
-        public decimal TotalRevenue { get; set; }
-        public decimal AveragePrice { get; set; }
-        public string? ConceptImage { get; set; }
-    }
 
     // Partner Statistics
     public class PartnerStatisticsViewModel
@@ -184,21 +145,6 @@ namespace MonAmour.ViewModels
         public int PendingPartners { get; set; }
         public int InactivePartners { get; set; }
         public int TotalLocations { get; set; }
-        public List<PartnerPerformanceViewModel> PerformanceData { get; set; } = new List<PartnerPerformanceViewModel>();
-    }
-
-    public class PartnerPerformanceViewModel
-    {
-        public int PartnerId { get; set; }
-        public string PartnerName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string? Avatar { get; set; }
-        public int LocationCount { get; set; }
-        public int ConceptCount { get; set; }
-        public int BookingCount { get; set; }
-        public decimal TotalRevenue { get; set; }
-        public decimal AverageRating { get; set; }
-        public string Status { get; set; } = string.Empty;
     }
 
     // Dashboard Summary
@@ -206,7 +152,6 @@ namespace MonAmour.ViewModels
     {
         public int TotalUsers { get; set; }
         public int TotalOrders { get; set; }
-        public int TotalBookings { get; set; }
         public int TotalProducts { get; set; }
         public int TotalPartners { get; set; }
         public decimal TotalRevenue { get; set; }
@@ -214,7 +159,6 @@ namespace MonAmour.ViewModels
         public decimal DailyRevenue { get; set; }
         public decimal RevenueGrowth { get; set; }
         public int PendingOrders { get; set; }
-        public int PendingBookings { get; set; }
         public int LowStockProducts { get; set; }
         public List<RecentActivityViewModel> RecentActivities { get; set; } = new List<RecentActivityViewModel>();
     }

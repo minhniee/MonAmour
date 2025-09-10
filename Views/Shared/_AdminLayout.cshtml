@@ -174,33 +174,6 @@
                         </div>
                     </div>
 
-                    <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Booking") == true ? "active" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#bookingSubmenu">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>Quản lý đặt chỗ</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
-                        </a>
-                        <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Booking") == true ? "show" : "")" id="bookingSubmenu">
-                            <div class="submenu">
-                                <a href="@Url.Action("Bookings", "Admin")" class="submenu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Bookings" ? "active" : "")">
-                                    <i class="fas fa-list"></i>
-                                    <span>Tất cả đặt chỗ</span>
-                                </a>
-                                <a href="@Url.Action("BookingsByStatus", "Admin", new { status = "pending" })" class="submenu-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Chờ xác nhận</span>
-                                </a>
-                                <a href="@Url.Action("BookingsByStatus", "Admin", new { status = "confirmed" })" class="submenu-item">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Đã xác nhận</span>
-                                </a>
-                                <a href="@Url.Action("BookingsByStatus", "Admin", new { status = "cancelled" })" class="submenu-item">
-                                    <i class="fas fa-times-circle"></i>
-                                    <span>Đã hủy</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BlogManagement" ? "active" : "")">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#blogSubmenu">
@@ -279,12 +252,6 @@
                         </a>
                     </div>
 
-                    <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "PartnerPerformance" ? "active" : "")">
-                        <a href="@Url.Action("PartnerPerformance", "Report")">
-                            <i class="fas fa-handshake"></i>
-                            <span>Hiệu suất đối tác</span>
-                        </a>
-                    </div>
                 </div>
 
             </div>

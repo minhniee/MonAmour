@@ -87,7 +87,7 @@
                                 <p class="form-control-plaintext">
                                     @if (!string.IsNullOrEmpty(Model.CategoryName))
                                     {
-                                        <span class="badge badge-secondary">@Model.CategoryName</span>
+                                        <span class="badge badge-success">@Model.CategoryName</span>
                                     }
                                     else
                                     {
@@ -123,7 +123,7 @@
                                 <p class="form-control-plaintext">
                                     @if (!string.IsNullOrEmpty(Model.AmbienceName))
                                     {
-                                        <span class="badge badge-dark">@Model.AmbienceName</span>
+                                        <span class="badge badge-primary">@Model.AmbienceName</span>
                                     }
                                     else
                                     {
@@ -215,61 +215,6 @@
                     }
                 </div>
             </div>
-
-            <!-- Bookings -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Lịch đặt (Bookings)</h6>
-                </div>
-                <div class="card-body">
-                    @if (Model.Bookings != null && Model.Bookings.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Ngày đặt</th>
-                                        <th>Giờ đặt</th>
-                                        <th>Tổng tiền</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thanh toán</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var booking in Model.Bookings)
-                                    {
-                                        <tr>
-                                            <td>@booking.BookingId</td>
-                                            <td>@(booking.BookingDate?.ToString("dd/MM/yyyy") ?? "N/A")</td>
-                                            <td>@(booking.BookingTime?.ToString("HH:mm") ?? "N/A")</td>
-                                            <td><text>@(booking.TotalPrice?.ToString("N0") ?? "N/A") VNĐ</text></td>
-                                            <td>
-                                                <span class="badge badge-@(booking.Status == "Confirmed" ? "success" : booking.Status == "Pending" ? "warning" : "danger")">
-                                                    @booking.Status
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-@(booking.PaymentStatus == "Paid" ? "success" : "warning")">
-                                                    @booking.PaymentStatus
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar fa-3x text-gray-300 mb-3"></i>
-                            <h5 class="text-gray-600">Chưa có booking nào</h5>
-                            <p class="text-gray-500">Concept này chưa có lịch đặt nào.</p>
-                        </div>
-                    }
-                </div>
-            </div>
         </div>
 
         <!-- Sidebar -->
@@ -318,15 +263,6 @@
                         </div>
                         <div class="col-sm-6">
                             <span class="badge badge-info">@Model.Images.Count hình</span>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <strong>Số booking:</strong>
-                        </div>
-                        <div class="col-sm-6">
-                            <span class="badge badge-primary">@Model.Bookings.Count booking</span>
                         </div>
                     </div>
                 </div>

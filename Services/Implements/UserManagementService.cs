@@ -139,7 +139,6 @@ public class UserManagementService : IUserManagementService
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                 .Include(u => u.Orders)
-                .Include(u => u.Bookings)
                 .Include(u => u.Reviews)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -166,7 +165,6 @@ public class UserManagementService : IUserManagementService
                     AssignedBy = ur.AssignedBy
                 }).ToList(),
                 TotalOrders = user.Orders.Count,
-                TotalBookings = user.Bookings.Count,
                 TotalReviews = user.Reviews.Count
             };
         }

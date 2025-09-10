@@ -24,7 +24,7 @@
 
     <!-- Revenue Summary Cards -->
     <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -64,27 +64,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Doanh thu đặt chỗ
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="bookingRevenue">
-                                @(ViewBag.RevenueReport?.BookingRevenue.ToString("N0") ?? "0") VNĐ
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -176,12 +156,6 @@
                                     <td>@(ViewBag.RevenueReport?.OrderRevenue.ToString("N0") ?? "0") VNĐ</td>
                                     <td>@(ViewBag.RevenueReport?.OrderPercentage.ToString("F1") ?? "0")%</td>
                                     <td>@(ViewBag.RevenueReport?.OrderCount ?? 0)</td>
-                                </tr>
-                                <tr>
-                                    <td>Đặt chỗ</td>
-                                    <td>@(ViewBag.RevenueReport?.BookingRevenue.ToString("N0") ?? "0") VNĐ</td>
-                                    <td>@(ViewBag.RevenueReport?.BookingPercentage.ToString("F1") ?? "0")%</td>
-                                    <td>@(ViewBag.RevenueReport?.BookingCount ?? 0)</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -395,14 +369,13 @@
             revenueDistributionChart = new Chart(distributionCtx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Đơn hàng', 'Đặt chỗ'],
+                    labels: ['Đơn hàng'],
                     datasets: [{
                         data: [
-                            @(ViewBag.RevenueReport?.OrderRevenue ?? 0),
-                            @(ViewBag.RevenueReport?.BookingRevenue ?? 0)
+                            @(ViewBag.RevenueReport?.OrderRevenue ?? 0)
                         ],
-                        backgroundColor: ['#4e73df', '#1cc88a'],
-                        hoverBackgroundColor: ['#2e59d9', '#17a673']
+                        backgroundColor: ['#4e73df'],
+                        hoverBackgroundColor: ['#2e59d9']
                     }]
                 },
                 options: {

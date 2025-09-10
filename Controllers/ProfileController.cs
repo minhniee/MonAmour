@@ -226,13 +226,6 @@ public class ProfileController : Controller
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
 
-            // Load concept bookings as another category
-            var conceptBookings = await _db.Bookings
-                .AsNoTracking()
-                .Include(b => b.Concept)
-                .Where(b => b.UserId == userId.Value)
-                .OrderByDescending(b => b.CreatedAt)
-                .ToListAsync();
 
             var model = new OrderHistoryUserViewModel
             {
@@ -272,41 +265,6 @@ public class ProfileController : Controller
                 }).ToList()
             };
 
-            var conceptCategory = new OrderCategoryUserViewModel
-            {
-                Name = "Concept",
-                Orders = conceptBookings.Select(b =>
-                {
-                    var review = reviews.FirstOrDefault(r =>
-                        r.TargetType == "Concept" && r.TargetId == b.ConceptId);
-
-                    return new OrderSummaryUserViewModel
-                    {
-                        OrderDate = b.CreatedAt ?? DateTime.Now,
-                        OrderNumber = $"BK-{b.BookingId}",
-                        Status = NormalizeStatus(b.Status),
-                        CanReview = string.Equals(NormalizeStatus(b.Status), "Completed", StringComparison.OrdinalIgnoreCase),
-                        HasReview = review != null,
-                        ReviewId = review?.ReviewId,
-                        TotalAmount = b.TotalPrice ?? 0m,
-                        Items = new List<OrderItemUserViewModel>
-                        {
-                            new OrderItemUserViewModel
-                            {
-                                ItemId = b.BookingId,
-                                ItemType = "Concept",
-                                TargetId = b.ConceptId ?? 0,
-                                Name = b.Concept?.Name ?? "",
-                                Quantity = 1,
-                                UnitPrice = b.TotalPrice ?? 0m,
-                                TotalPrice = b.TotalPrice ?? 0m
-                            }
-                        }
-                    };
-                }).ToList()
-            };
-
-            model.Categories.Add(conceptCategory);
             model.Categories.Add(giftBoxCategory);
 
             return View("OrderHistory", model);
@@ -470,47 +428,6 @@ public class ProfileController : Controller
                         UnitPrice = oi.UnitPrice ?? 0m,
                         TotalPrice = (order.ShippingCost ?? 0) + (order.TotalPrice ?? 0)
                     }).ToList()
-                };
-            }
-            else if (type == "BK") // Concept Booking
-            {
-                var booking = await _db.Bookings
-                    .AsNoTracking()
-                    .Include(b => b.Concept)
-                    .Include(b => b.PaymentDetails)
-                        .ThenInclude(pd => pd.Payment)
-                        .ThenInclude(p => p!.PaymentMethod)
-                    .FirstOrDefaultAsync(b => b.BookingId == id && b.UserId == userId);
-
-                if (booking == null)
-                {
-                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
-                    return RedirectToAction("OrderHistory");
-                }
-
-                model = new OrderDetailUserViewModel
-                {
-                    OrderNumber = orderNumber,
-                    OrderDate = booking.CreatedAt ?? DateTime.Now,
-                    Status = NormalizeStatus(booking.Status),
-                    TotalAmount = booking.TotalPrice ?? 0m,
-                    PaymentMethod = booking.PaymentDetails.FirstOrDefault()?.Payment?.PaymentMethod?.Name,
-                    PaymentStatus = booking.PaymentDetails.FirstOrDefault()?.Payment?.Status,
-                    PaymentDate = booking.PaymentDetails.FirstOrDefault()?.Payment?.ProcessedAt,
-                    TransactionId = booking.PaymentDetails.FirstOrDefault()?.PaymentId.ToString(),
-                    Items = new List<OrderItemUserViewModel>
-                    {
-                        new OrderItemUserViewModel
-                        {
-                            ItemId = booking.BookingId,
-                            ItemType = "Concept",
-                            TargetId = booking.ConceptId ?? 0,
-                            Name = booking.Concept?.Name ?? "",
-                            Quantity = 1,
-                            UnitPrice = booking.TotalPrice ?? 0m,
-                            TotalPrice = booking.TotalPrice ?? 0m
-                        }
-                    }
                 };
             }
             else

@@ -29,7 +29,6 @@ public partial class Concept
 
     public virtual ConceptAmbience? Ambience { get; set; }
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual ConceptCategory? Category { get; set; }
 

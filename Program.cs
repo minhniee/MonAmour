@@ -59,7 +59,6 @@ builder.Services.AddScoped<IPartnerService, PartnerService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IConceptService, ConceptService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IBannerService, BannerManagementService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();

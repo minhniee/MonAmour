@@ -15,6 +15,7 @@ namespace MonAmour.Services.Interfaces
         // Concept statistics and utilities
         Task<Dictionary<string, int>> GetConceptStatisticsAsync();
         Task<List<ConceptDropdownViewModel>> GetConceptsForDropdownAsync();
+        Task<List<ConceptDropdownViewModel>> SearchConceptsByNameAsync(string searchTerm);
 
         // Concept Image Management
         Task<List<ConceptImgViewModel>> GetConceptImagesAsync(int conceptId);

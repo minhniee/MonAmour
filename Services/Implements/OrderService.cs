@@ -184,13 +184,12 @@ namespace MonAmour.Services.Implements
             PaymentDetails = order.PaymentDetails.Select(pd => new PaymentDetailViewModel
             {
                 PaymentDetailId = pd.PaymentDetailId,
-                PaymentId = pd.PaymentId,
-                OrderId = pd.OrderId,
+                PaymentId = pd.PaymentId ?? 0,
+                OrderId = pd.OrderId ?? 0,
                 Amount = pd.Amount,
                 PaymentMethodName = pd.Payment?.PaymentMethod?.Name,
                 PaymentStatus = pd.Payment?.Status,
                 CreatedAt = pd.Payment?.CreatedAt,
-                ProcessedAt = pd.Payment?.ProcessedAt
             }).ToList()
         };
             }
@@ -497,13 +496,12 @@ namespace MonAmour.Services.Implements
                     .Select(pd => new PaymentDetailViewModel
                     {
                         PaymentDetailId = pd.PaymentDetailId,
-                        PaymentId = pd.PaymentId,
-                        OrderId = pd.OrderId,
+                        PaymentId = pd.PaymentId ?? 0,
+                        OrderId = pd.OrderId ?? 0,
                         Amount = pd.Amount,
                         PaymentMethodName = pd.Payment != null && pd.Payment.PaymentMethod != null ? pd.Payment.PaymentMethod.Name : null,
                         PaymentStatus = pd.Payment != null ? pd.Payment.Status : null,
                         CreatedAt = pd.Payment != null ? pd.Payment.CreatedAt : null,
-                        ProcessedAt = pd.Payment != null ? pd.Payment.ProcessedAt : null
                     })
                     .ToListAsync();
             }

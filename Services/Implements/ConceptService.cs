@@ -27,7 +27,6 @@ namespace MonAmour.Services.Implements
                         .ThenInclude(ccj => ccj.Color)
                     .Include(c => c.Ambience)
                     .Include(c => c.ConceptImgs)
-                    .Include(c => c.Bookings)
                     .AsQueryable();
 
                 // Apply filters
@@ -98,8 +97,7 @@ namespace MonAmour.Services.Implements
                         ColorNames = c.ConceptColorJunctions.Select(ccj => ccj.Color.Name ?? "").ToList(),
                         CategoryName = c.Category != null ? c.Category.Name : null,
                         AmbienceName = c.Ambience != null ? c.Ambience.Name : null,
-                        ImageCount = c.ConceptImgs.Count,
-                        BookingCount = c.Bookings.Count
+                        ImageCount = c.ConceptImgs.Count
                     })
                     .ToListAsync();
 
@@ -123,7 +121,6 @@ namespace MonAmour.Services.Implements
                         .ThenInclude(ccj => ccj.Color)
                     .Include(c => c.Ambience)
                     .Include(c => c.ConceptImgs)
-                    .Include(c => c.Bookings)
                     .FirstOrDefaultAsync(c => c.ConceptId == id);
 
                 if (concept == null) return null;
@@ -156,20 +153,6 @@ namespace MonAmour.Services.Implements
                         IsPrimary = img.IsPrimary ?? false,
                         DisplayOrder = img.DisplayOrder ?? 0,
                         CreatedAt = img.CreatedAt
-                    }).ToList(),
-                    Bookings = concept.Bookings.Select(b => new BookingViewModel
-                    {
-                        BookingId = b.BookingId,
-                        UserId = b.UserId ?? 0,
-                        ConceptId = b.ConceptId ?? 0,
-                        BookingDate = b.BookingDate ?? DateOnly.MinValue,
-                        BookingTime = b.BookingTime ?? TimeOnly.MinValue,
-                        TotalPrice = b.TotalPrice ?? 0,
-                        Status = b.Status ?? string.Empty,
-                        PaymentStatus = b.PaymentStatus ?? string.Empty,
-                        CreatedAt = b.CreatedAt,
-                        ConfirmedAt = b.ConfirmedAt,
-                        CancelledAt = b.CancelledAt
                     }).ToList()
                 };
             }
@@ -304,18 +287,10 @@ namespace MonAmour.Services.Implements
             {
                 var concept = await _context.Concepts
                     .Include(c => c.ConceptImgs)
-                    .Include(c => c.Bookings)
                     .FirstOrDefaultAsync(c => c.ConceptId == id);
                 
                 if (concept == null) return false;
 
-                // Check if concept has bookings
-                if (concept.Bookings.Any())
-                {
-                    _logger.LogWarning("Cannot delete concept {ConceptId} because it has {BookingCount} bookings", 
-                        id, concept.Bookings.Count);
-                    return false; // Cannot delete concept with bookings
-                }
 
                 // Remove concept images first
                 if (concept.ConceptImgs.Any())
@@ -367,15 +342,12 @@ namespace MonAmour.Services.Implements
                 var activeConcepts = await _context.Concepts.CountAsync(c => c.AvailabilityStatus == true);
                 var inactiveConcepts = await _context.Concepts.CountAsync(c => c.AvailabilityStatus == false);
                 var conceptsWithImages = await _context.Concepts.CountAsync(c => c.ConceptImgs.Any());
-                var conceptsWithBookings = await _context.Concepts.CountAsync(c => c.Bookings.Any());
-
                 return new Dictionary<string, int>
                 {
                     ["TotalConcepts"] = totalConcepts,
                     ["ActiveConcepts"] = activeConcepts,
                     ["InactiveConcepts"] = inactiveConcepts,
-                    ["ConceptsWithImages"] = conceptsWithImages,
-                    ["ConceptsWithBookings"] = conceptsWithBookings
+                    ["ConceptsWithImages"] = conceptsWithImages
                 };
             }
             catch (Exception ex)
@@ -403,6 +375,33 @@ namespace MonAmour.Services.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting concepts for dropdown");
+                throw;
+            }
+        }
+
+        public async Task<List<ConceptDropdownViewModel>> SearchConceptsByNameAsync(string searchTerm)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    return await GetConceptsForDropdownAsync();
+                }
+
+                var concepts = await _context.Concepts
+                    .Where(c => c.AvailabilityStatus == true && c.Name.Contains(searchTerm))
+                    .Select(c => new ConceptDropdownViewModel
+                    {
+                        ConceptId = c.ConceptId,
+                        Name = c.Name ?? string.Empty
+                    })
+                    .ToListAsync();
+
+                return concepts;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching concepts by name: {SearchTerm}", searchTerm);
                 throw;
             }
         }

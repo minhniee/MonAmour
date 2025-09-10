@@ -35,7 +35,6 @@ namespace MonAmour.ViewModels
         public string? CategoryName { get; set; }
         public string? AmbienceName { get; set; }
         public int ImageCount { get; set; }
-        public int BookingCount { get; set; }
     }
 
     public class ConceptCreateViewModel
@@ -109,7 +108,6 @@ namespace MonAmour.ViewModels
         public string? CategoryName { get; set; }
         public string? AmbienceName { get; set; }
         public List<ConceptImgViewModel> Images { get; set; } = new List<ConceptImgViewModel>();
-        public List<BookingViewModel> Bookings { get; set; } = new List<BookingViewModel>();
     }
 
     public class ConceptSearchViewModel
@@ -161,4 +159,5 @@ namespace MonAmour.ViewModels
         public int AmbienceId { get; set; }
         public string Name { get; set; } = string.Empty;
     }
+
 }

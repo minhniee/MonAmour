@@ -35,6 +35,7 @@ namespace MonAmour.Services.Interfaces
         // Additional methods for image management
         Task<List<ProductImgViewModel>> GetAllProductImagesAsync();
         Task<List<object>> GetProductsForDropdownAsync();
+        Task<List<object>> SearchProductsByNameAsync(string searchTerm);
         Task<List<object>> GetProductImagesGroupedByProductAsync();
         Task<int> GetProductImageCountAsync(int productId);
         Task<bool> CanProductAddMoreImagesAsync(int productId);

@@ -121,7 +121,6 @@ public class AdminUserViewModel
         public DateTime? UpdatedAt { get; set; }
         public List<RoleViewModel> Roles { get; set; } = new List<RoleViewModel>();
         public int TotalOrders { get; set; }
-        public int TotalBookings { get; set; }
         public int TotalReviews { get; set; }
     }
 

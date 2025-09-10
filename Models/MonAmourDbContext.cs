@@ -13,7 +13,6 @@ public partial class MonAmourDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Booking> Bookings { get; set; }
 
     public virtual DbSet<CassoTransaction> CassoTransactions { get; set; }
 
@@ -97,61 +96,6 @@ public partial class MonAmourDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Configure DateOnly and TimeOnly converters for SQL Server
-        modelBuilder.Entity<Booking>()
-            .Property(e => e.BookingDate)
-            .HasConversion(
-                v => v.HasValue ? v.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
-                v => v.HasValue ? DateOnly.FromDateTime(v.Value) : (DateOnly?)null);
-
-        modelBuilder.Entity<Booking>()
-            .Property(e => e.BookingTime)
-            .HasConversion(
-                v => v.HasValue ? v.Value.ToTimeSpan() : (TimeSpan?)null,
-                v => v.HasValue ? TimeOnly.FromTimeSpan(v.Value) : (TimeOnly?)null);
-        modelBuilder.Entity<Booking>(entity =>
-        {
-            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B159D753DC");
-            entity.HasKey(e => e.BookingId).HasName("PK__Booking__5DE3A5B18F1D4649");
-
-            entity.ToTable("Booking");
-
-            entity.Property(e => e.BookingId).HasColumnName("booking_id");
-            entity.Property(e => e.BookingDate).HasColumnName("booking_date");
-            entity.Property(e => e.BookingTime).HasColumnName("booking_time");
-            entity.Property(e => e.CancelledAt)
-                .HasColumnType("datetime")
-                .HasColumnName("cancelled_at");
-            entity.Property(e => e.ConceptId).HasColumnName("concept_id");
-            entity.Property(e => e.ConfirmedAt)
-                .HasColumnType("datetime")
-                .HasColumnName("confirmed_at");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("created_at");
-            entity.Property(e => e.PaymentStatus)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasDefaultValue("pending")
-                .HasColumnName("payment_status");
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("status");
-            entity.Property(e => e.TotalPrice)
-                .HasColumnType("decimal(18, 2)")
-                .HasColumnName("total_price");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.Concept).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.ConceptId)
-                .HasConstraintName("FK__Booking__concept__7A672E12");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Bookings)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Booking__user_id__797309D9");
-        });
 
         modelBuilder.Entity<CassoTransaction>(entity =>
         {
@@ -641,13 +585,8 @@ public partial class MonAmourDbContext : DbContext
             entity.Property(e => e.Amount)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("amount");
-            entity.Property(e => e.BookingId).HasColumnName("booking_id");
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.PaymentId).HasColumnName("payment_id");
-
-            entity.HasOne(d => d.Booking).WithMany(p => p.PaymentDetails)
-                .HasForeignKey(d => d.BookingId)
-                .HasConstraintName("FK__PaymentDe__booki__2A164134");
 
             entity.HasOne(d => d.Order).WithMany(p => p.PaymentDetails)
                 .HasForeignKey(d => d.OrderId)

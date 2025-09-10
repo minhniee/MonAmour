@@ -691,6 +691,34 @@ namespace MonAmour.Services.Implements
             }
         }
 
+        public async Task<List<object>> SearchProductsByNameAsync(string searchTerm)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    return await GetProductsForDropdownAsync();
+                }
+
+                var products = await _context.Products
+                    .Where(p => p.Status == "active" && p.Name.Contains(searchTerm))
+                    .OrderBy(p => p.Name)
+                    .Select(p => new
+                    {
+                        Value = p.ProductId,
+                        Text = p.Name
+                    })
+                    .ToListAsync();
+
+                return products.Cast<object>().ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching products by name: {SearchTerm}", searchTerm);
+                return new List<object>();
+            }
+        }
+
         /// <summary>
         /// Get Product Image Count - lấy số lượng hình ảnh của sản phẩm
         /// </summary>

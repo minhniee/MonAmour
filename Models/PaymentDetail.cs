@@ -11,11 +11,7 @@ public partial class PaymentDetail
 
     public int? OrderId { get; set; }
 
-    public int? BookingId { get; set; }
-
     public decimal? Amount { get; set; }
-
-    public virtual Booking? Booking { get; set; }
 
     public virtual Order? Order { get; set; }
 

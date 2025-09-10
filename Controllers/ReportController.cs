@@ -158,9 +158,7 @@ namespace MonAmour.Controllers
 
                 var orderStats = await _reportService.GetOrderStatisticsAsync(filter.FromDate, filter.ToDate);
                 var productStats = await _reportService.GetProductStatisticsAsync();
-                var bookingStats = await _reportService.GetBookingStatisticsAsync(filter.FromDate, filter.ToDate);
                 var topProducts = await _reportService.GetTopSellingProductsAsync(10, filter.FromDate, filter.ToDate);
-                var conceptPopularity = await _reportService.GetConceptPopularityAsync(filter.FromDate, filter.ToDate);
                 var lowStockProducts = await _reportService.GetLowStockProductsAsync(10);
 
                 // Debug logging
@@ -196,9 +194,7 @@ namespace MonAmour.Controllers
                 ViewBag.Filter = filter;
                 ViewBag.OrderStats = orderStats ?? new OrderStatisticsViewModel();
                 ViewBag.ProductStats = productStats ?? new ProductStatisticsViewModel();
-                ViewBag.BookingStats = bookingStats ?? new BookingStatisticsViewModel();
                 ViewBag.TopSellingProducts = topProducts ?? new List<TopSellingProductViewModel>();
-                ViewBag.PopularConcepts = conceptPopularity ?? new List<ConceptPopularityViewModel>();
                 ViewBag.LowStockProducts = lowStockProducts ?? new List<LowStockProductViewModel>();
 
                 return View();
@@ -210,48 +206,6 @@ namespace MonAmour.Controllers
             }
         }
 
-        // Partner Performance
-        public async Task<IActionResult> PartnerPerformance(ReportFilterViewModel? filter)
-        {
-            try
-            {
-                // Set common admin ViewBag data
-                await SetAdminViewBagAsync();
-
-                filter ??= new ReportFilterViewModel
-                {
-                    FromDate = DateTime.Now.AddMonths(-6),
-                    ToDate = DateTime.Now
-                };
-
-                var partnerStats = await _reportService.GetPartnerStatisticsAsync();
-                var performanceData = await _reportService.GetPartnerPerformanceAsync(filter.FromDate, filter.ToDate);
-
-                // Debug logging
-                _logger.LogInformation($"PartnerPerformance: Found {performanceData?.Count ?? 0} partners");
-                if (performanceData != null && performanceData.Any())
-                {
-                    _logger.LogInformation($"First partner: {performanceData.First().PartnerName}, Revenue: {performanceData.First().TotalRevenue}");
-                }
-
-                // Ensure we have data
-                if (partnerStats == null)
-                {
-                    partnerStats = new PartnerStatisticsViewModel();
-                }
-
-                ViewBag.Filter = filter;
-                ViewBag.PerformanceData = performanceData ?? new List<PartnerPerformanceViewModel>();
-                ViewBag.PartnerStats = partnerStats;
-
-                return View();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in PartnerPerformance");
-                return View(new PartnerStatisticsViewModel());
-            }
-        }
 
         // Dashboard Summary
         public async Task<IActionResult> DashboardSummary()
@@ -349,32 +303,6 @@ namespace MonAmour.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetBookingData(DateTime? fromDate, DateTime? toDate)
-        {
-            try
-            {
-                var from = fromDate ?? DateTime.Now.AddMonths(-6);
-                var to = toDate ?? DateTime.Now;
-
-                var bookingStats = await _reportService.GetBookingStatisticsAsync(from, to);
-                var statusDistribution = await _reportService.GetBookingStatusDistributionAsync(from, to);
-                var conceptPopularity = await _reportService.GetConceptPopularityAsync(from, to);
-
-                return Json(new
-                {
-                    success = true,
-                    bookingStats = bookingStats,
-                    statusDistribution = statusDistribution,
-                    conceptPopularity = conceptPopularity
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in GetBookingData");
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
 
         [HttpGet]
         public async Task<IActionResult> GetProductData()
@@ -400,30 +328,6 @@ namespace MonAmour.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetPartnerData(DateTime? fromDate, DateTime? toDate)
-        {
-            try
-            {
-                var from = fromDate ?? DateTime.Now.AddMonths(-6);
-                var to = toDate ?? DateTime.Now;
-
-                var partnerStats = await _reportService.GetPartnerStatisticsAsync();
-                var performanceData = await _reportService.GetPartnerPerformanceAsync(from, to);
-
-                return Json(new
-                {
-                    success = true,
-                    partnerStats = partnerStats,
-                    performanceData = performanceData
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in GetPartnerData");
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
 
         [HttpGet]
         public async Task<IActionResult> GetDashboardData()

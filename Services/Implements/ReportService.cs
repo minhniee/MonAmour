@@ -27,11 +27,7 @@ namespace MonAmour.Services.Implements
                     .Where(o => o.Status != "cart" && o.CreatedAt >= from && o.CreatedAt <= to)
                     .SumAsync(o => o.TotalPrice ?? 0);
 
-                var bookingRevenue = await _context.Bookings
-                    .Where(b => b.CreatedAt >= from && b.CreatedAt <= to)
-                    .SumAsync(b => b.TotalPrice ?? 0);
-
-                var totalRevenue = orderRevenue + bookingRevenue;
+                var totalRevenue = orderRevenue;
 
                 var previousPeriodRevenue = await GetTotalRevenueAsync(from.AddMonths(-12), from);
                 var growthRate = previousPeriodRevenue > 0 
@@ -42,15 +38,9 @@ namespace MonAmour.Services.Implements
                     .Where(o => o.Status != "cart" && o.CreatedAt >= from && o.CreatedAt <= to)
                     .CountAsync();
 
-                var totalBookings = await _context.Bookings
-                    .Where(b => b.CreatedAt >= from && b.CreatedAt <= to)
-                    .CountAsync();
-
                 var averageOrderValue = totalOrders > 0 ? orderRevenue / totalOrders : 0;
-                var averageBookingValue = totalBookings > 0 ? bookingRevenue / totalBookings : 0;
 
                 var orderPercentage = totalRevenue > 0 ? (orderRevenue / totalRevenue) * 100 : 0;
-                var bookingPercentage = totalRevenue > 0 ? (bookingRevenue / totalRevenue) * 100 : 0;
 
                 var monthlyData = await GetMonthlyRevenueAsync(to.Year);
 
@@ -58,14 +48,10 @@ namespace MonAmour.Services.Implements
                 {
                     TotalRevenue = totalRevenue,
                     OrderRevenue = orderRevenue,
-                    BookingRevenue = bookingRevenue,
                     GrowthRate = growthRate,
                     TotalOrders = totalOrders,
-                    TotalBookings = totalBookings,
                     AverageOrderValue = averageOrderValue,
-                    AverageBookingValue = averageBookingValue,
                     OrderPercentage = orderPercentage,
-                    BookingPercentage = bookingPercentage,
                     MonthlyData = monthlyData
                 };
             }
@@ -86,10 +72,9 @@ namespace MonAmour.Services.Implements
                 var monthNames = new[] { "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
                     "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12" };
 
-                // Check if we have any orders or bookings
+                // Check if we have any orders
                 var totalOrders = await _context.Orders.CountAsync(o => o.Status != "cart");
-                var totalBookings = await _context.Bookings.CountAsync();
-                _logger.LogInformation($"Total orders (non-cart): {totalOrders}, Total bookings: {totalBookings}");
+                _logger.LogInformation($"Total orders (non-cart): {totalOrders}");
 
                 for (int month = 1; month <= 12; month++)
                 {
@@ -100,21 +85,13 @@ namespace MonAmour.Services.Implements
                     .Where(o => o.Status != "cart" && o.CreatedAt >= fromDate && o.CreatedAt <= toDate)
                     .SumAsync(o => o.TotalPrice ?? 0);
 
-                var bookingRevenue = await _context.Bookings
-                    .Where(b => b.CreatedAt >= fromDate && b.CreatedAt <= toDate)
-                    .SumAsync(b => b.TotalPrice ?? 0);
-                
-                _logger.LogInformation($"Month {month}: OrderRevenue={orderRevenue}, BookingRevenue={bookingRevenue}, TotalRevenue={orderRevenue + bookingRevenue}");
+                _logger.LogInformation($"Month {month}: OrderRevenue={orderRevenue}, TotalRevenue={orderRevenue}");
 
                     var orderCount = await _context.Orders
                         .Where(o => o.Status != "cart" && o.CreatedAt >= fromDate && o.CreatedAt <= toDate)
                         .CountAsync();
 
-                    var bookingCount = await _context.Bookings
-                        .Where(b => b.CreatedAt >= fromDate && b.CreatedAt <= toDate)
-                        .CountAsync();
-
-                    var totalRevenue = orderRevenue + bookingRevenue;
+                    var totalRevenue = orderRevenue;
 
                     // Calculate growth rate compared to previous month
                     var previousMonthRevenue = 0m;
@@ -136,11 +113,10 @@ namespace MonAmour.Services.Implements
                         MonthName = monthNames[month - 1],
                         Revenue = totalRevenue,
                         OrderCount = orderCount,
-                        BookingCount = bookingCount,
                         GrowthRate = growthRate
                     });
                     
-                    _logger.LogInformation($"Month {month}: OrderRevenue={orderRevenue}, BookingRevenue={bookingRevenue}, TotalRevenue={totalRevenue}");
+                    _logger.LogInformation($"Month {month}: OrderRevenue={orderRevenue}, TotalRevenue={totalRevenue}");
                 }
 
                 _logger.LogInformation($"Returning {monthlyData.Count} months of data");
@@ -166,26 +142,17 @@ namespace MonAmour.Services.Implements
                         .Where(o => o.Status != "cart" && o.CreatedAt.HasValue && o.CreatedAt.Value.Date == currentDate.Date)
                         .SumAsync(o => o.TotalPrice ?? 0);
 
-                    var bookingRevenue = await _context.Bookings
-                        .Where(b => b.CreatedAt.HasValue && b.CreatedAt.Value.Date == currentDate.Date)
-                        .SumAsync(b => b.TotalPrice ?? 0);
-                    
-                    _logger.LogInformation($"Daily {currentDate:yyyy-MM-dd}: OrderRevenue={orderRevenue}, BookingRevenue={bookingRevenue}, TotalRevenue={orderRevenue + bookingRevenue}");
+                    _logger.LogInformation($"Daily {currentDate:yyyy-MM-dd}: OrderRevenue={orderRevenue}, TotalRevenue={orderRevenue}");
 
                     var orderCount = await _context.Orders
                         .Where(o => o.Status != "cart" && o.CreatedAt.HasValue && o.CreatedAt.Value.Date == currentDate.Date)
                         .CountAsync();
 
-                    var bookingCount = await _context.Bookings
-                        .Where(b => b.CreatedAt.HasValue && b.CreatedAt.Value.Date == currentDate.Date)
-                        .CountAsync();
-
                     dailyData.Add(new DailyRevenueViewModel
                     {
                         Date = currentDate,
-                        Revenue = orderRevenue + bookingRevenue,
-                        OrderCount = orderCount,
-                        BookingCount = bookingCount
+                        Revenue = orderRevenue,
+                        OrderCount = orderCount
                     });
 
                     currentDate = currentDate.AddDays(1);
@@ -211,11 +178,7 @@ namespace MonAmour.Services.Implements
                     .Where(o => o.Status != "cart" && o.CreatedAt >= from && o.CreatedAt <= to)
                     .SumAsync(o => o.TotalPrice ?? 0);
 
-                var bookingRevenue = await _context.Bookings
-                    .Where(b => b.CreatedAt >= from && b.CreatedAt <= to)
-                    .SumAsync(b => b.TotalPrice ?? 0);
-
-                return orderRevenue + bookingRevenue;
+                return orderRevenue;
             }
             catch (Exception ex)
             {
@@ -236,12 +199,6 @@ namespace MonAmour.Services.Implements
                     return await _context.Orders
                         .Where(o => o.Status != "cart" && o.CreatedAt >= from && o.CreatedAt <= to)
                         .SumAsync(o => o.TotalPrice ?? 0);
-                }
-                else if (status == "booking")
-                {
-                    return await _context.Bookings
-                        .Where(b => b.CreatedAt >= from && b.CreatedAt <= to)
-                        .SumAsync(b => b.TotalPrice ?? 0);
                 }
 
                 return 0;
@@ -350,16 +307,11 @@ namespace MonAmour.Services.Implements
                         .Where(o => o.Status != "cart" && o.CreatedAt.HasValue && o.CreatedAt.Value.Date == currentDate.Date)
                         .CountAsync();
 
-                    var newBookings = await _context.Bookings
-                        .Where(b => b.CreatedAt.HasValue && b.CreatedAt.Value.Date == currentDate.Date)
-                        .CountAsync();
-
                     activities.Add(new UserActivityViewModel
                     {
                         Date = currentDate,
                         ActiveUsers = activeUsers,
-                        NewOrders = newOrders,
-                        NewBookings = newBookings
+                        NewOrders = newOrders
                     });
 
                     currentDate = currentDate.AddDays(1);
@@ -730,133 +682,8 @@ namespace MonAmour.Services.Implements
             }
         }
 
-        public async Task<BookingStatisticsViewModel> GetBookingStatisticsAsync(DateTime? fromDate = null, DateTime? toDate = null)
-        {
-            try
-            {
-                var from = fromDate ?? new DateTime(1753, 1, 1);
-                var to = toDate ?? new DateTime(9999, 12, 31);
 
-                var bookings = _context.Bookings.Where(b => b.CreatedAt >= from && b.CreatedAt <= to);
 
-                var totalBookings = await bookings.CountAsync();
-                var pendingBookings = await bookings.CountAsync(b => b.Status == "pending");
-                var confirmedBookings = await bookings.CountAsync(b => b.Status == "confirmed");
-                var cancelledBookings = await bookings.CountAsync(b => b.Status == "cancelled");
-                var completedBookings = await bookings.CountAsync(b => b.Status == "completed");
-
-                var totalBookingValue = await bookings.SumAsync(b => b.TotalPrice ?? 0);
-                var averageBookingValue = totalBookings > 0 ? totalBookingValue / totalBookings : 0;
-
-                var statusDistribution = await bookings
-                    .GroupBy(b => b.Status)
-                    .Select(g => new BookingStatusDistributionViewModel
-                    {
-                        Status = g.Key ?? "unknown",
-                        StatusName = "", // Will be set after query
-                        Count = g.Count(),
-                        Revenue = g.Sum(b => b.TotalPrice ?? 0)
-                    })
-                    .ToListAsync();
-
-                // Set status names and calculate percentages
-                foreach (var status in statusDistribution)
-                {
-                    status.StatusName = GetBookingStatusName(status.Status);
-                    status.Percentage = totalBookings > 0 ? (decimal)status.Count / totalBookings * 100 : 0;
-                }
-
-                return new BookingStatisticsViewModel
-                {
-                    TotalBookings = totalBookings,
-                    PendingBookings = pendingBookings,
-                    ConfirmedBookings = confirmedBookings,
-                    CancelledBookings = cancelledBookings,
-                    CompletedBookings = completedBookings,
-                    TotalBookingValue = totalBookingValue,
-                    AverageBookingValue = averageBookingValue,
-                    StatusDistribution = statusDistribution
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in GetBookingStatisticsAsync");
-                return new BookingStatisticsViewModel();
-            }
-        }
-
-        public async Task<List<ConceptPopularityViewModel>> GetConceptPopularityAsync(DateTime? fromDate = null, DateTime? toDate = null)
-        {
-            try
-            {
-                var from = fromDate ?? new DateTime(1753, 1, 1);
-                var to = toDate ?? new DateTime(9999, 12, 31);
-
-                var popularConcepts = await _context.Bookings
-                    .Include(b => b.Concept)
-                        .ThenInclude(c => c.Category)
-                    .Include(b => b.Concept)
-                        .ThenInclude(c => c.ConceptImgs)
-                    .Where(b => b.CreatedAt >= from && b.CreatedAt <= to)
-                    .GroupBy(b => new { b.ConceptId, ConceptName = b.Concept.Name, CategoryName = b.Concept.Category.Name })
-                    .Select(g => new ConceptPopularityViewModel
-                    {
-                        ConceptId = g.Key.ConceptId ?? 0,
-                        ConceptName = g.Key.ConceptName ?? "Unknown",
-                        CategoryName = g.Key.CategoryName ?? "Unknown",
-                        BookingCount = g.Count(),
-                        TotalRevenue = g.Sum(b => b.TotalPrice ?? 0),
-                        AveragePrice = g.Average(b => b.Concept.Price ?? 0),
-                        ConceptImage = g.FirstOrDefault().Concept.ConceptImgs.FirstOrDefault().ImgUrl
-                    })
-                    .OrderByDescending(c => c.BookingCount)
-                    .ToListAsync();
-
-                return popularConcepts;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in GetConceptPopularityAsync");
-                return new List<ConceptPopularityViewModel>();
-            }
-        }
-
-        public async Task<List<BookingStatusDistributionViewModel>> GetBookingStatusDistributionAsync(DateTime? fromDate = null, DateTime? toDate = null)
-        {
-            try
-            {
-                var from = fromDate ?? new DateTime(1753, 1, 1);
-                var to = toDate ?? new DateTime(9999, 12, 31);
-
-                var bookings = _context.Bookings.Where(b => b.CreatedAt >= from && b.CreatedAt <= to);
-                var totalBookings = await bookings.CountAsync();
-
-                var distribution = await bookings
-                    .GroupBy(b => b.Status)
-                    .Select(g => new BookingStatusDistributionViewModel
-                    {
-                        Status = g.Key ?? "unknown",
-                        StatusName = "", // Will be set after query
-                        Count = g.Count(),
-                        Revenue = g.Sum(b => b.TotalPrice ?? 0)
-                    })
-                    .ToListAsync();
-
-                // Set status names and calculate percentages
-                foreach (var status in distribution)
-                {
-                    status.StatusName = GetBookingStatusName(status.Status);
-                    status.Percentage = totalBookings > 0 ? (decimal)status.Count / totalBookings * 100 : 0;
-                }
-
-                return distribution;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in GetBookingStatusDistributionAsync");
-                return new List<BookingStatusDistributionViewModel>();
-            }
-        }
 
         public async Task<PartnerStatisticsViewModel> GetPartnerStatisticsAsync()
         {
@@ -869,7 +696,6 @@ namespace MonAmour.Services.Implements
 
                 var totalLocations = await _context.Locations.CountAsync();
 
-                var performanceData = await GetPartnerPerformanceAsync();
 
                 return new PartnerStatisticsViewModel
                 {
@@ -878,7 +704,6 @@ namespace MonAmour.Services.Implements
                     PendingPartners = pendingPartners,
                     InactivePartners = inactivePartners,
                     TotalLocations = totalLocations,
-                    PerformanceData = performanceData
                 };
             }
             catch (Exception ex)
@@ -888,125 +713,7 @@ namespace MonAmour.Services.Implements
             }
         }
 
-        public async Task<List<PartnerPerformanceViewModel>> GetPartnerPerformanceAsync(DateTime? fromDate = null, DateTime? toDate = null)
-        {
-            try
-            {
-                var from = fromDate ?? DateTime.Now.AddMonths(-6);
-                var to = toDate ?? DateTime.Now;
 
-                _logger.LogInformation($"GetPartnerPerformanceAsync: Date range from {from:yyyy-MM-dd} to {to:yyyy-MM-dd}");
-
-                // First get all partners with their locations and concepts
-                var partners = await _context.Partners
-                    .Include(p => p.Locations)
-                        .ThenInclude(l => l.Concepts)
-                    .ToListAsync();
-
-                _logger.LogInformation($"GetPartnerPerformanceAsync: Found {partners.Count} partners");
-
-                // Get all bookings in the date range
-                var allBookings = await _context.Bookings
-                    .Where(b => b.CreatedAt >= from && b.CreatedAt <= to)
-                    .Include(b => b.Concept)
-                        .ThenInclude(c => c.Location)
-                    .ToListAsync();
-
-                _logger.LogInformation($"GetPartnerPerformanceAsync: Found {allBookings.Count} bookings in date range");
-
-                // If no real bookings, create some test data for demo
-                if (allBookings.Count == 0)
-                {
-                    _logger.LogInformation("No real bookings found, creating test data for demo");
-                    allBookings = await CreateTestBookingsAsync(partners, from, to);
-                }
-
-                var performance = partners.Select(p => 
-                {
-                    // Get concepts for this partner
-                    var partnerConcepts = p.Locations.SelectMany(l => l.Concepts).ToList();
-                    var conceptIds = partnerConcepts.Select(c => c.ConceptId).ToList();
-                    
-                    // Get bookings for this partner's concepts
-                    var partnerBookings = allBookings.Where(b => conceptIds.Contains(b.ConceptId ?? 0)).ToList();
-                    
-                    var bookingCount = partnerBookings.Count;
-                    var totalRevenue = partnerBookings.Sum(b => b.TotalPrice ?? 0);
-
-                    _logger.LogInformation($"Partner {p.Name}: {partnerConcepts.Count} concepts, {bookingCount} bookings, {totalRevenue} revenue");
-
-                    return new PartnerPerformanceViewModel
-                    {
-                        PartnerId = p.PartnerId,
-                        PartnerName = p.Name ?? "Unknown",
-                        Email = p.Email ?? "",
-                        Avatar = p.Avatar ?? "",
-                        LocationCount = p.Locations.Count,
-                        ConceptCount = partnerConcepts.Count,
-                        BookingCount = bookingCount,
-                        TotalRevenue = totalRevenue,
-                        AverageRating = 4.5m, // Default rating for now
-                        Status = p.Status ?? "active"
-                    };
-                })
-                .OrderByDescending(p => p.TotalRevenue)
-                .ToList();
-
-                // Debug logging
-                foreach (var p in performance.Take(3))
-                {
-                    _logger.LogInformation($"Final Partner: {p.PartnerName}, Bookings: {p.BookingCount}, Revenue: {p.TotalRevenue}");
-                }
-
-                return performance;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in GetPartnerPerformanceAsync");
-                return new List<PartnerPerformanceViewModel>();
-            }
-        }
-
-        private async Task<List<Booking>> CreateTestBookingsAsync(List<Partner> partners, DateTime from, DateTime to)
-        {
-            var testBookings = new List<Booking>();
-            var random = new Random();
-            
-            foreach (var partner in partners.Take(3)) // Only create test data for first 3 partners
-            {
-                var concepts = partner.Locations.SelectMany(l => l.Concepts).Take(2).ToList();
-                
-                foreach (var concept in concepts)
-                {
-                    // Create 2-5 test bookings per concept
-                    var bookingCount = random.Next(2, 6);
-                    
-                    for (int i = 0; i < bookingCount; i++)
-                    {
-                        var bookingDate = from.AddDays(random.Next(0, (to - from).Days + 1));
-                        var bookingTime = new TimeOnly(random.Next(8, 20), random.Next(0, 60));
-                        var totalPrice = (decimal)(random.Next(1000000, 5000000)); // 1M - 5M VND
-                        
-                        testBookings.Add(new Booking
-                        {
-                            BookingId = -1, // Negative ID to indicate test data
-                            UserId = 1, // Test user
-                            ConceptId = concept.ConceptId,
-                            BookingDate = DateOnly.FromDateTime(bookingDate),
-                            BookingTime = bookingTime,
-                            Status = "confirmed",
-                            PaymentStatus = "paid",
-                            TotalPrice = totalPrice,
-                            CreatedAt = bookingDate,
-                            Concept = concept
-                        });
-                    }
-                }
-            }
-            
-            _logger.LogInformation($"Created {testBookings.Count} test bookings for demo");
-            return testBookings;
-        }
 
         public async Task<DashboardSummaryViewModel> GetDashboardSummaryAsync()
         {
@@ -1014,7 +721,6 @@ namespace MonAmour.Services.Implements
             {
                 var totalUsers = await _context.Users.CountAsync();
                 var totalOrders = await _context.Orders.CountAsync(o => o.Status != "cart");
-                var totalBookings = await _context.Bookings.CountAsync();
                 var totalProducts = await _context.Products.CountAsync();
                 var totalPartners = await _context.Partners.CountAsync();
 
@@ -1028,7 +734,6 @@ namespace MonAmour.Services.Implements
                     : 0;
 
                 var pendingOrders = await _context.Orders.CountAsync(o => o.Status == "pending");
-                var pendingBookings = await _context.Bookings.CountAsync(b => b.Status == "pending");
                 var lowStockProducts = await _context.Products.CountAsync(p => p.StockQuantity <= 10);
 
                 var recentActivities = await GetRecentActivitiesAsync(10);
@@ -1037,7 +742,6 @@ namespace MonAmour.Services.Implements
                 {
                     TotalUsers = totalUsers,
                     TotalOrders = totalOrders,
-                    TotalBookings = totalBookings,
                     TotalProducts = totalProducts,
                     TotalPartners = totalPartners,
                     TotalRevenue = totalRevenue,
@@ -1045,7 +749,6 @@ namespace MonAmour.Services.Implements
                     DailyRevenue = dailyRevenue,
                     RevenueGrowth = revenueGrowth,
                     PendingOrders = pendingOrders,
-                    PendingBookings = pendingBookings,
                     LowStockProducts = lowStockProducts,
                     RecentActivities = recentActivities
                 };
@@ -1080,25 +783,7 @@ namespace MonAmour.Services.Implements
                     })
                     .ToListAsync();
 
-                // Recent bookings
-                var recentBookings = await _context.Bookings
-                    .Include(b => b.User)
-                    .Include(b => b.Concept)
-                    .OrderByDescending(b => b.CreatedAt)
-                    .Take(limit / 2)
-                    .Select(b => new RecentActivityViewModel
-                    {
-                        Type = "Booking",
-                        Description = $"Đặt chỗ mới cho {b.Concept.Name}",
-                        CreatedAt = b.CreatedAt ?? DateTime.Now,
-                        UserName = b.User.Name ?? "Unknown",
-                        Status = b.Status ?? "unknown",
-                        Amount = b.TotalPrice
-                    })
-                    .ToListAsync();
-
                 activities.AddRange(recentOrders);
-                activities.AddRange(recentBookings);
 
                 return activities.OrderByDescending(a => a.CreatedAt).Take(limit).ToList();
             }
@@ -1123,16 +808,5 @@ namespace MonAmour.Services.Implements
             };
         }
 
-        private static string GetBookingStatusName(string status)
-        {
-            return status switch
-            {
-                "pending" => "Chờ xác nhận",
-                "confirmed" => "Đã xác nhận",
-                "cancelled" => "Đã hủy",
-                "completed" => "Hoàn thành",
-                _ => status
-            };
-        }
     }
 }

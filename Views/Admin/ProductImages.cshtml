@@ -14,18 +14,23 @@
         </div>
     </div>
 
-    <!-- Product Filter -->
+    <!-- Product Search and Filter -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-filter mr-2"></i>Lọc theo Sản phẩm
+                <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc Sản phẩm
             </h6>
         </div>
         <div class="card-body">
             <form method="get" class="row align-items-end">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Tìm kiếm theo tên:</label>
+                    <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                           placeholder="Nhập tên sản phẩm..." value="@ViewBag.SearchTerm">
+                </div>
+                <div class="col-md-4">
                     <label for="productId" class="form-label">Chọn Sản phẩm:</label>
-                    <select id="productId" name="productId" class="form-control" onchange="this.form.submit()">
+                    <select id="productId" name="productId" class="form-control">
                         <option value="">-- Tất cả sản phẩm --</option>
                         @if (ViewBag.Products != null)
                         {
@@ -44,9 +49,9 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search mr-2"></i>Lọc
+                        <i class="fas fa-search mr-2"></i>Tìm kiếm
                     </button>
                     <a href="@Url.Action("ProductImages", "Admin")" class="btn btn-outline-secondary ml-2">
                         <i class="fas fa-times mr-2"></i>Xóa bộ lọc
