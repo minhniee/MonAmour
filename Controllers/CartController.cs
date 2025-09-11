@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MonAmour.AuthViewModel;
 using MonAmour.Helpers;
 using MonAmour.Models;
 using MonAmour.Services.Interfaces;
@@ -13,14 +14,17 @@ namespace MonAmour.Controllers
         private readonly MonAmourDbContext _db;
         private readonly ICassoService _cassoService;
         private readonly IVietQRService _vietQRService;
+        private readonly IReviewService _reviewService;
         private readonly IConfiguration _config;
 
-        public CartController(MonAmourDbContext db, ICassoService cassoService, IVietQRService vietQRService, IConfiguration configuration)
+        public CartController(MonAmourDbContext db, ICassoService cassoService, IVietQRService vietQRService, IConfiguration configuration, IReviewService reviewService)
         {
             _db = db;
             _cassoService = cassoService;
             _vietQRService = vietQRService;
             _config = configuration;
+            _reviewService = reviewService;
+
         }
 
         // GET: /Cart
@@ -132,10 +136,10 @@ namespace MonAmour.Controllers
             var totalQuantityInAllCarts = _db.OrderItems
                 .Where(i => i.ProductId == productId && i.Order.Status == "cart" && i.Order.UserId == userId)
                 .Sum(i => i.Quantity);
-            
+
             // Tính tổng số lượng sau khi thêm (bao gồm cả item hiện tại nếu có)
             var finalQuantity = totalQuantityInAllCarts + quantity;
-            
+
             if (product.StockQuantity.HasValue && finalQuantity > product.StockQuantity.Value)
             {
                 if (IsAjaxRequest())
@@ -214,7 +218,7 @@ namespace MonAmour.Controllers
             var totalQuantityInCart = _db.OrderItems
                 .Where(i => i.ProductId == item.ProductId && i.Order.Status == "cart")
                 .Sum(i => i.Quantity) - oldQuantity + quantity; // Tính lại với số lượng mới
-            
+
             if (item.Product.StockQuantity.HasValue && totalQuantityInCart > item.Product.StockQuantity.Value)
             {
                 TempData["CartError"] = $"Số lượng sản phẩm không còn đủ. Sản phẩm nhưng chỉ còn {item.Product.StockQuantity.Value} sản phẩm trong kho. Vui lòng giảm số lượng.";
@@ -275,6 +279,52 @@ namespace MonAmour.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitReview(int targetId, string targetType, int rating, string? comment)
+        {
+            try
+            {
+                var userId = AuthHelper.GetUserId(HttpContext);
+                if (userId == null)
+                {
+                    return RedirectToAction("Login", "Auth");
+                }
+
+                if (rating < 1 || rating > 5)
+                {
+                    TempData["ErrorMessage"] = "Điểm đánh giá phải từ 1 đến 5.";
+                    return RedirectToAction("OrderHistory");
+                }
+
+                // Ensure the user can review this target
+                var canReview = await _reviewService.CanUserReviewAsync(userId.Value, targetType, targetId);
+                if (!canReview)
+                {
+                    TempData["ErrorMessage"] = "Bạn không thể đánh giá mục này.";
+                    return RedirectToAction("OrderHistory");
+                }
+
+                var dto = new CreateReviewViewModel
+                {
+                    UserId = userId.Value,
+                    TargetType = targetType,
+                    TargetId = targetId,
+                    Rating = rating,
+                    Comment = string.IsNullOrWhiteSpace(comment) ? null : comment
+                };
+
+                await _reviewService.CreateReviewAsync(dto);
+                TempData["SuccessMessage"] = "Gửi đánh giá thành công!";
+                return RedirectToAction("OrderHistory");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi đánh giá.";
+                return RedirectToAction("OrderHistory");
+            }
+        }
+
         // POST: /Cart/SaveAddress - Save phone and address for current cart
         [HttpPost]
         public async Task<IActionResult> SaveAddress([FromForm] string address, [FromForm] string? phone)
@@ -308,6 +358,42 @@ namespace MonAmour.Controllers
             await _db.SaveChangesAsync();
 
             return Json(new { success = true, message = "Đã lưu địa chỉ giao hàng" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateReview(int reviewId, int rating, string? comment)
+        {
+            try
+            {
+                var userId = AuthHelper.GetUserId(HttpContext);
+                if (userId == null)
+                {
+                    return RedirectToAction("Login", "Auth");
+                }
+
+                if (rating < 1 || rating > 5)
+                {
+                    TempData["ErrorMessage"] = "Điểm đánh giá phải từ 1 đến 5.";
+                    return RedirectToAction("OrderHistory");
+                }
+
+                var dto = new UpdateReviewViewModel
+                {
+                    ReviewId = reviewId,
+                    Rating = rating,
+                    Comment = string.IsNullOrWhiteSpace(comment) ? null : comment
+                };
+
+                await _reviewService.UpdateReviewAsync(dto);
+                TempData["SuccessMessage"] = "Cập nhật đánh giá thành công!";
+                return RedirectToAction("OrderHistory");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đánh giá.";
+                return RedirectToAction("OrderHistory");
+            }
         }
 
         // POST: /Cart/Checkout
@@ -494,11 +580,11 @@ namespace MonAmour.Controllers
                     debugInfo.Add(transactionText);
 
                     // Chỉ kiểm tra theo mã tham chiếu đơn hàng để tránh trùng lặp
-                    var hasOrderRef = !string.IsNullOrWhiteSpace(cartOrderRef) && 
-                        (transaction.Description?.Contains(cartOrderRef) == true || 
-                         transaction.Reference?.Contains(cartOrderRef) == true || 
+                    var hasOrderRef = !string.IsNullOrWhiteSpace(cartOrderRef) &&
+                        (transaction.Description?.Contains(cartOrderRef) == true ||
+                         transaction.Reference?.Contains(cartOrderRef) == true ||
                          transaction.Ref?.Contains(cartOrderRef) == true);
-                    
+
                     debugInfo.Add($"HasOrderRef: {hasOrderRef}, OrderRef: {cartOrderRef}");
 
                     if (hasOrderRef)
@@ -517,12 +603,13 @@ namespace MonAmour.Controllers
                     {
                         return Json(new { success = false, message = stockResult.Message, debug = debugInfo });
                     }
-                    
-                    return Json(new { 
-                        success = true, 
-                        message = $"Đã xử lý {processedCount} giao dịch thành công", 
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Đã xử lý {processedCount} giao dịch thành công",
                         redirectUrl = Url.Action("BillDetail", "Cart", new { orderId = cartOrder.OrderId }),
-                        debug = debugInfo 
+                        debug = debugInfo
                     });
                 }
                 else

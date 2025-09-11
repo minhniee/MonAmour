@@ -201,6 +201,7 @@ public class ProfileController : Controller
         }
     }
 
+    [Obsolete]
     [HttpGet]
     public async Task<IActionResult> OrderHistory()
     {
@@ -277,6 +278,7 @@ public class ProfileController : Controller
         }
     }
 
+    [Obsolete]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateReview(int reviewId, int rating, string? comment)
@@ -313,7 +315,7 @@ public class ProfileController : Controller
             return RedirectToAction("OrderHistory");
         }
     }
-
+    [Obsolete]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SubmitReview(int targetId, string targetType, int rating, string? comment)

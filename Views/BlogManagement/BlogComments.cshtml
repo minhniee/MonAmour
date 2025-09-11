@@ -1,4 +1,8 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Options
+@using MonAmour.Util
 @model List<MonAmour.ViewModels.BlogCommentListViewModel>
+@inject IOptions<AppSettings> AppSettings
 @{
     ViewData["Title"] = "Quản lý bình luận blog";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -86,7 +90,8 @@
                                     <input type="checkbox" class="comment-checkbox" value="@comment.CommentId" />
                                 </td>
                                 <td>
-                                    <strong>@comment.BlogTitle</strong>
+                                    <a href="@AppSettings.Value.AppUrl"><strong>@comment.BlogTitle</strong></a>
+	                                <strong>@comment.BlogTitle</strong>
                                 </td>
                                 <td>
                                     @(comment.AuthorName ?? "Ẩn danh")

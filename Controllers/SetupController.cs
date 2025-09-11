@@ -8,6 +8,8 @@ namespace MonAmour.Controllers
     /// Controller để setup hệ thống ban đầu (tạo admin user đầu tiên)
     /// Chỉ sử dụng trong development hoặc setup lần đầu
     /// </summary>
+    // [Obsolete("This action is disabled.")]
+    [NonController]
     public class SetupController : Controller
     {
         private readonly IAuthService _authService;

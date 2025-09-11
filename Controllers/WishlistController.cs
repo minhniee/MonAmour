@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using MonAmour.Attributes;
 using MonAmour.AuthViewModel;
 using MonAmour.Helpers;
 using MonAmour.Services.Interfaces;
 
 namespace MonAmour.Controllers;
 
-[Authorize]
+// [Authorize]
+[NonController]
 public class WishlistController : Controller
 {
     private readonly IWishListService _wishlistService;
@@ -169,7 +169,7 @@ public class WishlistController : Controller
             {
                 TempData["ErrorMessage"] = "Không tìm thấy mục để xóa khỏi danh sách yêu thích.";
             }
-            
+
             return RedirectToAction("Index");
         }
         catch (ArgumentException ex)
@@ -213,7 +213,7 @@ public class WishlistController : Controller
             {
                 TempData["ErrorMessage"] = "Không tìm thấy mục để xóa khỏi danh sách yêu thích.";
             }
-            
+
             return RedirectToAction("Index");
         }
         catch (Exception ex)
@@ -245,7 +245,7 @@ public class WishlistController : Controller
             {
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa danh sách yêu thích.";
             }
-            
+
             return RedirectToAction("Index");
         }
         catch (Exception ex)

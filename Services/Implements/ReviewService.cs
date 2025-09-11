@@ -482,11 +482,28 @@ public class ReviewService : IReviewService
 
             // Check if user already reviewed this item
             var hasReviewed = await HasUserReviewedAsync(userId, targetType, targetId);
-            return !hasReviewed;
+            if (hasReviewed)
+            {
+                return false;
+            }
+
+            // For products, check if user has purchased this product
+            if (targetType.ToLower() == "product")
+            {
+                var hasPurchased = await _context.OrderItems
+                    .Include(oi => oi.Order)
+                    .AnyAsync(oi => oi.Order != null && oi.Order.UserId == userId
+                                 && oi.ProductId == targetId
+                                 && oi.Order.Status == "completed");
+                return hasPurchased;
+            }
+
+            // For concepts, allow review if target exists (concepts don't require purchase)
+            return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking if user {UserId} can review {TargetType} {TargetId}", 
+            _logger.LogError(ex, "Error checking if user {UserId} can review {TargetType} {TargetId}",
                 userId, targetType, targetId);
             return false;
         }
