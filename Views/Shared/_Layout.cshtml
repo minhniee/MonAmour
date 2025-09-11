@@ -4,17 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MonAmour</title>
-    <meta name="description" content="Experience luxury and elegance with MonAmour premium services"  />
+    <meta name="description" content="Experience luxury and elegance with MonAmour premium services" />
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prata:wght@400&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- jQuery, Tailwind CSS & Alpine.js -->
-    @* <script src="~/lib/jquery/dist/jquery.min.js"></script> *@
+    <!-- Tailwind CSS & Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -32,26 +28,40 @@
                     },
                     fontFamily: {
                         'prata': ['Prata', 'serif'],
-                        'noto-serif': ['Noto Serif', 'serif'],
-                        'serif': ['Noto Serif', 'serif']
+                        'noto-serif-extracondensed': ['"Noto Serif ExtraCondensed"', 'serif'],
+                        'serif': ['"Noto Serif ExtraCondensed"', 'serif']
                     }
                 }
             }
         }
     </script>
 
+    <!-- Custom font-face -->
     <style>
+        @@font -face {
+            font-family: 'Noto Serif ExtraCondensed';
+            src: url('/fonts/NotoSerifExtraCondensed.ttf') format('truetype');
+            font-weight: 400 700; /* hỗ trợ từ 400 đến 700 */
+            font-stretch: 75%; /* ExtraCondensed */
+            font-display: swap;
+        }
+
         body {
-            font-family: 'Noto Serif', serif;
+            font-family: 'Noto Serif ExtraCondensed', serif;
+            font-stretch: 75%; /* ép về ExtraCondensed */
+            font-size: 18px;
+            line-height: 1.6;
+            padding-top: 10px;
             background-color: #fbf1e6;
             color: #62000d;
         }
+
         .font-prata {
             font-family: 'Prata', serif;
         }
     </style>
 </head>
-<body class="font-serif antialiased">
+<body class="font-serif antialiased text-lg">
     <div class="min-h-screen">
         @await Html.PartialAsync("_Header")
         <main>

@@ -21,6 +21,7 @@ public class BlogService : IBlogService
         return await _context.Blogs
             .Include(b => b.Author)
             .Include(b => b.Category)
+            .Where(b => b.IsDeleted != true)
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync();
     }
@@ -78,9 +79,9 @@ public class BlogService : IBlogService
         return await _context.Blogs
             .Include(b => b.Author)
             .Include(b => b.Category)
-            .Where(b => b.IsPublished == true && 
-                   (b.Title.Contains(searchTerm) || 
-                    b.Content.Contains(searchTerm) || 
+            .Where(b => b.IsPublished == true &&
+                   (b.Title.Contains(searchTerm) ||
+                    b.Content.Contains(searchTerm) ||
                     (b.Excerpt != null && b.Excerpt.Contains(searchTerm)) ||
                     (b.Tags != null && b.Tags.Contains(searchTerm))))
             .OrderByDescending(b => b.PublishedDate)
@@ -92,7 +93,7 @@ public class BlogService : IBlogService
         blog.CreatedAt = DateTime.Now;
         blog.UpdatedAt = DateTime.Now;
         blog.ReadTime = await CalculateReadTimeAsync(blog.Content);
-        
+
         _context.Blogs.Add(blog);
         await _context.SaveChangesAsync();
         return blog;
@@ -293,7 +294,7 @@ public class BlogService : IBlogService
 
         _context.BlogComments.Add(comment);
         await _context.SaveChangesAsync();
-        
+
         // Load related data for complete comment object
         await _context.Entry(comment)
             .Reference(c => c.User)
@@ -301,7 +302,7 @@ public class BlogService : IBlogService
         await _context.Entry(comment)
             .Reference(c => c.Blog)
             .LoadAsync();
-            
+
         return comment;
     }
 
@@ -329,19 +330,71 @@ public class BlogService : IBlogService
 
     #endregion
 
+
+    public async Task<IEnumerable<string>> GetAllTagsAsync()
+    {
+        var allTags = await _context.Blogs
+            .Where(b => b.IsPublished == true && !string.IsNullOrEmpty(b.Tags))
+            .Select(b => b.Tags)
+            .ToListAsync();
+
+        return allTags
+            .SelectMany(tags => ParseTagsAsync(tags).Result)
+            .Distinct()
+            .OrderBy(t => t);
+    }
+
+    public async Task<IEnumerable<Blog>> GetBlogsByTagAsync(string tag)
+    {
+        return await _context.Blogs
+            .Include(b => b.Author)
+            .Include(b => b.Category)
+            .Where(b => b.IsPublished == true && b.Tags != null && b.Tags.Contains(tag))
+            .OrderByDescending(b => b.PublishedDate)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<string>> GetPopularTagsAsync(int count = 10)
+    {
+        var allTags = await _context.Blogs
+            .Where(b => b.IsPublished == true && !string.IsNullOrEmpty(b.Tags))
+            .Select(b => b.Tags)
+            .ToListAsync();
+
+        return allTags
+            .SelectMany(tags => ParseTagsAsync(tags).Result)
+            .GroupBy(t => t)
+            .OrderByDescending(g => g.Count())
+            .Take(count)
+            .Select(g => g.Key);
+    }
+
     #region Helper methods
+
+    public Task<string[]> ParseTagsAsync(string? tagString)
+    {
+        if (string.IsNullOrEmpty(tagString))
+            return Task.FromResult(Array.Empty<string>());
+
+        return Task.FromResult(
+            tagString.Split(',')
+                    .Select(t => t.Trim())
+                    .Where(t => !string.IsNullOrEmpty(t))
+                    .ToArray()
+        );
+    }
 
     public Task<int> CalculateReadTimeAsync(string content)
     {
         // Average reading speed: 200 words per minute
         const int wordsPerMinute = 200;
-        
+
         if (string.IsNullOrEmpty(content)) return Task.FromResult(0);
 
         // Remove HTML tags and count words
         var plainText = Regex.Replace(content, "<.*?>", string.Empty);
         var wordCount = plainText.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
-        
+
         var readTime = Math.Max(1, (int)Math.Ceiling((double)wordCount / wordsPerMinute));
         return Task.FromResult(readTime);
     }
@@ -393,10 +446,10 @@ public class BlogService : IBlogService
 
         // Remove special characters except hyphens
         slug = Regex.Replace(slug, @"[^a-z0-9\-]", "");
-        
+
         // Remove duplicate hyphens
         slug = Regex.Replace(slug, @"-+", "-");
-        
+
         // Remove leading and trailing hyphens
         slug = slug.Trim('-');
 

@@ -20,37 +20,50 @@ public class BlogController : Controller
     }
 
     // GET: Blog
-    public async Task<IActionResult> Index(string searchTerm = "", string filter = "")
+    public async Task<IActionResult> Index(string searchTerm = "", string filter = "", int? categoryId = null, int page = 1)
     {
+        // Get all published blogs
         var allBlogs = await _blogService.GetPublishedBlogsAsync();
         
-        // Apply search filter
+        // Get featured blogs separately to ensure they're always shown regardless of filters
+        var featuredBlogs = await _blogService.GetFeaturedBlogsAsync();
+        
+        // Apply search filter if provided
         if (!string.IsNullOrEmpty(searchTerm))
         {
             allBlogs = await _blogService.SearchBlogsAsync(searchTerm);
         }
 
-        // Apply sorting filter
-        switch (filter.ToLower())
+        // Apply category filter if provided
+        if (categoryId.HasValue)
         {
-            case "new":
-                allBlogs = allBlogs.OrderByDescending(b => b.PublishedDate);
-                break;
-            case "time":
-                allBlogs = allBlogs.OrderBy(b => b.ReadTime);
-                break;
-            case "type":
-                allBlogs = allBlogs.OrderBy(b => b.Category?.Name);
-                break;
-            default:
-                allBlogs = allBlogs.OrderByDescending(b => b.PublishedDate);
-                break;
+            allBlogs = allBlogs.Where(b => b.Category?.CategoryId == categoryId);
         }
 
-        var featuredBlogs = await _blogService.GetFeaturedBlogsAsync();
+        // Create a separate list for non-featured blogs
+        var nonFeaturedBlogs = allBlogs.Where(b => !(b.IsFeatured ?? false)).ToList();
+
+        // Apply sorting filter to non-featured blogs
+        IEnumerable<Blog> sortedBlogs = filter.ToLower() switch
+        {
+            "new" => nonFeaturedBlogs.OrderByDescending(b => b.PublishedDate),
+            "time" => nonFeaturedBlogs.OrderBy(b => b.ReadTime),
+            "type" => nonFeaturedBlogs.OrderBy(b => b.Category?.Name),
+            _ => nonFeaturedBlogs.OrderByDescending(b => b.PublishedDate)
+        };
+
+        // Get categories for the filter dropdown
+        var categories = await _blogService.GetAllCategoriesAsync();
+        
+        // Calculate pagination
+        int pageSize = 6; // Number of items per page for daily posts
+        int totalItems = sortedBlogs.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        page = Math.Max(1, Math.Min(page, totalPages)); // Ensure page is within valid range
         
         var viewModel = new BlogIndexViewModel
         {
+            // Featured posts are always shown at the top
             FeaturedPosts = featuredBlogs.Take(1).Select(b => new BlogListViewModel
             {
                 BlogId = b.BlogId,
@@ -63,7 +76,9 @@ public class BlogController : Controller
                 ReadTime = b.ReadTime ?? 0,
                 IsFeatured = b.IsFeatured ?? false
             }).ToList(),
-            RecentPosts = allBlogs.Skip(1).Take(4).Select(b => new BlogListViewModel
+
+            // Recent posts are the first 4 non-featured posts
+            RecentPosts = sortedBlogs.Take(4).Select(b => new BlogListViewModel
             {
                 BlogId = b.BlogId,
                 Title = b.Title,
@@ -75,7 +90,9 @@ public class BlogController : Controller
                 ReadTime = b.ReadTime ?? 0,
                 IsFeatured = b.IsFeatured ?? false
             }).ToList(),
-            DailyPosts = allBlogs.Skip(5).Take(3).Select(b => new BlogListViewModel
+
+            // Daily posts are paginated
+            DailyPosts = sortedBlogs.Skip((page - 1) * pageSize).Take(pageSize).Select(b => new BlogListViewModel
             {
                 BlogId = b.BlogId,
                 Title = b.Title,
@@ -87,52 +104,95 @@ public class BlogController : Controller
                 ReadTime = b.ReadTime ?? 0,
                 IsFeatured = b.IsFeatured ?? false
             }).ToList(),
+
+            // Add categories for the filter
+            Categories = categories.Select(c => new BlogCategoryListViewModel
+            {
+                CategoryId = c.CategoryId,
+                Name = c.Name,
+                Description = c.Description,
+                BlogCount = c.Blogs?.Count ?? 0
+            }).ToList(),
+
+            // Pagination and filter state
+            CurrentPage = page,
+            TotalPages = totalPages,
+            PageSize = pageSize,
             SearchTerm = searchTerm,
-            SelectedFilter = filter
+            SelectedFilter = filter,
+            CategoryId = categoryId
         };
 
         return View(viewModel);
     }
 
     // GET: Blog/Detail/5
-    public async Task<IActionResult> Detail(int id)
-    {
-        var blog = await _blogService.GetBlogByIdWithDetailsAsync(id);
-        if (blog == null || !(blog.IsPublished ?? false))
+        public async Task<IActionResult> Detail(int id)
         {
-            return NotFound();
-        }
-
-        // Increment view count
-        await _blogService.IncrementViewCountAsync(id);
-
-        // Set ViewBag for user info
-        var currentUserId = AuthHelper.GetUserId(HttpContext);
-        ViewBag.CurrentUserId = currentUserId;
-        ViewBag.IsAdmin = AuthHelper.IsAdmin(HttpContext);
-
-        var viewModel = new BlogDetailViewModel
-        {
-            BlogId = blog.BlogId,
-            Title = blog.Title,
-            Content = blog.Content,
-            Excerpt = blog.Excerpt ?? "",
-            AuthorName = blog.Author?.Name ?? "Admin",
-            CategoryName = blog.Category?.Name ?? "General",
-            PublishedDate = blog.PublishedDate ?? DateTime.Now,
-            FeaturedImage = blog.FeaturedImage ?? "",
-            ReadTime = blog.ReadTime ?? 0,
-            Tags = !string.IsNullOrEmpty(blog.Tags) ? string.Join(", ", blog.Tags.Split(',')) : "",
-            Comments = blog.Comments.Select(c => new BlogComment
+            var blog = await _blogService.GetBlogByIdWithDetailsAsync(id);
+            if (blog == null || !(blog.IsPublished ?? false))
             {
-                CommentId = c.CommentId,
-                AuthorName = c.User?.Name ?? c.AuthorName ?? "Anonymous",
-                AuthorEmail = c.AuthorEmail ?? "",
-                Content = c.Content,
-                CreatedAt = c.CreatedAt ?? DateTime.Now,
-                BlogId = c.BlogId
-            }).ToList()
-        };
+                return NotFound();
+            }
+
+            // Increment view count
+            await _blogService.IncrementViewCountAsync(id);
+
+            // Get related posts based on tags
+            var relatedPosts = new List<BlogListViewModel>();
+            if (!string.IsNullOrEmpty(blog.Tags))
+            {
+                var tags = blog.Tags.Split(',').Select(t => t.Trim()).ToList();
+                var allRelatedPosts = await _blogService.GetPublishedBlogsAsync();
+                
+                relatedPosts = allRelatedPosts
+                    .Where(b => b.BlogId != blog.BlogId && b.IsPublished == true && 
+                           !string.IsNullOrEmpty(b.Tags) &&
+                           b.Tags.Split(',').Select(t => t.Trim())
+                                .Intersect(tags, StringComparer.OrdinalIgnoreCase).Any())
+                    .OrderByDescending(b => b.PublishedDate)
+                    .Take(3)
+                    .Select(b => new BlogListViewModel
+                    {
+                        BlogId = b.BlogId,
+                        Title = b.Title,
+                        Excerpt = b.Excerpt ?? "",
+                        FeaturedImage = b.FeaturedImage,
+                        CategoryName = b.Category?.Name ?? "General",
+                        PublishedDate = b.PublishedDate ?? DateTime.Now,
+                        ReadTime = b.ReadTime ?? 0
+                    })
+                    .ToList();
+            }
+
+            // Set ViewBag for user info
+            var currentUserId = AuthHelper.GetUserId(HttpContext);
+            ViewBag.CurrentUserId = currentUserId;
+            ViewBag.IsAdmin = AuthHelper.IsAdmin(HttpContext);
+
+            var viewModel = new BlogDetailViewModel
+            {
+                BlogId = blog.BlogId,
+                Title = blog.Title,
+                Content = blog.Content,
+                Excerpt = blog.Excerpt ?? "",
+                AuthorName = blog.Author?.Name ?? "Admin",
+                CategoryName = blog.Category?.Name ?? "General",
+                PublishedDate = blog.PublishedDate ?? DateTime.Now,
+                FeaturedImage = blog.FeaturedImage ?? "",
+                ReadTime = blog.ReadTime ?? 0,
+                Tags = blog.Tags,
+                RelatedPosts = relatedPosts,
+                Comments = blog.Comments.Select(c => new BlogComment
+                {
+                    CommentId = c.CommentId,
+                    AuthorName = c.User?.Name ?? c.AuthorName ?? "Anonymous",
+                    AuthorEmail = c.AuthorEmail ?? "",
+                    Content = c.Content,
+                    CreatedAt = c.CreatedAt ?? DateTime.Now,
+                    BlogId = c.BlogId
+                }).ToList()
+            };
 
         return View(viewModel);
     }
@@ -145,6 +205,34 @@ public class BlogController : Controller
     }
 
     // GET: Blog/Category/5
+    // GET: Blog/Tag/{tag}
+    public async Task<IActionResult> Tag(string tag)
+    {
+        var blogs = await _blogService.GetBlogsByTagAsync(tag);
+        
+        var viewModel = new BlogIndexViewModel
+        {
+            FeaturedPosts = new List<BlogListViewModel>(),
+            RecentPosts = new List<BlogListViewModel>(),
+            DailyPosts = blogs.Select(b => new BlogListViewModel
+            {
+                BlogId = b.BlogId,
+                Title = b.Title,
+                Excerpt = b.Excerpt ?? "",
+                AuthorName = b.Author?.Name ?? "Admin",
+                CategoryName = b.Category?.Name ?? "General",
+                PublishedDate = b.PublishedDate ?? DateTime.Now,
+                FeaturedImage = b.FeaturedImage ?? "",
+                ReadTime = b.ReadTime ?? 0,
+                IsFeatured = b.IsFeatured ?? false
+            }).ToList(),
+            SearchTerm = $"Tag: {tag}",
+            SelectedFilter = ""
+        };
+
+        return View("Index", viewModel);
+    }
+
     public async Task<IActionResult> Category(int id)
     {
         var blogs = await _blogService.GetBlogsByCategoryAsync(id);

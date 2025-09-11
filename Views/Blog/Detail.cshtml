@@ -22,9 +22,28 @@
         <div class="max-w-4xl mx-auto">
             <!-- Article Header -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-                <div class="aspect-video bg-gray-200">
-                    <img src="@Model.FeaturedImage" alt="@Model.Title" class="w-full h-full object-cover">
-                </div>
+	            <div class="aspect-video  bg-gray-200 flex items-center justify-center">
+		            <div class="carousel-container relative w-full h-full">
+			            @if (!string.IsNullOrEmpty(Model.FeaturedImage))
+			            {
+				            <div class="carousel-slide active w-full h-full flex items-center justify-center">
+					            <img src="@Model.FeaturedImage" 
+					                 alt="@Model.Title" 
+					                 @* class="max-w-full max-h-full object-contain" /> *@
+					                 class="max-w-full max-h-full object-contain" />
+				            </div>
+			            }
+			            else
+			            {
+				            <div class="carousel-slide active w-full h-full flex items-center justify-center">
+					            <img src="~/images/placeholder-hero.jpg" 
+					                 alt="Blog Placeholder" 
+					                 class="max-w-full max-h-full object-contain" />
+				            </div>
+			            }
+		            </div>
+	            </div>
+
                 <div class="p-8">
                     <div class="flex items-center text-sm text-gray-500 mb-4">
                         <span>@Model.CategoryName</span>
@@ -46,21 +65,181 @@
 
             <!-- Article Body -->
             <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-                <div class="prose prose-lg max-w-none" style="font-family: 'Noto Serif', serif;">
+                <div class="blog-content prose prose-lg max-w-none" style="font-family: 'Noto Serif', serif;">
+                    <style>
+                        /* Headings */
+                        .blog-content h1, .blog-content h2, .blog-content h3, 
+                        .blog-content h4, .blog-content h5, .blog-content h6 {
+                            font-family: 'Prata', serif;
+                            font-weight: bold;
+                            line-height: 1.2;
+                            margin-top: 2em;
+                            margin-bottom: 1em;
+                            color: #333;
+                        }
+                        .blog-content h1 { font-size: 2.5em; }
+                        .blog-content h2 { font-size: 2em; }
+                        .blog-content h3 { font-size: 1.75em; }
+                        .blog-content h4 { font-size: 1.5em; }
+                        .blog-content h5 { font-size: 1.25em; }
+                        .blog-content h6 { font-size: 1.1em; }
+
+                        /* Paragraphs and text */
+                        .blog-content p {
+                            font-size: 1.1em;
+                            line-height: 1.8;
+                            margin-bottom: 1.5em;
+                            color: #333;
+                        }
+
+                        /* Lists */
+                        .blog-content ul, .blog-content ol {
+                            margin: 1.5em 0 1.5em 2em;
+                            padding-left: 1em;
+                        }
+                        .blog-content ul { list-style-type: disc; }
+                        .blog-content ol { list-style-type: decimal; }
+                        .blog-content li {
+                            margin-bottom: 0.5em;
+                            line-height: 1.6;
+                        }
+                        .blog-content ul ul, .blog-content ol ol,
+                        .blog-content ul ol, .blog-content ol ul {
+                            margin: 0.5em 0 0.5em 1em;
+                        }
+
+                        /* Text formatting */
+                        .blog-content strong, .blog-content b { 
+                            font-weight: bold;
+                            color: #222;
+                        }
+                        .blog-content em, .blog-content i { font-style: italic; }
+                        .blog-content u { text-decoration: underline; }
+                        .blog-content strike, .blog-content del { text-decoration: line-through; }
+                        .blog-content small { font-size: 0.875em; }
+
+                        /* Links */
+                        .blog-content a {
+                            color: #62000d;
+                            text-decoration: underline;
+                            transition: color 0.2s ease;
+                        }
+                        .blog-content a:hover {
+                            color: #8b0012;
+                        }
+
+                        /* Images */
+                        .blog-content img {
+                            max-width: 100%;
+                            height: auto;
+                            margin: 2em auto;
+                            border-radius: 0.5rem;
+                            display: block;
+                        }
+                        .blog-content figure {
+                            margin: 2em 0;
+                            text-align: center;
+                        }
+                        .blog-content figcaption {
+                            font-size: 0.9em;
+                            color: #666;
+                            margin-top: 0.5em;
+                            font-style: italic;
+                        }
+
+                        /* Blockquotes */
+                        .blog-content blockquote {
+                            border-left: 4px solid #62000d;
+                            padding: 1em 2em;
+                            margin: 2em 0;
+                            background-color: #f8f8f8;
+                            font-style: italic;
+                            color: #555;
+                        }
+                        .blog-content blockquote p:last-child {
+                            margin-bottom: 0;
+                        }
+
+                        /* Code blocks */
+                        .blog-content pre {
+                            background-color: #f4f4f4;
+                            padding: 1em;
+                            border-radius: 0.5rem;
+                            overflow-x: auto;
+                            margin: 1.5em 0;
+                        }
+                        .blog-content code {
+                            font-family: monospace;
+                            background-color: #f4f4f4;
+                            padding: 0.2em 0.4em;
+                            border-radius: 0.3rem;
+                            font-size: 0.9em;
+                        }
+
+                        /* Tables */
+                        .blog-content table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 2em 0;
+                        }
+                        .blog-content th, .blog-content td {
+                            border: 1px solid #ddd;
+                            padding: 0.75em;
+                            text-align: left;
+                        }
+                        .blog-content th {
+                            background-color: #f4f4f4;
+                            font-weight: bold;
+                        }
+                        .blog-content tr:nth-child(even) {
+                            background-color: #f8f8f8;
+                        }
+
+                        /* Definition Lists */
+                        .blog-content dl {
+                            margin: 1.5em 0;
+                        }
+                        .blog-content dt {
+                            font-weight: bold;
+                            margin-top: 1em;
+                        }
+                        .blog-content dd {
+                            margin-left: 2em;
+                            margin-top: 0.5em;
+                        }
+
+                        /* Horizontal Rule */
+                        .blog-content hr {
+                            border: none;
+                            border-top: 2px solid #eee;
+                            margin: 2em 0;
+                        }
+
+                        /* Subscript and Superscript */
+                        .blog-content sub, .blog-content sup {
+                            font-size: 0.75em;
+                            line-height: 0;
+                            position: relative;
+                            vertical-align: baseline;
+                        }
+                        .blog-content sup { top: -0.5em; }
+                        .blog-content sub { bottom: -0.25em; }
+                    </style>
                     @Html.Raw(Model.Content)
                 </div>
                 
                 <!-- Tags -->
-                @if (Model.Tags != null && Model.Tags.Any())
+                @if (!string.IsNullOrEmpty(Model.Tags))
                 {
                     <div class="mt-8 pt-6 border-t border-gray-200">
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">Tags:</h3>
                         <div class="flex flex-wrap gap-2">
-                            @foreach (var tag in Model.Tags)
+                            @foreach (var tag in Model.Tags.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()))
                             {
-                                <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-[#62000d] hover:text-white transition-colors cursor-pointer">
+                                <a href="@Url.Action("Tag", "Blog", new { tag = tag })" 
+                                   class="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-[#62000d] hover:text-white transition-colors cursor-pointer">
                                     #@tag
-                                </span>
+                                </a>
                             }
                         </div>
                     </div>
@@ -98,7 +277,7 @@
                         <div class="comment-item border-b border-gray-200 pb-6" data-comment-id="@comment.CommentId">
                             <div class="flex items-start space-x-4">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold" style="background-color: #62000d;">
-                                    @comment.AuthorName.Substring(0, 1).ToUpper()
+                                    @(comment.AuthorName?.Substring(0, 1).ToUpper() ?? "A")
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between mb-2">
@@ -125,29 +304,54 @@
             </div>
 
             <!-- Related Posts -->
-            <div class="mt-12">
-                <h3 class="text-2xl font-bold mb-6 text-gray-800" style="font-family: 'Prata', serif;">
-                    Bài viết liên quan
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @for (int i = 1; i <= 3; i++)
-                    {
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="openBlogDetail(@(Model.BlogId + i))">
-                            <div class="aspect-video bg-gray-200 flex items-center justify-center">
-                                <span class="text-gray-400 text-sm">Related Post @i</span>
+            @if (Model.RelatedPosts.Any())
+            {
+                <div class="mt-12">
+                    <h3 class="text-2xl font-bold mb-6 text-gray-800" style="font-family: 'Prata', serif;">
+                        Bài viết liên quan
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @foreach (var post in Model.RelatedPosts)
+                        {
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" 
+                                 onclick="openBlogDetail(@post.BlogId)">
+                                <div class="aspect-video bg-gray-200 flex items-center justify-center">
+                                    @if (!string.IsNullOrEmpty(post.FeaturedImage))
+                                    {
+	                                    <img src="@post.FeaturedImage"
+	                                         alt="@post.Title"
+	                                         class="img-fluid d-block mx-auto"
+	                                         style="object-fit: contain; width: 100%; height: 200px; " />
+
+                                    }
+                                    else
+                                    {
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                            <span class="text-gray-400 text-sm uppercase">@post.CategoryName</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex items-center text-xs text-gray-500 mb-2">
+                                        <span>@post.CategoryName</span>
+                                        @if (post.ReadTime > 0)
+                                        {
+                                            <span class="mx-2">•</span>
+                                            <span>@post.ReadTime phút đọc</span>
+                                        }
+                                    </div>
+                                    <h4 class="font-semibold text-gray-800 mb-2 line-clamp-2" style="font-family: 'Prata', serif;">
+                                        @post.Title
+                                    </h4>
+                                    <p class="text-gray-600 text-sm line-clamp-2" style="font-family: 'Noto Serif', serif;">
+                                        @Html.Raw(post.Excerpt)
+                                    </p>
+                                </div>
                             </div>
-                            <div class="p-4">
-                                <h4 class="font-semibold text-gray-800 mb-2" style="font-family: 'Prata', serif;">
-                                    Bài viết liên quan @i
-                                </h4>
-                                <p class="text-gray-600 text-sm" style="font-family: 'Noto Serif', serif;">
-                                    Mô tả ngắn về bài viết liên quan...
-                                </p>
-                            </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     </div>
 </div>

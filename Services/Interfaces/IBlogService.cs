@@ -37,7 +37,13 @@ public interface IBlogService
     Task<bool> ApproveCommentAsync(int commentId);
     Task<bool> DeleteCommentAsync(int commentId);
 
+    // Tag operations
+    Task<IEnumerable<string>> GetAllTagsAsync();
+    Task<IEnumerable<Blog>> GetBlogsByTagAsync(string tag);
+    Task<IEnumerable<string>> GetPopularTagsAsync(int count = 10);
+
     // Helper methods
     Task<int> CalculateReadTimeAsync(string content);
     Task<string> GenerateSlugAsync(string title);
+    Task<string[]> ParseTagsAsync(string? tagString);
 }

@@ -30,21 +30,21 @@ namespace MonAmour.Services.Implements
                     .ToListAsync();
 
                 var result = new List<BlogListViewModel>();
-                
+
                 foreach (var blog in blogs)
                 {
                     // Load author separately
-                    var author = blog.AuthorId.HasValue ? 
+                    var author = blog.AuthorId.HasValue ?
                         await _context.Users.FindAsync(blog.AuthorId.Value) : null;
-                    
+
                     // Load category separately  
                     var category = blog.CategoryId.HasValue ?
                         await _context.BlogCategories.FindAsync(blog.CategoryId.Value) : null;
-                    
+
                     // Count comments separately
                     var commentCount = await _context.BlogComments
                         .CountAsync(c => c.BlogId == blog.BlogId);
-                    
+
                     result.Add(new BlogListViewModel
                     {
                         BlogId = blog.BlogId,
@@ -62,7 +62,7 @@ namespace MonAmour.Services.Implements
                         CommentCount = commentCount
                     });
                 }
-                
+
                 return result;
             }
             catch (Exception ex)
@@ -82,7 +82,7 @@ namespace MonAmour.Services.Implements
                 if (blog == null) return null;
 
                 // Load related data separately
-                var author = blog.AuthorId.HasValue ? 
+                var author = blog.AuthorId.HasValue ?
                     await _context.Users.FindAsync(blog.AuthorId.Value) : null;
                 var category = blog.CategoryId.HasValue ?
                     await _context.BlogCategories.FindAsync(blog.CategoryId.Value) : null;
@@ -192,7 +192,7 @@ namespace MonAmour.Services.Implements
             try
             {
                 string? featuredImage = null;
-                
+
                 if (model.ImageFile != null)
                 {
                     featuredImage = await _fileUploadService.UploadBlogImageAsync(model.ImageFile);
@@ -263,7 +263,7 @@ namespace MonAmour.Services.Implements
                 blog.Excerpt = model.Excerpt;
                 blog.AuthorId = model.AuthorId;
                 blog.CategoryId = model.CategoryId;
-                blog.Tags = model.Tags;
+                    blog.Tags = model.Tags;
                 blog.PublishedDate = model.PublishedDate;
                 blog.IsFeatured = model.IsFeatured;
                 blog.IsPublished = model.IsPublished;
@@ -352,7 +352,7 @@ namespace MonAmour.Services.Implements
 
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
-                    query = query.Where(b => b.Title.Contains(searchTerm) || 
+                    query = query.Where(b => b.Title.Contains(searchTerm) ||
                                            (b.Excerpt != null && b.Excerpt.Contains(searchTerm)) ||
                                            (b.Tags != null && b.Tags.Contains(searchTerm)));
                 }
@@ -406,13 +406,13 @@ namespace MonAmour.Services.Implements
                     .ToListAsync();
 
                 var result = new List<BlogCategoryListViewModel>();
-                
+
                 foreach (var category in categories)
                 {
                     // Count blogs for this category (excluding deleted blogs)
                     var blogCount = await _context.Blogs
                         .CountAsync(b => b.CategoryId == category.CategoryId && b.IsDeleted != true);
-                    
+
                     result.Add(new BlogCategoryListViewModel
                     {
                         CategoryId = category.CategoryId,
@@ -424,7 +424,7 @@ namespace MonAmour.Services.Implements
                         BlogCount = blogCount
                     });
                 }
-                
+
                 return result;
             }
             catch (Exception ex)
@@ -581,13 +581,13 @@ namespace MonAmour.Services.Implements
                     .ToListAsync();
 
                 var result = new List<BlogCommentListViewModel>();
-                
+
                 foreach (var comment in comments)
                 {
                     var blog = await _context.Blogs.FindAsync(comment.BlogId);
-                    var user = comment.UserId.HasValue ? 
+                    var user = comment.UserId.HasValue ?
                         await _context.Users.FindAsync(comment.UserId.Value) : null;
-                    
+
                     result.Add(new BlogCommentListViewModel
                     {
                         CommentId = comment.CommentId,
@@ -600,7 +600,7 @@ namespace MonAmour.Services.Implements
                         UserName = user?.Name
                     });
                 }
-                
+
                 return result;
             }
             catch (Exception ex)

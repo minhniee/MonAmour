@@ -1,79 +1,77 @@
-﻿<header class="sticky top-0 z-50 w-full bg-background/95 backdrop-blur border-b border-border">
-    <div class="container mx-auto px-4 h-20 flex items-center justify-between">
-        <div class="flex items-center space-x-8">
+﻿<header class="sticky top-0 z-50 w-full bg-background/95 backdrop-blur border-b border-border shadow-md">
+    <div class="container mx-auto px-4 h-20 md:h-24 flex items-center justify-between">
+        <div class="flex items-center space-x-6 md:space-x-10">
             <div class="flex items-center">
-                <img src="~/images/MonAmour-logo.png" alt="MonAmour Logo" class="h-16 w-auto" />
+                <!-- Logo đầy đủ với kích thước tối ưu -->
+                <div class="w-[75px] md:w-[97px]">
+                    <img src="/images/monAmour-logo.webp" alt="MonAmour Logo"
+                         class="w-full h-auto object-contain transition-transform duration-300 hover:scale-105" />
+                </div>
             </div>
-            <nav class="hidden md:flex items-center space-x-6">
-                <a href="@Url.Action("Index", "Home")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="@Url.Action("Index", "Home")" class="text-lg md:text-xl font-medium text-[#62000d] hover:text-[#4a0009] transition-colors">
                     Trang chủ
                 </a>
-                <a href="@Url.Action("ListConcept", "Concept")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                <a href="@Url.Action("ListConcept", "Concept")" class="text-lg md:text-xl font-medium text-[#62000d] hover:text-[#4a0009] transition-colors">
                     Gói dịch vụ
                 </a>
-                <a href="@Url.Action("ListGiftbox", "Gift_box")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                <a href="@Url.Action("ListGiftbox", "Gift_box")" class="text-lg md:text-xl font-medium text-[#62000d] hover:text-[#4a0009] transition-colors">
                     Smart Gift Box
                 </a>
-                <a href="#contact" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                    Đặt lịch
+                <a href="@Url.Action("Index", "Blog")" class="text-lg md:text-xl font-medium text-[#62000d] hover:text-[#4a0009] transition-colors">
+                    Blog
                 </a>
-                <a href="@Url.Action("Index","Blog")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-	                Blog
+                <a href="@Url.Action("Index", "AboutUs")" class="text-lg md:text-xl font-medium text-[#62000d] hover:text-[#4a0009] transition-colors">
+                    Về chúng tôi
                 </a>
-                <a href="@Url.Action("Index", "AboutUs")" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-	                Về chúng tôi
-                </a>
-                <a href="#contact" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                <a href="#contact" class="text-lg md:text-xl font-medium text-[#62000d] hover:text-[#4a0009] transition-colors">
                     Liên hệ
                 </a>
             </nav>
         </div>
         <div class="flex items-center space-x-4">
-        
-             @if(ViewBag.IsLoggedIn == true)
-            {
-	            <a href="@Url.Action("Index", "Cart")" class="relative inline-flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-beige/80 border border-wine-red/20" title="Giỏ hàng">
-		            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-			            <path d="M2.25 3a.75.75 0 000 1.5h1.596c.26 0 .49.167.57.413l2.805 8.415a2.25 2.25 0 002.137 1.522h7.017a2.25 2.25 0 002.137-1.522l1.93-5.79A.75.75 0 0019.25 6H6.866l-.6-1.8A2.25 2.25 0 003.846 3H2.25z"/>
-			            <path d="M9 20.25a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17.25 20.25a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
-		            </svg>
-	            </a>
-            }
-	            @await Html.PartialAsync("_UserMenu")
 
-	            <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-muted-foreground hover:text-primary">
-	            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-		            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-	            </svg>
+            @if (ViewBag.IsLoggedIn == true)
+            {
+                <a href="@Url.Action("Index", "Cart")" class="relative inline-flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-beige/80 border border-wine-red/20" title="Giỏ hàng">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path d="M2.25 3a.75.75 0 000 1.5h1.596c.26 0 .49.167.57.413l2.805 8.415a2.25 2.25 0 002.137 1.522h7.017a2.25 2.25 0 002.137-1.522l1.93-5.79A.75.75 0 0019.25 6H6.866l-.6-1.8A2.25 2.25 0 003.846 3H2.25z" />
+                        <path d="M9 20.25a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM17.25 20.25a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                    </svg>
+                </a>
+            }
+            @await Html.PartialAsync("_UserMenu")
+
+            <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-muted-foreground hover:text-primary">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
             </button>
         </div>
     </div>
 
-    <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-background">
-        <nav class="container mx-auto px-4 py-4 space-y-2">
-            <a href="@Url.Action("Index", "Home")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+    <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-background/95 backdrop-blur shadow-lg">
+        <nav class="container mx-auto px-4 py-6 space-y-4">
+            <a href="@Url.Action("Index", "Home")" class="block py-3 text-lg font-medium text-[#62000d] hover:text-[#4a0009] hover:bg-[#fbf1e6] transition-all rounded-lg px-4">
                 Trang chủ
             </a>
-            <a href="#about" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a href="@Url.Action("Index", "AboutUs")" class="block py-3 text-lg font-medium text-[#62000d] hover:text-[#4a0009] hover:bg-[#fbf1e6] transition-all rounded-lg px-4">
                 Về chúng tôi
             </a>
-            <a href="@Url.Action("ListConcept", "Service")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a href="@Url.Action("ListConcept", "Concept")" class="block py-3 text-lg font-medium text-[#62000d] hover:text-[#4a0009] hover:bg-[#fbf1e6] transition-all rounded-lg px-4">
                 Gói dịch vụ
             </a>
-            <a href="@Url.Action("ListGiftbox", "Gift_box")" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a href="@Url.Action("ListGiftbox", "Gift_box")" class="block py-3 text-lg font-medium text-[#62000d] hover:text-[#4a0009] hover:bg-[#fbf1e6] transition-all rounded-lg px-4">
                 Smart Gift Box
             </a>
-            <a href="#contact" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                Đặt lịch
-            </a>
-            <a href="#blog" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a href="@Url.Action("Index", "Blog")" class="block py-3 text-lg font-medium text-[#62000d] hover:text-[#4a0009] hover:bg-[#fbf1e6] transition-all rounded-lg px-4">
                 Blog
             </a>
-            <a href="#contact" class="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <a href="#contact" class="block py-3 text-lg font-medium text-[#62000d] hover:text-[#4a0009] hover:bg-[#fbf1e6] transition-all rounded-lg px-4">
                 Liên hệ
             </a>
-         
-            <div class="pt-2 border-t border-border">
+
+            <div class="pt-4 mt-4 border-t border-border">
                 @await Html.PartialAsync("_UserMenu")
             </div>
         </nav>

@@ -163,6 +163,17 @@
                             'undo', 'redo'
                         ]
                     },
+                    htmlSupport: {
+                        allow: [
+                            {
+                                name: /.*/,
+                                attributes: true,
+                                classes: true,
+                                styles: true
+                            }
+                        ]
+                    },
+                    removePlugins: ['Markdown'],
                     language: 'vi'
                 })
                 .then(editor => {

@@ -112,6 +112,7 @@ namespace MonAmour.ViewModels
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public List<BlogComment> Comments { get; set; } = new List<BlogComment>();
+        public List<BlogListViewModel> RelatedPosts { get; set; } = new List<BlogListViewModel>();
     }
 
     public class BlogCategoryListViewModel
