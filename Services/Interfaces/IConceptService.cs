@@ -35,21 +35,21 @@ namespace MonAmour.Services.Interfaces
         Task<List<LocationDropdownViewModel>> GetLocationsForDropdownAsync();
 
         // Concept Category Management
-        Task<List<ConceptCategoryDropdownViewModel>> GetConceptCategoriesAsync();
+        Task<List<ConceptCategoryDropdownViewModel>> GetConceptCategoriesAsync(ConceptCategorySearchViewModel? searchModel = null);
         Task<ConceptCategoryDropdownViewModel?> GetConceptCategoryByIdAsync(int id);
         Task<bool> CreateConceptCategoryAsync(ConceptCategoryDropdownViewModel model);
         Task<bool> UpdateConceptCategoryAsync(ConceptCategoryDropdownViewModel model);
         Task<bool> DeleteConceptCategoryAsync(int id);
 
         // Concept Color Management
-        Task<List<ConceptColorDropdownViewModel>> GetConceptColorsAsync();
+        Task<List<ConceptColorDropdownViewModel>> GetConceptColorsAsync(ConceptColorSearchViewModel? searchModel = null);
         Task<ConceptColorDropdownViewModel?> GetConceptColorByIdAsync(int id);
         Task<bool> CreateConceptColorAsync(ConceptColorDropdownViewModel model);
         Task<bool> UpdateConceptColorAsync(ConceptColorDropdownViewModel model);
         Task<bool> DeleteConceptColorAsync(int id);
 
         // Concept Ambience Management
-        Task<List<ConceptAmbienceDropdownViewModel>> GetConceptAmbiencesAsync();
+        Task<List<ConceptAmbienceDropdownViewModel>> GetConceptAmbiencesAsync(ConceptAmbienceSearchViewModel? searchModel = null);
         Task<ConceptAmbienceDropdownViewModel?> GetConceptAmbienceByIdAsync(int id);
         Task<bool> CreateConceptAmbienceAsync(ConceptAmbienceDropdownViewModel model);
         Task<bool> UpdateConceptAmbienceAsync(ConceptAmbienceDropdownViewModel model);

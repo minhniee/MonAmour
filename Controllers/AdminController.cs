@@ -1092,12 +1092,65 @@ namespace MonAmour.Controllers
         /// Product Categories - quản lý danh mục sản phẩm
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> ProductCategories()
+        public async Task<IActionResult> ProductCategories(CategorySearchViewModel searchModel)
         {
             try
             {
                 await SetAdminViewBagAsync();
+                
+                // Set default values if not provided
+                if (string.IsNullOrEmpty(searchModel.SortBy))
+                    searchModel.SortBy = "name";
+                if (string.IsNullOrEmpty(searchModel.SortOrder))
+                    searchModel.SortOrder = "asc";
+                
                 var categories = await _productService.GetAllCategoriesAsync();
+                
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchModel.SearchTerm))
+                {
+                    var searchTerm = searchModel.SearchTerm.ToLower();
+                    categories = categories.Where(c => 
+                        c.Name.ToLower().Contains(searchTerm) ||
+                        c.CategoryId.ToString().Contains(searchTerm)
+                    ).ToList();
+                }
+                
+                // Apply status filter
+                if (!string.IsNullOrEmpty(searchModel.Status))
+                {
+                    switch (searchModel.Status)
+                    {
+                        case "hasProducts":
+                            categories = categories.Where(c => c.ProductCount > 0).ToList();
+                            break;
+                        case "empty":
+                            categories = categories.Where(c => c.ProductCount == 0).ToList();
+                            break;
+                    }
+                }
+                
+                // Apply sorting
+                switch (searchModel.SortBy)
+                {
+                    case "name":
+                        categories = searchModel.SortOrder == "desc" 
+                            ? categories.OrderByDescending(c => c.Name).ToList()
+                            : categories.OrderBy(c => c.Name).ToList();
+                        break;
+                    case "productCount":
+                        categories = searchModel.SortOrder == "desc"
+                            ? categories.OrderByDescending(c => c.ProductCount).ToList()
+                            : categories.OrderBy(c => c.ProductCount).ToList();
+                        break;
+                    case "id":
+                        categories = searchModel.SortOrder == "desc"
+                            ? categories.OrderByDescending(c => c.CategoryId).ToList()
+                            : categories.OrderBy(c => c.CategoryId).ToList();
+                        break;
+                }
+                
+                ViewBag.SearchModel = searchModel;
                 return View(categories);
             }
             catch (Exception ex)
@@ -1105,6 +1158,7 @@ namespace MonAmour.Controllers
                 _logger.LogError(ex, "Error in ProductCategories action");
                 TempData["Error"] = "Có lỗi xảy ra khi tải danh sách danh mục";
                 await SetAdminViewBagAsync();
+                ViewBag.SearchModel = new CategorySearchViewModel();
                 return View(new List<ProductCategoryViewModel>());
             }
         }
@@ -1732,12 +1786,18 @@ namespace MonAmour.Controllers
         /// Partners - quản lý đối tác
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Partners()
+        public async Task<IActionResult> Partners(PartnerSearchViewModel searchModel)
         {
             try
             {
                 await SetAdminViewBagAsync();
-                var searchModel = new PartnerSearchViewModel();
+                
+                // Set default values if not provided
+                if (string.IsNullOrEmpty(searchModel.SortBy))
+                    searchModel.SortBy = "name";
+                if (string.IsNullOrEmpty(searchModel.SortOrder))
+                    searchModel.SortOrder = "asc";
+                
                 var (partners, totalCount) = await _partnerService.GetPartnersAsync(searchModel);
 
                 ViewBag.TotalCount = totalCount;
@@ -2362,12 +2422,22 @@ namespace MonAmour.Controllers
         /// Locations - quản lý địa điểm
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Locations()
+        public async Task<IActionResult> Locations(LocationSearchViewModel searchModel)
         {
             try
             {
                 await SetAdminViewBagAsync();
-                var searchModel = new LocationSearchViewModel();
+                
+                // Initialize searchModel if null
+                if (searchModel == null)
+                    searchModel = new LocationSearchViewModel();
+                
+                // Set default values if not provided
+                if (string.IsNullOrEmpty(searchModel.SortBy))
+                    searchModel.SortBy = "name";
+                if (string.IsNullOrEmpty(searchModel.SortOrder))
+                    searchModel.SortOrder = "asc";
+                
                 var (locations, totalCount) = await _locationService.GetLocationsAsync(searchModel);
 
                 ViewBag.TotalCount = totalCount;
@@ -2380,6 +2450,7 @@ namespace MonAmour.Controllers
                 _logger.LogError(ex, "Error in Locations action");
                 TempData["Error"] = "Có lỗi xảy ra khi tải danh sách địa điểm";
                 await SetAdminViewBagAsync();
+                ViewBag.SearchModel = new LocationSearchViewModel();
                 return View(new List<LocationViewModel>());
             }
         }
@@ -2624,15 +2695,24 @@ namespace MonAmour.Controllers
         /// Concepts - quản lý concept
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Concepts()
+        public async Task<IActionResult> Concepts(ConceptSearchViewModel searchModel)
         {
             try
             {
                 await SetAdminViewBagAsync();
-                var searchModel = new ConceptSearchViewModel 
-                { 
-                    PageSize = 1000 // Load tất cả concept
-                };
+                
+                // Initialize searchModel if null
+                if (searchModel == null)
+                    searchModel = new ConceptSearchViewModel();
+                
+                // Set default values if not provided
+                if (string.IsNullOrEmpty(searchModel.SortBy))
+                    searchModel.SortBy = "name";
+                if (string.IsNullOrEmpty(searchModel.SortOrder))
+                    searchModel.SortOrder = "asc";
+                if (searchModel.PageSize == 0)
+                    searchModel.PageSize = 50; // Default page size
+                
                 var (concepts, totalCount) = await _conceptService.GetConceptsAsync(searchModel);
 
                 ViewBag.TotalCount = totalCount;
@@ -2922,12 +3002,25 @@ namespace MonAmour.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> ConceptCategories()
+        public async Task<IActionResult> ConceptCategories(ConceptCategorySearchViewModel searchModel)
         {
             try
             {
                 await SetAdminViewBagAsync();
-                var categories = await _conceptService.GetConceptCategoriesAsync();
+                
+                // Initialize searchModel if null
+                if (searchModel == null)
+                    searchModel = new ConceptCategorySearchViewModel();
+                
+                // Set default values if not provided
+                if (string.IsNullOrEmpty(searchModel.SortBy))
+                    searchModel.SortBy = "name";
+                if (string.IsNullOrEmpty(searchModel.SortOrder))
+                    searchModel.SortOrder = "asc";
+                
+                var categories = await _conceptService.GetConceptCategoriesAsync(searchModel);
+                ViewBag.SearchModel = searchModel;
+                
                 return View(categories);
             }
             catch (Exception ex)
@@ -2935,6 +3028,7 @@ namespace MonAmour.Controllers
                 _logger.LogError(ex, "Error in ConceptCategories action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách danh mục concept";
                 await SetAdminViewBagAsync();
+                ViewBag.SearchModel = new ConceptCategorySearchViewModel();
                 return View(new List<ConceptCategoryDropdownViewModel>());
             }
         }
@@ -3089,12 +3183,25 @@ namespace MonAmour.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> ConceptColors()
+        public async Task<IActionResult> ConceptColors(ConceptColorSearchViewModel searchModel)
         {
             try
             {
                 await SetAdminViewBagAsync();
-                var colors = await _conceptService.GetConceptColorsAsync();
+                
+                // Initialize searchModel if null
+                if (searchModel == null)
+                    searchModel = new ConceptColorSearchViewModel();
+                
+                // Set default values if not provided
+                if (string.IsNullOrEmpty(searchModel.SortBy))
+                    searchModel.SortBy = "name";
+                if (string.IsNullOrEmpty(searchModel.SortOrder))
+                    searchModel.SortOrder = "asc";
+                
+                var colors = await _conceptService.GetConceptColorsAsync(searchModel);
+                ViewBag.SearchModel = searchModel;
+                
                 return View(colors);
             }
             catch (Exception ex)
@@ -3102,6 +3209,7 @@ namespace MonAmour.Controllers
                 _logger.LogError(ex, "Error in ConceptColors action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách màu sắc concept";
                 await SetAdminViewBagAsync();
+                ViewBag.SearchModel = new ConceptColorSearchViewModel();
                 return View(new List<ConceptColorDropdownViewModel>());
             }
         }
@@ -3256,12 +3364,25 @@ namespace MonAmour.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> ConceptAmbiences()
+        public async Task<IActionResult> ConceptAmbiences(ConceptAmbienceSearchViewModel searchModel)
         {
             try
             {
                 await SetAdminViewBagAsync();
-                var ambiences = await _conceptService.GetConceptAmbiencesAsync();
+                
+                // Initialize searchModel if null
+                if (searchModel == null)
+                    searchModel = new ConceptAmbienceSearchViewModel();
+                
+                // Set default values if not provided
+                if (string.IsNullOrEmpty(searchModel.SortBy))
+                    searchModel.SortBy = "name";
+                if (string.IsNullOrEmpty(searchModel.SortOrder))
+                    searchModel.SortOrder = "asc";
+                
+                var ambiences = await _conceptService.GetConceptAmbiencesAsync(searchModel);
+                ViewBag.SearchModel = searchModel;
+                
                 return View(ambiences);
             }
             catch (Exception ex)
@@ -3269,6 +3390,7 @@ namespace MonAmour.Controllers
                 _logger.LogError(ex, "Error in ConceptAmbiences action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách không gian concept";
                 await SetAdminViewBagAsync();
+                ViewBag.SearchModel = new ConceptAmbienceSearchViewModel();
                 return View(new List<ConceptAmbienceDropdownViewModel>());
             }
         }
@@ -3890,7 +4012,7 @@ namespace MonAmour.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status, string returnUrl = null)
         {
             try
             {
@@ -3910,7 +4032,12 @@ namespace MonAmour.Controllers
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật trạng thái đơn hàng";
             }
 
-            return RedirectToAction("OrderDetail", new { id = orderId });
+            // Redirect về trang gốc hoặc Orders mặc định
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Orders");
         }
 
 
@@ -3958,6 +4085,39 @@ namespace MonAmour.Controllers
                 _logger.LogError(ex, "Error in ProcessPayment action");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi xử lý thanh toán" });
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(int orderId, string returnUrl = null)
+        {
+            try
+            {
+                _logger.LogInformation($"AdminController.CancelOrder called for OrderId: {orderId}");
+                
+                var result = await _orderService.CancelOrderAsync(orderId);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = $"Hủy đơn hàng #{orderId} thành công!";
+                    _logger.LogInformation($"Successfully cancelled order {orderId}");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Không thể hủy đơn hàng #{orderId}. Đơn hàng có thể đã được xác nhận, đang giao hàng hoặc đã hoàn thành.";
+                    _logger.LogWarning($"Failed to cancel order {orderId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in CancelOrder action for OrderId: {orderId}");
+                TempData["ErrorMessage"] = $"Có lỗi xảy ra khi hủy đơn hàng #{orderId}";
+            }
+
+            // Redirect về trang gốc hoặc Orders mặc định
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            return RedirectToAction("Orders");
         }
 
         #endregion

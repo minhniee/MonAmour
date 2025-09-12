@@ -88,10 +88,67 @@
         </div>
     </div>
 
+    <!-- Search and Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-3">
+                    <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                    <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                           value="@(ViewBag.SearchModel?.SearchTerm ?? "")" placeholder="Tên địa điểm, địa chỉ...">
+                </div>
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Trạng thái</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="">-- Tất cả --</option>
+                        <option value="Active" selected="@(ViewBag.SearchModel?.Status == "Active")">Hoạt động</option>
+                        <option value="Inactive" selected="@(ViewBag.SearchModel?.Status == "Inactive")">Tạm dừng</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="city" class="form-label">Thành phố</label>
+                    <input type="text" id="city" name="city" class="form-control" 
+                           value="@(ViewBag.SearchModel?.City ?? "")" placeholder="Thành phố...">
+                </div>
+                <div class="col-md-2">
+                    <label for="sortBy" class="form-label">Sắp xếp theo</label>
+                    <select id="sortBy" name="sortBy" class="form-control">
+                        <option value="name" selected="@(ViewBag.SearchModel?.SortBy == "name")">Tên địa điểm</option>
+                        <option value="city" selected="@(ViewBag.SearchModel?.SortBy == "city")">Thành phố</option>
+                        <option value="conceptCount" selected="@(ViewBag.SearchModel?.SortBy == "conceptCount")">Số concept</option>
+                        <option value="id" selected="@(ViewBag.SearchModel?.SortBy == "id")">ID</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="@Url.Action("Locations", "Admin")" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Locations Table -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Danh sách Địa điểm</h6>
+            <h6 class="m-0 font-weight-bold text-primary">
+                Danh sách Địa điểm
+                @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null || ViewBag.SearchModel?.City != null)
+                {
+                    <span class="text-muted">(@Model.Count kết quả)</span>
+                }
+            </h6>
             <div class="dropdown no-arrow">
                 <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -220,11 +277,22 @@
             {
                 <div class="text-center py-5">
                     <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Chưa có địa điểm nào</h5>
-                    <p class="text-muted">Hãy tạo địa điểm đầu tiên để bắt đầu</p>
-                    <a href="@Url.Action("CreateLocation", "Admin")" class="btn btn-primary">
-                        <i class="fas fa-plus mr-2"></i>Thêm Địa điểm
-                    </a>
+                    @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null || ViewBag.SearchModel?.City != null)
+                    {
+                        <h5 class="text-muted">Không tìm thấy địa điểm nào</h5>
+                        <p class="text-muted">Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>
+                        <a href="@Url.Action("Locations", "Admin")" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>Xóa bộ lọc
+                        </a>
+                    }
+                    else
+                    {
+                        <h5 class="text-muted">Chưa có địa điểm nào</h5>
+                        <p class="text-muted">Hãy tạo địa điểm đầu tiên để bắt đầu</p>
+                        <a href="@Url.Action("CreateLocation", "Admin")" class="btn btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Thêm Địa điểm
+                        </a>
+                    }
                 </div>
             }
         </div>
@@ -574,7 +642,9 @@
                 "order": [[0, "asc"]], // Sort by ID asc
                 "columnDefs": [
                     { "orderable": false, "targets": [7] } // Disable sorting for action column
-                ]
+                ],
+                "searching": false, // Disable DataTable search since we have custom search
+                "info": false // Disable info since we show custom count
             });
         });
     </script>

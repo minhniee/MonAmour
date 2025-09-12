@@ -39,5 +39,7 @@ namespace MonAmour.Services.Interfaces
         Task<bool> CanOrderBeModifiedAsync(int orderId);
         Task<bool> CanOrderBeDeletedAsync(int orderId);
         Task<bool> ProcessOrderPaymentAsync(int orderId, decimal amount, int paymentMethodId);
+        Task<bool> CanCancelOrderAsync(int orderId);
+        Task<bool> CancelOrderAsync(int orderId);
     }
 }

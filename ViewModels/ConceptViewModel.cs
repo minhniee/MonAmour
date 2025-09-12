@@ -110,19 +110,7 @@ namespace MonAmour.ViewModels
         public List<ConceptImgViewModel> Images { get; set; } = new List<ConceptImgViewModel>();
     }
 
-    public class ConceptSearchViewModel
-    {
-        public string? SearchTerm { get; set; }
-        public int? LocationId { get; set; }
-        public int? CategoryId { get; set; }
-        public List<int> ColorIds { get; set; } = new List<int>();
-        public int? AmbienceId { get; set; }
-        public bool? AvailabilityStatus { get; set; }
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public string? SortBy { get; set; } = "Name";
-        public string? SortOrder { get; set; } = "asc";
-    }
+    
 
     public class ConceptImgViewModel
     {

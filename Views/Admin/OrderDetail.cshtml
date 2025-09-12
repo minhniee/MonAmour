@@ -109,6 +109,16 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Cập nhật Đơn hàng
                             </button>
+                            @{
+                                // Logic kiểm tra có thể hủy đơn hàng - đơn giản hóa
+                                bool canCancel = Model.Status == "pending";
+                            }
+                            @if (canCancel)
+                            {
+                                <button type="button" class="btn btn-danger ml-2" onclick="cancelOrder(@Model.OrderId)">
+                                    <i class="fas fa-times"></i> Hủy Đơn hàng
+                                </button>
+                            }
                         </div>
                     </form>
                 </div>
@@ -319,7 +329,11 @@
                             <div class="timeline-content">
                                 <h6 class="timeline-title">Đơn hàng được tạo</h6>
                                 <p class="timeline-text">
-                                    @if (Model.CreatedAt.HasValue)
+                                    @if (Model.UpdatedAt.HasValue)
+                                    {
+                                        @Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                    }
+                                    else if (Model.CreatedAt.HasValue)
                                     {
                                         @Model.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
                                     }
@@ -374,6 +388,22 @@
                                 </div>
                             </div>
                         }
+                        
+                        @if (Model.Status == "cancelled")
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-danger"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Đơn hàng đã hủy</h6>
+                                    <p class="timeline-text">
+                                        @if (Model.UpdatedAt.HasValue)
+                                        {
+                                            @Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -409,11 +439,48 @@
                     statusInput.value = $(this).val();
                     form.appendChild(statusInput);
                     
+                    // Thêm returnUrl để redirect về trang OrderDetail
+                    const returnUrlInput = document.createElement('input');
+                    returnUrlInput.type = 'hidden';
+                    returnUrlInput.name = 'returnUrl';
+                    returnUrlInput.value = '@Url.Action("OrderDetail", "Admin", new { id = Model.OrderId })';
+                    form.appendChild(returnUrlInput);
+                    
                     document.body.appendChild(form);
                     form.submit();
                 }
             });
         });
+
+        function cancelOrder(orderId) {
+            if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("CancelOrder", "Admin")';
+                
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '__RequestVerificationToken';
+                token.value = $('input[name="__RequestVerificationToken"]').val();
+                form.appendChild(token);
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'orderId';
+                idInput.value = orderId;
+                form.appendChild(idInput);
+                
+                // Thêm returnUrl để redirect về trang OrderDetail
+                const returnUrlInput = document.createElement('input');
+                returnUrlInput.type = 'hidden';
+                returnUrlInput.name = 'returnUrl';
+                returnUrlInput.value = '@Url.Action("OrderDetail", "Admin", new { id = Model.OrderId })';
+                form.appendChild(returnUrlInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
     </script>
 }
 

@@ -36,11 +36,59 @@
                 </div>
             }
 
+            <!-- Search and Filter Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-4">
+                            <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                            <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                                   value="@(ViewBag.SearchModel?.SearchTerm ?? "")" placeholder="Tên danh mục, mô tả...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select id="status" name="status" class="form-control">
+                                <option value="">-- Tất cả --</option>
+                                <option value="active" selected="@(ViewBag.SearchModel?.Status == "active")">Hoạt động</option>
+                                <option value="inactive" selected="@(ViewBag.SearchModel?.Status == "inactive")">Không hoạt động</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sortBy" class="form-label">Sắp xếp theo</label>
+                            <select id="sortBy" name="sortBy" class="form-control">
+                                <option value="name" selected="@(ViewBag.SearchModel?.SortBy == "name")">Tên danh mục</option>
+                                <option value="id" selected="@(ViewBag.SearchModel?.SortBy == "id")">ID</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Tìm kiếm
+                                </button>
+                                <a href="@Url.Action("ConceptCategories", "Admin")" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Xóa bộ lọc
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Categories Table -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-list"></i> Danh sách danh mục concept
+                        @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null)
+                        {
+                            <span class="text-muted">(@Model.Count kết quả)</span>
+                        }
                     </h5>
                 </div>
                 <div class="card-body">
@@ -111,11 +159,22 @@
                     {
                         <div class="text-center py-5">
                             <i class="fas fa-tags fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Chưa có danh mục concept nào</h5>
-                            <p class="text-muted">Hãy tạo danh mục concept đầu tiên để bắt đầu quản lý.</p>
-                            <a href="@Url.Action("CreateConceptCategory", "Admin")" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Thêm danh mục đầu tiên
-                            </a>
+                            @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null)
+                            {
+                                <h5 class="text-muted">Không tìm thấy danh mục concept nào</h5>
+                                <p class="text-muted">Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>
+                                <a href="@Url.Action("ConceptCategories", "Admin")" class="btn btn-secondary">
+                                    <i class="fas fa-times mr-2"></i>Xóa bộ lọc
+                                </a>
+                            }
+                            else
+                            {
+                                <h5 class="text-muted">Chưa có danh mục concept nào</h5>
+                                <p class="text-muted">Hãy tạo danh mục concept đầu tiên để bắt đầu quản lý.</p>
+                                <a href="@Url.Action("CreateConceptCategory", "Admin")" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Thêm danh mục đầu tiên
+                                </a>
+                            }
                         </div>
                     }
                 </div>
@@ -168,7 +227,9 @@
                 "order": [[0, "desc"]],
                 "columnDefs": [
                     { "orderable": false, "targets": 4 }
-                ]
+                ],
+                "searching": false, // Disable DataTable search since we have custom search
+                "info": false // Disable info since we show custom count
             });
         });
 

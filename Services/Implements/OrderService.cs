@@ -269,6 +269,57 @@ namespace MonAmour.Services.Implements
                     order.DeliveredAt = DateTime.Now;
                 }
 
+                // Nếu chuyển sang confirmed, đảm bảo có payment với status completed
+                if (status == "confirmed")
+                {
+                    var existingPaymentDetail = await _context.PaymentDetails
+                        .Include(pd => pd.Payment)
+                        .FirstOrDefaultAsync(pd => pd.OrderId == orderId);
+                    
+                    if (existingPaymentDetail != null)
+                    {
+                        // Cập nhật payment hiện tại thành completed
+                        if (existingPaymentDetail.Payment != null)
+                        {
+                            existingPaymentDetail.Payment.Status = "completed";
+                            existingPaymentDetail.Payment.ProcessedAt = DateTime.Now;
+                        }
+                    }
+                    else if (order.TotalPrice.HasValue)
+                    {
+                        // Tạo payment record mới nếu chưa có
+                        var defaultPaymentMethod = await _context.PaymentMethods
+                            .FirstOrDefaultAsync();
+                        
+                        if (defaultPaymentMethod != null)
+                        {
+                            // Tạo payment record
+                            var payment = new Payment
+                            {
+                                Amount = order.TotalPrice.Value,
+                                Status = "completed",
+                                PaymentMethodId = defaultPaymentMethod.PaymentMethodId,
+                                CreatedAt = DateTime.Now,
+                                ProcessedAt = DateTime.Now,
+                                UserId = order.UserId
+                            };
+
+                            _context.Payments.Add(payment);
+                            await _context.SaveChangesAsync(); // Save để lấy PaymentId
+
+                            // Tạo payment detail
+                            var paymentDetail = new PaymentDetail
+                            {
+                                PaymentId = payment.PaymentId,
+                                OrderId = orderId,
+                                Amount = order.TotalPrice.Value
+                            };
+
+                            _context.PaymentDetails.Add(paymentDetail);
+                        }
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -669,6 +720,99 @@ namespace MonAmour.Services.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in ProcessOrderPaymentAsync");
+                return false;
+            }
+        }
+
+        public async Task<bool> CanCancelOrderAsync(int orderId)
+        {
+            try
+            {
+                var order = await _context.Orders.FindAsync(orderId);
+                return order != null && order.Status == "pending";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in CanCancelOrderAsync for OrderId: {orderId}");
+                return false;
+            }
+        }
+
+        public async Task<bool> CancelOrderAsync(int orderId)
+        {
+            try
+            {
+                _logger.LogInformation($"Starting CancelOrderAsync for OrderId: {orderId}");
+
+                var order = await _context.Orders
+                    .Include(o => o.PaymentDetails)
+                        .ThenInclude(pd => pd.Payment)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+                if (order == null)
+                {
+                    _logger.LogWarning($"Order not found: {orderId}");
+                    return false;
+                }
+
+                _logger.LogInformation($"Order found - Status: {order.Status}, PaymentDetails count: {order.PaymentDetails.Count}");
+
+                // Kiểm tra điều kiện có thể hủy đơn hàng - đơn giản hóa
+                bool canCancel = false;
+                
+                // Chỉ cần kiểm tra đơn hàng có status pending và chưa được confirmed/shipping/completed
+                if (order.Status == "pending")
+                {
+                    canCancel = true;
+                    _logger.LogInformation($"Can cancel: Order {orderId} is pending");
+                    
+                    // Log thêm thông tin payment để debug
+                    if (order.PaymentDetails.Any())
+                    {
+                        var payment = order.PaymentDetails.First().Payment;
+                        _logger.LogInformation($"Payment info - PaymentId: {payment?.PaymentId}, Status: {payment?.Status}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No payment details found");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Cannot cancel: Order status is {order.Status}");
+                }
+
+                if (!canCancel)
+                {
+                    _logger.LogWarning($"Cannot cancel order {orderId} - Status: {order.Status}");
+                    return false;
+                }
+
+                // Cập nhật trạng thái đơn hàng thành cancelled
+                order.Status = "cancelled";
+                order.UpdatedAt = DateTime.Now;
+                _logger.LogInformation($"Updated order {orderId} status to cancelled");
+
+                // Nếu có payment với status pending, cập nhật thành failed
+                if (order.PaymentDetails.Any())
+                {
+                    var payment = order.PaymentDetails.First().Payment;
+                    if (payment != null && payment.Status == "pending")
+                    {
+                        payment.Status = "failed";
+                        payment.UpdatedAt = DateTime.Now;
+                        _logger.LogInformation($"Updated payment {payment.PaymentId} status to failed");
+                    }
+                }
+
+                var result = await _context.SaveChangesAsync();
+                _logger.LogInformation($"SaveChanges result: {result} rows affected");
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in CancelOrderAsync for OrderId: {orderId}");
                 return false;
             }
         }

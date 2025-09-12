@@ -112,17 +112,6 @@ namespace MonAmour.ViewModels
         public List<LocationConceptViewModel> Concepts { get; set; } = new List<LocationConceptViewModel>();
     }
 
-    public class LocationSearchViewModel
-    {
-        public string? SearchTerm { get; set; }
-        public string? Status { get; set; }
-        public int? PartnerId { get; set; }
-        public string? City { get; set; }
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public string? SortBy { get; set; } = "Name";
-        public string? SortOrder { get; set; } = "asc";
-    }
 
     // ConceptViewModel for Location context
     public class LocationConceptViewModel

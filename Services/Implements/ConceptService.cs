@@ -32,8 +32,9 @@ namespace MonAmour.Services.Implements
                 // Apply filters
                 if (!string.IsNullOrEmpty(searchModel.SearchTerm))
                 {
-                    query = query.Where(c => c.Name!.Contains(searchModel.SearchTerm) ||
-                                           c.Description!.Contains(searchModel.SearchTerm));
+                    var searchTerm = searchModel.SearchTerm.ToLower();
+                    query = query.Where(c => c.Name!.ToLower().Contains(searchTerm) ||
+                                           (c.Description != null && c.Description.ToLower().Contains(searchTerm)));
                 }
 
                 if (searchModel.LocationId.HasValue)
@@ -56,9 +57,10 @@ namespace MonAmour.Services.Implements
                     query = query.Where(c => c.AmbienceId == searchModel.AmbienceId.Value);
                 }
 
-                if (searchModel.AvailabilityStatus.HasValue)
+                if (!string.IsNullOrEmpty(searchModel.Status))
                 {
-                    query = query.Where(c => c.AvailabilityStatus == searchModel.AvailabilityStatus.Value);
+                    var isAvailable = searchModel.Status == "available";
+                    query = query.Where(c => c.AvailabilityStatus == isAvailable);
                 }
 
                 // Get total count
@@ -758,12 +760,43 @@ namespace MonAmour.Services.Implements
 
         #region Concept Category Management
 
-        public async Task<List<ConceptCategoryDropdownViewModel>> GetConceptCategoriesAsync()
+        public async Task<List<ConceptCategoryDropdownViewModel>> GetConceptCategoriesAsync(ConceptCategorySearchViewModel? searchModel = null)
         {
             try
             {
-                var categories = await _context.ConceptCategories
-                    .OrderBy(c => c.Name)
+                var query = _context.ConceptCategories.AsQueryable();
+
+                // Apply search filters
+                if (searchModel != null)
+                {
+                    if (!string.IsNullOrEmpty(searchModel.SearchTerm))
+                    {
+                        var searchTerm = searchModel.SearchTerm.ToLower();
+                        query = query.Where(c => 
+                            c.Name!.ToLower().Contains(searchTerm) ||
+                            (c.Description != null && c.Description.ToLower().Contains(searchTerm)));
+                    }
+
+                    if (!string.IsNullOrEmpty(searchModel.Status))
+                    {
+                        var isActive = searchModel.Status == "active";
+                        query = query.Where(c => (c.IsActive ?? true) == isActive);
+                    }
+
+                    // Apply sorting
+                    query = searchModel.SortBy?.ToLower() switch
+                    {
+                        "name" => searchModel.SortOrder == "desc" ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name),
+                        "id" => searchModel.SortOrder == "desc" ? query.OrderByDescending(c => c.CategoryId) : query.OrderBy(c => c.CategoryId),
+                        _ => query.OrderBy(c => c.Name)
+                    };
+                }
+                else
+                {
+                    query = query.OrderBy(c => c.Name);
+                }
+
+                var categories = await query
                     .Select(c => new ConceptCategoryDropdownViewModel
                     {
                         CategoryId = c.CategoryId,
@@ -878,12 +911,38 @@ namespace MonAmour.Services.Implements
 
         #region Concept Color Management
 
-        public async Task<List<ConceptColorDropdownViewModel>> GetConceptColorsAsync()
+        public async Task<List<ConceptColorDropdownViewModel>> GetConceptColorsAsync(ConceptColorSearchViewModel? searchModel = null)
         {
             try
             {
-                var colors = await _context.ConceptColors
-                    .OrderBy(c => c.Name)
+                var query = _context.ConceptColors.AsQueryable();
+
+                // Apply search filters
+                if (searchModel != null)
+                {
+                    if (!string.IsNullOrEmpty(searchModel.SearchTerm))
+                    {
+                        var searchTerm = searchModel.SearchTerm.ToLower();
+                        query = query.Where(c => 
+                            c.Name!.ToLower().Contains(searchTerm) ||
+                            (c.Code != null && c.Code.ToLower().Contains(searchTerm)));
+                    }
+
+                    // Apply sorting
+                    query = searchModel.SortBy?.ToLower() switch
+                    {
+                        "name" => searchModel.SortOrder == "desc" ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name),
+                        "code" => searchModel.SortOrder == "desc" ? query.OrderByDescending(c => c.Code) : query.OrderBy(c => c.Code),
+                        "id" => searchModel.SortOrder == "desc" ? query.OrderByDescending(c => c.ColorId) : query.OrderBy(c => c.ColorId),
+                        _ => query.OrderBy(c => c.Name)
+                    };
+                }
+                else
+                {
+                    query = query.OrderBy(c => c.Name);
+                }
+
+                var colors = await query
                     .Select(c => new ConceptColorDropdownViewModel
                     {
                         ColorId = c.ColorId,
@@ -994,12 +1053,35 @@ namespace MonAmour.Services.Implements
 
         #region Concept Ambience Management
 
-        public async Task<List<ConceptAmbienceDropdownViewModel>> GetConceptAmbiencesAsync()
+        public async Task<List<ConceptAmbienceDropdownViewModel>> GetConceptAmbiencesAsync(ConceptAmbienceSearchViewModel? searchModel = null)
         {
             try
             {
-                var ambiences = await _context.ConceptAmbiences
-                    .OrderBy(a => a.Name)
+                var query = _context.ConceptAmbiences.AsQueryable();
+
+                // Apply search filters
+                if (searchModel != null)
+                {
+                    if (!string.IsNullOrEmpty(searchModel.SearchTerm))
+                    {
+                        var searchTerm = searchModel.SearchTerm.ToLower();
+                        query = query.Where(a => a.Name!.ToLower().Contains(searchTerm));
+                    }
+
+                    // Apply sorting
+                    query = searchModel.SortBy?.ToLower() switch
+                    {
+                        "name" => searchModel.SortOrder == "desc" ? query.OrderByDescending(a => a.Name) : query.OrderBy(a => a.Name),
+                        "id" => searchModel.SortOrder == "desc" ? query.OrderByDescending(a => a.AmbienceId) : query.OrderBy(a => a.AmbienceId),
+                        _ => query.OrderBy(a => a.Name)
+                    };
+                }
+                else
+                {
+                    query = query.OrderBy(a => a.Name);
+                }
+
+                var ambiences = await query
                     .Select(a => new ConceptAmbienceDropdownViewModel
                     {
                         AmbienceId = a.AmbienceId,

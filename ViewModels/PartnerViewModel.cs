@@ -109,16 +109,6 @@ namespace MonAmour.ViewModels
         public List<LocationViewModel> Locations { get; set; } = new List<LocationViewModel>();
     }
 
-    public class PartnerSearchViewModel
-    {
-        public string? SearchTerm { get; set; }
-        public string? Status { get; set; }
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public string? SortBy { get; set; } = "Name";
-        public string? SortOrder { get; set; } = "asc";
-    }
-
     public class PartnerDropdownViewModel
     {
         public int PartnerId { get; set; }

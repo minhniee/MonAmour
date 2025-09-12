@@ -45,10 +45,62 @@
         </div>
     </div>
 
+    <!-- Search and Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-3">
+                    <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                    <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                           value="@(ViewBag.SearchModel?.SearchTerm ?? "")" placeholder="Tên concept, mô tả...">
+                </div>
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Trạng thái</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="">-- Tất cả --</option>
+                        <option value="available" selected="@(ViewBag.SearchModel?.Status == "available")">Có sẵn</option>
+                        <option value="unavailable" selected="@(ViewBag.SearchModel?.Status == "unavailable")">Không có sẵn</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sortBy" class="form-label">Sắp xếp theo</label>
+                    <select id="sortBy" name="sortBy" class="form-control">
+                        <option value="name" selected="@(ViewBag.SearchModel?.SortBy == "name")">Tên concept</option>
+                        <option value="price" selected="@(ViewBag.SearchModel?.SortBy == "price")">Giá</option>
+                        <option value="createdAt" selected="@(ViewBag.SearchModel?.SortBy == "createdAt")">Ngày tạo</option>
+                        <option value="id" selected="@(ViewBag.SearchModel?.SortBy == "id")">ID</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="@Url.Action("Concepts", "Admin")" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Concepts Table -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Danh sách Concept</h6>
+            <h6 class="m-0 font-weight-bold text-primary">
+                Danh sách Concept
+                @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null)
+                {
+                    <span class="text-muted">(@Model.Count kết quả)</span>
+                }
+            </h6>
         </div>
         <div class="card-body">
             @if (Model != null && Model.Any())
@@ -191,11 +243,22 @@
             {
                 <div class="text-center py-4">
                     <i class="fas fa-lightbulb fa-3x text-gray-300 mb-3"></i>
-                    <h5 class="text-gray-600">Chưa có concept nào</h5>
-                    <p class="text-gray-500">Hãy tạo concept đầu tiên để bắt đầu quản lý.</p>
-                    <a href="@Url.Action("CreateConcept", "Admin")" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Tạo Concept Mới
-                    </a>
+                    @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null)
+                    {
+                        <h5 class="text-gray-600">Không tìm thấy concept nào</h5>
+                        <p class="text-gray-500">Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>
+                        <a href="@Url.Action("Concepts", "Admin")" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>Xóa bộ lọc
+                        </a>
+                    }
+                    else
+                    {
+                        <h5 class="text-gray-600">Chưa có concept nào</h5>
+                        <p class="text-gray-500">Hãy tạo concept đầu tiên để bắt đầu quản lý.</p>
+                        <a href="@Url.Action("CreateConcept", "Admin")" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tạo Concept Mới
+                        </a>
+                    }
                 </div>
             }
         </div>
@@ -239,7 +302,9 @@
                 "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tất cả"]],
                 "order": [[0, "desc"]],
                 "responsive": true,
-                "autoWidth": false
+                "autoWidth": false,
+                "searching": false, // Disable DataTable search since we have custom search
+                "info": false // Disable info since we show custom count
             });
         });
 

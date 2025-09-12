@@ -36,11 +36,52 @@
                 </div>
             }
 
+            <!-- Search and Filter Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-4">
+                            <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                            <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                                   value="@(ViewBag.SearchModel?.SearchTerm ?? "")" placeholder="Tên màu, mã màu...">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sortBy" class="form-label">Sắp xếp theo</label>
+                            <select id="sortBy" name="sortBy" class="form-control">
+                                <option value="name" selected="@(ViewBag.SearchModel?.SortBy == "name")">Tên màu</option>
+                                <option value="code" selected="@(ViewBag.SearchModel?.SortBy == "code")">Mã màu</option>
+                                <option value="id" selected="@(ViewBag.SearchModel?.SortBy == "id")">ID</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Tìm kiếm
+                                </button>
+                                <a href="@Url.Action("ConceptColors", "Admin")" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Xóa bộ lọc
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Colors Table -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-list"></i> Danh sách màu sắc concept
+                        @if (ViewBag.SearchModel?.SearchTerm != null)
+                        {
+                            <span class="text-muted">(@Model.Count kết quả)</span>
+                        }
                     </h5>
                 </div>
                 <div class="card-body">
@@ -115,11 +156,22 @@
                     {
                         <div class="text-center py-5">
                             <i class="fas fa-palette fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Chưa có màu sắc concept nào</h5>
-                            <p class="text-muted">Hãy tạo màu sắc concept đầu tiên để bắt đầu quản lý.</p>
-                            <a href="@Url.Action("CreateConceptColor", "Admin")" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Thêm màu sắc đầu tiên
-                            </a>
+                            @if (ViewBag.SearchModel?.SearchTerm != null)
+                            {
+                                <h5 class="text-muted">Không tìm thấy màu sắc concept nào</h5>
+                                <p class="text-muted">Hãy thử thay đổi từ khóa tìm kiếm</p>
+                                <a href="@Url.Action("ConceptColors", "Admin")" class="btn btn-secondary">
+                                    <i class="fas fa-times mr-2"></i>Xóa bộ lọc
+                                </a>
+                            }
+                            else
+                            {
+                                <h5 class="text-muted">Chưa có màu sắc concept nào</h5>
+                                <p class="text-muted">Hãy tạo màu sắc concept đầu tiên để bắt đầu quản lý.</p>
+                                <a href="@Url.Action("CreateConceptColor", "Admin")" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Thêm màu sắc đầu tiên
+                                </a>
+                            }
                         </div>
                     }
                 </div>
@@ -218,7 +270,9 @@
                 "columnDefs": [
                     { "orderable": false, "targets": [3, 4] }
                 ],
-                "responsive": true
+                "responsive": true,
+                "searching": false, // Disable DataTable search since we have custom search
+                "info": false // Disable info since we show custom count
             });
             
             // Add click event to color previews

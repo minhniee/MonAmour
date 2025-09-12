@@ -88,10 +88,61 @@
         </div>
     </div>
 
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-search mr-2"></i>Tìm kiếm và Lọc
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                    <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                           value="@ViewBag.SearchModel?.SearchTerm" placeholder="Tên danh mục, ID...">
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Trạng thái</label>
+                    <select id="status" name="status" class="form-control">
+                        <option value="">-- Tất cả --</option>
+                        <option value="hasProducts" selected="@(ViewBag.SearchModel?.Status == "hasProducts")">Có sản phẩm</option>
+                        <option value="empty" selected="@(ViewBag.SearchModel?.Status == "empty")">Trống</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="sortBy" class="form-label">Sắp xếp theo</label>
+                    <select id="sortBy" name="sortBy" class="form-control">
+                        <option value="name" selected="@(ViewBag.SearchModel?.SortBy == "name")">Tên danh mục</option>
+                        <option value="productCount" selected="@(ViewBag.SearchModel?.SortBy == "productCount")">Số sản phẩm</option>
+                        <option value="id" selected="@(ViewBag.SearchModel?.SortBy == "id")">ID</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="@Url.Action("ProductCategories", "Admin")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Xóa bộ lọc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Categories Table -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Danh sách Danh mục</h6>
+            <h6 class="m-0 font-weight-bold text-primary">
+                Danh sách Danh mục
+                @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null)
+                {
+                    <small class="text-muted">(@Model.Count kết quả)</small>
+                }
+            </h6>
             <div class="dropdown no-arrow">
                 <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -176,12 +227,24 @@
             else
             {
                 <div class="text-center py-5">
-                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">Chưa có danh mục nào</h5>
-                    <p class="text-muted">Hãy tạo danh mục đầu tiên để bắt đầu</p>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createCategoryModal">
-                        <i class="fas fa-plus mr-2"></i>Thêm Danh mục
-                    </button>
+                    @if (ViewBag.SearchModel?.SearchTerm != null || ViewBag.SearchModel?.Status != null)
+                    {
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Không tìm thấy danh mục nào</h5>
+                        <p class="text-muted">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>
+                        <a href="@Url.Action("ProductCategories", "Admin")" class="btn btn-outline-secondary">
+                            <i class="fas fa-times mr-2"></i>Xóa bộ lọc
+                        </a>
+                    }
+                    else
+                    {
+                        <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Chưa có danh mục nào</h5>
+                        <p class="text-muted">Hãy tạo danh mục đầu tiên để bắt đầu</p>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createCategoryModal">
+                            <i class="fas fa-plus mr-2"></i>Thêm Danh mục
+                        </button>
+                    }
                 </div>
             }
         </div>
@@ -520,6 +583,8 @@
                 },
                 "pageLength": 25,
                 "order": [[0, "asc"]], // Sort by ID asc
+                "searching": false, // Disable DataTable search since we have custom search
+                "info": false, // Hide "Showing X to Y of Z entries" since we have custom search
                 "columnDefs": [
                     { "orderable": false, "targets": [4] } // Disable sorting for action column
                 ]

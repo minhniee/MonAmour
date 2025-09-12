@@ -6,6 +6,26 @@
 }
 
 <div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
     <!-- Page Header -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Quản lý Đơn hàng</h1>
@@ -248,7 +268,7 @@
                                 <th>Mã tracking</th>
                                 <th>Thanh toán</th>
                                 <th>Số sản phẩm</th>
-                                <th>Ngày tạo</th>
+                                <th>Ngày cập nhật</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
@@ -366,7 +386,11 @@
                                         <span class="badge badge-info">@order.ItemCount sản phẩm</span>
                                     </td>
                                     <td>
-                                        @if (order.CreatedAt.HasValue)
+                                        @if (order.UpdatedAt.HasValue)
+                                        {
+                                            @order.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                        }
+                                        else if (order.CreatedAt.HasValue)
                                         {
                                             @order.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
                                         }
@@ -383,6 +407,18 @@
                                                         onclick="updateOrderStatus(@order.OrderId, '@order.Status')"
                                                         title="Cập nhật trạng thái">
                                                     <i class="fas fa-edit"></i>
+                                                </button>
+                                            }
+                                            @{
+                                                // Logic kiểm tra có thể hủy đơn hàng - đơn giản hóa
+                                                bool canCancel = order.Status == "pending";
+                                            }
+                                            @if (canCancel)
+                                            {
+                                                <button type="button" class="btn btn-danger btn-sm" 
+                                                        onclick="cancelOrder(@order.OrderId)"
+                                                        title="Hủy đơn hàng">
+                                                    <i class="fas fa-times"></i>
                                                 </button>
                                             }
                                         </div>
@@ -494,6 +530,13 @@
             statusInput.value = newStatus;
             form.appendChild(statusInput);
             
+            // Thêm returnUrl để redirect về trang Orders
+            const returnUrlInput = document.createElement('input');
+            returnUrlInput.type = 'hidden';
+            returnUrlInput.name = 'returnUrl';
+            returnUrlInput.value = '@Url.Action("Orders", "Admin")';
+            form.appendChild(returnUrlInput);
+            
             document.body.appendChild(form);
             form.submit();
         });
@@ -536,6 +579,36 @@
             setTimeout(() => {
                 $('.alert').fadeOut();
             }, 5000);
+        }
+
+        function cancelOrder(orderId) {
+            if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("CancelOrder", "Admin")';
+                
+                const token = document.createElement('input');
+                token.type = 'hidden';
+                token.name = '__RequestVerificationToken';
+                token.value = $('input[name="__RequestVerificationToken"]').val();
+                form.appendChild(token);
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'orderId';
+                idInput.value = orderId;
+                form.appendChild(idInput);
+                
+                // Thêm returnUrl để redirect về trang Orders
+                const returnUrlInput = document.createElement('input');
+                returnUrlInput.type = 'hidden';
+                returnUrlInput.name = 'returnUrl';
+                returnUrlInput.value = '@Url.Action("Orders", "Admin")';
+                form.appendChild(returnUrlInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
         }
     </script>
 }
