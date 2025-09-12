@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MonAmour.AuthViewModel;
 using MonAmour.Helpers;
 using MonAmour.Models;
 using MonAmour.Services.Interfaces;
@@ -14,17 +13,17 @@ namespace MonAmour.Controllers
         private readonly MonAmourDbContext _db;
         private readonly ICassoService _cassoService;
         private readonly IVietQRService _vietQRService;
-        private readonly IReviewService _reviewService;
         private readonly IConfiguration _config;
 
-        public CartController(MonAmourDbContext db, ICassoService cassoService, IVietQRService vietQRService, IConfiguration configuration, IReviewService reviewService)
+        private readonly IEmailService _emailService;
+
+        public CartController(MonAmourDbContext db, ICassoService cassoService, IVietQRService vietQRService, IConfiguration configuration, IEmailService emailService)
         {
             _db = db;
             _cassoService = cassoService;
             _vietQRService = vietQRService;
             _config = configuration;
-            _reviewService = reviewService;
-
+            _emailService = emailService;
         }
 
         // GET: /Cart
@@ -39,7 +38,11 @@ namespace MonAmour.Controllers
             var cart = _db.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
-                .FirstOrDefault(o => o.UserId == userId && o.Status == "cart");
+                .Include(o => o.PaymentDetails)
+                    .ThenInclude(pd => pd.Payment)
+                .Where(o => o.UserId == userId && o.Status == "cart")
+                .AsEnumerable()
+                .FirstOrDefault(o => !(o.PaymentDetails?.Any(pd => pd.Payment != null && pd.Payment.Status == "pending") ?? false));
 
             if (cart == null)
             {
@@ -98,7 +101,11 @@ namespace MonAmour.Controllers
 
             var cart = _db.Orders
                 .Include(o => o.OrderItems)
-                .FirstOrDefault(o => o.UserId == userId && o.Status == "cart");
+                .Include(o => o.PaymentDetails)
+                    .ThenInclude(pd => pd.Payment)
+                .Where(o => o.UserId == userId && o.Status == "cart")
+                .AsEnumerable()
+                .FirstOrDefault(o => !(o.PaymentDetails?.Any(pd => pd.Payment != null && pd.Payment.Status == "pending") ?? false));
 
             if (cart == null)
             {
@@ -136,10 +143,10 @@ namespace MonAmour.Controllers
             var totalQuantityInAllCarts = _db.OrderItems
                 .Where(i => i.ProductId == productId && i.Order.Status == "cart" && i.Order.UserId == userId)
                 .Sum(i => i.Quantity);
-
+            
             // Tính tổng số lượng sau khi thêm (bao gồm cả item hiện tại nếu có)
             var finalQuantity = totalQuantityInAllCarts + quantity;
-
+            
             if (product.StockQuantity.HasValue && finalQuantity > product.StockQuantity.Value)
             {
                 if (IsAjaxRequest())
@@ -218,7 +225,7 @@ namespace MonAmour.Controllers
             var totalQuantityInCart = _db.OrderItems
                 .Where(i => i.ProductId == item.ProductId && i.Order.Status == "cart")
                 .Sum(i => i.Quantity) - oldQuantity + quantity; // Tính lại với số lượng mới
-
+            
             if (item.Product.StockQuantity.HasValue && totalQuantityInCart > item.Product.StockQuantity.Value)
             {
                 TempData["CartError"] = $"Số lượng sản phẩm không còn đủ. Sản phẩm nhưng chỉ còn {item.Product.StockQuantity.Value} sản phẩm trong kho. Vui lòng giảm số lượng.";
@@ -279,52 +286,6 @@ namespace MonAmour.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitReview(int targetId, string targetType, int rating, string? comment)
-        {
-            try
-            {
-                var userId = AuthHelper.GetUserId(HttpContext);
-                if (userId == null)
-                {
-                    return RedirectToAction("Login", "Auth");
-                }
-
-                if (rating < 1 || rating > 5)
-                {
-                    TempData["ErrorMessage"] = "Điểm đánh giá phải từ 1 đến 5.";
-                    return RedirectToAction("OrderHistory");
-                }
-
-                // Ensure the user can review this target
-                var canReview = await _reviewService.CanUserReviewAsync(userId.Value, targetType, targetId);
-                if (!canReview)
-                {
-                    TempData["ErrorMessage"] = "Bạn không thể đánh giá mục này.";
-                    return RedirectToAction("OrderHistory");
-                }
-
-                var dto = new CreateReviewViewModel
-                {
-                    UserId = userId.Value,
-                    TargetType = targetType,
-                    TargetId = targetId,
-                    Rating = rating,
-                    Comment = string.IsNullOrWhiteSpace(comment) ? null : comment
-                };
-
-                await _reviewService.CreateReviewAsync(dto);
-                TempData["SuccessMessage"] = "Gửi đánh giá thành công!";
-                return RedirectToAction("OrderHistory");
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi đánh giá.";
-                return RedirectToAction("OrderHistory");
-            }
-        }
-
         // POST: /Cart/SaveAddress - Save phone and address for current cart
         [HttpPost]
         public async Task<IActionResult> SaveAddress([FromForm] string address, [FromForm] string? phone)
@@ -346,7 +307,13 @@ namespace MonAmour.Controllers
                 return Json(new { success = false, message = "Vui lòng nhập số điện thoại 10 số hợp lệ theo đầu số Việt Nam" });
             }
 
-            var cart = await _db.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "cart");
+            var candidateCarts = await _db.Orders
+                .Include(o => o.PaymentDetails)
+                    .ThenInclude(pd => pd.Payment)
+                .Where(o => o.UserId == userId && o.Status == "cart")
+                .ToListAsync();
+            var cart = candidateCarts
+                .FirstOrDefault(o => !(o.PaymentDetails?.Any(pd => pd.Payment != null && pd.Payment.Status == "pending") ?? false));
             if (cart == null)
             {
                 return Json(new { success = false, message = "Không có giỏ hàng" });
@@ -358,42 +325,6 @@ namespace MonAmour.Controllers
             await _db.SaveChangesAsync();
 
             return Json(new { success = true, message = "Đã lưu địa chỉ giao hàng" });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateReview(int reviewId, int rating, string? comment)
-        {
-            try
-            {
-                var userId = AuthHelper.GetUserId(HttpContext);
-                if (userId == null)
-                {
-                    return RedirectToAction("Login", "Auth");
-                }
-
-                if (rating < 1 || rating > 5)
-                {
-                    TempData["ErrorMessage"] = "Điểm đánh giá phải từ 1 đến 5.";
-                    return RedirectToAction("OrderHistory");
-                }
-
-                var dto = new UpdateReviewViewModel
-                {
-                    ReviewId = reviewId,
-                    Rating = rating,
-                    Comment = string.IsNullOrWhiteSpace(comment) ? null : comment
-                };
-
-                await _reviewService.UpdateReviewAsync(dto);
-                TempData["SuccessMessage"] = "Cập nhật đánh giá thành công!";
-                return RedirectToAction("OrderHistory");
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đánh giá.";
-                return RedirectToAction("OrderHistory");
-            }
         }
 
         // POST: /Cart/Checkout
@@ -411,7 +342,11 @@ namespace MonAmour.Controllers
             var order = _db.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
-                .FirstOrDefault(o => o.UserId == userId && o.Status == "cart");
+                .Include(o => o.PaymentDetails)
+                    .ThenInclude(pd => pd.Payment)
+                .Where(o => o.UserId == userId && o.Status == "cart")
+                .AsEnumerable()
+                .FirstOrDefault(o => !(o.PaymentDetails?.Any(pd => pd.Payment != null && pd.Payment.Status == "pending") ?? false));
 
             if (order == null || !order.OrderItems.Any())
             {
@@ -459,11 +394,14 @@ namespace MonAmour.Controllers
 
             // Create a payment with status pending -> completed (for demo)
             var paymentMethod = _db.PaymentMethods.FirstOrDefault();
+            var todayRef = DateTime.Now.ToString("yyyyMMdd");
+            var paymentReferenceCheckout = $"ORDER{order.OrderId}_{order.UserId}_{todayRef}";
             var payment = new Payment
             {
                 Amount = order.TotalPrice,
                 Status = "completed",
                 PaymentMethodId = paymentMethod?.PaymentMethodId,
+                PaymentReference = paymentReferenceCheckout,
                 CreatedAt = DateTime.Now,
                 ProcessedAt = DateTime.Now
             };
@@ -521,6 +459,14 @@ namespace MonAmour.Controllers
 
             try
             {
+                // Track failed check attempts in session to enable fallback flow
+                const string attemptKey = "CassoCheckAttempts";
+                int attempts = 0;
+                if (HttpContext.Session != null)
+                {
+                    var raw = HttpContext.Session.GetString(attemptKey);
+                    _ = int.TryParse(raw, out attempts);
+                }
                 // Lấy đơn hàng giỏ hiện tại để tạo mã tham chiếu theo đơn
                 var cartOrderRef = "";
                 var cartOrder = await _db.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "cart");
@@ -534,7 +480,8 @@ namespace MonAmour.Controllers
                 }
                 if (cartOrder != null)
                 {
-                    cartOrderRef = $"ORDER{cartOrder.OrderId}";
+                    var today = DateTime.Now.ToString("yyyyMMdd");
+                    cartOrderRef = $"ORDER{cartOrder.OrderId}_{userId}_{today}";
                 }
 
                 // Check for new transactions in the last 24 hours (giảm thời gian kiểm tra vì có webhook)
@@ -565,10 +512,37 @@ namespace MonAmour.Controllers
                     var errorMessage = response.Code == 401 ? "API key không hợp lệ hoặc hết hạn" :
                                      response.Code == 403 ? "Không có quyền truy cập API" :
                                      response.Code == 404 ? "API endpoint không tồn tại" :
+                                     response.Code == 429 ? "Hệ thống đang giới hạn tần suất. Vui lòng thử lại sau ít phút Ngân hàng có thể đang gặp sự cố. Bạn có thể bấm 'Báo lỗi thanh toán' để thông báo lỗi tới hệ thống. Xin lỗi quý khách vì sự bất tiện này!" :
                                      response.Code == 500 ? "Lỗi server" :
                                      $"Vui lòng chờ 1-2 phút và thử lại";
 
-                    return Json(new { success = false, message = errorMessage, debug = debugInfo });
+                    // Count as a failed attempt too so users can access the fallback after 5 tries
+                    attempts++;
+                    HttpContext.Session?.SetString(attemptKey, attempts.ToString());
+                    var extra = attempts >= 5 && response.Code != 429 ? "\nNgân hàng có thể đang gặp sự cố. Bạn có thể bấm 'Báo lỗi thanh toán' để thông báo lỗi tới hệ thống." : "";
+                    return Json(new { success = false, message = errorMessage + extra, showReport = attempts >= 5, attempts, debug = debugInfo });
+                }
+
+                // First, check if the cart already has a completed payment with a non-null TransactionId
+                var hasCompletedPayment = await _db.PaymentDetails
+                    .Include(pd => pd.Payment)
+                    .AnyAsync(pd => pd.OrderId == cartOrder.OrderId && pd.Payment != null && pd.Payment.Status == "completed" && pd.Payment.TransactionId != null);
+
+                if (hasCompletedPayment)
+                {
+                    // Stock processing and redirect if not already confirmed
+                    var stockResultExisting = await ProcessStockAfterPayment(cartOrder.OrderId);
+                    if (!stockResultExisting.Success)
+                    {
+                        return Json(new { success = false, message = stockResultExisting.Message, debug = debugInfo });
+                    }
+                    HttpContext.Session?.SetString(attemptKey, "0");
+                    return Json(new {
+                        success = true,
+                        message = "Đơn hàng đã được thanh toán và xác nhận",
+                        redirectUrl = Url.Action("BillDetail", "Cart", new { orderId = cartOrder.OrderId }),
+                        debug = debugInfo
+                    });
                 }
 
                 var processedCount = 0;
@@ -580,12 +554,28 @@ namespace MonAmour.Controllers
                     debugInfo.Add(transactionText);
 
                     // Chỉ kiểm tra theo mã tham chiếu đơn hàng để tránh trùng lặp
-                    var hasOrderRef = !string.IsNullOrWhiteSpace(cartOrderRef) &&
-                        (transaction.Description?.Contains(cartOrderRef) == true ||
-                         transaction.Reference?.Contains(cartOrderRef) == true ||
-                         transaction.Ref?.Contains(cartOrderRef) == true);
+                    // Build flexible variants to match banks that strip separators or user id
+                    var today = DateTime.Now.ToString("yyyyMMdd");
+                    var variants = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(cartOrderRef))
+                    {
+                        variants.Add(cartOrderRef); // ORDER{orderId}_{userId}_{yyyyMMdd}
+                        variants.Add(cartOrderRef.Replace("_", "")); // ORDER{orderId}{userId}{yyyyMMdd}
+                    }
+                    // Without user id
+                    variants.Add($"ORDER{cartOrder.OrderId}_{today}");
+                    variants.Add($"ORDER{cartOrder.OrderId}{today}");
+                    // Fallback to just order id
+                    variants.Add($"ORDER{cartOrder.OrderId}");
 
-                    debugInfo.Add($"HasOrderRef: {hasOrderRef}, OrderRef: {cartOrderRef}");
+                    bool hasOrderRef = variants.Any(v =>
+                        (transaction.Description?.Contains(v) == true) ||
+                        (transaction.Reference?.Contains(v) == true) ||
+                        (transaction.Ref?.Contains(v) == true)
+                    );
+
+                    debugInfo.Add($"OrderRefVariants: [" + string.Join(", ", variants) + "]");
+                    debugInfo.Add($"HasOrderRef: {hasOrderRef}");
 
                     if (hasOrderRef)
                     {
@@ -603,24 +593,171 @@ namespace MonAmour.Controllers
                     {
                         return Json(new { success = false, message = stockResult.Message, debug = debugInfo });
                     }
-
-                    return Json(new
-                    {
-                        success = true,
-                        message = $"Đã xử lý {processedCount} giao dịch thành công",
+                    // Reset failed attempts
+                    HttpContext.Session?.SetString(attemptKey, "0");
+                    return Json(new { 
+                        success = true, 
+                        message = $"Đã xử lý {processedCount} giao dịch thành công", 
                         redirectUrl = Url.Action("BillDetail", "Cart", new { orderId = cartOrder.OrderId }),
-                        debug = debugInfo
+                        debug = debugInfo 
                     });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Chưa có giao dịch nào phù hợp", debug = debugInfo });
+                    // Increment failed attempts and suggest fallback after threshold
+                    attempts++;
+                    HttpContext.Session?.SetString(attemptKey, attempts.ToString());
+                    var baseMsg = "Chưa có giao dịch nào phù hợp";
+                    var extra = attempts >= 5 ? "\nNgân hàng có thể đang gặp sự cố. Bạn có thể bấm 'Báo lỗi thanh toán' để gửi mã chuyển khoản, hệ thống sẽ tạo đơn hàng ở trạng thái 'pending' để admin xác minh." : "";
+                    return Json(new { success = false, message = baseMsg + extra, showReport = attempts >= 5, attempts, debug = debugInfo });
                 }
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi khi kiểm tra thanh toán: " + ex.Message });
             }
+        }
+
+        // POST: /Cart/ReportPaymentIssue - Tạo đơn hàng pending với mã giao dịch khách hàng cung cấp
+        [HttpPost]
+        public async Task<IActionResult> ReportPaymentIssue([FromForm] string transferCode, [FromForm] string? contactName, [FromForm] string? contactPhone, [FromForm] string? contactEmail)
+        {
+            int? userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            transferCode = (transferCode ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(transferCode))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập mã giao dịch/FT hoặc nội dung chuyển khoản" });
+            }
+
+            // Validate contact info: name required, phone required (VN 10 digits), email optional but must be valid if provided
+            contactName = (contactName ?? string.Empty).Trim();
+            contactPhone = (contactPhone ?? string.Empty).Trim();
+            contactEmail = (contactEmail ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(contactName))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập họ tên để chúng tôi liên hệ hỗ trợ" });
+            }
+            if (string.IsNullOrWhiteSpace(contactPhone) || !IsValidVietnamesePhone(contactPhone))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập số điện thoại 10 số hợp lệ theo đầu số Việt Nam" });
+            }
+            if (!string.IsNullOrWhiteSpace(contactEmail))
+            {
+                try
+                {
+                    var _ = new System.Net.Mail.MailAddress(contactEmail);
+                }
+                catch
+                {
+                    return Json(new { success = false, message = "Email không hợp lệ" });
+                }
+            }
+
+            // Lấy giỏ hàng hiện tại
+            var order = await _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "cart");
+
+            if (order == null || !order.OrderItems.Any())
+            {
+                return Json(new { success = false, message = "Giỏ hàng trống hoặc không tồn tại" });
+            }
+
+            if (string.IsNullOrWhiteSpace(order.ShippingAddress) || !order.ShippingAddress.Contains("Phone:"))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập số điện thoại và địa chỉ giao hàng trước" });
+            }
+
+            // Không giảm stock. Chỉ tạo payment pending và chuyển order sang pending_review
+            // Recalculate total to be safe
+            order.TotalPrice = order.OrderItems
+                .Select(i => (decimal?)i.TotalPrice)
+                .Sum()
+                .GetValueOrDefault(0m);
+
+            var paymentMethod = _db.PaymentMethods.FirstOrDefault();
+            var today = DateTime.Now.ToString("yyyyMMdd");
+            var orderRef = $"ORDER{order.OrderId}_{userId}_{today}";
+            var payment = new Payment
+            {
+                Amount = order.TotalPrice,
+                Status = "pending",
+                PaymentMethodId = paymentMethod?.PaymentMethodId,
+                PaymentReference = orderRef,
+                CreatedAt = DateTime.Now
+            };
+            _db.Payments.Add(payment);
+            await _db.SaveChangesAsync();
+
+            var paymentDetail = new PaymentDetail
+            {
+                PaymentId = payment.PaymentId,
+                OrderId = order.OrderId,
+                Amount = order.TotalPrice,
+            };
+            _db.PaymentDetails.Add(paymentDetail);
+
+            // Đánh dấu đơn hàng ở trạng thái chờ xử lý để admin xác minh
+            order.Status = "pending";
+            order.TrackingNumber = transferCode; // lưu mã giao dịch khách
+            order.UpdatedAt = DateTime.Now;
+            _db.Orders.Update(order);
+            await _db.SaveChangesAsync();
+
+            // Gửi email báo cáo tới admin
+            try
+            {
+                var adminEmails = await _db.UserRoles
+                    .Where(ur => ur.RoleId == 1)
+                    .Select(ur => ur.User.Email)
+                    .Distinct()
+                    .Where(e => e != null && e != "")
+                    .ToListAsync();
+
+                if (adminEmails.Any())
+                {
+                    var subject = $"[MonAmour] Báo lỗi thanh toán - Order #{order.OrderId}";
+                    var htmlBody = $@"
+                        <html><body style='font-family: Arial, sans-serif; color:#333'>
+                          <h2>📣 Báo lỗi thanh toán</h2>
+                          <p><strong>Order ID:</strong> {order.OrderId}</p>
+                          <p><strong>User ID:</strong> {order.UserId}</p>
+                          <p><strong>Số tiền:</strong> {(order.TotalPrice ?? 0m):N0}₫</p>
+                          <p><strong>Nội dung chuyển khoản (TrackingNumber):</strong> {System.Net.WebUtility.HtmlEncode(order.TrackingNumber)}</p>
+                          <p><strong>PaymentReference (dự kiến):</strong> {System.Net.WebUtility.HtmlEncode(orderRef)}</p>
+                          <h3>Thông tin liên hệ khách hàng</h3>
+                          <p><strong>Tên:</strong> {System.Net.WebUtility.HtmlEncode(contactName ?? "")}</p>
+                          <p><strong>Điện thoại:</strong> {System.Net.WebUtility.HtmlEncode(contactPhone ?? "")}</p>
+                          <p><strong>Email:</strong> {System.Net.WebUtility.HtmlEncode(contactEmail ?? "")}</p>
+                          <p><strong>Thời gian báo cáo:</strong> {DateTime.Now:dd/MM/yyyy HH:mm:ss}</p>
+                          <hr/>
+                          <p>Vui lòng kiểm tra giao dịch và xác minh thủ công trong Casso/Ngân hàng.</p>
+                        </body></html>";
+
+                    foreach (var adminEmail in adminEmails)
+                    {
+                        await _emailService.SendAdminPaymentIssueReportAsync(adminEmail!, subject, htmlBody);
+                    }
+                }
+            }
+            catch { /* Không để lỗi email chặn flow của khách */ }
+
+            // Reset failed attempts
+            HttpContext.Session?.SetString("CassoCheckAttempts", "0");
+
+            return Json(new
+            {
+                success = true,
+                message = "Đã ghi nhận sự cố thanh toán. Chúng tôi sẽ liên hệ qua thông tin bạn cung cấp để xác minh.",
+                redirectUrl = Url.Action("OrderHistory", "Cart")
+            });
         }
 
         // GET: /Cart/GetPaymentStatus - Kiểm tra trạng thái thanh toán realtime
@@ -696,7 +833,8 @@ namespace MonAmour.Controllers
             var amount = cart.TotalPrice;
             // Nội dung chuyển khoản dùng mã tham chiếu theo đơn hàng
             // Để ổn định khi khớp giao dịch, dùng dạng ngắn: ORDER{orderId}
-            var paymentReference = $"ORDER{cart.OrderId}";
+            var today = DateTime.Now.ToString("yyyyMMdd");
+            var paymentReference = $"ORDER{cart.OrderId}_{userId}_{today}";
             var transferContent = paymentReference;
 
             // Tạo QR code cho thanh toán
@@ -986,7 +1124,13 @@ namespace MonAmour.Controllers
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Product)
                 .ThenInclude(p => p.ProductImgs)
-                .Where(o => o.UserId == userId && o.Status != "cart")
+                .Include(o => o.PaymentDetails)
+                .ThenInclude(pd => pd.Payment)
+                // Hiển thị cả đơn đang chờ xác minh (đang ở trạng thái cart nhưng có Payment pending)
+                .Where(o => o.UserId == userId && (
+                    o.Status != "cart" ||
+                    _db.PaymentDetails.Any(pd => pd.OrderId == o.OrderId && pd.Payment != null && pd.Payment.Status == "pending")
+                ))
                 .OrderByDescending(o => o.CreatedAt)
                 .ToList();
 

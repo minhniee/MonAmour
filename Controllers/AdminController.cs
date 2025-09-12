@@ -3765,6 +3765,32 @@ namespace MonAmour.Controllers
                 var statistics = await _orderService.GetOrderStatisticsAsync();
                 var orderStatuses = await _orderService.GetOrderStatusesAsync();
 
+                // Helper: resolve payment status from Payment table (preferred),
+                // fall back to any existing Order.PaymentStatus property if present
+                ViewBag.GetPaymentStatus = (Func<dynamic, string>)(o =>
+                {
+                    try
+                    {
+                        // Try common casings first
+                        var s = (string)(o?.Payment?.Status ?? o?.payment?.status ?? o?.PaymentStatus ?? o?.paymentStatus ?? string.Empty);
+                        return s ?? string.Empty;
+                    }
+                    catch
+                    {
+                        return string.Empty;
+                    }
+                });
+
+                // Provide a simple translator for payment status labels in views
+                ViewBag.TranslatePaymentStatus = (Func<string, string>)(code =>
+                {
+                    if (string.IsNullOrWhiteSpace(code)) return string.Empty;
+                    var v = code.Trim();
+                    return string.Equals(v, "pending", StringComparison.OrdinalIgnoreCase)
+                        ? "Đang xử lí"
+                        : v; // giữ nguyên các trạng thái khác
+                });
+
                 ViewBag.Orders = orders;
                 ViewBag.TotalCount = totalCount;
                 ViewBag.Statistics = statistics;
@@ -3796,6 +3822,28 @@ namespace MonAmour.Controllers
                 }
 
                 var orderStatuses = await _orderService.GetOrderStatusesAsync();
+
+                // Same payment status translator for detail view
+                ViewBag.GetPaymentStatus = (Func<dynamic, string>)(o =>
+                {
+                    try
+                    {
+                        var s = (string)(o?.Payment?.Status ?? o?.payment?.status ?? o?.PaymentStatus ?? o?.paymentStatus ?? string.Empty);
+                        return s ?? string.Empty;
+                    }
+                    catch
+                    {
+                        return string.Empty;
+                    }
+                });
+                ViewBag.TranslatePaymentStatus = (Func<string, string>)(code =>
+                {
+                    if (string.IsNullOrWhiteSpace(code)) return string.Empty;
+                    var v = code.Trim();
+                    return string.Equals(v, "pending", StringComparison.OrdinalIgnoreCase)
+                        ? "Đang xử lí"
+                        : v;
+                });
                 var shippingOptions = await _orderService.GetShippingOptionsAsync();
 
                 ViewBag.OrderStatuses = orderStatuses;

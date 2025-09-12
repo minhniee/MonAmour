@@ -132,27 +132,31 @@ namespace MonAmour.Services.Implements
 
                 System.Diagnostics.Debug.WriteLine($"Found cart order: {cartOrder.OrderId}, Total: {cartOrder.TotalPrice}");
 
-                // Check if amount matches (with some tolerance for rounding)
-                var expectedAmount = (long)Math.Round((cartOrder.TotalPrice ?? 0)); // Casso trả về VND, không phải cents
-                var amountDifference = Math.Abs(transaction.Amount - expectedAmount);
-
-                System.Diagnostics.Debug.WriteLine($"Amount check: Expected={expectedAmount}, Received={transaction.Amount}, Difference={amountDifference}");
-
-                // Allow 1000 VND difference for rounding
-                if (amountDifference > 1000)
+                // Check if amount matches exactly in VND
+                var expectedAmount = (long)Math.Round((cartOrder.TotalPrice ?? 0)); // VND
+                if (transaction.Amount != expectedAmount)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Amount mismatch: Difference {amountDifference} > 1000");
+                    System.Diagnostics.Debug.WriteLine($"Amount mismatch: Expected={expectedAmount}, Received={transaction.Amount}");
                     return false;
                 }
 
-                // Chỉ kiểm tra theo mã đơn hàng để tránh trùng lặp
-                // Hỗ trợ cả format cũ ORDER{id} và format mới ORDER{id}_{timestamp}
-                var orderRefShort = $"ORDER{cartOrder.OrderId}";
-                var hasOrderRef = transaction.Description?.Contains(orderRefShort) == true ||
-                                 transaction.Reference?.Contains(orderRefShort) == true ||
-                                 transaction.Ref?.Contains(orderRefShort) == true;
+                // Strict reference match: include user id and date variants used in QR
+                var today = DateTime.Now.ToString("yyyyMMdd");
+                var variants = new List<string>
+                {
+                    $"ORDER{cartOrder.OrderId}_{userId}_{today}",
+                    $"ORDER{cartOrder.OrderId}{userId}{today}",
+                    $"ORDER{cartOrder.OrderId}_{today}",
+                    $"ORDER{cartOrder.OrderId}{today}",
+                    $"ORDER{cartOrder.OrderId}"
+                };
+                var hasOrderRef = variants.Any(v =>
+                    (transaction.Description?.Contains(v) == true) ||
+                    (transaction.Reference?.Contains(v) == true) ||
+                    (transaction.Ref?.Contains(v) == true)
+                );
 
-                System.Diagnostics.Debug.WriteLine($"OrderRef check: OrderRef='{orderRefShort}', Description='{transaction.Description}', Reference='{transaction.Reference}', Ref='{transaction.Ref}', HasOrderRef={hasOrderRef}");
+                System.Diagnostics.Debug.WriteLine($"OrderRef variants: [" + string.Join(", ", variants) + "] HasOrderRef=" + hasOrderRef);
 
                 if (!hasOrderRef)
                 {
@@ -167,18 +171,29 @@ namespace MonAmour.Services.Implements
                 if (existingPayment != null)
                 {
                     System.Diagnostics.Debug.WriteLine($"Payment already exists for transaction: {transaction.Id}");
-                    return true; // Already processed
+                    return false; // Do not count as newly processed
                 }
+
+                // Resolve payment method id for Casso Bank Transfer (fallback to first if not found)
+                var cassoMethod = await _dbContext.PaymentMethods
+                    .OrderBy(pm => pm.PaymentMethodId)
+                    .FirstOrDefaultAsync(pm => pm.Name != null && (pm.Name == "Casso Bank Transfer" || pm.Name == "VietQR" || pm.Name.Contains("Casso")));
+
+                // Build a stable payment reference if Casso does not include one
+                var todayRef = DateTime.Now.ToString("yyyyMMdd");
+                var stableOrderRef = $"ORDER{cartOrder.OrderId}_{userId}_{todayRef}";
+                var effectiveReference = string.IsNullOrWhiteSpace(transaction.Reference) ? stableOrderRef : transaction.Reference;
 
                 // Create payment record
                 var payment = new Payment
                 {
                     Amount = transaction.Amount, // Casso trả về VND, không cần chia 100
                     Status = "completed",
+                    PaymentMethodId = cassoMethod?.PaymentMethodId,
                     CreatedAt = DateTime.UtcNow,
                     ProcessedAt = DateTime.UtcNow,
                     UserId = userId,
-                    PaymentReference = transaction.Reference,
+                    PaymentReference = effectiveReference,
                     TransactionId = transaction.Id,
                     UpdatedAt = DateTime.UtcNow
                 };

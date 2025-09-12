@@ -13,6 +13,7 @@ public partial class MonAmourDbContext : DbContext
     {
     }
 
+    
 
     public virtual DbSet<CassoTransaction> CassoTransactions { get; set; }
 
@@ -96,6 +97,7 @@ public partial class MonAmourDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Booking entity removed
 
         modelBuilder.Entity<CassoTransaction>(entity =>
         {
@@ -585,8 +587,11 @@ public partial class MonAmourDbContext : DbContext
             entity.Property(e => e.Amount)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("amount");
+            // booking_id removed from PaymentDetail model
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.PaymentId).HasColumnName("payment_id");
+
+            // Removed navigation mapping to Booking as PaymentDetail no longer exposes Booking navigation
 
             entity.HasOne(d => d.Order).WithMany(p => p.PaymentDetails)
                 .HasForeignKey(d => d.OrderId)

@@ -7,6 +7,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace MonAmour.Controllers
 {
@@ -26,6 +28,17 @@ namespace MonAmour.Controllers
         public IActionResult ListGiftbox(int? categoryId, string? price, string? sort, int page = 1)
         {
             ViewData["Title"] = "Gift Box Collection - MonAmour";
+
+            // Load banner images for hero (fallback handled in view)
+            try
+            {
+                var bannersRaw = LoadBannerProductsFromDb(maxItems: 2);
+                // Shape data with snake_case keys to avoid dynamic binder errors in view
+                ViewBag.BannerProducts = bannersRaw
+                    .Select(b => new { img_url = b.ImgUrl, is_primary = (b.IsPrimary ?? false) })
+                    .ToList();
+            }
+            catch { /* ignore and let view use defaults */ }
 
             // Prepare base query
             IQueryable<Product> query = _db.Products
@@ -94,6 +107,9 @@ namespace MonAmour.Controllers
                 .Take(pageSize)
                 .ToList();
 
+            // Normalize to ensure each product has at most one primary image (in-memory only)
+            NormalizePrimaryImages(products);
+
             // Provide data for dropdowns
             ViewBag.Categories = _db.ProductCategories
                 .OrderBy(c => c.Name)
@@ -127,6 +143,9 @@ namespace MonAmour.Controllers
                     .OrderBy(p => topIds.IndexOf(p.ProductId))
                     .ToList();
 
+                // Normalize primary images for top products as well
+                NormalizePrimaryImages(topProducts);
+
                 if (topProducts == null || topProducts.Count == 0)
                 {
                     topProducts = products.Take(4).ToList();
@@ -136,10 +155,72 @@ namespace MonAmour.Controllers
             }
             catch
             {
-                ViewBag.TopProducts = products.Take(4).ToList();
+                var fallback = products.Take(4).ToList();
+                NormalizePrimaryImages(fallback);
+                ViewBag.TopProducts = fallback;
             }
 
             return View(products);
+        }
+
+        private sealed class BannerItem
+        {
+            public string? ImgUrl { get; set; }
+            public bool? IsPrimary { get; set; }
+        }
+
+        private System.Collections.Generic.List<BannerItem> LoadBannerProductsFromDb(int maxItems)
+        {
+            var result = new System.Collections.Generic.List<BannerItem>();
+            var conn = _db.Database.GetDbConnection();
+            var wasClosed = conn.State == ConnectionState.Closed;
+            if (wasClosed) conn.Open();
+            try
+            {
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = $@"SELECT TOP({maxItems}) img_url, is_primary
+                                      FROM BannerProduct
+                                      WHERE (is_active = 1 OR is_active IS NULL)
+                                      ORDER BY ISNULL(is_primary,0) DESC,
+                                               ISNULL(display_order, 0) ASC,
+                                               ISNULL(updated_at, created_at) DESC";
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    result.Add(new BannerItem
+                    {
+                        ImgUrl = reader.IsDBNull(0) ? null : reader.GetString(0),
+                        IsPrimary = reader.IsDBNull(1) ? (bool?)null : reader.GetBoolean(1)
+                    });
+                }
+            }
+            finally
+            {
+                if (wasClosed && conn.State != ConnectionState.Closed) conn.Close();
+            }
+            return result;
+        }
+
+        private static void NormalizePrimaryImages(System.Collections.Generic.IEnumerable<Product> products)
+        {
+            if (products == null) return;
+            foreach (var p in products)
+            {
+                if (p?.ProductImgs == null) continue;
+                // If multiple primary images exist, keep the first one and unset the rest
+                var primaries = p.ProductImgs.Where(i => i.IsPrimary == true).ToList();
+                if (primaries.Count > 1)
+                {
+                    var keep = primaries.First();
+                    foreach (var img in primaries.Skip(1))
+                    {
+                        img.IsPrimary = false;
+                    }
+                    // Ensure the kept one stays marked
+                    keep.IsPrimary = true;
+                }
+                // If none primary, do nothing (view already has fallback logic)
+            }
         }
 
         /// <summary>

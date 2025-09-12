@@ -1,0 +1,265 @@
+@{
+    ViewData["Title"] = "Liên hệ tư vấn - MonAmour";
+}
+
+<div class="min-h-screen bg-beige py-12">
+    <div class="container mx-auto px-4">
+        <h1 class="font-prata text-4xl md:text-5xl text-center text-wine-red mb-8">Liên hệ tư vấn</h1>
+
+        <form id="consultForm" method="post" action="@Url.Action("SubmitContact","Concept")" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            @Html.AntiForgeryToken()
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Họ tên *</label>
+                    <input name="fullName" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Nhập họ tên">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Địa chỉ email *</label>
+                    <input name="email" type="email" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="you@example.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Số điện thoại *</label>
+                    <input name="phone" type="tel" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="0xxxxxxxxx">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Nơi tổ chức</label>
+                    <select id="citySelect" name="location" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+                        <option value="">Chọn thành phố</option>
+                        @{
+                            var cities = ViewBag.Cities as List<string>;
+                        }
+                        @if (cities != null)
+                        {
+                            foreach (var city in cities)
+                            {
+                                <option value="@city">@city</option>
+                            }
+                        }
+                        <option value="other">Khác</option>
+                    </select>
+                    <div id="cityOtherWrapper" class="mt-2 hidden">
+                        <input id="cityOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập địa điểm khác">
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="font-prata text-2xl text-wine-red mt-8 mb-4">Thông tin chi tiết</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Loại hình sự kiện</label>
+                    <select id="eventTypeSelect" name="eventType" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+                        <option value="">Chọn loại sự kiện</option>
+                        @{
+                            var categories = ViewBag.Categories as List<MonAmour.Models.ConceptCategory>;
+                        }
+                        @if (categories != null)
+                        {
+                            foreach (var cat in categories)
+                            {
+                                <option value="@cat.Name">@cat.Name</option>
+                            }
+                        }
+                        <option value="other">Khác</option>
+                    </select>
+                    <div id="eventTypeOtherWrapper" class="mt-2 hidden">
+                        <input id="eventTypeOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập loại hình sự kiện khác">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Ngân sách *</label>
+                    <select id="budgetSelect" name="budget" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+                        <option value="">Chọn ngân sách</option>
+                        <option>&lt; 10.000.000₫</option>
+                        <option>10.000.000₫ - 20.000.000₫</option>
+                        <option>20.000.000₫ - 30.000.000₫</option>
+                        <option>30.000.000₫ - 50.000.000₫</option>
+                        <option>50.000.000₫ - 80.000.000₫</option>
+                        <option>80.000.000₫ - 120.000.000₫</option>
+                        <option>120.000.000₫ - 200.000.000₫</option>
+                        <option>&gt; 200.000.000₫</option>
+                        <option value="other">Khác</option>
+                    </select>
+                    <div id="budgetOtherWrapper" class="mt-2 hidden">
+                        <input id="budgetOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập ngân sách mong muốn">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Ngày tổ chức</label>
+                    <input name="eventDate" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-wine-red mb-1">Thời gian</label>
+                    <div class="relative">
+                        <input id="bookingTime" name="eventTime" type="text" readonly onclick="showTimePicker()" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Chọn thời gian">
+                        <div id="customTimePicker" class="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden timepicker">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div id="hoursColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
+                                <div id="minutesColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-wine-red mb-1">Lời nhắn</label>
+                <textarea name="message" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Bạn cần hỗ trợ điều gì?"></textarea>
+            </div>
+
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-wine-red mb-1">Bạn biết đến MonAmour qua kênh nào?</label>
+                <select id="referralSelect" name="referral" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+                    <option value="">Chọn kênh</option>
+                    <option>Facebook</option>
+                    <option>Instagram</option>
+                    <option>TikTok</option>
+                    <option>Tìm kiếm Google</option>
+                    <option>Người quen giới thiệu</option>
+                    <option value="other">Khác</option>
+                </select>
+                <div id="referralOtherWrapper" class="mt-2 hidden">
+                    <input id="referralOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập kênh khác">
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <button id="consultSubmit" type="submit" class="px-8 py-3 bg-wine-red text-white rounded-full shadow-lg hover:shadow-xl hover:bg-wine-red/90 transition-all duration-200">Gửi yêu cầu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Match hover styles from Concept detail form */
+    .timepicker button { transition: background-color .15s ease, color .15s ease; }
+    .timepicker button:hover { background-color: rgba(127, 29, 29, 0.08); }
+    .timepicker button.active { background-color: rgba(127, 29, 29, 0.12); color: #7f1d1d; font-weight: 600; }
+</style>
+
+<script>
+    function showTimePicker() {
+        const picker = document.getElementById('customTimePicker');
+        const hoursCol = document.getElementById('hoursColumn');
+        const minutesCol = document.getElementById('minutesColumn');
+        const input = document.getElementById('bookingTime');
+
+        if (!hoursCol.dataset.initialized) {
+            // Populate hours 08 - 22
+            let hoursHtml = '';
+            for (let h = 8; h <= 22; h++) {
+                const hh = h.toString().padStart(2, '0');
+                hoursHtml += `<button type="button" data-hour="${hh}" class="block w-full text-left px-4 py-2">${hh}</button>`;
+            }
+            hoursCol.innerHTML = hoursHtml;
+
+            // Populate minutes 00, 30
+            minutesCol.innerHTML = ['00','30']
+                .map(m => `<button type="button" data-minute="${m}" class="block w-full text-left px-4 py-2">${m}</button>`)
+                .join('');
+
+            // Selection handling
+            let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
+            let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
+
+            const updateActive = () => {
+                [...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
+                [...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
+            };
+
+            const scrollIntoViewSmooth = (btn, container) => {
+                if (!btn) return;
+                const top = btn.offsetTop - container.clientHeight / 2 + btn.clientHeight / 2;
+                container.scrollTo({ top, behavior: 'smooth' });
+            };
+
+            const commit = () => {
+                if (selectedHour && selectedMinute) {
+                    input.value = `${selectedHour}:${selectedMinute}`;
+                    hideTimePicker();
+                }
+            };
+
+            hoursCol.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-hour]');
+                if (!btn) return;
+                selectedHour = btn.getAttribute('data-hour');
+                updateActive();
+                scrollIntoViewSmooth(btn, hoursCol);
+                commit();
+            });
+
+            minutesCol.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-minute]');
+                if (!btn) return;
+                selectedMinute = btn.getAttribute('data-minute');
+                updateActive();
+                scrollIntoViewSmooth(btn, minutesCol);
+                commit();
+            });
+
+            // Mark as initialized
+            hoursCol.dataset.initialized = 'true';
+        }
+
+        picker.classList.remove('hidden');
+
+        // If value exists, set active and center it
+        let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
+        let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
+        [...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
+        [...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
+
+        // Click outside to close
+        const outsideHandler = (ev) => {
+            if (!picker.contains(ev.target) && ev.target !== input) {
+                hideTimePicker();
+                document.removeEventListener('click', outsideHandler);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', outsideHandler), 0);
+    }
+    function hideTimePicker(){
+        const picker = document.getElementById('customTimePicker');
+        picker.classList.add('hidden');
+    }
+    (function() {
+        const form = document.getElementById('consultForm');
+        const btn = document.getElementById('consultSubmit');
+        const eventTypeSelect = document.getElementById('eventTypeSelect');
+        const eventTypeOtherWrapper = document.getElementById('eventTypeOtherWrapper');
+        const citySelect = document.getElementById('citySelect');
+        const cityOtherWrapper = document.getElementById('cityOtherWrapper');
+        const budgetSelect = document.getElementById('budgetSelect');
+        const budgetOtherWrapper = document.getElementById('budgetOtherWrapper');
+        const referralSelect = document.getElementById('referralSelect');
+        const referralOtherWrapper = document.getElementById('referralOtherWrapper');
+
+        if (eventTypeSelect) eventTypeSelect.addEventListener('change', function(){ eventTypeOtherWrapper.classList.toggle('hidden', this.value !== 'other'); });
+        if (citySelect) citySelect.addEventListener('change', function(){ cityOtherWrapper.classList.toggle('hidden', this.value !== 'other'); });
+        if (budgetSelect) budgetSelect.addEventListener('change', function(){ budgetOtherWrapper.classList.toggle('hidden', this.value !== 'other'); });
+        if (referralSelect) referralSelect.addEventListener('change', function(){ referralOtherWrapper.classList.toggle('hidden', this.value !== 'other'); });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const fullName = form.fullName.value.trim();
+            const email = form.email.value.trim();
+            const phone = form.phone.value.trim();
+            if (!fullName || !email || !/^\d{10}$/.test(phone)) { alert('Vui lòng nhập Họ tên, Email hợp lệ và SĐT 10 số.'); return; }
+
+            const fd = new FormData(form);
+            if (eventTypeSelect && eventTypeSelect.value === 'other') fd.set('eventType', document.getElementById('eventTypeOther').value.trim());
+            if (citySelect && citySelect.value === 'other') fd.set('location', document.getElementById('cityOther').value.trim());
+            if (budgetSelect && budgetSelect.value === 'other') fd.set('budget', document.getElementById('budgetOther').value.trim());
+            if (referralSelect && referralSelect.value === 'other') fd.set('referral', document.getElementById('referralOther').value.trim());
+
+            btn.disabled = true; btn.textContent = 'Đang gửi...';
+            try {
+                const res = await fetch(form.action, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) { const msg = await res.text(); alert(msg || 'Gửi thất bại, vui lòng thử lại.'); }
+                else { alert('Đã gửi yêu cầu tư vấn thành công! Vui lòng kiểm tra email.'); form.reset(); }
+            } finally { btn.disabled = false; btn.textContent = 'Gửi yêu cầu'; }
+        });
+    })();
+</script>
+
+

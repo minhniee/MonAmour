@@ -59,6 +59,7 @@ builder.Services.AddScoped<IPartnerService, PartnerService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<IConceptService, ConceptService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+// Booking service removed
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IBannerService, BannerManagementService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();

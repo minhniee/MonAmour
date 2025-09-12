@@ -71,7 +71,28 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <button id="casso-check-btn" class="flex-1 bg-wine-red text-beige px-4 py-2 rounded-lg text-sm">Kiểm tra thanh toán</button>
-                                    <button id="casso-refresh-btn" class="px-4 py-2 border border-wine-red text-wine-red rounded-lg text-sm">Làm mới</button>
+                                    <button id="report-payment-issue-btn" class="px-4 py-2 border border-amber-600 text-amber-700 rounded-lg text-sm hidden">Báo lỗi thanh toán</button>
+                                </div>
+                                <div class="mt-3 text-xs text-wine-red/70">
+                                    Nếu kiểm tra thanh toán <strong>5 lần</strong> vẫn chưa tìm được giao dịch hợp lệ, nút "Báo lỗi thanh toán" sẽ xuất hiện. Quản lí sẽ xác minh và thông báo lại cho bạn.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal: Thông tin liên hệ khi báo lỗi -->
+                        <div id="contact-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+                            <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+                                <h3 class="font-prata text-wine-red text-lg mb-4">Thông tin liên hệ</h3>
+                                <div class="space-y-3">
+                                    <input id="contact-name" class="w-full border border-wine-red/30 rounded-lg p-3" placeholder="Họ tên" />
+                                    <input id="contact-phone" class="w-full border border-wine-red/30 rounded-lg p-3" placeholder="Số điện thoại" />
+                                    <input id="contact-email" class="w-full border border-wine-red/30 rounded-lg p-3" placeholder="Email (không bắt buộc)" />
+                                    <div class="text-xs text-wine-red/70">Thông tin này sẽ gửi kèm cho admin để hỗ trợ bạn nhanh hơn.</div>
+                                    <div id="contact-error" class="text-sm text-red-600"></div>
+                                </div>
+                                <div class="flex justify-end gap-2 mt-5">
+                                    <button id="contact-cancel" class="px-4 py-2 border border-wine-red text-wine-red rounded-lg text-sm">Hủy</button>
+                                    <button id="contact-submit" class="px-4 py-2 bg-wine-red text-beige rounded-lg text-sm">Gửi báo lỗi</button>
                                 </div>
                             </div>
                         </div>
@@ -214,6 +235,7 @@
     }
 
     // VietQR
+    let currentTransferContent = '';
     const vietqrBtn = document.getElementById('vietqr-btn');
     const vietqrWrap = document.getElementById('vietqr-wrap');
     const vietqrImg = document.getElementById('vietqr-img');
@@ -238,7 +260,14 @@
                 const totalStr = totalEl.dataset.total || '0';
                 const amount = Math.max(0, Math.round(parseFloat(totalStr)));
                 // Sử dụng mã tham chiếu theo đơn để đồng bộ với đối soát Casso
-                const note = 'ORDER' + (@Model.OrderId);
+                const userId = @Model.UserId;
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const dateStr = `${yyyy}${mm}${dd}`;
+                const note = `ORDER${@Model.OrderId}_${userId}_${dateStr}`;
+                currentTransferContent = note;
 
                 // Prefer verified API
                 let res = await fetch('/Gift_box/GenerateVietQrVerified', {
@@ -337,10 +366,15 @@
                     if (data.redirectUrl) {
                         setTimeout(() => { window.location.href = data.redirectUrl; }, 1500);
                     } else {
-                        setTimeout(() => { window.location.reload(); }, 2000);
+                    setTimeout(() => { window.location.reload(); }, 2000);
                     }
                 } else {
                     alert(data.message || 'Chưa có giao dịch nào phù hợp');
+                    // Chỉ hiển thị nút báo lỗi sau khi server cho phép (>=5 lần)
+                    if (data.showReport) {
+                        const btn = document.getElementById('report-payment-issue-btn');
+                        if (btn) btn.classList.remove('hidden');
+                    }
                 }
             } catch (err) {
                 alert('Lỗi khi kiểm tra thanh toán: ' + (err && err.message ? err.message : err));
@@ -351,9 +385,97 @@
         });
     }
 
-    if (cassoRefreshBtn) {
-        cassoRefreshBtn.addEventListener('click', function(){
-            cassoWrap.classList.add('hidden');
+    // Removed "Làm mới" button
+
+    // Report payment issue flow
+    const reportBtn = document.getElementById('report-payment-issue-btn');
+    const contactModal = document.getElementById('contact-modal');
+    const contactName = document.getElementById('contact-name');
+    const contactPhone = document.getElementById('contact-phone');
+    const contactEmail = document.getElementById('contact-email');
+    const contactCancel = document.getElementById('contact-cancel');
+    const contactSubmit = document.getElementById('contact-submit');
+    if (reportBtn) {
+        reportBtn.addEventListener('click', async function(){
+            try {
+                let note = currentTransferContent;
+                if (!note) {
+                    // Try to infer from instructions block if available
+                    const inst = document.getElementById('casso-instructions');
+                    if (inst) {
+                        const text = inst.innerText || '';
+                        const m = text.match(/Nội dung chuyển khoản:\s*(ORDER\S+)/);
+                        if (m && m[1]) note = m[1];
+                    }
+                }
+                if (!note) return alert('Không tìm thấy nội dung chuyển khoản (ORDER...) để báo lỗi. Vui lòng tạo VietQR trước.');
+                // Mở modal thu thập thông tin liên hệ
+                if (contactModal) {
+                    // Prefill
+                    contactPhone.value = phoneInput ? (phoneInput.value || '') : '';
+                    contactEmail.value = '';
+                    contactName.value = '';
+                    contactModal.classList.remove('hidden');
+                    contactModal.classList.add('flex');
+
+                    const submitHandler = async () => {
+                        const err = document.getElementById('contact-error');
+                        if (err) err.textContent = '';
+                        // Validate
+                        const name = contactName.value.trim();
+                        const phone = (contactPhone.value || '').replace(/[\s\-\(\)]/g,'');
+                        const email = (contactEmail.value || '').trim();
+                        if (!name) { if (err) err.textContent = 'Vui lòng nhập họ tên'; return; }
+                        if (!phone || phone.length !== 10 || !phone.startsWith('0')) { if (err) err.textContent = 'Vui lòng nhập số điện thoại 10 số hợp lệ theo đầu số Việt Nam'; return; }
+                        const validPrefixes = ['032','033','034','035','036','037','038','039','070','076','077','078','079','081','082','083','084','085','056','058','059','020','021','022','023','024','025','026','027','028','029','030','031','040','041','042','043','044','045','046','047','048','049','050','051','052','053','054','055','057','060','061','062','063','064','065','066','067','068','069','090','091','092','093','094','095','096','097','098','099','086','087','088','089'];
+                        if (!validPrefixes.includes(phone.substring(0,3))) { if (err) err.textContent = 'Số điện thoại không thuộc đầu số Việt Nam'; return; }
+                        if (email) {
+                            const re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                            if (!re.test(email)) { if (err) err.textContent = 'Email không hợp lệ'; return; }
+                        }
+                        const fd = new FormData();
+                        fd.append('transferCode', note);
+                        fd.append('contactName', name);
+                        fd.append('contactPhone', phone);
+                        fd.append('contactEmail', email);
+                        const res = await fetch('/Cart/ReportPaymentIssue', { method: 'POST', body: fd, credentials: 'same-origin' });
+                        const data = await res.json();
+                        if (data.success) {
+                            // Toast thông báo gửi thành công
+                            const toast = document.createElement('div');
+                            toast.textContent = data.message || 'Đã gửi báo lỗi thành công. Chúng tôi sẽ liên hệ hỗ trợ sớm.';
+                            toast.className = 'fixed bottom-6 right-6 bg-wine-red text-beige px-4 py-3 rounded-lg shadow-lg';
+                            toast.style.zIndex = '9999';
+                            toast.style.fontFamily = 'Noto Serif, serif';
+                            document.body.appendChild(toast);
+                            setTimeout(()=>{ toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 1500);
+                            if (data.redirectUrl) {
+                                setTimeout(()=>{ window.location.href = data.redirectUrl; }, 1200);
+                            } else {
+                                setTimeout(()=>{ window.location.reload(); }, 1200);
+                            }
+                        } else {
+                            if (err) err.textContent = data.message || 'Không thể ghi nhận sự cố.';
+                        }
+                        contactSubmit.removeEventListener('click', submitHandler);
+                        contactCancel.removeEventListener('click', cancelHandler);
+                        contactModal.classList.add('hidden');
+                        contactModal.classList.remove('flex');
+                    };
+
+                    const cancelHandler = () => {
+                        contactSubmit.removeEventListener('click', submitHandler);
+                        contactCancel.removeEventListener('click', cancelHandler);
+                        contactModal.classList.add('hidden');
+                        contactModal.classList.remove('flex');
+                    };
+
+                    contactSubmit.addEventListener('click', submitHandler);
+                    contactCancel.addEventListener('click', cancelHandler);
+                }
+            } catch (err) {
+                alert('Có lỗi khi gửi báo lỗi: ' + (err && err.message ? err.message : err));
+            }
         });
     }
 

@@ -261,4 +261,79 @@ public class EmailService : IEmailService
             throw new Exception("Failed to send welcome email due to system error", ex);
         }
     }
+
+    public async Task SendAdminPaymentIssueReportAsync(string adminEmail, string subject, string htmlBody)
+    {
+        try
+        {
+            _logger.LogInformation("Sending admin payment issue report to: {Email}", adminEmail);
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "MonAmour"),
+                Subject = string.IsNullOrWhiteSpace(subject) ? "Báo cáo sự cố thanh toán" : subject,
+                IsBodyHtml = true,
+                Body = htmlBody
+            };
+            mailMessage.To.Add(adminEmail);
+
+            await _smtpClient.SendMailAsync(mailMessage);
+            _logger.LogInformation("Admin payment issue report sent successfully to: {Email}", adminEmail);
+        }
+        catch (SmtpException ex)
+        {
+            _logger.LogError(ex, "SMTP error sending admin payment issue report to {Email}: {Error}", adminEmail, ex.Message);
+            throw new Exception($"Failed to send admin payment issue report: {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error sending admin payment issue report to {Email}", adminEmail);
+            throw new Exception("Failed to send admin payment issue report due to system error", ex);
+        }
+    }
+
+    public async Task SendContactConfirmationEmailAsync(string customerEmail, string customerName, string htmlBody)
+    {
+        try
+        {
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "MonAmour"),
+                Subject = "Xác nhận yêu cầu tư vấn - MonAmour",
+                IsBodyHtml = true,
+                Body = htmlBody
+            };
+            mailMessage.To.Add(customerEmail);
+
+            await _smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending contact confirmation to {Email}", customerEmail);
+            throw;
+        }
+    }
+
+    public async Task SendAdminContactNotificationEmailAsync(string htmlBody, string? subject = null)
+    {
+        try
+        {
+            var adminEmail = _emailSettings.From;
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "MonAmour"),
+                Subject = string.IsNullOrWhiteSpace(subject) ? "Yêu cầu tư vấn mới" : subject,
+                IsBodyHtml = true,
+                Body = htmlBody
+            };
+            mailMessage.To.Add(adminEmail);
+
+            await _smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending admin contact notification");
+            throw;
+        }
+    }
 }

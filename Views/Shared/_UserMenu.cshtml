@@ -3,16 +3,16 @@
     <!-- User Avatar Dropdown Component -->
     <div class="relative" x-data="{ open: false }">
     <!-- User Avatar Button -->
-    <button x-on:click="open = !open" class="flex items-center space-x-3 p-3 rounded-full hover:bg-muted transition-colors">
-        <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-            <span class="text-sm font-semibold text-primary-foreground">
+    <button x-on:click="open = !open" class="flex items-center space-x-2 p-2 rounded-full hover:bg-muted transition-colors">
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <span class="text-xs font-medium text-primary-foreground">
                 @(ViewBag.UserName?.ToString()?.Substring(0, 1).ToUpper() ?? "U")
             </span>
         </div>
-        <span class="hidden md:block text-base font-medium text-foreground">
+        <span class="hidden md:block text-sm font-medium text-foreground">
             @(ViewBag.UserName ?? "Người dùng")
         </span>
-        <svg class="w-5 h-5 text-muted-foreground transition-transform"
+        <svg class="w-4 h-4 text-muted-foreground transition-transform"
              x-bind:class="{ 'rotate-180': open }"
              fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -28,20 +28,20 @@
          x-transition:leave="transition ease-in duration-75"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="absolute right-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
+         class="absolute right-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-lg z-50">
 
         <div class="py-2">
             <!-- User Info -->
-            <div class="px-5 py-3 border-b border-border">
-                <p class="text-base font-semibold text-foreground">@(ViewBag.UserName ?? "Người dùng")</p>
-                <p class="text-sm text-muted-foreground">@(ViewBag.UserEmail ?? "user@example.com")</p>
+            <div class="px-4 py-2 border-b border-border">
+                <p class="text-sm font-medium text-foreground">@(ViewBag.UserName ?? "Người dùng")</p>
+                <p class="text-xs text-muted-foreground">@(ViewBag.UserEmail ?? "user@example.com")</p>
             </div>
 
             <!-- Menu Items -->
             <div class="py-1">
                 <a href="@Url.Action("Index", "Profile")"
-                   class="flex items-center px-5 py-3 text-base text-foreground hover:bg-muted transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
@@ -49,8 +49,8 @@
                 </a>
 
                 <a href="@Url.Action("OrderHistory", "Profile")"
-                   class="flex items-center px-5 py-3 text-base text-foreground hover:bg-muted transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -58,8 +58,8 @@
                 </a>
 
                 <a href="@Url.Action("OrderHistory", "Cart")"
-                   class="flex items-center px-5 py-3 text-base text-foreground hover:bg-muted transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                     </svg>
@@ -93,8 +93,8 @@
             @if (ViewBag.IsAdmin == true)
             {
                 <a href="@Url.Action("Dashboard", "Admin")"
-                   class="flex items-center px-5 py-3 text-base text-foreground hover:bg-muted transition-colors">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                     </svg>
@@ -107,9 +107,9 @@
             <form method="post" action="@Url.Action("Logout", "Auth")" class="block">
                 @Html.AntiForgeryToken()
                 <button type="submit"
-                        class="flex items-center w-full px-5 py-3 text-base text-red-600 hover:bg-red-50 transition-colors"
+                        class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                         x-on:click="open = false">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                     </svg>
@@ -123,10 +123,10 @@
 else
 {
     <div class="flex items-center space-x-4">
-        <a href="@Url.Action("Login", "Auth")" class="text-sm font-medium text-foreground hover:text-foreground/80">
+        <a href="@Url.Action("Login", "Auth")" class="text-lg md:text-xl font-medium text-foreground hover:text-foreground/80">
             Đăng nhập
         </a>
-        <a href="@Url.Action("Signup", "Auth")" class="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+        <a href="@Url.Action("Signup", "Auth")" class="px-4 py-2 text-lg md:text-xl font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
             Đăng ký
         </a>
     </div>

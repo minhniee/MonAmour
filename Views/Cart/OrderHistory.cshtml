@@ -1,7 +1,5 @@
-@using Microsoft.Extensions.Options
-@using MonAmour.Util
 @model List<MonAmour.Models.Order>
-@inject IOptions<AppSettings> AppSettings
+
 @{
     ViewData["Title"] = "Lịch sử đơn hàng";
 }
@@ -10,7 +8,6 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 class="text-2xl md:text-3xl font-semibold text-foreground mb-6">Lịch sử đơn hàng</h1>
         @if (Model == null || !Model.Any())
         {
             <!-- Empty State -->
@@ -30,52 +27,32 @@
         else
         {
             <!-- Orders List -->
-            <div id="order-list" class="space-y-6">
-                @for (int i = 0; i < Model.Count; i++)
+            <div class="space-y-6">
+                @foreach (var order in Model)
                 {
-                    var order = Model[i];
-                    <div class="bg-white rounded-lg shadow-sm border border-border overflow-hidden" data-order-card data-index="@i" @(i >= 6 ? "style=\"display:none\"" : "")>
+                    <div class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
                         <!-- Order Header -->
                         <div class="px-6 py-4 border-b border-border bg-muted/30">
                             <div class="flex justify-between items-start">
-	                            <div>
-                                    <a href="@AppSettings.Value.AppUrl/Cart/BillDetail?orderId=@order.OrderId">
+                                <div>
+                                    <h3 class="font-heading text-lg text-foreground">Đơn hàng #@order.OrderId</h3>
+                                    <p class="text-sm text-muted-foreground">
+                                        Ngày đặt: @(order.CreatedAt.HasValue ? order.CreatedAt.Value.ToString("dd/MM/yyyy") : "Chưa có")
 
-                                        <h3 class="font-heading text-lg text-foreground">Đơn hàng #@order.OrderId</h3>
-                                    </a>
-		                            <p class="text-sm text-muted-foreground">
-			                            Ngày đặt: @(order.CreatedAt.HasValue ? order.CreatedAt.Value.ToString("dd/MM/yyyy") : "Chưa có")
-
-		                            </p>
-	                            </div>
+                                    </p>
+                                </div>
                                 <div class="text-right">
-                                    <div class="text-lg font-semibold text-foreground">@String.Format("{0:#,##0}₫", order.TotalPrice)</div>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        @(order.Status == "confirmed" ? "bg-green-100 text-green-800" :
-                                          order.Status == "pending" ? "bg-yellow-100 text-yellow-800" :
-                                          order.Status == "cancelled" ? "bg-red-100 text-red-800" :
-                                          "bg-gray-100 text-gray-800")">
-                                        @switch (order.Status)
-                                        {
-                                            case "confirmed":
-                                                <text>Đã xác nhận</text>
-                                                break;
-                                            case "pending":
-                                                <text>Đang chờ</text>
-                                                break;
-                                            case "cancelled":
-                                                <text>Đã hủy</text>
-                                                break;
-                                            case "shipped":
-                                                <text>Đã giao</text>
-                                                break;
-                                            case "completed":
-                                                <text>Đã nhận</text>
-                                                break;
-                                            default:
-                                                <text>@order.Status</text>
-                                                break;
-                                        }
+                                    <div class="text-lg font-semibold text-foreground">
+                                        @(order.TotalPrice)₫
+                                    </div>
+                                    @{
+                                        // Determine visual status: treat orders with pending payment as "Chờ xác minh"
+                                        bool hasPendingPayment = order.PaymentDetails != null && order.PaymentDetails.Any(pd => pd.Payment != null && pd.Payment.Status == "pending");
+                                        string badgeClass = hasPendingPayment ? "bg-yellow-100 text-yellow-800" : (order.Status == "confirmed" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800");
+                                        string badgeText = hasPendingPayment ? "Chờ xác minh" : (order.Status == "confirmed" ? "Đã xác nhận" : order.Status);
+                                    }
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @badgeClass">
+                                        @badgeText
                                     </span>
                                 </div>
                             </div>
@@ -108,47 +85,14 @@
                                             </p>
                                         </div>
                                         <div class="text-right">
-                                            <div class="font-medium text-foreground">@String.Format("{0:#,##0}₫", item.TotalPrice)</div>
-                                            <div class="text-sm text-muted-foreground">@String.Format("{0:#,##0}₫", item.UnitPrice) × @item.Quantity</div>
-                                        </div>
-                                    </div>
-
-                                    @if ((order.Status ?? string.Empty).ToLowerInvariant() == "completed")
-                                    {
-                                        var modalId = $"reviewModal-{order.OrderId}-{item.OrderItemId}";
-                                        <div class="mt-2 flex justify-end">
-                                            <button type="button" class="px-4 py-2 bg-primary text-primary-foreground rounded text-sm" onclick="document.getElementById('@modalId').classList.remove('hidden')">Đánh giá sản phẩm</button>
-                                        </div>
-
-                                        <div id="@modalId" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                                            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                                                <h3 class="text-lg font-semibold mb-4">Đánh giá sản phẩm</h3>
-                                                <form asp-action="SubmitReview" asp-controller="Cart" method="post" class="space-y-3">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="targetType" value="Product" />
-                                                    <input type="hidden" name="targetId" value="@item.ProductId" />
-                                                    <div class="flex items-center gap-2">
-                                                        <label class="text-sm">Đánh giá:</label>
-                                                        <select name="rating" class="border border-border rounded px-2 py-1 text-sm" required>
-                                                            <option value="">Chọn</option>
-                                                            <option value="1">1 ⭐</option>
-                                                            <option value="2">2 ⭐⭐</option>
-                                                            <option value="3">3 ⭐⭐⭐</option>
-                                                            <option value="4">4 ⭐⭐⭐⭐</option>
-                                                            <option value="5">5 ⭐⭐⭐⭐⭐</option>
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <textarea name="comment" rows="3" class="w-full border border-border rounded px-3 py-2 text-sm" placeholder="Viết cảm nhận của bạn (không bắt buộc)"></textarea>
-                                                    </div>
-                                                    <div class="flex justify-end gap-2">
-                                                        <button type="button" class="px-4 py-2 border rounded text-sm" onclick="document.getElementById('@modalId').classList.add('hidden')">Hủy</button>
-                                                        <button type="submit" class="px-4 py-2 bg-primary text-primary-foreground rounded text-sm">Gửi</button>
-                                                    </div>
-                                                </form>
+                                            <div class="font-medium text-foreground">
+                                                @(item.TotalPrice)₫
+                                            </div>
+                                            <div class="text-sm text-muted-foreground">
+                                                @(item.UnitPrice)₫ × @item.Quantity
                                             </div>
                                         </div>
-                                    }
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -162,34 +106,14 @@
                                         <span>Địa chỉ giao hàng: @order.ShippingAddress</span>
                                     }
                                 </div>
-                                <div class="text-lg font-semibold text-foreground">Tổng cộng: @String.Format("{0:#,##0}₫", order.TotalPrice)</div>
+                                <div class="text-lg font-semibold text-foreground">
+                                    Tổng cộng: @(order.TotalPrice)₫
+                                </div>
                             </div>
                         </div>
                     </div>
                 }
             </div>
-            <div id="orders-loadmore-wrap" class="text-center mt-8 @(Model.Count > 6 ? "" : "hidden")">
-                <button id="orders-loadmore" class="bg-muted text-foreground px-6 py-2 rounded hover:bg-muted/80">Xem thêm</button>
-            </div>
         }
     </div>
 </div>
-
-<script>
-    // Load more orders (progressive reveal)
-    (function(){
-        const list = document.getElementById('order-list');
-        const btn = document.getElementById('orders-loadmore');
-        if (!list || !btn) return;
-        btn.addEventListener('click', function(){
-            const hidden = Array.from(list.querySelectorAll('[data-order-card][style*="display:none"], [data-order-card].hidden'));
-            hidden.slice(0, 6).forEach(el => {
-                el.style.display = '';
-                el.classList.remove('hidden');
-            });
-            if (Array.from(list.querySelectorAll('[data-order-card][style*="display:none"], [data-order-card].hidden')).length === 0) {
-                btn.parentElement.classList.add('hidden');
-            }
-        });
-    })();
-</script>

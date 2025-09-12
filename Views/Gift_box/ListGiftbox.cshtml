@@ -10,11 +10,26 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <!-- Visual Area (Left Side) -->
                 <div class="relative h-80 flex items-center justify-start">
+                    @{
+                        var banners = ViewBag.BannerProducts as IEnumerable<dynamic>;
+                        string defaultBack = "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=600&fit=crop";
+                        string defaultFront = "https://images.unsplash.com/photo-1606800052052-a08af7148866?w=500&h=700&fit=crop";
+                        string frontImg = defaultFront;
+                        string backImg = defaultBack;
+                        if (banners != null)
+                        {
+                            var list = banners.ToList();
+                            var primary = list.FirstOrDefault(b => (bool)(b?.is_primary ?? false) == true);
+                            frontImg = (string)(primary?.img_url ?? list.FirstOrDefault()?.img_url) ?? defaultFront;
+                            var second = list.FirstOrDefault(b => (string)(b?.img_url) != frontImg);
+                            backImg = (string)(second?.img_url) ?? defaultBack;
+                        }
+                    }
                     <!-- Back Image (Smaller, positioned right) -->
                     <div id="back-rect" class="w-40 h-56 rounded-lg shadow-lg transform -rotate-1 hover:rotate-0 transition-all duration-500 cursor-pointer z-10 absolute overflow-hidden" 
                          onclick="bringToFront('back-rect')" 
                          style="left: 60px; top: 50px;">
-                        <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=600&fit=crop" 
+                        <img src="@backImg" 
                              alt="Gift Box 1" 
                              class="w-full h-full object-cover rounded-lg">
                         <div class="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
@@ -23,7 +38,7 @@
                     <div id="front-rect" class="w-48 h-64 rounded-lg shadow-lg transform rotate-2 hover:rotate-0 transition-all duration-500 cursor-pointer z-20 absolute overflow-hidden" 
                          onclick="bringToFront('front-rect')" 
                          style="left: 0px; top: 20px;">
-                        <img src="https://images.unsplash.com/photo-1606800052052-a08af7148866?w=500&h=700&fit=crop" 
+                        <img src="@frontImg" 
                              alt="Gift Box 2" 
                              class="w-full h-full object-cover rounded-lg">
                         <div class="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
@@ -42,12 +57,9 @@
                         Mô tả về bộ sưu tập hộp quà thông minh của chúng tôi, được thiết kế đặc biệt để tạo nên những khoảnh khắc đáng nhớ và ý nghĩa cho mọi dịp đặc biệt.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                        <button class="bg-wine-red text-beige px-8 py-3 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
+                        <a href="#product-list" class="bg-wine-red text-beige px-8 py-3 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
                             Khám phá ngay
-                        </button>
-                        <button class="border-2 border-wine-red text-wine-red px-8 py-3 rounded-lg font-prata text-lg hover:bg-wine-red hover:text-beige transition-colors duration-200">
-                            Tìm hiểu thêm
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -65,7 +77,7 @@
                     Các sản phẩm nổi bật sẽ hiển thị tại đây khi có đủ dữ liệu.
                 </p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 featured-grid">
                 @{
                     var top = ViewBag.TopProducts as IEnumerable<MonAmour.Models.Product>;
                 }
@@ -73,7 +85,9 @@
                 {
                     foreach (var p in top)
                     {
-                        var img = p.ProductImgs?.FirstOrDefault(pi => pi.IsPrimary == true)?.ImgUrl ?? "https://via.placeholder.com/600x400?text=No+Image";
+                        var img = p.ProductImgs?.FirstOrDefault(pi => pi.IsPrimary == true)?.ImgUrl
+                                  ?? p.ProductImgs?.FirstOrDefault()?.ImgUrl
+                                  ?? "https://via.placeholder.com/600x400?text=No+Image";
                         <a href="@Url.Action("ProductDetail", "Gift_box", new { id = p.ProductId })" class="block group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-wine-red/10">
                             <img src="@img" alt="@p.Name" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
                             <div class="p-4">
@@ -130,21 +144,22 @@
     </div>
 
     <!-- Gift Box Grid -->
-    <div class="bg-beige/20 py-12">
+    <div id="product-list" class="bg-beige/20 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 gift-grid">
             @if (Model != null && Model.Any())
             {
                 foreach (var p in Model)
                 {
-                    var img = p.ProductImgs?.FirstOrDefault(pi => pi.IsPrimary == true)?.ImgUrl ?? "https://via.placeholder.com/600x400?text=No+Image";
-            <a href="@Url.Action("ProductDetail", "Gift_box", new { id = p.ProductId })" class="block group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-wine-red/10 cursor-pointer">
+                    var img = p.ProductImgs?.FirstOrDefault(pi => pi.IsPrimary == true)?.ImgUrl
+                              ?? p.ProductImgs?.FirstOrDefault()?.ImgUrl
+                              ?? "https://via.placeholder.com/600x400?text=No+Image";
+            <a href="@Url.Action("ProductDetail", "Gift_box", new { id = p.ProductId })" class="block group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-wine-red/10 cursor-pointer gift-card">
                 <div class="relative overflow-hidden">
-                    <img src="@img" alt="@p.Name" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300">
+                    <img src="@img" alt="@p.Name" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300 gift-image">
                 </div>
                 <div class="p-6">
                     <h3 class="font-prata text-xl font-bold text-wine-red mb-2">@p.Name</h3>
-                    <p class="font-noto-serif text-gray-600 mb-4 line-clamp-2">@p.Description</p>
                     <div class="flex items-center justify-between mb-4">
                         <span class="font-prata text-2xl font-bold text-wine-red">@String.Format("{0:N0}₫", p.Price)</span>
                         <span class="text-sm text-gray-600">@p.Category?.Name</span>
@@ -241,6 +256,31 @@
         z-index: 10;
         transform: rotate(-1deg);
         opacity: 1;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 1024px) {
+        .gift-image { height: 15rem; }
+    }
+    /* Phones ≥ 390px (e.g., iPhone 12 Pro and up) */
+    @@media (min-width: 390px) and (max-width: 767px) {
+        .featured-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .gift-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+        .gift-card { border-radius: 1rem; }
+        .gift-image { height: 12rem; }
+        #front-rect { left: 0 !important; top: 10px !important; width: 9rem !important; height: 12rem !important; }
+        #back-rect { left: 50px !important; top: 30px !important; width: 8rem !important; height: 10.5rem !important; }
+    }
+    /* Very small phones < 390px */
+    @@media (max-width: 389px) {
+        .featured-grid { grid-template-columns: 1fr; }
+        .gift-grid { grid-template-columns: 1fr; }
+        .gift-image { height: 11rem; }
+    }
+    /* iPad/tablet 768–1023px: behave like desktop */
+    @@media (min-width: 768px) and (max-width: 1023px) {
+        .gift-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .featured-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
 </style>
 

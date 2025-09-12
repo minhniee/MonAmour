@@ -1,0 +1,18 @@
+@{
+    // Reuse the same form structure as ConceptDetail contact-section
+}
+
+<section id="contact-section" class="py-6">
+    <div class="container mx-auto px-0">
+        @Html.Raw(System.IO.File.ReadAllText(Context.RequestServices.GetService<IWebHostEnvironment>()!.ContentRootPath + "/Views/Concept/_ConsultFormBody.html"))
+    </div>
+</section>
+
+<style>
+    /* Same timepicker styles as ConceptDetail */
+    .timepicker button { transition: background-color .15s ease, color .15s ease; }
+    .timepicker button:hover { background-color: rgba(127, 29, 29, 0.08); }
+    .timepicker button.active { background-color: rgba(127, 29, 29, 0.12); color: #7f1d1d; font-weight: 600; }
+</style>
+
+

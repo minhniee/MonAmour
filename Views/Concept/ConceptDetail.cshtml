@@ -5,6 +5,8 @@
 	var primaryImage = Model.ConceptImgs?.FirstOrDefault(img => img.IsPrimary == true)?.ImgUrl ?? Model.ConceptImgs?.FirstOrDefault()?.ImgUrl ?? "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop";
 	var coverImages = Model.ConceptImgs?.Where(img => img.DisplayOrder == 2 || img.DisplayOrder == 3).OrderBy(img => img.DisplayOrder).ToList() ?? new List<MonAmour.Models.ConceptImg>();
 	var detailImages = Model.ConceptImgs?.Where(img => img.DisplayOrder >= 4 && img.DisplayOrder <= 6).OrderBy(img => img.DisplayOrder).ToList() ?? new List<MonAmour.Models.ConceptImg>();
+	var categories = ViewBag.Categories as List<MonAmour.Models.ConceptCategory>;
+	var cities = ViewBag.Cities as List<string>;
 }
 
 <div class="min-h-screen bg-beige">
@@ -162,6 +164,133 @@
 		</div>
 	</section>
 
+	<!-- Contact CTA Button -->
+	<section class="pb-2 -mt-6">
+		<div class="container mx-auto px-4 text-center">
+			<a href="#contact-section" class="inline-block px-8 py-3 bg-wine-red text-white rounded-full shadow-lg hover:shadow-xl hover:bg-wine-red/90 transition-all duration-200 font-prata text-lg">Liên hệ ngay</a>
+		</div>
+	</section>
+
+	<!-- Contact Form Section -->
+	<section id="contact-section" class="py-12 bg-white/50">
+		<div class="container mx-auto px-4">
+			<h3 class="font-prata text-3xl text-wine-red text-center mb-8">Thông tin liên hệ</h3>
+			<form id="contactForm" method="post" action="@Url.Action("SubmitContact","Concept")" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+				@Html.AntiForgeryToken()
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Họ tên *</label>
+						<input name="fullName" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập họ tên">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Địa chỉ email *</label>
+						<input name="email" type="email" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="you@example.com">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Số điện thoại *</label>
+						<input name="phone" type="tel" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="0xxxxxxxxx">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Nơi sống hiện tại</label>
+						<input name="currentLocation" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Thành phố / Tỉnh">
+					</div>
+				</div>
+
+				<h4 class="font-prata text-2xl text-wine-red mt-8 mb-4">Thông tin chi tiết</h4>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Loại hình sự kiện *</label>
+						<select id="eventTypeSelect" name="eventType" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+							<option value="">Chọn loại sự kiện</option>
+							@if (categories != null)
+							{
+								foreach (var cat in categories)
+								{
+									<option value="@cat.Name">@cat.Name</option>
+								}
+							}
+							<option value="other">Khác</option>
+						</select>
+						<div id="eventTypeOtherWrapper" class="mt-2 hidden">
+							<input id="eventTypeOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập loại hình sự kiện khác">
+						</div>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Ngân sách *</label>
+						<select id="budgetSelect" name="budget" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+							<option value="">Chọn ngân sách</option>
+							<option>&lt; 10.000.000₫</option>
+							<option>10.000.000₫ - 20.000.000₫</option>
+							<option>20.000.000₫ - 30.000.000₫</option>
+							<option>30.000.000₫ - 50.000.000₫</option>
+							<option>50.000.000₫ - 80.000.000₫</option>
+							<option>80.000.000₫ - 120.000.000₫</option>
+							<option>120.000.000₫ - 200.000.000₫</option>
+							<option>&gt; 200.000.000₫</option>
+							<option value="other">Khác</option>
+						</select>
+						<div id="budgetOtherWrapper" class="mt-2 hidden">
+							<input id="budgetOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập ngân sách mong muốn">
+						</div>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Ngày tổ chức</label>
+						<input name="eventDate" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Thời gian</label>
+						<div class="relative">
+							<input id="bookingTime" name="eventTime" type="text" readonly onclick="showTimePicker()" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Chọn thời gian">
+							<div id="customTimePicker" class="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden timepicker">
+								<div class="grid grid-cols-2 gap-3">
+									<div id="hoursColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
+									<div id="minutesColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-wine-red mb-1">Nơi tổ chức</label>
+						<select id="citySelect" name="location" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+							<option value="">Chọn thành phố</option>
+							@if (cities != null)
+							{
+								foreach (var city in cities)
+								{
+									<option value="@city">@city</option>
+								}
+							}
+							<option value="other">Khác</option>
+						</select>
+						<div id="cityOtherWrapper" class="mt-2 hidden">
+							<input id="cityOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập địa điểm khác">
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-6">
+					<label class="block text-sm font-medium text-wine-red mb-1">Câu hỏi dành cho The Planners</label>
+					<textarea name="message" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Hãy cho chúng tôi biết thêm về nhu cầu của bạn..."></textarea>
+				</div>
+
+				<div class="mt-6">
+					<label class="block text-sm font-medium text-wine-red mb-1">Bạn biết đến The Planners qua kênh nào?</label>
+					<select name="referral" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+						<option>Facebook</option>
+						<option>Instagram</option>
+						<option>TikTok</option>
+						<option>Tìm kiếm Google</option>
+						<option>Người quen giới thiệu</option>
+						<option>Khác</option>
+					</select>
+				</div>
+
+				<div class="mt-8 text-center">
+					<button id="submitContactBtn" type="submit" class="px-8 py-3 bg-wine-red text-white rounded-full shadow-lg hover:shadow-xl hover:bg-wine-red/90 transition-all duration-200">Gửi yêu cầu</button>
+				</div>
+			</form>
+		</div>
+	</section>
 
 	<!-- Related Concepts -->
 	@if (relatedConcepts != null && relatedConcepts.Any())
@@ -385,4 +514,78 @@
 		}
 	});
 
+	// Toggle inputs for "Khác"
+	(function() {
+		const eventTypeSelect = document.getElementById('eventTypeSelect');
+		const eventTypeOtherWrapper = document.getElementById('eventTypeOtherWrapper');
+		const citySelect = document.getElementById('citySelect');
+		const cityOtherWrapper = document.getElementById('cityOtherWrapper');
+		const budgetSelect = document.getElementById('budgetSelect');
+		const budgetOtherWrapper = document.getElementById('budgetOtherWrapper');
+		const form = document.getElementById('contactForm');
+		const submitBtn = document.getElementById('submitContactBtn');
+
+		if (eventTypeSelect) {
+			eventTypeSelect.addEventListener('change', function() {
+				eventTypeOtherWrapper.classList.toggle('hidden', this.value !== 'other');
+			});
+		}
+
+		if (citySelect) {
+			citySelect.addEventListener('change', function() {
+				cityOtherWrapper.classList.toggle('hidden', this.value !== 'other');
+			});
+		}
+
+		if (budgetSelect) {
+			budgetSelect.addEventListener('change', function() {
+				budgetOtherWrapper.classList.toggle('hidden', this.value !== 'other');
+			});
+		}
+
+		if (form) {
+			form.addEventListener('submit', async function(e) {
+				e.preventDefault();
+				// Client-side validation
+				const fullName = form.querySelector('input[name="fullName"]').value.trim();
+				const email = form.querySelector('input[name="email"]').value.trim();
+				const phone = form.querySelector('input[name="phone"]').value.trim();
+				if (!fullName || !email || !/^\d{10}$/.test(phone)) {
+					alert('Vui lòng nhập Họ tên, Email hợp lệ và SĐT 10 số.');
+					return;
+				}
+
+				submitBtn.disabled = true;
+				submitBtn.textContent = 'Đang gửi...';
+
+				const data = new FormData(form);
+				// Ensure other fields are included
+				if (eventTypeSelect && eventTypeSelect.value === 'other') {
+					data.set('eventType', document.getElementById('eventTypeOther').value.trim());
+				}
+				if (citySelect && citySelect.value === 'other') {
+					data.set('location', document.getElementById('cityOther').value.trim());
+				}
+				if (budgetSelect && budgetSelect.value === 'other') {
+					data.set('budget', document.getElementById('budgetOther').value.trim());
+				}
+
+				try {
+					const res = await fetch(form.action, { method: 'POST', body: data, headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+					if (!res.ok) {
+						const msg = await res.text();
+						alert(msg || 'Gửi yêu cầu thất bại, vui lòng thử lại.');
+					} else {
+						alert('Đã gửi yêu cầu tư vấn thành công! Vui lòng kiểm tra email.');
+						form.reset();
+					}
+				} catch (err) {
+					alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
+				} finally {
+					submitBtn.disabled = false;
+					submitBtn.textContent = 'Submit Request';
+				}
+			});
+		}
+	})();
 </script>

@@ -331,21 +331,35 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (order.HasPayment)
-                                        {
-                                            <span class="badge badge-success">
-                                                <i class="fas fa-check"></i> Đã thanh toán
-                                            </span>
-                                            @if (order.PaymentAmount.HasValue)
+                                        @{
+                                            string payLabel;
+                                            string badgeClass;
+                                            switch (order.Status)
                                             {
-                                                <br><small class="text-muted">@order.PaymentAmount.Value.ToString("N0") VNĐ</small>
+                                                case "pending":
+                                                    payLabel = "Đang xử lí";
+                                                    badgeClass = "badge-warning";
+                                                    break;
+                                                case "cancelled":
+                                                    payLabel = "Chưa thanh toán";
+                                                    badgeClass = "badge-danger";
+                                                    break;
+                                                case "confirmed":
+                                                case "shipping":
+                                                case "completed":
+                                                    payLabel = "Đã thanh toán";
+                                                    badgeClass = "badge-success";
+                                                    break;
+                                                default:
+                                                    payLabel = order.Status ?? "Chưa thanh toán";
+                                                    badgeClass = "badge-secondary";
+                                                    break;
                                             }
                                         }
-                                        else
+                                        <span class="badge @badgeClass">@payLabel</span>
+                                        @if (order.PaymentAmount.HasValue)
                                         {
-                                            <span class="badge badge-danger">
-                                                <i class="fas fa-times"></i> Chưa thanh toán
-                                            </span>
+                                            <br><small class="text-muted">@order.PaymentAmount.Value.ToString("N0") VNĐ</small>
                                         }
                                     </td>
                                     <td>
