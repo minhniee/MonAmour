@@ -1126,9 +1126,10 @@ namespace MonAmour.Controllers
                 .ThenInclude(p => p.ProductImgs)
                 .Include(o => o.PaymentDetails)
                 .ThenInclude(pd => pd.Payment)
-                // Hiển thị cả đơn đang chờ xác minh (đang ở trạng thái cart nhưng có Payment pending)
+                // Hiển thị cả đơn đang chờ xác minh (đang ở trạng thái cart nhưng có Payment pending) và đơn đã hủy
                 .Where(o => o.UserId == userId && (
                     o.Status != "cart" ||
+                    o.Status == "cancelled" ||
                     _db.PaymentDetails.Any(pd => pd.OrderId == o.OrderId && pd.Payment != null && pd.Payment.Status == "pending")
                 ))
                 .OrderByDescending(o => o.CreatedAt)

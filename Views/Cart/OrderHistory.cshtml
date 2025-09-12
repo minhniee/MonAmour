@@ -48,8 +48,28 @@
                                     @{
                                         // Determine visual status: treat orders with pending payment as "Chờ xác minh"
                                         bool hasPendingPayment = order.PaymentDetails != null && order.PaymentDetails.Any(pd => pd.Payment != null && pd.Payment.Status == "pending");
-                                        string badgeClass = hasPendingPayment ? "bg-yellow-100 text-yellow-800" : (order.Status == "confirmed" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800");
-                                        string badgeText = hasPendingPayment ? "Chờ xác minh" : (order.Status == "confirmed" ? "Đã xác nhận" : order.Status);
+                                        string badgeClass, badgeText;
+                                        
+                                        if (hasPendingPayment)
+                                        {
+                                            badgeClass = "bg-yellow-100 text-yellow-800";
+                                            badgeText = "Chờ xác minh";
+                                        }
+                                        else if (order.Status == "confirmed")
+                                        {
+                                            badgeClass = "bg-green-100 text-green-800";
+                                            badgeText = "Đã xác nhận";
+                                        }
+                                        else if (order.Status == "cancelled")
+                                        {
+                                            badgeClass = "bg-red-100 text-red-800";
+                                            badgeText = "Đã hủy";
+                                        }
+                                        else
+                                        {
+                                            badgeClass = "bg-gray-100 text-gray-800";
+                                            badgeText = order.Status;
+                                        }
                                     }
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @badgeClass">
                                         @badgeText
