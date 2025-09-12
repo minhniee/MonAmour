@@ -26,18 +26,18 @@
                         }
                     }
                     <!-- Back Image (Smaller, positioned right) -->
-                    <div id="back-rect" class="w-40 h-56 rounded-lg shadow-lg transform -rotate-1 hover:rotate-0 transition-all duration-500 cursor-pointer z-10 absolute overflow-hidden" 
+                    <div id="back-rect" class="w-56 h-72 rounded-lg shadow-lg transform -rotate-1 hover:rotate-0 transition-all duration-500 cursor-pointer z-10 absolute overflow-hidden" 
                          onclick="bringToFront('back-rect')" 
-                         style="left: 60px; top: 50px;">
+                         style="left: 140px; top: 50px;">
                         <img src="@backImg" 
                              alt="Gift Box 1" 
                              class="w-full h-full object-cover rounded-lg">
                         <div class="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent rounded-lg opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     <!-- Front Image (Larger, positioned left) -->
-                    <div id="front-rect" class="w-48 h-64 rounded-lg shadow-lg transform rotate-2 hover:rotate-0 transition-all duration-500 cursor-pointer z-20 absolute overflow-hidden" 
+                    <div id="front-rect" class="w-64 h-80 rounded-lg shadow-lg transform rotate-2 hover:rotate-0 transition-all duration-500 cursor-pointer z-20 absolute overflow-hidden" 
                          onclick="bringToFront('front-rect')" 
-                         style="left: 0px; top: 20px;">
+                         style="left: 80px; top: 20px;">
                         <img src="@frontImg" 
                              alt="Gift Box 2" 
                              class="w-full h-full object-cover rounded-lg">
@@ -227,8 +227,8 @@
         transform: rotate(2deg) scale(1) !important;
         box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3) !important;
         transition: all 0.5s ease !important;
-        width: 12rem !important;
-        height: 16rem !important;
+        width: 16rem !important;
+        height: 20rem !important;
     }
     
     .rect-back {
@@ -236,8 +236,8 @@
         transform: rotate(-1deg) scale(1) !important;
         box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.15) !important;
         transition: all 0.5s ease !important;
-        width: 10rem !important;
-        height: 14rem !important;
+        width: 14rem !important;
+        height: 18rem !important;
     }
     
     /* Ensure proper stacking context */
@@ -268,8 +268,8 @@
         .gift-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
         .gift-card { border-radius: 1rem; }
         .gift-image { height: 12rem; }
-        #front-rect { left: 0 !important; top: 10px !important; width: 9rem !important; height: 12rem !important; }
-        #back-rect { left: 50px !important; top: 30px !important; width: 8rem !important; height: 10.5rem !important; }
+        #front-rect { left: 40px !important; top: 10px !important; width: 11rem !important; height: 14rem !important; }
+        #back-rect { left: 100px !important; top: 30px !important; width: 10rem !important; height: 13rem !important; }
     }
     /* Very small phones < 390px */
     @@media (max-width: 389px) {
