@@ -569,6 +569,21 @@ namespace MonAmour.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SearchCategories(string searchTerm, bool? isActive)
+        {
+            try
+            {
+                var categories = await _blogService.SearchCategoriesAsync(searchTerm, isActive);
+                return PartialView("_CategoryListPartial", categories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching categories");
+                return PartialView("_CategoryListPartial", new List<BlogCategoryListViewModel>());
+            }
+        }
+
         #endregion
 
         #region Helper Methods

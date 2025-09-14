@@ -568,6 +568,55 @@ namespace MonAmour.Services.Implements
             }
         }
 
+        public async Task<List<BlogCategoryListViewModel>> SearchCategoriesAsync(string searchTerm, bool? isActive)
+        {
+            try
+            {
+                var query = _context.BlogCategories.AsQueryable();
+
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    query = query.Where(c => c.Name.Contains(searchTerm) ||
+                                           (c.Description != null && c.Description.Contains(searchTerm)) ||
+                                           (c.Slug != null && c.Slug.Contains(searchTerm)));
+                }
+
+                if (isActive.HasValue)
+                {
+                    query = query.Where(c => c.IsActive == isActive.Value);
+                }
+
+                var categories = await query.OrderBy(c => c.Name).ToListAsync();
+
+                var result = new List<BlogCategoryListViewModel>();
+
+                foreach (var category in categories)
+                {
+                    // Count blogs for this category (excluding deleted blogs)
+                    var blogCount = await _context.Blogs
+                        .CountAsync(b => b.CategoryId == category.CategoryId && b.IsDeleted != true);
+
+                    result.Add(new BlogCategoryListViewModel
+                    {
+                        CategoryId = category.CategoryId,
+                        Name = category.Name,
+                        Description = category.Description,
+                        Slug = category.Slug,
+                        IsActive = category.IsActive,
+                        CreatedAt = category.CreatedAt,
+                        BlogCount = blogCount
+                    });
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching categories");
+                return new List<BlogCategoryListViewModel>();
+            }
+        }
+
         #endregion
 
         #region Blog Comment Methods

@@ -26,6 +26,7 @@ namespace MonAmour.Services.Interfaces
         Task<bool> UpdateCategoryAsync(BlogCategoryEditViewModel model);
         Task<bool> DeleteCategoryAsync(int id);
         Task<bool> ToggleCategoryStatusAsync(int id);
+        Task<List<BlogCategoryListViewModel>> SearchCategoriesAsync(string searchTerm, bool? isActive);
 
         // Blog Comment methods
         Task<List<BlogCommentListViewModel>> GetAllCommentsAsync();

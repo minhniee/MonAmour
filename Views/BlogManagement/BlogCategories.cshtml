@@ -15,6 +15,37 @@
         </a>
     </div>
 
+    <!-- Search Form -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tìm kiếm danh mục</h6>
+        </div>
+        <div class="card-body">
+            <form id="searchForm" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Từ khóa tìm kiếm</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="Nhập tên, mô tả hoặc slug...">
+                </div>
+                <div class="col-md-3">
+                    <label for="isActive" class="form-label">Trạng thái</label>
+                    <select class="form-select" id="isActive" name="isActive">
+                        <option value="">Tất cả</option>
+                        <option value="true">Hoạt động</option>
+                        <option value="false">Không hoạt động</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary me-2" onclick="searchCategories()">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="clearSearch()">
+                        <i class="fas fa-times"></i> Xóa bộ lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Categories List -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -25,80 +56,8 @@
                 </button>
             </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="categoryTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Tên danh mục</th>
-                            <th>Mô tả</th>
-                            <th>Slug</th>
-                            <th>Số bài viết</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày tạo</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var category in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <strong>@category.Name</strong>
-                                </td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(category.Description))
-                                    {
-                                        @(category.Description.Length > 100 ? category.Description.Substring(0, 100) + "..." : category.Description)
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Không có mô tả</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(category.Slug))
-                                    {
-                                        <code>@category.Slug</code>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">N/A</span>
-                                    }
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">@category.BlogCount</span>
-                                </td>
-                                <td>
-                                    @if (category.IsActive == true)
-                                    {
-                                        <span class="badge bg-success">Hoạt động</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">Không hoạt động</span>
-                                    }
-                                </td>
-                                <td>@(category.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a asp-action="EditCategory" asp-route-id="@category.CategoryId" class="btn btn-sm btn-warning" title="Chỉnh sửa">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-@(category.IsActive == true ? "warning" : "success")" 
-                                                onclick="toggleCategoryStatus(@category.CategoryId)" title="@(category.IsActive == true ? "Vô hiệu hóa" : "Kích hoạt")">
-                                            <i class="fas fa-@(category.IsActive == true ? "pause" : "play")"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteCategory(@category.CategoryId)" title="Xóa">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+        <div class="card-body" id="categoryListContainer">
+            @await Html.PartialAsync("_CategoryListPartial", Model)
         </div>
     </div>
 </div>
@@ -119,6 +78,51 @@
         function refreshCategories() {
             location.reload();
         }
+
+        function searchCategories() {
+            var searchTerm = $('#searchTerm').val();
+            var isActive = $('#isActive').val();
+            
+            // Show loading
+            $('#categoryListContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Đang tìm kiếm...</p></div>');
+            
+            $.ajax({
+                url: '@Url.Action("SearchCategories", "BlogManagement")',
+                type: 'POST',
+                data: {
+                    searchTerm: searchTerm,
+                    isActive: isActive === '' ? null : isActive === 'true',
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    $('#categoryListContainer').html(result);
+                    // Re-initialize DataTable for the new content
+                    $('#categoryTable').DataTable({
+                        "language": {
+                            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                        },
+                        "pageLength": 25,
+                        "order": [[5, "desc"]]
+                    });
+                },
+                error: function() {
+                    $('#categoryListContainer').html('<div class="alert alert-danger">Có lỗi xảy ra khi tìm kiếm danh mục</div>');
+                }
+            });
+        }
+
+        function clearSearch() {
+            $('#searchTerm').val('');
+            $('#isActive').val('');
+            refreshCategories();
+        }
+
+        // Search on Enter key press
+        $('#searchTerm').on('keypress', function(e) {
+            if (e.which === 13) {
+                searchCategories();
+            }
+        });
 
         function toggleCategoryStatus(categoryId) {
             if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái danh mục này?')) {
