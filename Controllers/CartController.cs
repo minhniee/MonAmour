@@ -143,10 +143,10 @@ namespace MonAmour.Controllers
             var totalQuantityInAllCarts = _db.OrderItems
                 .Where(i => i.ProductId == productId && i.Order.Status == "cart" && i.Order.UserId == userId)
                 .Sum(i => i.Quantity);
-            
+
             // Tính tổng số lượng sau khi thêm (bao gồm cả item hiện tại nếu có)
             var finalQuantity = totalQuantityInAllCarts + quantity;
-            
+
             if (product.StockQuantity.HasValue && finalQuantity > product.StockQuantity.Value)
             {
                 if (IsAjaxRequest())
@@ -225,7 +225,7 @@ namespace MonAmour.Controllers
             var totalQuantityInCart = _db.OrderItems
                 .Where(i => i.ProductId == item.ProductId && i.Order.Status == "cart")
                 .Sum(i => i.Quantity) - oldQuantity + quantity; // Tính lại với số lượng mới
-            
+
             if (item.Product.StockQuantity.HasValue && totalQuantityInCart > item.Product.StockQuantity.Value)
             {
                 TempData["CartError"] = $"Số lượng sản phẩm không còn đủ. Sản phẩm nhưng chỉ còn {item.Product.StockQuantity.Value} sản phẩm trong kho. Vui lòng giảm số lượng.";
@@ -537,7 +537,8 @@ namespace MonAmour.Controllers
                         return Json(new { success = false, message = stockResultExisting.Message, debug = debugInfo });
                     }
                     HttpContext.Session?.SetString(attemptKey, "0");
-                    return Json(new {
+                    return Json(new
+                    {
                         success = true,
                         message = "Đơn hàng đã được thanh toán và xác nhận",
                         redirectUrl = Url.Action("BillDetail", "Cart", new { orderId = cartOrder.OrderId }),
@@ -595,11 +596,12 @@ namespace MonAmour.Controllers
                     }
                     // Reset failed attempts
                     HttpContext.Session?.SetString(attemptKey, "0");
-                    return Json(new { 
-                        success = true, 
-                        message = $"Đã xử lý {processedCount} giao dịch thành công", 
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Đã xử lý {processedCount} giao dịch thành công",
                         redirectUrl = Url.Action("BillDetail", "Cart", new { orderId = cartOrder.OrderId }),
-                        debug = debugInfo 
+                        debug = debugInfo
                     });
                 }
                 else

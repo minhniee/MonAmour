@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
-using MonAmour.Services.Interfaces;
 
 namespace MonAmour.Controllers
 {

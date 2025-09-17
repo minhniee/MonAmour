@@ -13,7 +13,7 @@ public partial class MonAmourDbContext : DbContext
     {
     }
 
-    
+
 
     public virtual DbSet<CassoTransaction> CassoTransactions { get; set; }
 
@@ -1001,12 +1001,12 @@ public partial class MonAmourDbContext : DbContext
             entity.Property(e => e.ViewCount).HasColumnName("view_count");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            
+
             entity.HasOne(d => d.Author)
                 .WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.AuthorId)
                 .HasConstraintName("FK_Blog_User");
-                
+
             entity.HasOne(d => d.Category)
                 .WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.CategoryId)
@@ -1039,12 +1039,12 @@ public partial class MonAmourDbContext : DbContext
             entity.Property(e => e.IsApproved).HasColumnName("is_approved");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            
+
             entity.HasOne(d => d.Blog)
                 .WithMany(p => p.Comments)
                 .HasForeignKey(d => d.BlogId)
                 .HasConstraintName("FK_BlogComment_Blog");
-                
+
             entity.HasOne(d => d.User)
                 .WithMany(p => p.BlogComments)
                 .HasForeignKey(d => d.UserId)

@@ -1,6 +1,5 @@
-using MonAmour.Services.Interfaces;
-using MonAmour.Models;
 using MonAmour.Helpers;
+using MonAmour.Services.Interfaces;
 
 namespace MonAmour.Middleware;
 
@@ -26,17 +25,17 @@ public class RememberMeMiddleware
                 if (!string.IsNullOrEmpty(rememberToken))
                 {
                     _logger.LogDebug("Processing remember me token");
-                    
+
                     // Tìm user từ token
                     var user = await authService.GetUserByTokenAsync(rememberToken, "remember_me");
                     if (user is not null)
                     {
                         // Lấy roles của user
                         var roles = await authService.GetUserRolesAsync(user.UserId);
-                        
+
                         // Set session với roles
                         AuthHelper.SetUserSession(context, user, roles);
-                        
+
                         _logger.LogInformation("User automatically logged in via remember me token: {Email}", user.Email);
                     }
                     else

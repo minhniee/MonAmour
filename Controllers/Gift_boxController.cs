@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MonAmour.Models;
 using MonAmour.Helpers;
-using System;
-using System.Net.Http;
+using MonAmour.Models;
+using System.Data;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Data.SqlClient;
-using System.Data;
 
 namespace MonAmour.Controllers
 {

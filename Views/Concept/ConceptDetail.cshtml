@@ -180,15 +180,18 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
 						<label class="block text-sm font-medium text-wine-red mb-1">Họ tên *</label>
-						<input name="fullName" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập họ tên">
+						<input name="fullName" type="text" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="Nhập họ tên">
+						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-wine-red mb-1">Địa chỉ email *</label>
-						<input name="email" type="email" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="you@example.com">
+						<input name="email" type="email" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="you@example.com">
+						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-wine-red mb-1">Số điện thoại *</label>
-						<input name="phone" type="tel" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="0xxxxxxxxx">
+						<input name="phone" type="tel" required pattern="^0[0-9]{9}$" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="0xxxxxxxxx">
+						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-wine-red mb-1">Nơi sống hiện tại</label>
@@ -199,54 +202,43 @@
 				<h4 class="font-prata text-2xl text-wine-red mt-8 mb-4">Thông tin chi tiết</h4>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Loại hình sự kiện *</label>
-						<select id="eventTypeSelect" name="eventType" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
-							<option value="">Chọn loại sự kiện</option>
-							@if (categories != null)
-							{
-								foreach (var cat in categories)
-								{
-									<option value="@cat.Name">@cat.Name</option>
-								}
-							}
-							<option value="other">Khác</option>
+						<label class="block text-sm font-medium text-wine-red mb-1">Mục đích buổi hẹn hò *</label>
+						<select id="datePurposeSelect" name="datePurpose" required class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500">
+							<option value="">Chọn mục đích buổi hẹn</option>
+							<option value="First date">First date</option>
+							<option value="Normal date">Normal date</option>
+							<option value="Anniversary/Birthday">Kỷ niệm ngày đặc biệt (Anniversary, Birthday)</option>
+							<option value="Proposal">Cầu hôn/Proposal</option>
+							<option value="other">Khác (ghi rõ trong phần ghi chú)</option>
 						</select>
-						<div id="eventTypeOtherWrapper" class="mt-2 hidden">
-							<input id="eventTypeOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập loại hình sự kiện khác">
-						</div>
+						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Ngân sách *</label>
-						<select id="budgetSelect" name="budget" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+						<label class="block text-sm font-medium text-wine-red mb-1">Ngân sách mong muốn *</label>
+						<select id="budgetSelect" name="budget" required class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500">
 							<option value="">Chọn ngân sách</option>
-							<option>&lt; 10.000.000₫</option>
-							<option>10.000.000₫ - 20.000.000₫</option>
-							<option>20.000.000₫ - 30.000.000₫</option>
-							<option>30.000.000₫ - 50.000.000₫</option>
-							<option>50.000.000₫ - 80.000.000₫</option>
-							<option>80.000.000₫ - 120.000.000₫</option>
-							<option>120.000.000₫ - 200.000.000₫</option>
-							<option>&gt; 200.000.000₫</option>
-							<option value="other">Khác</option>
+							<option value="Standard">Dưới 1.000.000đ (Standard)</option>
+							<option value="Signature">1.000.000đ – 2.000.000đ (Signature)</option>
+							<option value="Premium">2.000.000đ – 4.000.000đ (Premium)</option>
+							<option value="Haute Amour">Trên 5.000.000đ (Haute Amour)</option>
 						</select>
-						<div id="budgetOtherWrapper" class="mt-2 hidden">
-							<input id="budgetOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập ngân sách mong muốn">
-						</div>
+						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Ngày tổ chức</label>
-						<input id="eventDate" name="eventDate" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+						<label class="block text-sm font-medium text-wine-red mb-1">Ngày bạn muốn hẹn hò</label>
+						<input id="eventDate" name="eventDate" type="text" placeholder="dd/mm/yyyy" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Thời gian</label>
-						<div class="grid grid-cols-1 gap-2">
+						<label class="block text-sm font-medium text-wine-red mb-1">Khoảng thời gian mong muốn</label>
+						<div class="grid grid-cols-2 gap-2">
 							<div class="relative">
-								<input id="bookingStartTime" name="eventStartTime" type="text" readonly onclick="showTimePicker('bookingStartTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Bắt đầu (hh:mm)">
+								<input id="bookingStartTime" name="eventStartTime" type="text" readonly onclick="showTimePicker('bookingStartTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="From (hh:mm)">
 							</div>
 							<div class="relative">
-								<input id="bookingEndTime" name="eventEndTime" type="text" readonly onclick="showTimePicker('bookingEndTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Kết thúc (hh:mm)">
+								<input id="bookingEndTime" name="eventEndTime" type="text" readonly onclick="showTimePicker('bookingEndTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="To (hh:mm)">
 							</div>
-							<p id="durationText" class="text-sm text-gray-600 mt-1"></p>
+							<p id="durationText" class="text-sm text-gray-600 mt-1 col-span-2"></p>
 							<div id="customTimePicker" class="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden timepicker">
 								<div class="grid grid-cols-2 gap-3">
 									<div id="hoursColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
@@ -255,32 +247,30 @@
 							</div>
 						</div>
 					</div>
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Nơi tổ chức</label>
-						<select id="citySelect" name="location" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
-							<option value="">Chọn thành phố</option>
-							@if (cities != null)
-							{
-								foreach (var city in cities)
-								{
-									<option value="@city">@city</option>
-								}
-							}
-							<option value="other">Khác</option>
+					<div class="col-span-1 md:col-span-2">
+						<label class="block text-sm font-medium text-wine-red mb-1">Không gian bạn hướng đến</label>
+						<select id="spaceSelect" name="spacePreference" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+							<option value="">Chọn không gian</option>
+							<option value="Private">Tại nhà/ Homestay/ Không gian riêng</option>
+							<option value="Restaurant/Cafe">Nhà hàng/ Quán Café</option>
+							<option value="Rooftop/Outdoor">Rooftop/ Outdoor</option>
+							<option value="Beach/Lake/Garden">Bãi biển/ Hồ/ Sân vườn</option>
+							<option value="other">Khác (ghi rõ)</option>
 						</select>
-						<div id="cityOtherWrapper" class="mt-2 hidden">
-							<input id="cityOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập địa điểm khác">
+						<div id="spaceOtherWrapper" class="mt-2 hidden">
+							<input id="spaceOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập không gian khác">
 						</div>
 					</div>
 				</div>
 
 				<div class="mt-6">
-					<label class="block text-sm font-medium text-wine-red mb-1">Câu hỏi dành cho The Planners</label>
-					<textarea name="message" rows="4" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Hãy cho chúng tôi biết thêm về nhu cầu của bạn..."></textarea>
+					<label class="block text-sm font-medium text-wine-red mb-1">Điều bạn muốn MonAmour lưu ý * <span class="text-sm text-gray-500">(Let us know your wishes in more detail)</span></label>
+					<textarea name="message" rows="4" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="✍️ Hãy cho chúng tôi biết chi tiết về mong muốn của bạn..."></textarea>
+					<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
 				</div>
 
 				<div class="mt-6">
-					<label class="block text-sm font-medium text-wine-red mb-1">Bạn biết đến The Planners qua kênh nào?</label>
+					<label class="block text-sm font-medium text-wine-red mb-1">Bạn biết đến MonAmour qua kênh nào?</label>
 					<select name="referral" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
 						<option>Facebook</option>
 						<option>Instagram</option>
@@ -389,6 +379,45 @@
 	.timepicker button { transition: background-color .15s ease, color .15s ease; }
 	.timepicker button:hover { background-color: rgba(127, 29, 29, 0.08); }
 	.timepicker button.active { background-color: rgba(127, 29, 29, 0.12); color: #7f1d1d; font-weight: 600; }
+	
+	/* Form validation styles */
+	.form-field {
+		transition: border-color 0.2s ease;
+	}
+	
+	.form-field.valid {
+		border-color: #10b981;
+	}
+	
+	.form-field.invalid {
+		border-color: #ef4444;
+	}
+	
+	.error-message {
+		animation: slideDown 0.3s ease-out;
+	}
+	
+	@@keyframes slideDown {
+		from { 
+			opacity: 0; 
+			transform: translateY(-10px); 
+		}
+		to { 
+			opacity: 1; 
+			transform: translateY(0); 
+		}
+	}
+	
+	/* Success feedback */
+	.success-message {
+		background-color: #dcfce7;
+		border: 1px solid #10b981;
+		color: #059669;
+		padding: 12px 16px;
+		border-radius: 8px;
+		margin-bottom: 16px;
+		animation: slideDown 0.3s ease-out;
+	}
 </style>
 
 <script>
@@ -401,6 +430,7 @@
         const minutesCol = document.getElementById('minutesColumn');
         const input = document.getElementById(targetInputId);
 
+        // Populate hours and minutes if not initialized
         if (!hoursCol.dataset.initialized) {
             // Populate hours 08 - 22
             let hoursHtml = '';
@@ -415,13 +445,29 @@
                 .map(m => `<button type=\"button\" data-minute=\"${m}\" class=\"block w-full text-left px-4 py-2\">${m}</button>`)
                 .join('');
 
-            // Selection handling
+            // Mark as initialized
+            hoursCol.dataset.initialized = 'true';
+        }
+
+        // Remove any existing event listeners
+        hoursCol.replaceWith(hoursCol.cloneNode(true));
+        minutesCol.replaceWith(minutesCol.cloneNode(true));
+        
+        // Re-get references after cloning
+        const freshHoursCol = document.getElementById('hoursColumn');
+        const freshMinutesCol = document.getElementById('minutesColumn');
+
+        // Get current input's values
             let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
             let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
 
             const updateActive = () => {
-                [...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
-                [...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
+            freshHoursCol.querySelectorAll('button').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour);
+            });
+            freshMinutesCol.querySelectorAll('button').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute);
+            });
             };
 
             const scrollIntoViewSmooth = (btn, container) => {
@@ -430,45 +476,49 @@
                 container.scrollTo({ top, behavior: 'smooth' });
             };
 
-            const commit = () => {
+        // Add event listeners for the current session
+        freshHoursCol.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-hour]');
+            if (!btn) return;
+            selectedHour = btn.getAttribute('data-hour');
+            updateActive();
+            scrollIntoViewSmooth(btn, freshHoursCol);
+            
+            // Commit time selection
                 if (selectedHour && selectedMinute) {
-                    input.value = `${selectedHour}:${selectedMinute}`;
+                const targetInput = document.getElementById(currentTimeTargetId);
+                if (targetInput) {
+                    targetInput.value = `${selectedHour}:${selectedMinute}`;
                     hideTimePicker();
                     updateDurationText();
                 }
-            };
+            }
+        });
 
-            hoursCol.addEventListener('click', (e) => {
-                const btn = e.target.closest('button[data-hour]');
-                if (!btn) return;
-                selectedHour = btn.getAttribute('data-hour');
-                updateActive();
-                scrollIntoViewSmooth(btn, hoursCol);
-                commit();
-            });
-
-            minutesCol.addEventListener('click', (e) => {
+        freshMinutesCol.addEventListener('click', (e) => {
                 const btn = e.target.closest('button[data-minute]');
                 if (!btn) return;
                 selectedMinute = btn.getAttribute('data-minute');
                 updateActive();
-                scrollIntoViewSmooth(btn, minutesCol);
-                commit();
-            });
-
-            // Mark as initialized
-            hoursCol.dataset.initialized = 'true';
-        }
+            scrollIntoViewSmooth(btn, freshMinutesCol);
+            
+            // Commit time selection
+            if (selectedHour && selectedMinute) {
+                const targetInput = document.getElementById(currentTimeTargetId);
+                if (targetInput) {
+                    targetInput.value = `${selectedHour}:${selectedMinute}`;
+                    hideTimePicker();
+                    updateDurationText();
+                }
+            }
+        });
 
         picker.classList.remove('hidden');
 
-        // If value exists, set active and center it
-        let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
-        let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
-        [...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
-        [...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
-        scrollIntoViewSmooth(hoursCol.querySelector('button.active'), hoursCol);
-        scrollIntoViewSmooth(minutesCol.querySelector('button.active'), minutesCol);
+        // Update active states and scroll to current values
+        updateActive();
+        scrollIntoViewSmooth(freshHoursCol.querySelector('button.active'), freshHoursCol);
+        scrollIntoViewSmooth(freshMinutesCol.querySelector('button.active'), freshMinutesCol);
 
         // Click outside to close
         const outsideHandler = (ev) => {
@@ -557,43 +607,37 @@
 
 	// Toggle inputs for "Khác"
 	(function() {
-		const eventTypeSelect = document.getElementById('eventTypeSelect');
-		const eventTypeOtherWrapper = document.getElementById('eventTypeOtherWrapper');
-		const citySelect = document.getElementById('citySelect');
-		const cityOtherWrapper = document.getElementById('cityOtherWrapper');
+		const datePurposeSelect = document.getElementById('datePurposeSelect');
+		const spaceSelect = document.getElementById('spaceSelect');
+		const spaceOtherWrapper = document.getElementById('spaceOtherWrapper');
 		const budgetSelect = document.getElementById('budgetSelect');
-		const budgetOtherWrapper = document.getElementById('budgetOtherWrapper');
 		const form = document.getElementById('contactForm');
 		const submitBtn = document.getElementById('submitContactBtn');
 		const eventDate = document.getElementById('eventDate');
 		const startInput = document.getElementById('bookingStartTime');
 		const endInput = document.getElementById('bookingEndTime');
 
-		if (eventTypeSelect) {
-			eventTypeSelect.addEventListener('change', function() {
-				eventTypeOtherWrapper.classList.toggle('hidden', this.value !== 'other');
+		if (spaceSelect) {
+			spaceSelect.addEventListener('change', function() {
+				spaceOtherWrapper.classList.toggle('hidden', this.value !== 'other');
 			});
 		}
 
-		if (citySelect) {
-			citySelect.addEventListener('change', function() {
-				cityOtherWrapper.classList.toggle('hidden', this.value !== 'other');
-			});
-		}
-
-		if (budgetSelect) {
-			budgetSelect.addEventListener('change', function() {
-				budgetOtherWrapper.classList.toggle('hidden', this.value !== 'other');
-			});
-		}
-
-		// Min date today
+		// Add input mask for date field
 		if (eventDate) {
-			const today = new Date();
-			const yyyy = today.getFullYear();
-			const mm = String(today.getMonth() + 1).padStart(2, '0');
-			const dd = String(today.getDate()).padStart(2, '0');
-			eventDate.min = `${yyyy}-${mm}-${dd}`;
+			eventDate.addEventListener('input', function(e) {
+				let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+				
+				// Add slashes automatically
+				if (value.length >= 2) {
+					value = value.substring(0, 2) + '/' + value.substring(2);
+				}
+				if (value.length >= 5) {
+					value = value.substring(0, 5) + '/' + value.substring(5, 9);
+				}
+				
+				e.target.value = value;
+			});
 		}
 
 		// Update duration when times change programmatically
@@ -603,31 +647,125 @@
 			el.addEventListener('input', updateDurationText);
 		});
 
-		if (form) {
-			form.addEventListener('submit', async function(e) {
-				e.preventDefault();
-				// Client-side validation
-				const fullName = form.querySelector('input[name="fullName"]').value.trim();
-				const email = form.querySelector('input[name="email"]').value.trim();
-				const phone = form.querySelector('input[name="phone"]').value.trim();
-				const dateVal = eventDate ? eventDate.value : '';
-				const startVal = startInput ? startInput.value : '';
-				const endVal = endInput ? endInput.value : '';
-				if (!fullName || !email || !/^\d{10}$/.test(phone)) {
-					alert('Vui lòng nhập Họ tên, Email hợp lệ và SĐT 10 số.');
-					return;
-				}
-				// Date must not be in the past
+		// Helper functions for validation
+		function showError(element, message) {
+			element.classList.add('border-red-500');
+			const errorDiv = element.parentNode.querySelector('.error-message');
+			if (errorDiv) {
+				errorDiv.textContent = message;
+				errorDiv.classList.remove('hidden');
+			}
+		}
+
+		function clearError(element) {
+			element.classList.remove('border-red-500');
+			const errorDiv = element.parentNode.querySelector('.error-message');
+			if (errorDiv) {
+				errorDiv.classList.add('hidden');
+			}
+		}
+
+		function clearAllErrors() {
+			form.querySelectorAll('.border-red-500').forEach(el => clearError(el));
+		}
+
+		function validateForm() {
+			let isValid = true;
+			clearAllErrors();
+
+			// Required fields validation
+			const fullNameInput = form.querySelector('input[name="fullName"]');
+			const emailInput = form.querySelector('input[name="email"]');
+			const phoneInput = form.querySelector('input[name="phone"]');
+			const datePurposeSelect = form.querySelector('select[name="datePurpose"]');
+			const budgetSelect = form.querySelector('select[name="budget"]');
+			const messageInput = form.querySelector('textarea[name="message"]');
+
+			const fullName = fullNameInput.value.trim();
+			const email = emailInput.value.trim();
+			const phone = phoneInput.value.trim();
+			const datePurpose = datePurposeSelect.value;
+			const budget = budgetSelect.value;
+			const message = messageInput.value.trim();
+
+			// Validate full name
+			if (!fullName) {
+				showError(fullNameInput, 'Vui lòng nhập họ tên');
+				isValid = false;
+			}
+
+			// Validate email
+			const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+			if (!email) {
+				showError(emailInput, 'Vui lòng nhập địa chỉ email');
+				isValid = false;
+			} else if (!emailRegex.test(email)) {
+				showError(emailInput, 'Địa chỉ email không hợp lệ');
+				isValid = false;
+			}
+
+			// Validate phone
+			const phoneRegex = /^0[0-9]{9}$/;
+			if (!phone) {
+				showError(phoneInput, 'Vui lòng nhập số điện thoại');
+				isValid = false;
+			} else if (!phoneRegex.test(phone)) {
+				showError(phoneInput, 'Số điện thoại phải có 10 số và bắt đầu bằng 0');
+				isValid = false;
+			}
+
+			// Validate date purpose
+			if (!datePurpose) {
+				showError(datePurposeSelect, 'Vui lòng chọn mục đích buổi hẹn hò');
+				isValid = false;
+			}
+
+			// Validate budget
+			if (!budget) {
+				showError(budgetSelect, 'Vui lòng chọn ngân sách');
+				isValid = false;
+			}
+
+			// Validate message
+			if (!message) {
+				showError(messageInput, 'Vui lòng nhập điều bạn muốn MonAmour lưu ý');
+				isValid = false;
+			}
+
+			// Date validation for dd/mm/yyyy format
+			const dateVal = eventDate ? eventDate.value.trim() : '';
 				if (dateVal) {
+				const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+				const match = dateVal.match(dateRegex);
+				
+				if (!match) {
+					showError(eventDate, 'Định dạng ngày không hợp lệ (dd/mm/yyyy)');
+					isValid = false;
+				} else {
+					const day = parseInt(match[1], 10);
+					const month = parseInt(match[2], 10);
+					const year = parseInt(match[3], 10);
+					
+					// Check if date is valid
+					const inputDate = new Date(year, month - 1, day);
+					if (inputDate.getDate() !== day || inputDate.getMonth() !== month - 1 || inputDate.getFullYear() !== year) {
+						showError(eventDate, 'Ngày không hợp lệ');
+						isValid = false;
+					} else {
+						// Check if date is not in the past
 					const today = new Date();
-					const d = new Date(dateVal + 'T00:00');
-					const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-					if (d.getTime() < t0) {
-						alert('Ngày tổ chức không được ở quá khứ.');
-						return;
+						const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+						if (inputDate < todayStart) {
+							showError(eventDate, 'Ngày tổ chức không được ở quá khứ');
+							isValid = false;
+						}
 					}
 				}
+			}
+
 				// Time validation
+			const startVal = startInput ? startInput.value : '';
+			const endVal = endInput ? endInput.value : '';
 				const parse = (v) => {
 					if (!v || v.indexOf(':') < 0) return null;
 					const [h, m] = v.split(':').map(Number);
@@ -636,12 +774,137 @@
 				};
 				const s = parse(startVal);
 				const en = parse(endVal);
+			
+			if (startVal && endVal) {
 				if (s == null || en == null) {
-					alert('Vui lòng chọn thời gian bắt đầu và kết thúc.');
-					return;
+					if (startInput) showError(startInput, 'Thời gian không hợp lệ');
+					if (endInput) showError(endInput, 'Thời gian không hợp lệ');
+					isValid = false;
+				} else if (en <= s) {
+					showError(endInput, 'Thời gian kết thúc phải sau thời gian bắt đầu');
+					isValid = false;
 				}
-				if (en <= s) {
-					alert('Thời gian kết thúc phải sau thời gian bắt đầu.');
+			}
+
+			return isValid;
+		}
+
+		// Add real-time validation
+		if (form) {
+			// Real-time validation for input fields
+			form.querySelectorAll('input[required], select[required], textarea[required], input[name="eventDate"]').forEach(field => {
+				field.addEventListener('blur', function() {
+					if (this.name === 'fullName' || this.name === 'email' || this.name === 'phone' || 
+						this.name === 'datePurpose' || this.name === 'budget' || this.name === 'eventDate' || 
+						this.name === 'message') {
+						validateSingleField(this);
+					}
+				});
+				
+				field.addEventListener('input', function() {
+					// Clear error on input change
+					if (this.classList.contains('border-red-500')) {
+						clearError(this);
+					}
+				});
+			});
+		}
+
+		function validateSingleField(field) {
+			const value = field.value.trim();
+			
+			switch (field.name) {
+				case 'fullName':
+					if (!value) {
+						showError(field, 'Vui lòng nhập họ tên');
+						return false;
+					}
+					break;
+				case 'email':
+					const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+					if (!value) {
+						showError(field, 'Vui lòng nhập địa chỉ email');
+						return false;
+					} else if (!emailRegex.test(value)) {
+						showError(field, 'Địa chỉ email không hợp lệ');
+						return false;
+					}
+					break;
+				case 'phone':
+					const phoneRegex = /^0[0-9]{9}$/;
+					if (!value) {
+						showError(field, 'Vui lòng nhập số điện thoại');
+						return false;
+					} else if (!phoneRegex.test(value)) {
+						showError(field, 'Số điện thoại phải có 10 số và bắt đầu bằng 0');
+						return false;
+					}
+					break;
+				case 'datePurpose':
+					if (!value) {
+						showError(field, 'Vui lòng chọn mục đích buổi hẹn hò');
+						return false;
+					}
+					break;
+				case 'budget':
+					if (!value) {
+						showError(field, 'Vui lòng chọn ngân sách');
+						return false;
+					}
+					break;
+				case 'message':
+					if (!value) {
+						showError(field, 'Vui lòng nhập điều bạn muốn MonAmour lưu ý');
+						return false;
+					}
+					break;
+				case 'eventDate':
+					if (value) {
+						const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+						const match = value.match(dateRegex);
+						
+						if (!match) {
+							showError(field, 'Định dạng ngày không hợp lệ (dd/mm/yyyy)');
+							return false;
+						} else {
+							const day = parseInt(match[1], 10);
+							const month = parseInt(match[2], 10);
+							const year = parseInt(match[3], 10);
+							
+							// Check if date is valid
+							const inputDate = new Date(year, month - 1, day);
+							if (inputDate.getDate() !== day || inputDate.getMonth() !== month - 1 || inputDate.getFullYear() !== year) {
+								showError(field, 'Ngày không hợp lệ');
+								return false;
+							}
+							
+							// Check if date is not in the past
+							const today = new Date();
+							const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+							if (inputDate < todayStart) {
+								showError(field, 'Ngày tổ chức không được ở quá khứ');
+								return false;
+							}
+						}
+					}
+					break;
+			}
+			
+			clearError(field);
+			return true;
+		}
+
+		if (form) {
+			form.addEventListener('submit', async function(e) {
+				e.preventDefault();
+				
+				if (!validateForm()) {
+					// Scroll to first error
+					const firstError = form.querySelector('.border-red-500');
+					if (firstError) {
+						firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+						firstError.focus();
+					}
 					return;
 				}
 
@@ -650,14 +913,18 @@
 
 				const data = new FormData(form);
 				// Ensure other fields are included
-				if (eventTypeSelect && eventTypeSelect.value === 'other') {
-					data.set('eventType', document.getElementById('eventTypeOther').value.trim());
+				if (spaceSelect && spaceSelect.value === 'other') {
+					data.set('spacePreference', document.getElementById('spaceOther').value.trim());
 				}
-				if (citySelect && citySelect.value === 'other') {
-					data.set('location', document.getElementById('cityOther').value.trim());
-				}
-				if (budgetSelect && budgetSelect.value === 'other') {
-					data.set('budget', document.getElementById('budgetOther').value.trim());
+				
+				// Convert date format from dd/mm/yyyy to yyyy-mm-dd for server processing if needed
+				const eventDateValue = eventDate ? eventDate.value.trim() : '';
+				if (eventDateValue) {
+					const match = eventDateValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+					if (match) {
+						const [, day, month, year] = match;
+						data.set('eventDate', `${year}-${month}-${day}`);
+					}
 				}
 
 				try {
@@ -673,7 +940,7 @@
 					alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
 				} finally {
 					submitBtn.disabled = false;
-					submitBtn.textContent = 'Submit Request';
+					submitBtn.textContent = 'Gửi yêu cầu';
 				}
 			});
 		}

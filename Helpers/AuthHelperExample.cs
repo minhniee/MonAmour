@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MonAmour.Models;
@@ -162,7 +161,7 @@ public static class AuthHelperExample
         {
             var userName = AuthHelper.GetUserName(context);
             var userEmail = AuthHelper.GetUserEmail(context);
-            
+
             return !string.IsNullOrEmpty(userName) ? userName : userEmail ?? "Unknown User";
         }
 
