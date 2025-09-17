@@ -1,92 +1,39 @@
 ﻿
 
 <div class="py-16 relative z-20 mt-16 overflow-hidden about-section" style="margin-top: 4rem; clear: both;">
-	<div class="container mx-auto px-4 relative">
-		<div class="grid lg:grid-cols-5 gap-12 items-center">
-			<!-- Left Column - Image Placeholder (40-45% width) -->
-			<div class="lg:col-span-2">
-				<div class="h-80 image-container">
-					<img src="Imagine/about_us/van_anh.png" alt="Mon Amour Logo" />
-				</div>
-			</div>
-			
-			<!-- Right Column - Content (55-60% width) -->
-			<div class="lg:col-span-3 space-y-6 flex flex-col justify-center">
-				<h2 class="text-3xl font-bold text-black text-balance text-center lg:text-left">About us</h2>
-				<div class="space-y-4 text-black text-center lg:text-left">
-					<p class="text-pretty font-sans">
-						Since establishment, we have worked to help people help themselves and help others. Thousands of underserved lives have been permanently changed for the better. Hundreds thousands more will be touched as we expand our operation from hospitality training to various fields including other vocational teachings, gender equality, and environmental impact.
-					</p>
-					<p class="text-pretty font-sans">
-						We are different not because we claim to be the best in what we do, but we effortlessly want to go beyond the expectation of our stakeholders and have you say....
-					</p>
-				</div>
-				
-				<!-- Read More Button -->
-				<div class="flex justify-center lg:justify-end">
-					<a href="@Url.Action("Index", "AboutUs")" class="bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer inline-block">
-						Đọc thêm →
-					</a>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="container mx-auto px-4 relative">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto items-center">
+            <!-- Left Column - Image Placeholder (50% width) -->
+            <div class="lg:col-span-1">
+                <div class="h-80 image-container">
+                    <img src="Imagine/about_us/van_anh.png" alt="Mon Amour Logo" />
+                </div>
+            </div>
+
+            <!-- Right Column - Content (50% width) -->
+            <div class="lg:col-span-1 space-y-6 flex flex-col justify-center">
+                <h2 class="text-3xl font-bold text-black text-balance text-center lg:text-left">About us</h2>
+                <div class="space-y-4 text-black text-center lg:text-left">
+                    <p class="text-pretty font-sans">
+                        Vân Anh sở hữu nét đẹp trong sáng và đầy tự tin. Mái tóc đen dài óng ả buông tự nhiên làm nổi bật gương mặt thanh tú cùng nụ cười nhẹ nhàng, cuốn hút. Ánh mắt của cô ấy toát lên sự thân thiện, dễ gần, khiến người đối diện cảm thấy ấm áp và thiện cảm ngay từ cái nhìn đầu tiên.
+                    </p>
+                    <p class="text-pretty font-sans">
+                        Trang phục áo polo đen đơn giản nhưng tinh tế, kết hợp với dáng đứng tự nhiên và cử chỉ tạo hình duyên dáng giúp cô ấy toát lên vẻ năng động, trẻ trung. Sự hài hòa giữa nét đẹp dịu dàng và thần thái tự tin tạo nên một ấn tượng khó quên, khiến cô trở nên vừa gần gũi vừa đầy sức hút.
+                    </p>
+                </div>
+
+                <!-- Read More Button -->
+                <div class="flex justify-center lg:justify-end">
+                    <a href="@Url.Action("Index", "AboutUs")" class="bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer inline-block">
+                        Đọc thêm →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-    /* Ensure About Section is properly contained */
-    .about-section {
-        position: relative;
-        z-index: 20;
-        margin-top: 4rem;
-        clear: both;
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    /* Prevent any overlap issues */
-    .about-section * {
-        position: relative;
-        z-index: inherit;
-    }
-    
-    /* Clear any floating elements */
-    .about-section::before {
-        content: "";
-        display: table;
-        clear: both;
-    }
-    
-    /* Force clear separation */
-    .about-section::after {
-        content: "";
-        display: block;
-        clear: both;
-        height: 0;
-        visibility: hidden;
-    }
-    
-    /* Ensure no floating elements interfere */
-    .about-section {
-        float: none;
-        overflow: visible;
-    }
-    
-    /* Global section separation */
-    section, div[class*="section"] {
-        clear: both;
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    /* Prevent any absolute positioning from causing overlaps */
-    .service-section, .about-section {
-        position: relative !important;
-        transform: none !important;
-    }
-    
     /* Image styling for full display without cropping */
     .about-section img {
         width: 100%;
@@ -96,7 +43,7 @@
         max-width: 100%;
         max-height: 100%;
     }
-    
+
     /* Ensure image container takes full space */
     .about-section .image-container {
         width: 100%;

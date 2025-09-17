@@ -51,10 +51,9 @@
 
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Product") == true ? "active" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#productSubmenu">
+                        <a href="@Url.Action("Products", "Admin")" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#productSubmenu">
                             <i class="fas fa-shopping-bag"></i>
                             <span>Quản lý sản phẩm</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
                         <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Product") == true ? "show" : "")" id="productSubmenu">
                             <div class="submenu">
@@ -75,10 +74,9 @@
                     </div>
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Partner") == true ? "active" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#partnerSubmenu">
+                        <a href="@Url.Action("Partners", "Admin")" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#partnerSubmenu">
                             <i class="fas fa-handshake"></i>
                             <span>Quản lý đối tác</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
                         <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Partner") == true ? "show" : "")" id="partnerSubmenu">
                             <div class="submenu">
@@ -95,10 +93,9 @@
                     </div>
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Location") == true ? "active" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#locationSubmenu">
+                        <a href="@Url.Action("Locations", "Admin")" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#locationSubmenu">
                             <i class="fas fa-map-marker-alt"></i>
                             <span>Quản lý địa điểm</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
                         <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Location") == true ? "show" : "")" id="locationSubmenu">
                             <div class="submenu">
@@ -115,10 +112,9 @@
                     </div>
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Concept") == true ? "active" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#conceptSubmenu">
+                        <a href="@Url.Action("Concepts", "Admin")" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#conceptSubmenu">
                             <i class="fas fa-lightbulb"></i>
                             <span>Quản lý Concept</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
                         <div class="collapse @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Concept") == true ? "show" : "")" id="conceptSubmenu">
                             <div class="submenu">
@@ -147,10 +143,9 @@
                     </div>
 
                     <div class="menu-item">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#orderSubmenu">
+                        <a href="@Url.Action("Orders", "Admin")" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#orderSubmenu">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Quản lý đơn hàng</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
                         <div class="collapse" id="orderSubmenu">
                             <div class="submenu">
@@ -176,10 +171,9 @@
 
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BlogManagement" ? "active" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#blogSubmenu">
+                        <a href="@Url.Action("Blogs", "BlogManagement")" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#blogSubmenu">
                             <i class="fas fa-blog"></i>
                             <span>Quản lý Blog</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
                         <div class="collapse @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BlogManagement" ? "show" : "")" id="blogSubmenu">
                             <div class="submenu">
@@ -204,10 +198,9 @@
                     </div>
 
                     <div class="menu-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BannerManagement" ? "active" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#bannerSubmenu">
+                        <a href="@Url.Action("BannerHomepages", "BannerManagement")" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#bannerSubmenu">
                             <i class="fas fa-images"></i>
                             <span>Quản lý Banner</span>
-                            <i class="fas fa-chevron-down ms-auto"></i>
                         </a>
                         <div class="collapse @(ViewContext.RouteData.Values["Controller"]?.ToString() == "BannerManagement" ? "show" : "")" id="bannerSubmenu">
                             <div class="submenu">
@@ -277,7 +270,6 @@
                                 </div>
                             }
                             <span class="user-name">Hi, @ViewBag.UserName</span>
-                            <i class="fas fa-chevron-down"></i>
                         </div>
                         <ul class="dropdown-menu dropdown-menu-end">
 

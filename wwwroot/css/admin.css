@@ -1,8 +1,21 @@
-﻿/* Admin Dashboard Styles */
+﻿/* Global styles for full screen */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* Admin Dashboard Styles */
 .admin-dashboard {
     display: flex;
     min-height: 100vh;
+    width: 100vw;
     background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
 /* Product Image Gallery Styles */
@@ -277,9 +290,13 @@
     color: white;
     position: fixed;
     height: 100vh;
+    top: 0;
+    left: 0;
     overflow-y: auto;
     z-index: 1000;
     transition: all 0.3s ease;
+    margin: 0;
+    padding: 0;
 }
 
 .sidebar-header {
@@ -391,6 +408,68 @@
     flex: 1;
     margin-left: 280px;
     background-color: #f8f9fa;
+    transition: margin-left 0.3s ease;
+    width: calc(100vw - 280px);
+    min-height: 100vh;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+/* Adjust main content when sidebar is collapsed */
+.admin-dashboard .sidebar.collapsed ~ .main-content {
+    margin-left: 70px;
+    width: calc(100vw - 70px);
+}
+
+/* Alternative selector for collapsed state */
+.admin-dashboard.collapsed .main-content {
+    margin-left: 70px;
+    width: calc(100vw - 70px);
+}
+
+/* User info styling in tables */
+.user-info {
+    min-width: 200px;
+}
+
+.user-info .user-name {
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+.user-info .user-email {
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+    line-height: 1.2;
+    word-break: break-all;
+}
+
+.user-info .user-phone {
+    font-size: 0.85rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+/* Table responsive improvements */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 12px 8px;
+}
+
+/* Ensure phone numbers display properly */
+.user-phone i {
+    color: #6c757d;
+    font-size: 0.75rem;
 }
 
 /* Top Navigation */
@@ -902,18 +981,67 @@
     justify-content: center;
 }
 
+/* Sidebar Toggle States */
+.sidebar.collapsed {
+    width: 70px;
+    transition: width 0.3s ease;
+}
+
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .menu-title,
+.sidebar.collapsed .menu-item span,
+.sidebar.collapsed .submenu {
+    display: none;
+}
+
+.sidebar.collapsed .menu-item {
+    justify-content: center;
+}
+
+.sidebar.collapsed .menu-item a {
+    justify-content: center;
+}
+
+.sidebar.collapsed .menu-item .fas {
+    margin-right: 0;
+}
+
+.sidebar.collapsed .submenu {
+    display: none !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
-        transform: translateX(-100%);
+        width: 70px; /* Thu gọn sidebar trên mobile */
     }
 
-        .sidebar.show {
-            transform: translateX(0);
-        }
+    .sidebar .logo-text,
+    .sidebar .menu-title,
+    .sidebar .menu-item span,
+    .sidebar .submenu {
+        display: none; /* Ẩn text trên mobile */
+    }
+
+    .sidebar .menu-item {
+        justify-content: center;
+    }
+
+    .sidebar .menu-item a {
+        justify-content: center;
+    }
+
+    .sidebar .menu-item .fas {
+        margin-right: 0;
+    }
+
+    .sidebar .submenu {
+        display: none !important;
+    }
 
     .main-content {
-        margin-left: 0;
+        margin-left: 70px; /* Điều chỉnh margin cho mobile */
+        width: calc(100vw - 70px);
     }
 
     .charts-section {

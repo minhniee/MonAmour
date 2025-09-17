@@ -1,24 +1,52 @@
 // Admin Dashboard JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle sidebar on mobile
+    // Toggle sidebar functionality
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
     
     if (sidebarToggle && sidebar) {
         sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('show');
+            const adminDashboard = document.querySelector('.admin-dashboard');
+            
+            if (window.innerWidth <= 768) {
+                // Mobile: toggle between collapsed and expanded
+                sidebar.classList.toggle('collapsed');
+                if (adminDashboard) {
+                    adminDashboard.classList.toggle('collapsed');
+                }
+                
+                // Store preference in localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            } else {
+                // Desktop: collapse/expand sidebar
+                sidebar.classList.toggle('collapsed');
+                if (adminDashboard) {
+                    adminDashboard.classList.toggle('collapsed');
+                }
+                
+                // Store preference in localStorage
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            }
         });
     }
-
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(e) {
-        if (window.innerWidth <= 768) {
-            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                sidebar.classList.remove('show');
+    
+    // Restore sidebar state from localStorage on page load
+    if (sidebar) {
+        const adminDashboard = document.querySelector('.admin-dashboard');
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            if (adminDashboard) {
+                adminDashboard.classList.add('collapsed');
             }
         }
-    });
+    }
+
+    // Note: Sidebar is now always visible on both desktop and mobile
 
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -84,8 +112,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Responsive sidebar behavior
     function handleResize() {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('show');
+        const adminDashboard = document.querySelector('.admin-dashboard');
+        // Both desktop and mobile now use the same collapsed behavior
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            if (adminDashboard) {
+                adminDashboard.classList.add('collapsed');
+            }
+        } else {
+            sidebar.classList.remove('collapsed');
+            if (adminDashboard) {
+                adminDashboard.classList.remove('collapsed');
+            }
         }
     }
 

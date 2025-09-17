@@ -195,9 +195,16 @@
                                         }
                                     </td>
                                     <td>
-                                        <div><strong>@user.Name</strong></div>
-                                        <div class="text-muted">@user.Email</div>
-                                        <div class="text-muted">@user.Phone</div>
+                                        <div class="user-info">
+                                            <div class="user-name"><strong>@user.Name</strong></div>
+                                            <div class="user-email text-muted small">@user.Email</div>
+                                            @if (!string.IsNullOrEmpty(user.Phone))
+                                            {
+                                                <div class="user-phone text-muted small">
+                                                    <i class="fas fa-phone me-1"></i>@user.Phone
+                                                </div>
+                                            }
+                                        </div>
                                     </td>
                                     <td>
                                         @foreach (var role in user.Roles)

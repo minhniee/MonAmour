@@ -1,77 +1,69 @@
 ﻿@model List<MonAmour.ViewModels.BannerServiceListViewModel>
 
 <div class="container mx-auto px-4 relative pt-[20px] dropdown-divider-">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-black mb-4">Our Service</h2>
-            <p class="text-gray-600 max-w-3xl mx-auto">
-                Health Clubs with Simplicity. Value. And Your Good health in mind. These qualities form the bedrock of Fitness Evolution, the next generation of health and fitness centers. With our low-cost, no long-term-contract memberships and high-quality equipment, you can realize your fitness goals in a comfortable, safe environment.
-            </p>
-        </div>
+    <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-black mb-4">Our Service</h2>
+        <p class="text-gray-600 max-w-3xl mx-auto">
+            Vân Anh toát lên vẻ đẹp hiện đại pha chút truyền thống, vừa cá tính vừa duyên dáng. Trong bộ trang phục đỏ nổi bật với quạt tay và kính đen, cô thể hiện thần thái tự tin, sang trọng, như một điểm nhấn giữa không gian trang trí rực rỡ sắc Tết. Ở những khung hình khác, với phong cách nhẹ nhàng trong gam màu trắng, cô lại trở nên dịu dàng, tinh tế, mang đến cảm giác gần gũi nhưng vẫn cuốn hút. Sự linh hoạt trong biểu cảm và cách tạo dáng khiến cô vừa nổi bật vừa để lại ấn tượng khó quên.
+        </p>
+    </div>
 
-        <!-- Grid Layout - 1/2 + 1/2 split -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto min-h-[600px]">
-            <!-- Large Block - Left (1/2 width) -->
-            <div class="lg:col-span-1">
-                <div class="bg-gray-100 rounded-lg shadow-sm h-full overflow-hidden relative group cursor-pointer">
-                    @if (Model != null && Model.Any())
+    <!-- Grid Layout - 1/2 + 1/2 split -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto min-h-[600px]">
+        <!-- Large Block - Left (1/2 width) -->
+        <div class="lg:col-span-1">
+            <div class="bg-gray-100 rounded-lg shadow-sm h-full overflow-hidden relative group cursor-pointer">
+                @if (Model != null && Model.Any())
+                {
+                    var primary = Model.FirstOrDefault(b => b.IsPrimary);
+                    if (primary != null)
                     {
-                        var primary = Model.FirstOrDefault(b => b.IsPrimary);
-                        if (primary != null)
-                        {
-                            <img src="@primary.ImgUrl" alt="Service Banner @primary.BannerId" class="w-full h-full object-cover" />
-                            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
-                            <div class="absolute inset-0 p-6 flex flex-col justify-between">
-                                <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg w-fit">Setup</div>
-                                <div class="text-white">
-                                    <h3 class="font-sans font-medium text-lg text-white uppercase leading-tight">EMPOWERING AT-RISK AND DISADVANTAGED YOUTH IN VIETNAM</h3>
-                                </div>
+                        <img src="@primary.ImgUrl" alt="Service Banner @primary.BannerId" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-between">
+                            <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg w-fit">Setup</div>
+                            <div class="text-white">
+                                <h3 class="font-sans font-medium text-lg text-white uppercase leading-tight">Vân Anh – Nàng xuân kiêu sa</h3>
                             </div>
-                        }
-                        else
-                        {
-                            <div class="p-6 h-full flex flex-col justify-center items-center text-center">
-                                <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-4 w-fit">Setup</div>
-                                <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">Please set a primary banner</h3>
-                            </div>
-                        }
+                        </div>
                     }
                     else
                     {
                         <div class="p-6 h-full flex flex-col justify-center items-center text-center">
                             <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-4 w-fit">Setup</div>
-                            <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">No service banners</h3>
+                            <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">Please set a primary banner</h3>
                         </div>
                     }
-                </div>
+                }
+                else
+                {
+                    <div class="p-6 h-full flex flex-col justify-center items-center text-center">
+                        <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-4 w-fit">Setup</div>
+                        <h3 class="font-sans font-medium text-lg text-black uppercase leading-tight">No service banners</h3>
+                    </div>
+                }
             </div>
+        </div>
 
-            <!-- Right Side Container (1/2 width) -->
-            <div class="lg:col-span-1">
-                <div class="grid grid-rows-2 gap-6 h-full">
-                    <!-- Top Right Block -->
-                    <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
-                        @if (Model != null && Model.Any())
+        <!-- Right Side Container (1/2 width) -->
+        <div class="lg:col-span-1">
+            <div class="grid grid-rows-2 gap-6 h-full">
+                <!-- Top Right Block -->
+                <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
+                    @if (Model != null && Model.Any())
+                    {
+                        var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).ToList();
+                        if (nonPrimaryBanners.Any())
                         {
-                            var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).ToList();
-                            if (nonPrimaryBanners.Any())
-                            {
-                                var banner = nonPrimaryBanners.First();
-                                <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
-                                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
-                                <div class="absolute inset-0 p-4 flex flex-col justify-between">
-                                    <div class="bg-black text-white px-3 py-1 text-xs font-medium rounded w-fit">Setup</div>
-                                    <div class="text-white">
-                                        <h3 class="font-sans font-medium text-base text-white uppercase leading-tight">WE ARE KOTO - The first social enterprise in Vietnam.</h3>
-                                    </div>
+                            var banner = nonPrimaryBanners.First();
+                            <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                            <div class="absolute inset-0 p-4 flex flex-col justify-between">
+                                <div class="bg-black text-white px-3 py-1 text-xs font-medium rounded w-fit">Setup</div>
+                                <div class="text-white">
+                                    <h3 class="font-sans font-medium text-base text-white uppercase leading-tight">Vân Anh – Nét đẹp huyền bí</h3>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="p-4 h-full flex flex-col justify-center items-center text-center">
-                                    <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
-                                    <h3 class="font-sans font-medium text-base text-black uppercase leading-tight">Add more service banners</h3>
-                                </div>
-                            }
+                            </div>
                         }
                         else
                         {
@@ -80,34 +72,34 @@
                                 <h3 class="font-sans font-medium text-base text-black uppercase leading-tight">Add more service banners</h3>
                             </div>
                         }
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                            <div class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
+                            <h3 class="font-sans font-medium text-base text-black uppercase leading-tight">Add more service banners</h3>
+                        </div>
+                    }
+                </div>
 
-                    <!-- Bottom Right Blocks Container -->
-                    <div class="grid grid-cols-2 gap-6">
-                        <!-- Bottom Right 1 -->
-                        <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
-                            @if (Model != null && Model.Any())
+                <!-- Bottom Right Blocks Container -->
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Bottom Right 1 -->
+                    <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
+                        @if (Model != null && Model.Any())
+                        {
+                            var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(1).ToList();
+                            if (nonPrimaryBanners.Any())
                             {
-                                var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(1).ToList();
-                                if (nonPrimaryBanners.Any())
-                                {
-                                    var banner = nonPrimaryBanners.First();
-                                    <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
-                                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
-                                    <div class="absolute inset-0 p-4 flex flex-col justify-end">
-                                        <div class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2">Setup</div>
-                                        <div class="text-white">
-                                            <h3 class="font-sans font-medium text-sm text-white uppercase">WE ARE KOTO</h3>
-                                        </div>
+                                var banner = nonPrimaryBanners.First();
+                                <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
+                                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                                <div class="absolute inset-0 p-4 flex flex-col justify-end">
+                                    <div class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2">Setup</div>
+                                    <div class="text-white">
+                                        <h3 class="font-sans font-medium text-sm text-white uppercase">Vân Anh – Cá tính nổi bật</h3>
                                     </div>
-                                }
-                                else
-                                {
-                                    <div class="p-4 h-full flex flex-col justify-center items-center text-center">
-                                        <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
-                                        <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
-                                    </div>
-                                }
+                                </div>
                             }
                             else
                             {
@@ -116,32 +108,32 @@
                                     <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
                                 </div>
                             }
-                        </div>
+                        }
+                        else
+                        {
+                            <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Setup</div>
+                                <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
+                            </div>
+                        }
+                    </div>
 
-                        <!-- Bottom Right 2 -->
-                        <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
-                            @if (Model != null && Model.Any())
+                    <!-- Bottom Right 2 -->
+                    <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
+                        @if (Model != null && Model.Any())
+                        {
+                            var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(2).ToList();
+                            if (nonPrimaryBanners.Any())
                             {
-                                var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(2).ToList();
-                                if (nonPrimaryBanners.Any())
-                                {
-                                    var banner = nonPrimaryBanners.First();
-                                    <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
-                                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
-                                    <div class="absolute inset-0 p-4 flex flex-col justify-end">
-                                        <div class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2">Gift</div>
-                                        <div class="text-white">
-                                            <h3 class="font-sans font-medium text-sm text-white uppercase">WE ARE KOTO</h3>
-                                        </div>
+                                var banner = nonPrimaryBanners.First();
+                                <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
+                                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
+                                <div class="absolute inset-0 p-4 flex flex-col justify-end">
+                                    <div class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2">Gift</div>
+                                    <div class="text-white">
+                                        <h3 class="font-sans font-medium text-sm text-white uppercase">Vân Anh – Dịu dàng và tinh khôi</h3>
                                     </div>
-                                }
-                                else
-                                {
-                                    <div class="p-4 h-full flex flex-col justify-center items-center text-center">
-                                        <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Gift</div>
-                                        <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
-                                    </div>
-                                }
+                                </div>
                             }
                             else
                             {
@@ -150,12 +142,20 @@
                                     <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
                                 </div>
                             }
-                        </div>
+                        }
+                        else
+                        {
+                            <div class="p-4 h-full flex flex-col justify-center items-center text-center">
+                                <div class="bg-black text-white px-3 py-2 text-sm font-medium rounded-lg mb-3 w-fit">Gift</div>
+                                <h3 class="font-sans font-medium text-sm text-black uppercase">Add more</h3>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 
 @* <style>
