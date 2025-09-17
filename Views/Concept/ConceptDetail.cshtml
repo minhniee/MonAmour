@@ -235,12 +235,18 @@
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-wine-red mb-1">Ngày tổ chức</label>
-						<input name="eventDate" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+						<input id="eventDate" name="eventDate" type="date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40">
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-wine-red mb-1">Thời gian</label>
-						<div class="relative">
-							<input id="bookingTime" name="eventTime" type="text" readonly onclick="showTimePicker()" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Chọn thời gian">
+						<div class="grid grid-cols-1 gap-2">
+							<div class="relative">
+								<input id="bookingStartTime" name="eventStartTime" type="text" readonly onclick="showTimePicker('bookingStartTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Bắt đầu (hh:mm)">
+							</div>
+							<div class="relative">
+								<input id="bookingEndTime" name="eventEndTime" type="text" readonly onclick="showTimePicker('bookingEndTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Kết thúc (hh:mm)">
+							</div>
+							<p id="durationText" class="text-sm text-gray-600 mt-1"></p>
 							<div id="customTimePicker" class="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden timepicker">
 								<div class="grid grid-cols-2 gap-3">
 									<div id="hoursColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
@@ -386,94 +392,129 @@
 </style>
 
 <script>
-	function showTimePicker() {
-		const picker = document.getElementById('customTimePicker');
-		const hoursCol = document.getElementById('hoursColumn');
-		const minutesCol = document.getElementById('minutesColumn');
-		const input = document.getElementById('bookingTime');
+    let currentTimeTargetId = null;
 
-		if (!hoursCol.dataset.initialized) {
-			// Populate hours 08 - 22
-			let hoursHtml = '';
-			for (let h = 8; h <= 22; h++) {
-				const hh = h.toString().padStart(2, '0');
-				hoursHtml += `<button type="button" data-hour="${hh}" class="block w-full text-left px-4 py-2">${hh}</button>`;
-			}
-			hoursCol.innerHTML = hoursHtml;
+    function showTimePicker(targetInputId) {
+        currentTimeTargetId = targetInputId;
+        const picker = document.getElementById('customTimePicker');
+        const hoursCol = document.getElementById('hoursColumn');
+        const minutesCol = document.getElementById('minutesColumn');
+        const input = document.getElementById(targetInputId);
 
-			// Populate minutes 00, 30
-			minutesCol.innerHTML = ['00','30']
-				.map(m => `<button type=\"button\" data-minute=\"${m}\" class=\"block w-full text-left px-4 py-2\">${m}</button>`)
-				.join('');
+        if (!hoursCol.dataset.initialized) {
+            // Populate hours 08 - 22
+            let hoursHtml = '';
+            for (let h = 8; h <= 22; h++) {
+                const hh = h.toString().padStart(2, '0');
+                hoursHtml += `<button type="button" data-hour="${hh}" class="block w-full text-left px-4 py-2">${hh}</button>`;
+            }
+            hoursCol.innerHTML = hoursHtml;
 
-			// Selection handling
-			let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
-			let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
+            // Populate minutes 00, 15, 30, 45
+            minutesCol.innerHTML = ['00','15','30','45']
+                .map(m => `<button type=\"button\" data-minute=\"${m}\" class=\"block w-full text-left px-4 py-2\">${m}</button>`)
+                .join('');
 
-			const updateActive = () => {
-				[...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
-				[...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
-			};
+            // Selection handling
+            let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
+            let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
 
-			const scrollIntoViewSmooth = (btn, container) => {
-				if (!btn) return;
-				const top = btn.offsetTop - container.clientHeight / 2 + btn.clientHeight / 2;
-				container.scrollTo({ top, behavior: 'smooth' });
-			};
+            const updateActive = () => {
+                [...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
+                [...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
+            };
 
-			const commit = () => {
-				if (selectedHour && selectedMinute) {
-					input.value = `${selectedHour}:${selectedMinute}`;
-					hideTimePicker();
-				}
-			};
+            const scrollIntoViewSmooth = (btn, container) => {
+                if (!btn) return;
+                const top = btn.offsetTop - container.clientHeight / 2 + btn.clientHeight / 2;
+                container.scrollTo({ top, behavior: 'smooth' });
+            };
 
-			hoursCol.addEventListener('click', (e) => {
-				const btn = e.target.closest('button[data-hour]');
-				if (!btn) return;
-				selectedHour = btn.getAttribute('data-hour');
-				updateActive();
-				scrollIntoViewSmooth(btn, hoursCol);
-				commit();
-			});
+            const commit = () => {
+                if (selectedHour && selectedMinute) {
+                    input.value = `${selectedHour}:${selectedMinute}`;
+                    hideTimePicker();
+                    updateDurationText();
+                }
+            };
 
-			minutesCol.addEventListener('click', (e) => {
-				const btn = e.target.closest('button[data-minute]');
-				if (!btn) return;
-				selectedMinute = btn.getAttribute('data-minute');
-				updateActive();
-				scrollIntoViewSmooth(btn, minutesCol);
-				commit();
-			});
+            hoursCol.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-hour]');
+                if (!btn) return;
+                selectedHour = btn.getAttribute('data-hour');
+                updateActive();
+                scrollIntoViewSmooth(btn, hoursCol);
+                commit();
+            });
 
-			// Mark as initialized
-			hoursCol.dataset.initialized = 'true';
-		}
+            minutesCol.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-minute]');
+                if (!btn) return;
+                selectedMinute = btn.getAttribute('data-minute');
+                updateActive();
+                scrollIntoViewSmooth(btn, minutesCol);
+                commit();
+            });
 
-		picker.classList.remove('hidden');
+            // Mark as initialized
+            hoursCol.dataset.initialized = 'true';
+        }
 
-		// If value exists, set active and center it
-		let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
-		let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
-		[...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
-		[...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
-		scrollIntoViewSmooth(hoursCol.querySelector('button.active'), hoursCol);
-		scrollIntoViewSmooth(minutesCol.querySelector('button.active'), minutesCol);
+        picker.classList.remove('hidden');
 
-		// Click outside to close
-		const outsideHandler = (ev) => {
-			if (!picker.contains(ev.target) && ev.target !== input) {
-				hideTimePicker();
-				document.removeEventListener('click', outsideHandler);
-			}
-		};
-		setTimeout(() => document.addEventListener('click', outsideHandler), 0);
-	}
+        // If value exists, set active and center it
+        let selectedHour = input.value && input.value.includes(':') ? input.value.split(':')[0] : null;
+        let selectedMinute = input.value && input.value.includes(':') ? input.value.split(':')[1] : null;
+        [...hoursCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-hour') === selectedHour));
+        [...minutesCol.querySelectorAll('button')].forEach(b => b.classList.toggle('active', b.getAttribute('data-minute') === selectedMinute));
+        scrollIntoViewSmooth(hoursCol.querySelector('button.active'), hoursCol);
+        scrollIntoViewSmooth(minutesCol.querySelector('button.active'), minutesCol);
 
-	function hideTimePicker() {
-		const picker = document.getElementById('customTimePicker');
-		picker.classList.add('hidden');
-	}
+        // Click outside to close
+        const outsideHandler = (ev) => {
+            if (!picker.contains(ev.target) && ev.target.id !== targetInputId) {
+                hideTimePicker();
+                document.removeEventListener('click', outsideHandler);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', outsideHandler), 0);
+    }
+
+    function hideTimePicker() {
+        const picker = document.getElementById('customTimePicker');
+        picker.classList.add('hidden');
+    }
+
+    function parseHHMM(val) {
+        if (!val || !val.includes(':')) return null;
+        const [h, m] = val.split(':').map(Number);
+        if (Number.isNaN(h) || Number.isNaN(m)) return null;
+        return h * 60 + m;
+    }
+
+    function updateDurationText() {
+        const start = document.getElementById('bookingStartTime').value;
+        const end = document.getElementById('bookingEndTime').value;
+        const el = document.getElementById('durationText');
+        const s = parseHHMM(start);
+        const e = parseHHMM(end);
+        if (s != null && e != null && e > s) {
+            const mins = e - s;
+            const hh = Math.floor(mins / 60);
+            const mm = mins % 60;
+            const parts = [];
+            if (hh > 0) parts.push(`${hh} giờ`);
+            if (mm > 0) parts.push(`${mm} phút`);
+            el.textContent = `Tổng thời gian: ${parts.join(' ')}.`;
+            el.classList.remove('text-red-600');
+        } else if (s != null && e != null) {
+            el.textContent = 'Thời gian kết thúc phải sau thời gian bắt đầu.';
+            el.classList.add('text-red-600');
+        } else {
+            el.textContent = '';
+            el.classList.remove('text-red-600');
+        }
+    }
 	function openLightbox(imageSrc, imageAlt) {
 		const lightbox = document.getElementById('lightbox');
 		const lightboxImage = document.getElementById('lightboxImage');
@@ -524,6 +565,9 @@
 		const budgetOtherWrapper = document.getElementById('budgetOtherWrapper');
 		const form = document.getElementById('contactForm');
 		const submitBtn = document.getElementById('submitContactBtn');
+		const eventDate = document.getElementById('eventDate');
+		const startInput = document.getElementById('bookingStartTime');
+		const endInput = document.getElementById('bookingEndTime');
 
 		if (eventTypeSelect) {
 			eventTypeSelect.addEventListener('change', function() {
@@ -543,6 +587,22 @@
 			});
 		}
 
+		// Min date today
+		if (eventDate) {
+			const today = new Date();
+			const yyyy = today.getFullYear();
+			const mm = String(today.getMonth() + 1).padStart(2, '0');
+			const dd = String(today.getDate()).padStart(2, '0');
+			eventDate.min = `${yyyy}-${mm}-${dd}`;
+		}
+
+		// Update duration when times change programmatically
+		[startInput, endInput].forEach(el => {
+			if (!el) return;
+			el.addEventListener('change', updateDurationText);
+			el.addEventListener('input', updateDurationText);
+		});
+
 		if (form) {
 			form.addEventListener('submit', async function(e) {
 				e.preventDefault();
@@ -550,8 +610,38 @@
 				const fullName = form.querySelector('input[name="fullName"]').value.trim();
 				const email = form.querySelector('input[name="email"]').value.trim();
 				const phone = form.querySelector('input[name="phone"]').value.trim();
+				const dateVal = eventDate ? eventDate.value : '';
+				const startVal = startInput ? startInput.value : '';
+				const endVal = endInput ? endInput.value : '';
 				if (!fullName || !email || !/^\d{10}$/.test(phone)) {
 					alert('Vui lòng nhập Họ tên, Email hợp lệ và SĐT 10 số.');
+					return;
+				}
+				// Date must not be in the past
+				if (dateVal) {
+					const today = new Date();
+					const d = new Date(dateVal + 'T00:00');
+					const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+					if (d.getTime() < t0) {
+						alert('Ngày tổ chức không được ở quá khứ.');
+						return;
+					}
+				}
+				// Time validation
+				const parse = (v) => {
+					if (!v || v.indexOf(':') < 0) return null;
+					const [h, m] = v.split(':').map(Number);
+					if (Number.isNaN(h) || Number.isNaN(m)) return null;
+					return h * 60 + m;
+				};
+				const s = parse(startVal);
+				const en = parse(endVal);
+				if (s == null || en == null) {
+					alert('Vui lòng chọn thời gian bắt đầu và kết thúc.');
+					return;
+				}
+				if (en <= s) {
+					alert('Thời gian kết thúc phải sau thời gian bắt đầu.');
 					return;
 				}
 

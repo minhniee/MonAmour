@@ -2,7 +2,7 @@
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="col-span-1 md:col-span-2">
-                @* <img src="images/MonAmour-logo.png" alt="MonAmour Logo" class="h-12 w-auto mb-4 brightness-0 invert" /> *@
+                <img src="~/images/monAmour-logo.webp" alt="MonAmour Logo" class="h-12 w-auto mb-4 brightness-0 invert" />
                 <p class="text-background/80 mb-4 max-w-md">
                     MonAmour - Nghệ nhân của những buổi hẹn khó quên. Chúng tôi tạo nên những trải nghiệm lãng mạn độc đáo cho tình yêu của bạn.
                 </p>
@@ -20,10 +20,10 @@
             <div>
                 <h3 class="font-prata text-lg font-medium mb-4">Dịch Vụ</h3>
                 <ul class="space-y-2 text-background/80">
-                    <li><a href="#" class="hover:text-background transition-colors">Hẹn Hò Lãng Mạn</a></li>
-                    <li><a href="#" class="hover:text-background transition-colors">Cầu Hôn</a></li>
-                    <li><a href="#" class="hover:text-background transition-colors">Kỷ Niệm</a></li>
-                    <li><a href="#" class="hover:text-background transition-colors">Tư Vấn</a></li>
+                    <li><a href="@Url.Action("ListConcept", "Concept")" class="hover:text-background transition-colors">Datting Plan</a></li>
+                    <li><a href="@Url.Action("ListGiftbox", "Gift_box")" class="hover:text-background transition-colors">Gift Box</a></li>
+                    <li><a href="@Url.Action("Index", "AboutUs")" class="hover:text-background transition-colors">About Us</a></li>
+                    <li><a href="@Url.Action("Consultation", "Home")" class="hover:text-background transition-colors">Tư Vấn</a></li>
                 </ul>
             </div>
         </div>

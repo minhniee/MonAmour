@@ -28,7 +28,7 @@
             <!-- Enhanced Carousel Section -->
             <div class="carousel-section mb-16">
                 <div class="carousel-container relative overflow-hidden h-[450px] md:h-[360px] flex items-center justify-center" id="carouselContainer">
-                    <div class="carousel-track flex transition-transform duration-600 ease-in-out" id="track">
+                    <div class="carousel-track flex transition-transform duration-300 ease-in-out" id="track">
                         @if (Model != null && Model.Any())
                         {
                             var concepts = Model.Take(5).ToList();
@@ -400,7 +400,7 @@
         height: 360px;
         margin: 0 16px;
         border-radius: 16px;
-        transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out, box-shadow 0.3s ease;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, box-shadow 0.3s ease;
     }
     .carousel-item.active {
         transform: scale(1.15);
@@ -515,7 +515,7 @@
             if (!animate) {
                 track.style.transition = 'none';
             } else {
-                track.style.transition = 'transform 0.6s ease-in-out';
+                track.style.transition = 'transform 0.3s ease-in-out';
                 isTransitioning = true;
             }
 
@@ -541,7 +541,7 @@
                     current++;
                     updateCarousel();
                 }
-            }, 4000);
+            }, 2500);
         }
 
         function stopAutoplay() {

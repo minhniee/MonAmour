@@ -36,8 +36,15 @@
             </svg>
         </button>
 
+        <!-- Call to Action Button -->
+        <div class="absolute bottom-12 md:bottom-16 left-1/2 transform -translate-x-1/2 z-10">
+            <a href="@Url.Action("ListConcept","Concept")" class="px-8 md:px-12 py-3 md:py-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+                Đặt Lịch Ngay
+            </a>
+        </div>
+
         <!-- Pagination Indicators -->
-        <div class="absolute bottom-16 md:bottom-20 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
             @{
                 var dotsCount = (Model != null && Model.Any()) ? Model.Count : 1;
                 for (var i = 0; i < dotsCount; i++)
@@ -46,13 +53,6 @@
                     <button class="carousel-dot w-2 h-2 md:w-3 md:h-3 rounded-full bg-white/70 hover:bg-white transition-all duration-300 @active"></button>
                 }
             }
-        </div>
-
-        <!-- Call to Action Button -->
-        <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 z-10">
-            <a href="@Url.Action("ListConcept","Concept")" class="px-8 md:px-12 py-3 md:py-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-medium text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl">
-                Đặt Lịch Ngay
-            </a>
         </div>
     </div>
 
