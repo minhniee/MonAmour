@@ -1356,12 +1356,6 @@ namespace MonAmour.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OrderItemId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("Rating")
                         .HasColumnType("int")
                         .HasColumnName("rating");

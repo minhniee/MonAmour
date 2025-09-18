@@ -12,8 +12,8 @@ using MonAmour.Models;
 namespace MonAmour.Migrations
 {
     [DbContext(typeof(MonAmourDbContext))]
-    [Migration("20250908205510_AddSoftDeleteToBlogOnly")]
-    partial class AddSoftDeleteToBlogOnly
+    [Migration("20250912003246_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -337,73 +337,6 @@ namespace MonAmour.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Blog_Comment", (string)null);
-                });
-
-            modelBuilder.Entity("MonAmour.Models.Booking", b =>
-                {
-                    b.Property<int>("BookingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("booking_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookingId"));
-
-                    b.Property<DateTime?>("BookingDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("booking_date");
-
-                    b.Property<TimeSpan?>("BookingTime")
-                        .HasColumnType("time")
-                        .HasColumnName("booking_time");
-
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("cancelled_at");
-
-                    b.Property<int?>("ConceptId")
-                        .HasColumnType("int")
-                        .HasColumnName("concept_id");
-
-                    b.Property<DateTime?>("ConfirmedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("confirmed_at");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<string>("PaymentStatus")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(20)")
-                        .HasDefaultValue("pending")
-                        .HasColumnName("payment_status");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("status");
-
-                    b.Property<decimal?>("TotalPrice")
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("total_price");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("BookingId")
-                        .HasName("PK__Booking__5DE3A5B18F1D4649");
-
-                    b.HasIndex("ConceptId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Booking", (string)null);
                 });
 
             modelBuilder.Entity("MonAmour.Models.CassoTransaction", b =>
@@ -1199,10 +1132,6 @@ namespace MonAmour.Migrations
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("amount");
 
-                    b.Property<int?>("BookingId")
-                        .HasColumnType("int")
-                        .HasColumnName("booking_id");
-
                     b.Property<int?>("OrderId")
                         .HasColumnType("int")
                         .HasColumnName("order_id");
@@ -1213,8 +1142,6 @@ namespace MonAmour.Migrations
 
                     b.HasKey("PaymentDetailId")
                         .HasName("PK__PaymentD__C66E6E36678D2E3A");
-
-                    b.HasIndex("BookingId");
 
                     b.HasIndex("OrderId");
 
@@ -1856,23 +1783,6 @@ namespace MonAmour.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MonAmour.Models.Booking", b =>
-                {
-                    b.HasOne("MonAmour.Models.Concept", "Concept")
-                        .WithMany("Bookings")
-                        .HasForeignKey("ConceptId")
-                        .HasConstraintName("FK__Booking__concept__7A672E12");
-
-                    b.HasOne("MonAmour.Models.User", "User")
-                        .WithMany("Bookings")
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("FK__Booking__user_id__797309D9");
-
-                    b.Navigation("Concept");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MonAmour.Models.Concept", b =>
                 {
                     b.HasOne("MonAmour.Models.ConceptAmbience", "Ambience")
@@ -2031,11 +1941,6 @@ namespace MonAmour.Migrations
 
             modelBuilder.Entity("MonAmour.Models.PaymentDetail", b =>
                 {
-                    b.HasOne("MonAmour.Models.Booking", "Booking")
-                        .WithMany("PaymentDetails")
-                        .HasForeignKey("BookingId")
-                        .HasConstraintName("FK__PaymentDe__booki__2A164134");
-
                     b.HasOne("MonAmour.Models.Order", "Order")
                         .WithMany("PaymentDetails")
                         .HasForeignKey("OrderId")
@@ -2045,8 +1950,6 @@ namespace MonAmour.Migrations
                         .WithMany("PaymentDetails")
                         .HasForeignKey("PaymentId")
                         .HasConstraintName("FK__PaymentDe__payme__282DF8C2");
-
-                    b.Navigation("Booking");
 
                     b.Navigation("Order");
 
@@ -2158,15 +2061,8 @@ namespace MonAmour.Migrations
                     b.Navigation("Blogs");
                 });
 
-            modelBuilder.Entity("MonAmour.Models.Booking", b =>
-                {
-                    b.Navigation("PaymentDetails");
-                });
-
             modelBuilder.Entity("MonAmour.Models.Concept", b =>
                 {
-                    b.Navigation("Bookings");
-
                     b.Navigation("ConceptColorJunctions");
 
                     b.Navigation("ConceptImgs");
@@ -2247,8 +2143,6 @@ namespace MonAmour.Migrations
                     b.Navigation("BlogComments");
 
                     b.Navigation("Blogs");
-
-                    b.Navigation("Bookings");
 
                     b.Navigation("Contents");
 

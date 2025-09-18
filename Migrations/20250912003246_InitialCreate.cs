@@ -6,11 +6,68 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MonAmour.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateBlogTables : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "BannerHomepage",
+                columns: table => new
+                {
+                    banner_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    img_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    is_primary = table.Column<bool>(type: "bit", nullable: false),
+                    display_order = table.Column<int>(type: "int", nullable: false),
+                    description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    is_active = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BannerHomepage", x => x.banner_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BannerProduct",
+                columns: table => new
+                {
+                    banner_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    img_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    is_primary = table.Column<bool>(type: "bit", nullable: false),
+                    display_order = table.Column<int>(type: "int", nullable: false),
+                    description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    is_active = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BannerProduct", x => x.banner_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BannerService",
+                columns: table => new
+                {
+                    banner_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    img_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    is_primary = table.Column<bool>(type: "bit", nullable: false),
+                    display_order = table.Column<int>(type: "int", nullable: false),
+                    description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    is_active = table.Column<bool>(type: "bit", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BannerService", x => x.banner_id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Blog_Category",
                 columns: table => new
@@ -206,31 +263,26 @@ namespace MonAmour.Migrations
                 {
                     blog_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Excerpt = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    excerpt = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     featured_image = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     author_id = table.Column<int>(type: "int", nullable: true),
                     category_id = table.Column<int>(type: "int", nullable: true),
                     tags = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     published_date = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsFeatured = table.Column<bool>(type: "bit", nullable: true),
-                    IsPublished = table.Column<bool>(type: "bit", nullable: true),
-                    ReadTime = table.Column<int>(type: "int", nullable: true),
-                    ViewCount = table.Column<int>(type: "int", nullable: true),
+                    is_featured = table.Column<bool>(type: "bit", nullable: true),
+                    is_published = table.Column<bool>(type: "bit", nullable: true),
+                    read_time = table.Column<int>(type: "int", nullable: true),
+                    view_count = table.Column<int>(type: "int", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true),
                     updated_at = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    BlogCategoryCategoryId = table.Column<int>(type: "int", nullable: true),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    is_deleted = table.Column<bool>(type: "bit", nullable: true),
+                    deleted_at = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Blog", x => x.blog_id);
-                    table.ForeignKey(
-                        name: "FK_Blog_Blog_Category_BlogCategoryCategoryId",
-                        column: x => x.BlogCategoryCategoryId,
-                        principalTable: "Blog_Category",
-                        principalColumn: "category_id");
                     table.ForeignKey(
                         name: "FK_Blog_Category",
                         column: x => x.category_id,
@@ -239,11 +291,6 @@ namespace MonAmour.Migrations
                     table.ForeignKey(
                         name: "FK_Blog_User",
                         column: x => x.author_id,
-                        principalTable: "User",
-                        principalColumn: "user_id");
-                    table.ForeignKey(
-                        name: "FK_Blog_User_UserId",
-                        column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "user_id");
                 });
@@ -525,8 +572,7 @@ namespace MonAmour.Migrations
                     content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     is_approved = table.Column<bool>(type: "bit", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UserId1 = table.Column<int>(type: "int", nullable: true)
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -540,11 +586,6 @@ namespace MonAmour.Migrations
                     table.ForeignKey(
                         name: "FK_BlogComment_User",
                         column: x => x.user_id,
-                        principalTable: "User",
-                        principalColumn: "user_id");
-                    table.ForeignKey(
-                        name: "FK_Blog_Comment_User_UserId1",
-                        column: x => x.UserId1,
                         principalTable: "User",
                         principalColumn: "user_id");
                 });
@@ -600,6 +641,31 @@ namespace MonAmour.Migrations
                         column: x => x.partner_id,
                         principalTable: "Partner",
                         principalColumn: "partner_id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentDetail",
+                columns: table => new
+                {
+                    payment_detail_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    payment_id = table.Column<int>(type: "int", nullable: true),
+                    order_id = table.Column<int>(type: "int", nullable: true),
+                    amount = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__PaymentD__C66E6E36678D2E3A", x => x.payment_detail_id);
+                    table.ForeignKey(
+                        name: "FK__PaymentDe__order__29221CFB",
+                        column: x => x.order_id,
+                        principalTable: "Order",
+                        principalColumn: "order_id");
+                    table.ForeignKey(
+                        name: "FK__PaymentDe__payme__282DF8C2",
+                        column: x => x.payment_id,
+                        principalTable: "Payment",
+                        principalColumn: "payment_id");
                 });
 
             migrationBuilder.CreateTable(
@@ -659,38 +725,6 @@ namespace MonAmour.Migrations
                         column: x => x.location_id,
                         principalTable: "Location",
                         principalColumn: "location_id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Booking",
-                columns: table => new
-                {
-                    booking_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    user_id = table.Column<int>(type: "int", nullable: true),
-                    concept_id = table.Column<int>(type: "int", nullable: true),
-                    booking_date = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    booking_time = table.Column<TimeSpan>(type: "time", nullable: true),
-                    status = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
-                    payment_status = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true, defaultValue: "pending"),
-                    confirmed_at = table.Column<DateTime>(type: "datetime", nullable: true),
-                    cancelled_at = table.Column<DateTime>(type: "datetime", nullable: true),
-                    total_price = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__Booking__5DE3A5B18F1D4649", x => x.booking_id);
-                    table.ForeignKey(
-                        name: "FK__Booking__concept__7A672E12",
-                        column: x => x.concept_id,
-                        principalTable: "Concept",
-                        principalColumn: "concept_id");
-                    table.ForeignKey(
-                        name: "FK__Booking__user_id__797309D9",
-                        column: x => x.user_id,
-                        principalTable: "User",
-                        principalColumn: "user_id");
                 });
 
             migrationBuilder.CreateTable(
@@ -772,56 +806,15 @@ namespace MonAmour.Migrations
                         principalColumn: "user_id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "PaymentDetail",
-                columns: table => new
-                {
-                    payment_detail_id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    payment_id = table.Column<int>(type: "int", nullable: true),
-                    order_id = table.Column<int>(type: "int", nullable: true),
-                    booking_id = table.Column<int>(type: "int", nullable: true),
-                    amount = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__PaymentD__C66E6E36678D2E3A", x => x.payment_detail_id);
-                    table.ForeignKey(
-                        name: "FK__PaymentDe__booki__2A164134",
-                        column: x => x.booking_id,
-                        principalTable: "Booking",
-                        principalColumn: "booking_id");
-                    table.ForeignKey(
-                        name: "FK__PaymentDe__order__29221CFB",
-                        column: x => x.order_id,
-                        principalTable: "Order",
-                        principalColumn: "order_id");
-                    table.ForeignKey(
-                        name: "FK__PaymentDe__payme__282DF8C2",
-                        column: x => x.payment_id,
-                        principalTable: "Payment",
-                        principalColumn: "payment_id");
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Blog_author_id",
                 table: "Blog",
                 column: "author_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Blog_BlogCategoryCategoryId",
-                table: "Blog",
-                column: "BlogCategoryCategoryId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Blog_category_id",
                 table: "Blog",
                 column: "category_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Blog_UserId",
-                table: "Blog",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Blog_Comment_blog_id",
@@ -831,21 +824,6 @@ namespace MonAmour.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Blog_Comment_user_id",
                 table: "Blog_Comment",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Blog_Comment_UserId1",
-                table: "Blog_Comment",
-                column: "UserId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Booking_concept_id",
-                table: "Booking",
-                column: "concept_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Booking_user_id",
-                table: "Booking",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
@@ -954,11 +932,6 @@ namespace MonAmour.Migrations
                 name: "IX_Payment_UserId",
                 table: "Payment",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentDetail_booking_id",
-                table: "PaymentDetail",
-                column: "booking_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PaymentDetail_order_id",
@@ -1070,6 +1043,15 @@ namespace MonAmour.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "BannerHomepage");
+
+            migrationBuilder.DropTable(
+                name: "BannerProduct");
+
+            migrationBuilder.DropTable(
+                name: "BannerService");
+
+            migrationBuilder.DropTable(
                 name: "Blog_Comment");
 
             migrationBuilder.DropTable(
@@ -1121,9 +1103,6 @@ namespace MonAmour.Migrations
                 name: "Concept_Color");
 
             migrationBuilder.DropTable(
-                name: "Booking");
-
-            migrationBuilder.DropTable(
                 name: "Order");
 
             migrationBuilder.DropTable(
@@ -1133,22 +1112,19 @@ namespace MonAmour.Migrations
                 name: "Role");
 
             migrationBuilder.DropTable(
+                name: "Concept");
+
+            migrationBuilder.DropTable(
                 name: "Product");
 
             migrationBuilder.DropTable(
                 name: "Blog_Category");
 
             migrationBuilder.DropTable(
-                name: "Concept");
-
-            migrationBuilder.DropTable(
                 name: "ShippingOption");
 
             migrationBuilder.DropTable(
                 name: "PaymentMethod");
-
-            migrationBuilder.DropTable(
-                name: "Product_Category");
 
             migrationBuilder.DropTable(
                 name: "Concept_Ambience");
@@ -1158,6 +1134,9 @@ namespace MonAmour.Migrations
 
             migrationBuilder.DropTable(
                 name: "Location");
+
+            migrationBuilder.DropTable(
+                name: "Product_Category");
 
             migrationBuilder.DropTable(
                 name: "Partner");

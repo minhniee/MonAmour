@@ -14,9 +14,28 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<UserMenuFilter>();
 });
 
-// Add Entity Framework
+// Add Entity Framework with optimized configuration for Azure
 builder.Services.AddDbContext<MonAmourDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null);
+        sqlOptions.CommandTimeout(120); // 2 minutes timeout
+    });
+    
+    // Enable sensitive data logging only in development
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
+    
+    // Configure query tracking for better performance
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+});
 
 // Configure Settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
@@ -38,22 +57,16 @@ builder.Services.AddHttpContextAccessor();
 // Add Authorization (using custom SessionAuthorizeAttribute)
 builder.Services.AddAuthorization();
 
-// Add Services
+// Add Services (cleaned up duplicates)
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ICassoService, CassoService>();
 builder.Services.AddScoped<IVietQRService, VietQRService>();
-
 builder.Services.AddScoped<IWishListService, WishListService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
-
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IBlogManagementService, BlogManagementService>();
-
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IPartnerService, PartnerService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
@@ -85,15 +98,52 @@ using (var scope = app.Services.CreateScope())
 {
     var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<MonAmourDbContext>();
 
     try
     {
-        await authService.InitializeSystemAsync();
-        logger.LogInformation("System initialized successfully");
+        // Test database connection first
+        logger.LogInformation("=== STARTING DATABASE CONNECTION TEST ===");
+        logger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
+        logger.LogInformation("Connection String: {ConnectionString}", 
+            builder.Configuration.GetConnectionString("DefaultConnection")?.Substring(0, 50) + "...");
+        
+        var canConnect = await dbContext.Database.CanConnectAsync();
+        logger.LogInformation("Database connection test: {Status}", canConnect ? "SUCCESS" : "FAILED");
+
+        if (canConnect)
+        {
+            // Check if database exists and has tables
+            var appliedMigrations = await dbContext.Database.GetAppliedMigrationsAsync();
+            var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+            
+            logger.LogInformation("Applied migrations count: {AppliedCount}", appliedMigrations.Count());
+            logger.LogInformation("Pending migrations count: {PendingCount}", pendingMigrations.Count());
+            
+            if (pendingMigrations.Any())
+            {
+                logger.LogWarning("⚠️  WARNING: There are {Count} pending migrations!", pendingMigrations.Count());
+                logger.LogWarning("Use POST /database/migrate to apply them");
+            }
+
+            await authService.InitializeSystemAsync();
+            logger.LogInformation("✅ System initialized successfully");
+        }
+        else
+        {
+            logger.LogError("❌ Cannot connect to database. Application will start but may have limited functionality.");
+            logger.LogError("Check: 1) Connection string 2) Azure SQL firewall 3) Database existence");
+        }
+        
+        logger.LogInformation("=== DATABASE CONNECTION TEST COMPLETED ===");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Failed to initialize system");
+        logger.LogError(ex, "Failed to initialize system. Error: {Message}", ex.Message);
+        if (ex.InnerException != null)
+        {
+            logger.LogError("Inner exception: {InnerMessage}", ex.InnerException.Message);
+        }
     }
 }
 

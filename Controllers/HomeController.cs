@@ -37,26 +37,84 @@ namespace MonAmour.Controllers
         {
             ViewData["Title"] = "Trang chủ - MonAmour";
 
-            var homepageBanners = await _bannerService.GetAllBannerHomepagesAsync();
-            var serviceBanners = await _bannerService.GetAllBannerServicesAsync();
-
-            var (partners, _) = await _partnerService.GetPartnersAsync(new PartnerSearchViewModel
+            try
             {
-                Status = "Active",
-                Page = 1,
-                PageSize = 50,
-                SortBy = "Name",
-                SortOrder = "asc"
-            });
+                var homepageBanners = await _bannerService.GetAllBannerHomepagesAsync();
+                var serviceBanners = await _bannerService.GetAllBannerServicesAsync();
 
-            var model = new HomeIndexViewModel
+                var (partners, _) = await _partnerService.GetPartnersAsync(new PartnerSearchViewModel
+                {
+                    Status = "Active",
+                    Page = 1,
+                    PageSize = 50,
+                    SortBy = "Name",
+                    SortOrder = "asc"
+                });
+
+                var model = new HomeIndexViewModel
+                {
+                    HomepageBanners = homepageBanners.Where(b => b.IsActive).OrderBy(b => b.DisplayOrder).ToList(),
+                    ServiceBanners = serviceBanners.Where(b => b.IsActive).OrderBy(b => b.DisplayOrder).ToList(),
+                    Partners = partners
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
             {
-                HomepageBanners = homepageBanners.Where(b => b.IsActive).OrderBy(b => b.DisplayOrder).ToList(),
-                ServiceBanners = serviceBanners.Where(b => b.IsActive).OrderBy(b => b.DisplayOrder).ToList(),
-                Partners = partners
-            };
+                // Log the error and return a simple view
+                Console.WriteLine($"Database connection error: {ex.Message}");
+                var model = new HomeIndexViewModel
+                {
+                    HomepageBanners = new List<BannerHomepageListViewModel>(),
+                    ServiceBanners = new List<BannerServiceListViewModel>(),
+                    Partners = new List<PartnerViewModel>()
+                };
 
-            return View(model);
+                return View(model);
+            }
+        }
+
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+            return Content("Test endpoint is working!");
+        }
+
+        [HttpGet("health")]
+        public async Task<IActionResult> HealthCheck()
+        {
+            try
+            {
+                // Test database connection
+                var bannerCount = await _bannerService.GetAllBannerHomepagesAsync();
+                var partnerResult = await _partnerService.GetPartnersAsync(new PartnerSearchViewModel
+                {
+                    Page = 1,
+                    PageSize = 1
+                });
+
+                return Json(new
+                {
+                    status = "healthy",
+                    database = "connected",
+                    timestamp = DateTime.UtcNow,
+                    bannerCount = bannerCount.Count,
+                    partnerCount = partnerResult.partners.Count,
+                    totalPartners = partnerResult.totalCount
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = "unhealthy",
+                    database = "disconnected",
+                    error = ex.Message,
+                    innerException = ex.InnerException?.Message,
+                    timestamp = DateTime.UtcNow
+                });
+            }
         }
     }
 }
