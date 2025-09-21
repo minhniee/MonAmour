@@ -2,9 +2,9 @@
 
 <div class="container mx-auto px-4 relative pt-[20px] dropdown-divider-">
     <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold text-black mb-4">Our Service</h2>
-        <p class="text-gray-600 max-w-3xl mx-auto">
-            Vân Anh toát lên vẻ đẹp hiện đại pha chút truyền thống, vừa cá tính vừa duyên dáng. Trong bộ trang phục đỏ nổi bật với quạt tay và kính đen, cô thể hiện thần thái tự tin, sang trọng, như một điểm nhấn giữa không gian trang trí rực rỡ sắc Tết. Ở những khung hình khác, với phong cách nhẹ nhàng trong gam màu trắng, cô lại trở nên dịu dàng, tinh tế, mang đến cảm giác gần gũi nhưng vẫn cuốn hút. Sự linh hoạt trong biểu cảm và cách tạo dáng khiến cô vừa nổi bật vừa để lại ấn tượng khó quên.
+        <h2 class="text-3xl font-bold text-[#62000d] mb-4 font-prata">Dịch Vụ Của Chúng Tôi</h2>
+        <p class="text-gray-600 max-w-3xl mx-auto font-body">
+            Mon Amour là nền tảng cung cấp dịch vụ lên kế hoạch hẹn hò cá nhân hóa trọn gói, giúp khách hàng tổ chức các buổi hẹn lãng mạn, ấn tượng và ý nghĩa. Mon Amour hướng tới việc "dịch vụ hóa cảm xúc" biến những khoảnh khắc tình cảm thành trải nghiệm được thiết kế chỉn chu, dễ đặt, dễ nhớ và đậm tính cá nhân.
         </p>
     </div>
 
@@ -18,14 +18,17 @@
                     var primary = Model.FirstOrDefault(b => b.IsPrimary);
                     if (primary != null)
                     {
+	                    <a href="@Url.Action("ConceptDetail", "Concept",new{id=32})" class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg w-fit hover:bg-gray-800 transition-colors duration-200">
                         <img src="@primary.ImgUrl" alt="Service Banner @primary.BannerId" class="w-full h-full object-cover" />
                         <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-between">
-                            <a href="@Url.Action("ListConcept", "Concept")" class="bg-black text-white px-4 py-2 text-sm font-medium rounded-lg w-fit hover:bg-gray-800 transition-colors duration-200">Setup</a>
-                            <div class="text-white">
-                                <h3 class="font-sans font-medium text-lg text-white uppercase leading-tight">Vân Anh – Nàng xuân kiêu sa</h3>
-                            </div>
+
+	                        <div class="text-white">
+		                        <h3 class="font-sans font-medium text-lg text-white uppercase leading-tight">Vân Anh – Nàng xuân kiêu sa</h3>
+	                        </div>
                         </div>
+                        </a>
+
                     }
                     else
                     {
@@ -55,15 +58,16 @@
                         var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).ToList();
                         if (nonPrimaryBanners.Any())
                         {
-                            var banner = nonPrimaryBanners.First();
+	                        var banner = nonPrimaryBanners.First();
+	                        <a href="@Url.Action("ConceptDetail", "Concept",new{id=32})"class="bg-black text-white px-3 py-1 text-xs font-medium rounded w-fit hover:bg-gray-800 transition-colors duration-200">
                             <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
                             <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
                             <div class="absolute inset-0 p-4 flex flex-col justify-between">
-                                <a href="@Url.Action("ListConcept", "Concept")" class="bg-black text-white px-3 py-1 text-xs font-medium rounded w-fit hover:bg-gray-800 transition-colors duration-200">Setup</a>
-                                <div class="text-white">
-                                    <h3 class="font-sans font-medium text-base text-white uppercase leading-tight">Vân Anh – Nét đẹp huyền bí</h3>
-                                </div>
+	                            <div class="text-white">
+		                            <h3 class="font-sans font-medium text-base text-white uppercase leading-tight">Vân Anh – Nét đẹp huyền bí</h3>
+	                            </div>
                             </div>
+                            </a>
                         }
                         else
                         {
@@ -91,15 +95,16 @@
                             var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(1).ToList();
                             if (nonPrimaryBanners.Any())
                             {
-                                var banner = nonPrimaryBanners.First();
+	                            var banner = nonPrimaryBanners.First();
+	                        <a href="@Url.Action("ConceptDetail", "Concept",new{id=32})"class="bg-black text-white px-3 py-1 text-xs font-medium rounded w-fit hover:bg-gray-800 transition-colors duration-200">
                                 <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
                                 <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
                                 <div class="absolute inset-0 p-4 flex flex-col justify-end">
-                                    <a href="@Url.Action("ListConcept", "Concept")" class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2 hover:bg-gray-800 transition-colors duration-200">Setup</a>
-                                    <div class="text-white">
-                                        <h3 class="font-sans font-medium text-sm text-white uppercase">Vân Anh – Cá tính nổi bật</h3>
-                                    </div>
+	                                <div class="text-white">
+		                                <h3 class="font-sans font-medium text-sm text-white uppercase">Vân Anh – Cá tính nổi bật</h3>
+	                                </div>
                                 </div>
+                                </a>
                             }
                             else
                             {
@@ -122,18 +127,21 @@
                     <div class="bg-gray-100 rounded-lg shadow-sm overflow-hidden relative group cursor-pointer">
                         @if (Model != null && Model.Any())
                         {
+
                             var nonPrimaryBanners = Model.Where(b => !b.IsPrimary).OrderBy(b => b.DisplayOrder).Skip(2).ToList();
                             if (nonPrimaryBanners.Any())
                             {
-                                var banner = nonPrimaryBanners.First();
+                            var banner = nonPrimaryBanners.First();
+                            <a href="@Url.Action("ConceptDetail", "Concept",new{id=32})"class="bg-black text-white px-3 py-1 text-xs font-medium rounded w-fit hover:bg-gray-800 transition-colors duration-200">
                                 <img src="@banner.ImgUrl" alt="Service Banner @banner.BannerId" class="w-full h-full object-cover" />
                                 <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300"></div>
                                 <div class="absolute inset-0 p-4 flex flex-col justify-end">
-                                    <a href="@Url.Action("ListConcept", "Concept")" class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2 hover:bg-gray-800 transition-colors duration-200">Gift</a>
-                                    <div class="text-white">
-                                        <h3 class="font-sans font-medium text-sm text-white uppercase">Vân Anh – Dịu dàng và tinh khôi</h3>
-                                    </div>
+	                                <a href="@Url.Action("ListConcept", "Concept")" class="bg-black text-white px-2 py-1 text-xs font-medium rounded w-fit mb-2 hover:bg-gray-800 transition-colors duration-200">Gift</a>
+	                                <div class="text-white">
+		                                <h3 class="font-sans font-medium text-sm text-white uppercase">Vân Anh – Dịu dàng và tinh khôi</h3>
+	                                </div>
                                 </div>
+                                </a>
                             }
                             else
                             {

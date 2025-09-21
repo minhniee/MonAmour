@@ -6,6 +6,16 @@
     <title>@ViewData["Title"] - Mon Amour</title>
     <meta name="description" content="Experience luxury and elegance with Mon Amour premium services" />
 
+    <!-- Google Analytics -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-53B763GR7T"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-53B763GR7T');
+    </script>
+
     <!-- Tailwind CSS & Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -28,13 +38,23 @@
                     },
                     fontFamily: {
                         'prata': ['Prata', 'serif'],
+                        'noto-serif': ['"Noto Serif"', 'serif'],
                         'noto-serif-extracondensed': ['"Noto Serif ExtraCondensed"', 'serif'],
                         'serif': ['"Noto Serif ExtraCondensed"', 'serif']
+                    },
+                    fontWeight: {
+                        'semi-bold': '600',
+                        'medium': '500'
                     }
                 }
             }
         }
     </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
 
     <!-- Custom font-face -->
     <style>
@@ -58,6 +78,19 @@
 
         .font-prata {
             font-family: 'Prata', serif;
+            font-weight: 500; /* Semi-bold for Prata titles */
+        }
+
+        /* Header navigation font */
+        nav a {
+            font-family: 'Noto Serif', serif;
+            font-weight: 600; /* Semi-bold for header */
+        }
+
+        /* Body text font */
+        .font-body {
+            font-family: 'Noto Serif ExtraCondensed', serif;
+            font-stretch: 75%;
         }
     </style>
 </head>
@@ -132,6 +165,96 @@
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
         }
+
+        // Google Analytics Helper Functions for MonAmour
+        function trackEvent(eventName, parameters = {}) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, parameters);
+            }
+        }
+
+        // Track concept views
+        function trackConceptView(conceptId, conceptName, category, price) {
+            trackEvent('view_item', {
+                currency: 'VND',
+                value: price,
+                item_id: conceptId,
+                item_name: conceptName,
+                item_category: category,
+                content_type: 'concept'
+            });
+        }
+
+        // Track contact form submissions
+        function trackContactSubmission(formType = 'concept_contact') {
+            trackEvent('generate_lead', {
+                currency: 'VND',
+                form_type: formType,
+                content_type: 'contact_form'
+            });
+        }
+
+        // Track button clicks
+        function trackButtonClick(buttonName, buttonType = 'cta') {
+            trackEvent('select_content', {
+                content_type: buttonType,
+                content_id: buttonName
+            });
+        }
+
+        // Track navigation
+        function trackNavigation(destination, source = 'menu') {
+            trackEvent('select_content', {
+                content_type: 'navigation',
+                content_id: destination,
+                source: source
+            });
+        }
+
+        // Track social media clicks
+        function trackSocialClick(platform) {
+            trackEvent('select_content', {
+                content_type: 'social_media',
+                content_id: platform
+            });
+        }
+
+        // Auto-track contact form submissions
+        document.addEventListener('submit', function(e) {
+            if (e.target.id === 'contactForm' || e.target.classList.contains('contact-form')) {
+                trackContactSubmission();
+            }
+        });
+
+        // Auto-track social media clicks
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a[href*="facebook.com"], a[href*="zalo.me"], a[href*="tiktok.com"]');
+            if (link) {
+                let platform = 'unknown';
+                if (link.href.includes('facebook.com')) platform = 'facebook';
+                else if (link.href.includes('zalo.me')) platform = 'zalo';
+                else if (link.href.includes('tiktok.com')) platform = 'tiktok';
+                
+                trackSocialClick(platform);
+            }
+        });
+
+        // Track scroll depth
+        let maxScroll = 0;
+        window.addEventListener('scroll', function() {
+            const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+            
+            // Track at 25%, 50%, 75%, 90% milestones
+            [25, 50, 75, 90].forEach(milestone => {
+                if (scrollPercent >= milestone && maxScroll < milestone) {
+                    trackEvent('scroll', {
+                        percent_scrolled: milestone
+                    });
+                }
+            });
+            
+            maxScroll = Math.max(maxScroll, scrollPercent);
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

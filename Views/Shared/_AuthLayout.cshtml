@@ -35,12 +35,12 @@
     <div class="min-h-screen bg-background flex">
         @* Left side - Branding *@
         <div class="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-center items-center p-12">
-            <div class=" text-center">
+            <div class="text-center bd p-8">
                 <a href="/" class="inline-block mb-8">
                     <img src="/images/monAmour-large.png" alt="Mon Amour" width="200" height="160" class="filter brightness-0 invert" />
                 </a>
-                <h1 class="font-heading text-4xl text-primary-foreground pl-16 mb-4">Chào mừng đến với Mon Amour</h1>
-                <p class="text-primary-foreground/80 text-lg max-w-md whitespace-nowrap">
+                <h1 class="font-heading text-2xl lg:text-3xl xl:text-4xl text-primary-foreground mb-4 whitespace-nowrap">Chào mừng đến với Mon Amour</h1>
+                <p class="text-primary-foreground/80 text-sm lg:text-base xl:text-lg whitespace-nowrap text-left ml-8">
                     Nơi tình yêu được nuôi dưỡng và thăng hoa qua những trải nghiệm đáng nhớ
                 </p>
             </div>
@@ -57,7 +57,7 @@
                 </div>
 
                 <div class="text-center mb-8">
-                    <h2 class="font-heading text-2xl leading-tight text-foreground whitespace-nowrap overflow-hidden text-ellipsis">@ViewData["Title"]</h2>
+                    <h2 class="font-heading text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl leading-tight text-foreground text-center whitespace-nowrap">@ViewData["Title"]</h2>
                     @if (ViewData["Subtitle"] != null)
                     {
                         <p class="mt-2 text-sm text-muted-foreground">@ViewData["Subtitle"]</p>
