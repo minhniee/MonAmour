@@ -189,4 +189,13 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+		(function(){
+			var form = document.getElementById('profileForm');
+			if (!form) return;
+			if (window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive) {
+				window.jQuery.validator.unobtrusive.parse(form);
+			}
+		})();
+	</script>
 }

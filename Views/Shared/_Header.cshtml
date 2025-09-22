@@ -9,23 +9,23 @@
                 </a>
             </div>
             <nav class="hidden md:flex items-center space-x-2">
-                <a href="@Url.Action("Index", "Home")" class="text-lg md:text-xl font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-4 py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                    Trang chủ
+                <a href="@Url.Action("Index", "Home")" class="text-sm md:text-xl whitespace-nowrap font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-3 py-2 md:px-4 md:py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
+                    Trang Chủ
                 </a>
-                <a href="@Url.Action("ListConcept", "Concept")" class="text-lg md:text-xl font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-4 py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Concept" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                    Kế hoạch hẹn hò
+                <a href="@Url.Action("ListConcept", "Concept")" class="text-sm md:text-xl whitespace-nowrap font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-3 py-2 md:px-4 md:py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Concept" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
+                    Kế Hoạch Hẹn Hò
                 </a>
-                <a href="@Url.Action("ListGiftbox", "Gift_box")" class="text-lg md:text-xl font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-4 py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Gift_box" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                    Hộp quà
+                <a href="@Url.Action("ListGiftbox", "Gift_box")" class="text-sm md:text-xl whitespace-nowrap font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-3 py-2 md:px-4 md:py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Gift_box" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
+                    Hộp Quà
                 </a>
-                <a href="@Url.Action("Index", "Blog")" class="text-lg md:text-xl font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-4 py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Blog" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
+                <a href="@Url.Action("Index", "Blog")" class="text-sm md:text-xl whitespace-nowrap font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-3 py-2 md:px-4 md:py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Blog" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
                     Blog
                 </a>
-                <a href="@Url.Action("Index", "AboutUs")" class="text-lg md:text-xl font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-4 py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AboutUs" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                    Về chúng tôi
+                <a href="@Url.Action("Index", "AboutUs")" class="text-sm md:text-xl whitespace-nowrap font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-3 py-2 md:px-4 md:py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AboutUs" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
+                    Về Chúng Tôi
                 </a>
-                <a href="@Url.Action("Consultation", "Home")" class="text-lg md:text-xl font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-4 py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Consultation" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                    Liên hệ tư vấn
+                <a href="@Url.Action("Consultation", "Home")" class="text-sm md:text-xl whitespace-nowrap font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 px-3 py-2 md:px-4 md:py-3 rounded-lg h-full flex items-center @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Consultation" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
+                    Liên Hệ Tư Vấn
                 </a>
             </nav>
         </div>
@@ -53,22 +53,22 @@
     <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-background/95 backdrop-blur shadow-lg">
         <nav class="container mx-auto px-4 py-6 space-y-2">
             <a href="@Url.Action("Index", "Home")" class="block py-4 text-lg font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 rounded-lg px-4 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                Trang chủ
+                Trang Chủ
             </a>
             <a href="@Url.Action("Index", "AboutUs")" class="block py-4 text-lg font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 rounded-lg px-4 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AboutUs" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                Về chúng tôi
+                Về Chúng Tôi
             </a>
             <a href="@Url.Action("ListConcept", "Concept")" class="block py-4 text-lg font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 rounded-lg px-4 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Concept" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                Gói dịch vụ
+                Kế Hoạch Hẹn Hò
             </a>
             <a href="@Url.Action("ListGiftbox", "Gift_box")" class="block py-4 text-lg font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 rounded-lg px-4 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Gift_box" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                Smart Gift Box
+                Hộp Quà
             </a>
             <a href="@Url.Action("Index", "Blog")" class="block py-4 text-lg font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 rounded-lg px-4 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Blog" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
                 Blog
             </a>
             <a href="@Url.Action("Consultation", "Home")" class="block py-4 text-lg font-semibold text-[#62000d] hover:text-[#4a0009] transition-all duration-300 rounded-lg px-4 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Consultation" ? "bg-[#62000d] text-[#fbf1e6] shadow-lg" : "hover:bg-[#fbf1e6]")">
-                Liên hệ tư vấn
+                Liên Hệ Tư Vấn
             </a>
 
             <div class="pt-4 mt-4 border-t border-border">

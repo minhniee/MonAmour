@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Mon Amour</title>
+    <link rel="icon" type="image/webp" href="~/monAmour-logo.png">
+    @* <link rel="icon" href="/favicon.ico" type="image/x-icon"> *@
     <meta name="description" content="Experience luxury and elegance with Mon Amour premium services" />
 
     <!-- Google Analytics -->
@@ -19,6 +21,10 @@
     <!-- Tailwind CSS & Alpine.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
     <!-- Tailwind Config -->
     <script>
@@ -81,6 +87,12 @@
             font-weight: 500; /* Semi-bold for Prata titles */
         }
 
+        /* Global headings use Prata */
+        h1, h2, h3, h4, .heading-prata {
+            font-family: 'Prata', serif !important;
+            font-weight: 500;
+        }
+
         /* Header navigation font */
         nav a {
             font-family: 'Noto Serif', serif;
@@ -91,6 +103,45 @@
         .font-body {
             font-family: 'Noto Serif ExtraCondensed', serif;
             font-stretch: 75%;
+        }
+
+        /* Global body text elements use ExtraCondensed */
+        p, li, span, small, label, input, textarea, select, button {
+            font-family: 'Noto Serif ExtraCondensed', serif;
+            font-stretch: 75%;
+        }
+
+        /* Improve justification and hyphenation for body text */
+        .text-justify {
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+        }
+
+        /* Responsive base type scale */
+        html { font-size: 16px; }
+        body { font-size: clamp(16px, 1.2vw + 12px, 18px); }
+        h1 { font-size: clamp(1.875rem, 2.5vw + 1rem, 3rem); }
+        h2 { font-size: clamp(1.5rem, 2vw + 0.8rem, 2.25rem); }
+        h3 { font-size: clamp(1.25rem, 1.5vw + 0.6rem, 1.75rem); }
+
+        /* Fluid container padding */
+        .container { padding-left: 1rem; padding-right: 1rem; }
+        @@media (min-width: 768px) { .container { padding-left: 1.25rem; padding-right: 1.25rem; } }
+        @@media (min-width: 1024px) { .container { padding-left: 2rem; padding-right: 2rem; } }
+
+        /* Images scale nicely */
+        img { max-width: 100%; height: auto; }
+
+        /* Prevent horizontal scroll on small screens */
+        html, body { overflow-x: hidden; }
+
+        /* Floating buttons spacing and sizing on small screens */
+        @@media (max-width: 640px) {
+            .fixed.bottom-6.right-6 { bottom: 1rem; right: 1rem; }
+            .fixed.bottom-6.right-6 .w-14.h-14 { width: 3rem; height: 3rem; }
+            .fixed.bottom-6.right-6 .w-12.h-12 { width: 2.5rem; height: 2.5rem; }
         }
     </style>
 </head>

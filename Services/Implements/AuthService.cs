@@ -57,11 +57,11 @@ public class AuthService : IAuthService
             }
 
             // Kiểm tra email đã được xác thực chưa
-            if (user.Verified != true)
-            {
-                _logger.LogWarning("Login failed - email not verified: {Email}", model.Email);
-                return (false, "Vui lòng xác thực email trước khi đăng nhập.");
-            }
+            //if (user.Verified != true)
+            //{
+            //    _logger.LogWarning("Login failed - email not verified: {Email}", model.Email);
+            //    return (false, "Vui lòng xác thực email trước khi đăng nhập.");
+            //}
 
             // Lấy roles của user
             var roles = await _context.UserRoles
@@ -154,6 +154,7 @@ public class AuthService : IAuthService
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+            await _emailService.SendWelcomeEmailAsync(user.Email, user.Name ?? "O co loi a");
 
             var role = new UserRole()
             {
@@ -166,22 +167,22 @@ public class AuthService : IAuthService
             _context.UserRoles.Add(role);
 
             // Tạo token xác thực email
-            var verificationToken = GenerateToken();
-            var token = new Token
-            {
-                UserId = user.UserId,
-                TokenValue = verificationToken,
-                TokenType = "email_verification",
-                ExpiresAt = DateTime.Now.AddHours(24),
-                IsActive = true,
-                CreatedAt = DateTime.Now
-            };
+            //var verificationToken = GenerateToken();
+            //var token = new Token
+            //{
+            //    UserId = user.UserId,
+            //    TokenValue = verificationToken,
+            //    TokenType = "email_verification",
+            //    ExpiresAt = DateTime.Now.AddHours(24),
+            //    IsActive = true,
+            //    CreatedAt = DateTime.Now
+            //};
 
-            _context.Tokens.Add(token);
-            await _context.SaveChangesAsync();
+            //_context.Tokens.Add(token);
+            //await _context.SaveChangesAsync();
 
-            // Gửi email xác thực
-            await _emailService.SendVerificationEmailAsync(user.Email, verificationToken);
+            //// Gửi email xác thực
+            //await _emailService.SendVerificationEmailAsync(user.Email, verificationToken);
 
             _logger.LogInformation("User registered successfully: {Email}", model.Email);
             return (true, null);
@@ -211,6 +212,7 @@ public class AuthService : IAuthService
             // Vô hiệu hóa các token reset password cũ
             var oldTokens = await _context.Tokens
                 .Where(t => t.UserId == user.UserId && t.TokenType == "reset_password" && t.IsActive == true)
+                .AsTracking()
                 .ToListAsync();
 
             foreach (var oldToken in oldTokens)
@@ -255,6 +257,7 @@ public class AuthService : IAuthService
             // Tìm token hợp lệ
             var token = await _context.Tokens
                 .Include(t => t.User)
+                .AsTracking()
                 .FirstOrDefaultAsync(t => t.TokenValue == model.Token
                     && t.TokenType == "reset_password"
                     && t.IsActive == true
@@ -294,6 +297,7 @@ public class AuthService : IAuthService
 
             var verificationToken = await _context.Tokens
                 .Include(t => t.User)
+                .AsTracking()
                 .FirstOrDefaultAsync(t => t.TokenValue == token
                     && t.TokenType == "email_verification"
                     && t.IsActive == true
@@ -354,6 +358,7 @@ public class AuthService : IAuthService
             // Vô hiệu hóa token cũ
             var oldTokens = await _context.Tokens
                 .Where(t => t.UserId == user.UserId && t.TokenType == "email_verification" && t.IsActive == true)
+                .AsTracking()
                 .ToListAsync();
 
             foreach (var oldToken in oldTokens)
@@ -403,6 +408,7 @@ public class AuthService : IAuthService
             {
                 // Vô hiệu hóa token trong database
                 var token = await _context.Tokens
+                    .AsTracking()
                     .FirstOrDefaultAsync(t => t.TokenValue == rememberToken && t.TokenType == "remember_me");
 
                 if (token != null)

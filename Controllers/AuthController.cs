@@ -92,7 +92,7 @@ namespace MonAmour.Controllers
 
                 if (success)
                 {
-                    TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.";
+                    TempData["SuccessMessage"] = "Đăng ký thành công! Chào mừng bạn đến với trang web của chúng tôiii <3";
                     _logger.LogInformation("User registered successfully: {Email}", model.Email);
                     return View();
                 }
@@ -105,7 +105,7 @@ namespace MonAmour.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during signup for email: {Email}", model.Email);
-                ModelState.AddModelError("", "Có lỗi xảy ra. Vui lòng thử lại sau.");
+                ModelState.AddModelError("", "Có lỗi xảy ra. Vui lòng thử lại sau. Trân thành cin lỗi bạn về sự bất tiện này");
                 return View(model);
             }
         }

@@ -275,7 +275,9 @@ public class UserManagementService : IUserManagementService
     {
         try
         {
-            var user = await _context.Users.FindAsync(model.UserId);
+            var user = await _context.Users
+                .AsTracking()
+                .FirstOrDefaultAsync(u => u.UserId == model.UserId);
             if (user == null) return false;
 
             // Check if email already exists (excluding current user)
@@ -297,6 +299,7 @@ public class UserManagementService : IUserManagementService
             // Update roles
             var existingRoles = await _context.UserRoles
                 .Where(ur => ur.UserId == model.UserId)
+                .AsTracking()
                 .ToListAsync();
 
             _context.UserRoles.RemoveRange(existingRoles);
@@ -328,7 +331,9 @@ public class UserManagementService : IUserManagementService
     {
         try
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .AsTracking()
+                .FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null) return false;
 
             // Check if user is admin (prevent deleting admin)
@@ -342,7 +347,10 @@ public class UserManagementService : IUserManagementService
             }
 
             // Delete related data
-            var userRoles = await _context.UserRoles.Where(ur => ur.UserId == userId).ToListAsync();
+            var userRoles = await _context.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .AsTracking()
+                .ToListAsync();
             _context.UserRoles.RemoveRange(userRoles);
 
             _context.Users.Remove(user);
@@ -360,9 +368,12 @@ public class UserManagementService : IUserManagementService
 
     public async Task<bool> ChangeUserPasswordAsync(AdminUserViewModel.UserChangePasswordViewModel model, int adminUserId)
     {
+
         try
         {
-            var user = await _context.Users.FindAsync(model.UserId);
+            var user = await _context.Users
+                .AsTracking()
+                .FirstOrDefaultAsync(u => u.UserId == model.UserId);
             if (user == null) return false;
 
             user.Password = HashPassword(model.NewPassword);
@@ -377,13 +388,16 @@ public class UserManagementService : IUserManagementService
             _logger.LogError(ex, "Error changing user password: {UserId}", model.UserId);
             return false;
         }
+
     }
 
     public async Task<bool> ToggleUserVerificationAsync(int userId, int adminUserId)
     {
         try
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .AsTracking()
+                .FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null) return false;
 
             user.Verified = !user.Verified;
@@ -405,7 +419,9 @@ public class UserManagementService : IUserManagementService
     {
         try
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .AsTracking()
+                .FirstOrDefaultAsync(u => u.UserId == userId);
             if (user == null) return false;
 
             user.Status = status;

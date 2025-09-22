@@ -41,8 +41,8 @@ public class EmailService : IEmailService
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(_emailSettings.From, "MonAmour"),
-                Subject = "Xác thực tài khoản MonAmour",
+                From = new MailAddress(_emailSettings.From, "Mon Amour"),
+                Subject = "Xác thực tài khoản Mon Amour",
                 IsBodyHtml = true,
                 Body = $@"
                     <!DOCTYPE html>
@@ -50,21 +50,22 @@ public class EmailService : IEmailService
                     <head>
                         <meta charset='utf-8'>
                         <style>
-                            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                            .header {{ background-color: #f8f9fa; padding: 20px; text-align: center; }}
-                            .content {{ padding: 20px; }}
-                            .button {{ display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
-                            .footer {{ background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #666; }}
+                            body {{ font-family: 'Noto Serif', Arial, sans-serif; line-height: 1.6; color: #62000d; background-color: #fbf1e6; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(98, 0, 13, 0.1); }}
+                            .header {{ background-color: #62000d; padding: 24px; text-align: center; color: #fbf1e6; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 24px; }}
+                            .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
+                            .button:hover {{ background-color: #4a0009; }}
+                            .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
                         </style>
                     </head>
                     <body>
                         <div class='container'>
                             <div class='header'>
-                                <h2>Xác thực tài khoản MonAmour</h2>
+                                <h2>Xác thực tài khoản Mon Amour</h2>
                             </div>
                             <div class='content'>
-                                <p>Chào mừng bạn đến với MonAmour!</p>
+                                <p>Chào mừng bạn đến với Mon Amour!</p>
                                 <p>Vui lòng click vào nút dưới đây để xác thực tài khoản của bạn:</p>
                                 <p style='text-align: center; margin: 30px 0;'>
                                     <a href='{verificationLink}' class='button'>Xác thực tài khoản</a>
@@ -72,11 +73,11 @@ public class EmailService : IEmailService
                                 <p>Hoặc copy link sau vào trình duyệt:</p>
                                 <p style='word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 3px;'>{verificationLink}</p>
                                 <p><strong>Lưu ý:</strong> Link xác thực sẽ hết hạn sau 24 giờ.</p>
-                                <p>Nếu bạn không đăng ký tài khoản tại MonAmour, vui lòng bỏ qua email này.</p>
+                                <p>Nếu bạn không đăng ký tài khoản tại Mon Amour, vui lòng bỏ qua email này.</p>
                             </div>
                             <div class='footer'>
-                                <p>Trân trọng,<br><strong>MonAmour Team</strong></p>
-                                <p>© 2024 MonAmour. All rights reserved.</p>
+                                <p>Trân trọng,<br><strong>Mon Amour Team</strong></p>
+                                <p>© 2024 Mon Amour. All rights reserved.</p>
                             </div>
                         </div>
                     </body>
@@ -118,13 +119,14 @@ public class EmailService : IEmailService
                     <head>
                         <meta charset='utf-8'>
                         <style>
-                            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                            .header {{ background-color: #f8f9fa; padding: 20px; text-align: center; }}
-                            .content {{ padding: 20px; }}
-                            .button {{ display: inline-block; padding: 12px 24px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 5px; }}
-                            .footer {{ background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #666; }}
-                            .warning {{ background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin: 15px 0; }}
+                            body {{ font-family: 'Noto Serif', Arial, sans-serif; line-height: 1.6; color: #62000d; background-color: #fbf1e6; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(98, 0, 13, 0.1); }}
+                            .header {{ background-color: #62000d; padding: 24px; text-align: center; color: #fbf1e6; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 24px; }}
+                            .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
+                            .button:hover {{ background-color: #4a0009; }}
+                            .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
+                            .warning {{ background-color: #fbf1e6; border: 1px solid #62000d; padding: 16px; border-radius: 8px; margin: 20px 0; }}
                         </style>
                     </head>
                     <body>
@@ -182,8 +184,8 @@ public class EmailService : IEmailService
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(_emailSettings.From, "MonAmour"),
-                Subject = "Chào mừng đến với MonAmour! 🎉",
+                From = new MailAddress(_emailSettings.From, "Mon Amour"),
+                Subject = "Chào mừng đến với Mon Amour! 🎉",
                 IsBodyHtml = true,
                 Body = $@"
                     <!DOCTYPE html>
@@ -191,27 +193,28 @@ public class EmailService : IEmailService
                     <head>
                         <meta charset='utf-8'>
                         <style>
-                            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white; }}
-                            .content {{ padding: 30px; }}
-                            .button {{ display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; }}
-                            .footer {{ background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }}
-                            .features {{ background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }}
-                            .feature-item {{ margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px; border-left: 4px solid #667eea; }}
+                            body {{ font-family: 'Noto Serif', Arial, sans-serif; line-height: 1.6; color: #62000d; background-color: #fbf1e6; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(98, 0, 13, 0.1); }}
+                            .header {{ background-color: #62000d; padding: 24px; text-align: center; color: #fbf1e6; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 24px; }}
+                            .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
+                            .button:hover {{ background-color: #4a0009; }}
+                            .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
+                            .features {{ background-color: #fbf1e6; padding: 24px; border-radius: 8px; margin: 24px 0; }}
+                            .feature-item {{ margin: 12px 0; padding: 16px; background-color: white; border-radius: 8px; border-left: 4px solid #62000d; box-shadow: 0 2px 4px rgba(98, 0, 13, 0.05); }}
                         </style>
                     </head>
                     <body>
                         <div class='container'>
                             <div class='header'>
-                                <h1>🎉 Chào mừng đến với MonAmour!</h1>
+                                <h1>🎉 Chào mừng đến với Mon Amour!</h1>
                                 <p>Xin chào <strong>{name}</strong>!</p>
                             </div>
                             <div class='content'>
-                                <p>Chúng tôi rất vui mừng khi bạn đã trở thành thành viên của MonAmour! Tài khoản của bạn đã được xác thực thành công.</p>
+                                <p>Chúng tôi rất vui mừng khi bạn đã trở thành thành viên của Mon Amour! Tài khoản của bạn đã được xác thực thành công.</p>
                                 
                                 <div class='features'>
-                                    <h3>🌟 Tại MonAmour, bạn có thể:</h3>
+                                    <h3>🌟 Tại Mon Amour, bạn có thể:</h3>
                                     <div class='feature-item'>
                                         <strong>📸 Khám phá concepts chụp ảnh độc đáo</strong><br>
                                         Tìm hiểu các phong cách chụp ảnh đa dạng và sáng tạo
@@ -234,12 +237,22 @@ public class EmailService : IEmailService
                                     <a href='{_appSettings.GetFullUrl()}' class='button'>🚀 Bắt đầu khám phá ngay!</a>
                                 </p>
                                 
-                                <p>Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi. Team hỗ trợ MonAmour luôn sẵn sàng giúp đỡ bạn!</p>
+                                <p>Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi. Team hỗ trợ Mon Amour luôn sẵn sàng giúp đỡ bạn!</p>
                             </div>
                             <div class='footer'>
-                                <p>Trân trọng,<br><strong>MonAmour Team</strong></p>
-                                <p>📧 Email: support@monamour.com | 📞 Hotline: 1900 xxxx</p>
-                                <p>© 2024 MonAmour. All rights reserved.</p>
+                                    <p>
+        📧 
+        <a href=""mailto:booking.monamour@gmail.com"" class=""hover:underline"">
+            booking.monamour@gmail.com
+        </a>
+    </p>
+    <p>
+        📞 
+        <a href=""tel:0985613906"" class=""hover:underline"">
+            0985613906
+        </a>
+    </p>
+    <p>📍 Ngõ 83 Đào Tấn, Giảng Võ, Hà Nội</p>
                             </div>
                         </div>
                     </body>
@@ -321,7 +334,7 @@ public class EmailService : IEmailService
             var adminEmail = _emailSettings.From;
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(_emailSettings.From, "MonAmour"),
+                From = new MailAddress(_emailSettings.From, "Mon Amour"),
                 Subject = string.IsNullOrWhiteSpace(subject) ? "Yêu cầu tư vấn mới" : subject,
                 IsBodyHtml = true,
                 Body = htmlBody

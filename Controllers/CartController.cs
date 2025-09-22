@@ -187,7 +187,7 @@ namespace MonAmour.Controllers
                 .Sum()
                 .GetValueOrDefault(0m);
             cart.UpdatedAt = DateTime.Now;
-            _db.Orders.Update(cart);
+            // cart is already tracked, no need to call Update
             _db.SaveChanges();
 
             if (IsAjaxRequest())
@@ -248,7 +248,7 @@ namespace MonAmour.Controllers
                 .Sum()
                 .GetValueOrDefault(0m);
             item.Order.UpdatedAt = DateTime.Now;
-            _db.Orders.Update(item.Order);
+            // item.Order is tracked; avoid duplicate attach
             _db.SaveChanges();
 
             return RedirectToAction("Index");
@@ -267,19 +267,21 @@ namespace MonAmour.Controllers
 
             // Không cần restore stock vì chưa giảm stock khi add to cart
 
+            var order = item.Order; // already tracked instance
             var orderId = item.OrderId;
             _db.OrderItems.Remove(item);
             _db.SaveChanges();
 
-            var order = _db.Orders.Include(o => o.OrderItems).FirstOrDefault(o => o.OrderId == orderId);
             if (order != null)
             {
+                // Reload items for the tracked order instance to calculate fresh total
+                _db.Entry(order).Collection(o => o.OrderItems).Load();
                 order.TotalPrice = order.OrderItems
                     .Select(i => (decimal?)i.TotalPrice)
                     .Sum()
                     .GetValueOrDefault(0m);
                 order.UpdatedAt = DateTime.Now;
-                _db.Orders.Update(order);
+                // order is tracked; no Update call needed
                 _db.SaveChanges();
             }
 

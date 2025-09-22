@@ -1,6 +1,6 @@
 @model MonAmour.Models.Concept
 @{
-	ViewData["Title"] = Model.Name + " - MonAmour";
+	ViewData["Title"] = Model.Name + " - Mon Amour";
 	var relatedConcepts = ViewBag.RelatedConcepts as List<MonAmour.Models.Concept>;
 	var primaryImage = Model.ConceptImgs?.FirstOrDefault(img => img.IsPrimary == true)?.ImgUrl ?? Model.ConceptImgs?.FirstOrDefault()?.ImgUrl ?? "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop";
 	var coverImages = Model.ConceptImgs?.Where(img => img.DisplayOrder == 2 || img.DisplayOrder == 3).OrderBy(img => img.DisplayOrder).ToList() ?? new List<MonAmour.Models.ConceptImg>();
