@@ -586,24 +586,26 @@ namespace MonAmour.Services.Implements
         {
             try
             {
-                // Remove primary status from all images of this product
-                var allImages = await _context.ProductImgs
-                    .Where(pi => pi.ProductId == productId)
-                    .ToListAsync();
+                _logger.LogInformation("Starting SetPrimaryImageAsync for ProductId: {ProductId}, ImageId: {ImageId}", productId, imageId);
 
-                foreach (var img in allImages)
+                // Use raw SQL to update all images at once
+                var sql = @"
+                    UPDATE Product_img 
+                    SET is_primary = CASE 
+                        WHEN img_id = @imageId THEN 1 
+                        ELSE 0 
+                    END 
+                    WHERE product_id = @productId";
+
+                var parameters = new[]
                 {
-                    img.IsPrimary = false;
-                }
+                    new Microsoft.Data.SqlClient.SqlParameter("@imageId", imageId),
+                    new Microsoft.Data.SqlClient.SqlParameter("@productId", productId)
+                };
 
-                // Set the specified image as primary
-                var primaryImage = allImages.FirstOrDefault(pi => pi.ImgId == imageId);
-                if (primaryImage != null)
-                {
-                    primaryImage.IsPrimary = true;
-                }
+                var result = await _context.Database.ExecuteSqlRawAsync(sql, parameters);
+                _logger.LogInformation("Raw SQL update result: {Result}", result);
 
-                var result = await _context.SaveChangesAsync();
                 return result > 0;
             }
             catch (Exception ex)

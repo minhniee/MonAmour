@@ -1639,13 +1639,54 @@ namespace MonAmour.Controllers
         {
             try
             {
+                // Validate parameters
+                if (productId <= 0)
+                {
+                    return Json(new { success = false, message = "ID sản phẩm không hợp lệ!" });
+                }
+
+                if (imageId <= 0)
+                {
+                    return Json(new { success = false, message = "ID hình ảnh không hợp lệ!" });
+                }
+
+                // Check if product exists
+                var product = await _productService.GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm!" });
+                }
+
+                // Check if image exists
+                var image = await _productService.GetProductImageByIdAsync(imageId);
+                if (image == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy hình ảnh!" });
+                }
+
+                // Check if image belongs to the product
+                if (image.ProductId != productId)
+                {
+                    return Json(new { success = false, message = "Hình ảnh không thuộc về sản phẩm này!" });
+                }
+
+                _logger.LogInformation("Calling SetPrimaryImageAsync for ProductId: {ProductId}, ImageId: {ImageId}", productId, imageId);
                 var result = await _productService.SetPrimaryImageAsync(productId, imageId);
-                return Json(new { success = result, message = result ? "Đã cập nhật hình ảnh chính" : "Có lỗi xảy ra" });
+                _logger.LogInformation("SetPrimaryImageAsync result: {Result}", result);
+                
+                if (result)
+                {
+                    return Json(new { success = true, message = "Đã cập nhật hình ảnh chính thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật hình ảnh chính! Có thể không có thay đổi nào được lưu." });
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in SetPrimaryImage action");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật hình ảnh chính" });
+                _logger.LogError(ex, "Error in SetPrimaryImage action for ProductId: {ProductId}, ImageId: {ImageId}", productId, imageId);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật hình ảnh chính: " + ex.Message });
             }
         }
 

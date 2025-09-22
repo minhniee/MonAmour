@@ -148,7 +148,7 @@
                                                                          </button>
                                                                          @if (image.IsPrimary != true)
                                                                          {
-                                                                             <button type="button" class="btn btn-sm btn-outline-success" onclick="setPrimaryImage(@image.ProductId, @image.ImgId)">
+                                                                             <button type="button" class="btn btn-sm btn-outline-success" onclick="setPrimaryImage(@image.ProductId, @image.ImgId)" title="Đặt làm ảnh chính">
                                                                                  <i class="fas fa-star"></i>
                                                                              </button>
                                                                          }
@@ -623,24 +623,58 @@
 
         // Set Primary Image
         function setPrimaryImage(productId, imageId) {
+            // Validate parameters
+            if (!productId || productId <= 0) {
+                showAlert('danger', 'ID sản phẩm không hợp lệ!');
+                return;
+            }
+            
+            if (!imageId || imageId <= 0) {
+                showAlert('danger', 'ID hình ảnh không hợp lệ!');
+                return;
+            }
+            
             if (confirm('Bạn có chắc chắn muốn đặt hình ảnh này làm hình ảnh chính?')) {
+                console.log('Setting primary image:', { productId: productId, imageId: imageId });
+                
+                // Show loading state
+                showAlert('info', 'Đang cập nhật hình ảnh chính...');
+                
                 $.ajax({
                     url: '@Url.Action("SetPrimaryImage", "Admin")',
                     type: 'POST',
                     data: {
-                        productId: productId,
-                        imageId: imageId
+                        productId: parseInt(productId),
+                        imageId: parseInt(imageId)
+                    },
+                    dataType: 'json',
+                    beforeSend: function() {
+                        console.log('Sending request to set primary image...');
                     },
                     success: function(result) {
-                        if (result.success) {
-                            showAlert('success', result.message);
+                        console.log('Response received:', result);
+                        if (result && result.success) {
+                            showAlert('success', result.message || 'Đã cập nhật hình ảnh chính thành công!');
                             setTimeout(() => location.reload(), 1500);
                         } else {
-                            showAlert('danger', result.message);
+                            showAlert('danger', result.message || 'Có lỗi xảy ra khi cập nhật hình ảnh chính');
                         }
                     },
-                    error: function() {
-                        showAlert('danger', 'Có lỗi xảy ra khi cập nhật hình ảnh chính!');
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', { xhr: xhr, status: status, error: error });
+                        console.error('Response Text:', xhr.responseText);
+                        
+                        let errorMessage = 'Có lỗi xảy ra khi cập nhật hình ảnh chính!';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 404) {
+                            errorMessage = 'Không tìm thấy trang yêu cầu!';
+                        } else if (xhr.status === 500) {
+                            errorMessage = 'Lỗi máy chủ! Vui lòng thử lại sau.';
+                        }
+                        
+                        showAlert('danger', errorMessage);
                     }
                 });
             }
@@ -794,7 +828,8 @@
         // Alert helper
         function showAlert(type, message) {
             const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
                     ${message}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -806,12 +841,14 @@
             $('.alert').remove();
             
             // Add new alert
-            $('.container-fluid').prepend(alertHtml);
+            $('body').append(alertHtml);
             
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                $('.alert').fadeOut();
-            }, 5000);
+            // Auto-hide after 5 seconds (except for info alerts)
+            if (type !== 'info') {
+                setTimeout(() => {
+                    $('.alert').fadeOut();
+                }, 5000);
+            }
         }
     </script>
 }
