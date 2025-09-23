@@ -493,7 +493,7 @@ namespace MonAmour.Controllers
             _db.Orders.Update(order);
             _db.SaveChanges();
 
-            // Send order confirmation email
+            // Send order confirmation email (fire-and-forget so user sees notice first)
             try
             {
                 await _db.Entry(order).Reference(o => o.User).LoadAsync();
@@ -502,7 +502,7 @@ namespace MonAmour.Controllers
                 {
                     var orderCode = order.OrderId.ToString();
                     var totalAmount = order.TotalPrice ?? 0m;
-                    await _emailService.SendOrderConfirmedEmailAsync(customerEmail!, orderCode, totalAmount);
+                    _ = Task.Run(() => _emailService.SendOrderConfirmedEmailAsync(customerEmail!, orderCode, totalAmount));
                 }
             }
             catch { /* Email failure should not block checkout flow */ }
@@ -830,7 +830,8 @@ namespace MonAmour.Controllers
 
                     foreach (var adminEmail in adminEmails)
                     {
-                        await _emailService.SendAdminPaymentIssueReportAsync(adminEmail!, subject, htmlBody);
+                        // Fire-and-forget: do not block the response
+                        _ = Task.Run(() => _emailService.SendAdminPaymentIssueReportAsync(adminEmail!, subject, htmlBody));
                     }
                 }
             }
@@ -1333,7 +1334,7 @@ namespace MonAmour.Controllers
 
                 await _db.SaveChangesAsync();
 
-                // Gửi email xác nhận đơn hàng
+                // Gửi email xác nhận đơn hàng (fire-and-forget)
                 try
                 {
                     await _db.Entry(order).Reference(o => o.User).LoadAsync();
@@ -1342,7 +1343,7 @@ namespace MonAmour.Controllers
                     {
                         var orderCode = order.OrderId.ToString();
                         var totalAmount = order.TotalPrice ?? 0m;
-                        await _emailService.SendOrderConfirmedEmailAsync(customerEmail!, orderCode, totalAmount);
+                        _ = Task.Run(() => _emailService.SendOrderConfirmedEmailAsync(customerEmail!, orderCode, totalAmount));
                     }
                 }
                 catch { /* Không để lỗi email chặn flow */ }

@@ -5,18 +5,11 @@
     <!-- User Avatar Button -->
     <button x-on:click="open = !open" class="flex items-center space-x-2 p-2 md:p-2.5 rounded-full hover:bg-muted transition-colors">
         <div class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-primary flex items-center justify-center">
-            <span class="text-xs font-medium text-primary-foreground">
-                @(ViewBag.UserName?.ToString()?.Substring(0, 1).ToUpper() ?? "U")
-            </span>
+        <img src="/Imagine/Avatars/@(ViewBag.UserAvatar ?? "avatar.png")" alt="User Avatar" class="w-8 h-8 md:w-9 md:h-9 rounded-full">
         </div>
         <span class="hidden md:block text-sm md:text-base font-medium text-foreground max-w-[10rem] truncate">
             @(ViewBag.UserName ?? "Người dùng")
         </span>
-        <svg class="w-4 h-4 text-muted-foreground transition-transform"
-             x-bind:class="{ 'rotate-180': open }"
-             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
     </button>
 
     <!-- Dropdown Menu -->

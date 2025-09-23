@@ -11,7 +11,7 @@ public class EmailService : IEmailService
     private readonly ILogger<EmailService> _logger;
     private readonly EmailSettings _emailSettings;
     private readonly AppSettings _appSettings;
-    private readonly SmtpClient _smtpClient;
+    // Note: SmtpClient is not thread-safe for concurrent SendMailAsync. Create per-send instances instead of sharing one.
 
     public EmailService(
         ILogger<EmailService> logger,
@@ -22,7 +22,12 @@ public class EmailService : IEmailService
         _emailSettings = emailSettings.Value;
         _appSettings = appSettings.Value;
 
-        _smtpClient = new SmtpClient
+        // Intentionally not creating a shared SmtpClient here to avoid concurrency issues
+    }
+
+    private SmtpClient CreateSmtpClient()
+    {
+        return new SmtpClient
         {
             Host = _emailSettings.Host,
             Port = _emailSettings.Port,
@@ -85,7 +90,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(email);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
             _logger.LogInformation("Verification email sent successfully to: {Email}", email);
         }
         catch (SmtpException ex)
@@ -161,7 +167,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(email);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
             _logger.LogInformation("Password reset email sent successfully to: {Email}", email);
         }
         catch (SmtpException ex)
@@ -260,7 +267,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(email);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
             _logger.LogInformation("Welcome email sent successfully to: {Email} for user: {Name}", email, name);
         }
         catch (SmtpException ex)
@@ -290,7 +298,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(adminEmail);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
             _logger.LogInformation("Admin payment issue report sent successfully to: {Email}", adminEmail);
         }
         catch (SmtpException ex)
@@ -318,7 +327,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(customerEmail);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
         }
         catch (Exception ex)
         {
@@ -341,7 +351,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(adminEmail);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
         }
         catch (Exception ex)
         {
@@ -406,7 +417,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(email);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
         }
         catch (Exception ex)
         {
@@ -470,7 +482,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(email);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
         }
         catch (Exception ex)
         {
@@ -533,7 +546,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(email);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
         }
         catch (Exception ex)
         {
@@ -597,7 +611,8 @@ public class EmailService : IEmailService
             };
             mailMessage.To.Add(email);
 
-            await _smtpClient.SendMailAsync(mailMessage);
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
         }
         catch (Exception ex)
         {
