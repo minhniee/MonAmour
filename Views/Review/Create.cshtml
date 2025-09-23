@@ -46,39 +46,7 @@
                     <p class="text-sm text-gray-500 mt-1">Nhập ID của sản phẩm hoặc ý tưởng bạn muốn đánh giá.</p>
                 </div>
 
-                <div class="mb-6">
-                    <label asp-for="Rating" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-star text-wine-red mr-2"></i>Đánh Giá
-                    </label>
-                    <div class="flex items-center space-x-2">
-                        <div class="flex space-x-1" id="rating-stars">
-                            @for (int i = 1; i <= 5; i++)
-                            {
-                                <button type="button" class="star-button text-2xl text-gray-300 hover:text-yellow-400 focus:outline-none" 
-                                        data-rating="@i" onclick="setRating(@i)">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                            }
-                        </div>
-                        <span id="rating-text" class="text-sm text-gray-600 ml-3">Chưa chọn</span>
-                    </div>
-                    <input asp-for="Rating" type="hidden" id="rating-input" />
-                    <span asp-validation-for="Rating" class="text-sm text-red-600 mt-1 block"></span>
-                </div>
-
-                <div class="mb-6">
-                    <label asp-for="Comment" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-comment text-wine-red mr-2"></i>Nhận Xét (Tùy chọn)
-                    </label>
-                    <textarea asp-for="Comment" rows="5" 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-wine-red focus:border-wine-red" 
-                              placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm/ý tưởng này..."></textarea>
-                    <span asp-validation-for="Comment" class="text-sm text-red-600 mt-1 block"></span>
-                    <div class="flex justify-between items-center mt-1">
-                        <p class="text-sm text-gray-500">Tối đa 1000 ký tự</p>
-                        <span id="comment-count" class="text-sm text-gray-500">0/1000</span>
-                    </div>
-                </div>
+                <partial name="_ReviewFields" model="Model" />
 
                 <div class="flex items-center justify-between pt-6 border-t border-gray-200">
                     <a href="@Url.Action("Index", new { targetType = Model.TargetType, targetId = Model.TargetId })" 

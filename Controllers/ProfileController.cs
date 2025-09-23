@@ -306,13 +306,13 @@ public class ProfileController : Controller
 
             await _reviewService.UpdateReviewAsync(dto);
             TempData["SuccessMessage"] = "Cập nhật đánh giá thành công!";
-            return RedirectToAction("OrderHistory");
+            return RedirectToAction("OrderHistory", "Cart");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating review {ReviewId}", reviewId);
             TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đánh giá.";
-            return RedirectToAction("OrderHistory");
+            return RedirectToAction("OrderHistory", "Cart");
         }
     }
     [Obsolete]
@@ -331,7 +331,7 @@ public class ProfileController : Controller
             if (rating < 1 || rating > 5)
             {
                 TempData["ErrorMessage"] = "Điểm đánh giá phải từ 1 đến 5.";
-                return RedirectToAction("OrderHistory");
+                return RedirectToAction("OrderHistory", "Cart");
             }
 
             // Ensure the user can review this target
@@ -339,7 +339,7 @@ public class ProfileController : Controller
             if (!canReview)
             {
                 TempData["ErrorMessage"] = "Bạn không thể đánh giá mục này.";
-                return RedirectToAction("OrderHistory");
+                return RedirectToAction("OrderHistory", "Cart");
             }
 
             var dto = new CreateReviewViewModel
@@ -353,13 +353,13 @@ public class ProfileController : Controller
 
             await _reviewService.CreateReviewAsync(dto);
             TempData["SuccessMessage"] = "Gửi đánh giá thành công!";
-            return RedirectToAction("OrderHistory");
+            return RedirectToAction("OrderHistory", "Cart");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error submitting review for {TargetType} {TargetId}", targetType, targetId);
             TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi đánh giá.";
-            return RedirectToAction("OrderHistory");
+            return RedirectToAction("OrderHistory", "Cart");
         }
     }
 

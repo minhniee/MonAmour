@@ -5,6 +5,7 @@ using MonAmour.Models;
 using MonAmour.Services.Interfaces;
 using System.Security.Claims;
 using System.Text.Json;
+using MonAmour.AuthViewModel;
 
 namespace MonAmour.Controllers
 {
@@ -16,14 +17,16 @@ namespace MonAmour.Controllers
         private readonly IConfiguration _config;
 
         private readonly IEmailService _emailService;
+        private readonly IReviewService _reviewService;
 
-        public CartController(MonAmourDbContext db, ICassoService cassoService, IVietQRService vietQRService, IConfiguration configuration, IEmailService emailService)
+        public CartController(MonAmourDbContext db, ICassoService cassoService, IVietQRService vietQRService, IConfiguration configuration, IEmailService emailService, IReviewService reviewService)
         {
             _db = db;
             _cassoService = cassoService;
             _vietQRService = vietQRService;
             _config = configuration;
             _emailService = emailService;
+            _reviewService = reviewService;
         }
 
         // GET: /Cart
@@ -187,7 +190,7 @@ namespace MonAmour.Controllers
                 .Sum()
                 .GetValueOrDefault(0m);
             cart.UpdatedAt = DateTime.Now;
-            // cart is already tracked, no need to call Update
+            _db.Orders.Update(cart);
             _db.SaveChanges();
 
             if (IsAjaxRequest())
@@ -197,6 +200,76 @@ namespace MonAmour.Controllers
 
             TempData["CartSuccess"] = "Đã thêm vào giỏ hàng";
             return RedirectToAction("ProductDetail", "Gift_box", new { id = productId, added = true });
+        }
+
+        // POST: /Cart/SubmitReview - Chỉ cho phép khách đã mua hàng và đơn ở trạng thái completed/confirmed
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitReview([FromForm] int targetId, [FromForm] string targetType, [FromForm] int rating, [FromForm] string? comment)
+        {
+            int? userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Json(new { success = false, message = "Chưa đăng nhập" });
+            }
+
+            targetType = (targetType ?? string.Empty).Trim();
+            if (!string.Equals(targetType, "Product", StringComparison.OrdinalIgnoreCase) && !string.Equals(targetType, "Concept", StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new { success = false, message = "Loại mục đánh giá không hợp lệ" });
+            }
+
+            if (rating < 1 || rating > 5)
+            {
+                return Json(new { success = false, message = "Điểm đánh giá phải từ 1 đến 5" });
+            }
+
+            // Xác thực: user đã mua sản phẩm này và đơn đã hoàn tất/đã xác nhận
+            bool purchased = false;
+            if (string.Equals(targetType, "Product", StringComparison.OrdinalIgnoreCase))
+            {
+                purchased = await _db.OrderItems
+                    .Include(oi => oi.Order)
+                    .AsNoTracking()
+                    .AnyAsync(oi => oi.ProductId == targetId
+                                    && oi.Order.UserId == userId
+                                    && (oi.Order.Status == "completed" || oi.Order.Status == "confirmed"));
+            }
+            else
+            {
+                // Nếu có Concept review thì xác thực tương tự theo domain của bạn
+                purchased = true; // cho phép tạm nếu business không yêu cầu
+            }
+
+            if (!purchased)
+            {
+                return Json(new { success = false, message = "Bạn chỉ có thể đánh giá sản phẩm đã mua" });
+            }
+
+            // Không cho đánh giá trùng
+            if (await _reviewService.HasUserReviewedAsync(userId.Value, "Product", targetId))
+            {
+                return Json(new { success = false, message = "Bạn đã đánh giá sản phẩm này rồi" });
+            }
+
+            var dto = new CreateReviewViewModel
+            {
+                UserId = userId.Value,
+                TargetType = "Product",
+                TargetId = targetId,
+                Rating = rating,
+                Comment = string.IsNullOrWhiteSpace(comment) ? null : comment!.Trim()
+            };
+
+            try
+            {
+                var created = await _reviewService.CreateReviewAsync(dto);
+                return Json(new { success = true, message = "Cảm ơn bạn đã đánh giá!", reviewId = created.ReviewId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Không thể lưu đánh giá: " + ex.Message });
+            }
         }
 
         // POST: /Cart/Update
@@ -248,7 +321,7 @@ namespace MonAmour.Controllers
                 .Sum()
                 .GetValueOrDefault(0m);
             item.Order.UpdatedAt = DateTime.Now;
-            // item.Order is tracked; avoid duplicate attach
+            _db.Orders.Update(item.Order);
             _db.SaveChanges();
 
             return RedirectToAction("Index");
@@ -267,23 +340,19 @@ namespace MonAmour.Controllers
 
             // Không cần restore stock vì chưa giảm stock khi add to cart
 
-            var order = item.Order; // already tracked instance
-            var orderId = item.OrderId;
+            var order = item.Order; // reuse the already-tracked Order to avoid double-tracking
             _db.OrderItems.Remove(item);
             _db.SaveChanges();
 
-            if (order != null)
-            {
-                // Reload items for the tracked order instance to calculate fresh total
-                _db.Entry(order).Collection(o => o.OrderItems).Load();
-                order.TotalPrice = order.OrderItems
-                    .Select(i => (decimal?)i.TotalPrice)
-                    .Sum()
-                    .GetValueOrDefault(0m);
-                order.UpdatedAt = DateTime.Now;
-                // order is tracked; no Update call needed
-                _db.SaveChanges();
-            }
+            // Ensure latest items are loaded for total recalculation
+            _db.Entry(order).Collection(o => o.OrderItems).Load();
+            order.TotalPrice = order.OrderItems
+                .Select(i => (decimal?)i.TotalPrice)
+                .Sum()
+                .GetValueOrDefault(0m);
+            order.UpdatedAt = DateTime.Now;
+            // No need to call Update on a tracked entity
+            _db.SaveChanges();
 
             return RedirectToAction("Index");
         }
@@ -1136,8 +1205,16 @@ namespace MonAmour.Controllers
                     o.Status == "cancelled" ||
                     _db.PaymentDetails.Any(pd => pd.OrderId == o.OrderId && pd.Payment != null && pd.Payment.Status == "pending")
                 ))
+                .AsNoTracking()
                 .OrderByDescending(o => o.CreatedAt)
                 .ToList();
+
+            // Lấy danh sách sản phẩm user đã đánh giá để disable nút Đánh giá
+            var reviewedProductIds = _db.Reviews
+                .Where(r => r.UserId == userId && r.TargetType == "Product")
+                .Select(r => r.TargetId)
+                .ToList();
+            ViewBag.ReviewedProductIds = reviewedProductIds;
 
             return View(orders);
         }
@@ -1293,5 +1370,4 @@ namespace MonAmour.Controllers
         }
     }
 }
-
 

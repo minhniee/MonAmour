@@ -349,4 +349,260 @@ public class EmailService : IEmailService
             throw;
         }
     }
+
+    public async Task SendOrderConfirmedEmailAsync(string email, string orderCode, decimal totalAmount, string? note = null)
+    {
+        try
+        {
+            _logger.LogInformation("Sending order confirmed email to: {Email}, order: {OrderCode}", email, orderCode);
+
+            var orderLink = $"{_appSettings.GetFullUrl()}/Order/Details?code={Uri.EscapeDataString(orderCode)}";
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "Mon Amour"),
+                Subject = $"Xác nhận đơn hàng #{orderCode}",
+                IsBodyHtml = true,
+                Body = $@"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset='utf-8'>
+                        <style>
+                            body {{ font-family: 'Noto Serif', Arial, sans-serif; line-height: 1.6; color: #62000d; background-color: #fbf1e6; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(98, 0, 13, 0.1); }}
+                            .header {{ background-color: #62000d; padding: 24px; text-align: center; color: #fbf1e6; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 24px; }}
+                            .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
+                            .button:hover {{ background-color: #4a0009; }}
+                            .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
+                            .summary {{ background-color: #fbf1e6; padding: 16px; border-radius: 8px; margin: 20px 0; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <h2>Đơn hàng của bạn đã được xác nhận</h2>
+                            </div>
+                            <div class='content'>
+                                <p>Cảm ơn bạn đã đặt hàng tại Mon Amour!</p>
+                                <div class='summary'>
+                                    <p><strong>Mã đơn hàng:</strong> #{orderCode}</p>
+                                    <p><strong>Tổng tiền:</strong> {totalAmount:N0} ₫</p>
+                                    {(string.IsNullOrWhiteSpace(note) ? string.Empty : $"<p><strong>Ghi chú:</strong> {System.Net.WebUtility.HtmlEncode(note)}</p>")}
+                                </div>
+                                <p>Chúng tôi đang chuẩn bị đơn hàng của bạn. Bạn có thể theo dõi trạng thái đơn hàng tại liên kết dưới đây.</p>
+                                <p style='text-align: center; margin: 30px 0;'>
+                                    <a href='{orderLink}' class='button'>Xem chi tiết đơn hàng</a>
+                                </p>
+                            </div>
+                            <div class='footer'>
+                                <p>Trân trọng,<br><strong>Mon Amour Team</strong></p>
+                                <p>© 2024 Mon Amour. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>"
+            };
+            mailMessage.To.Add(email);
+
+            await _smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending order confirmed email to {Email}", email);
+            throw;
+        }
+    }
+
+    public async Task SendOrderShippingEmailAsync(string email, string orderCode, string carrierName, string trackingNumber)
+    {
+        try
+        {
+            _logger.LogInformation("Sending order shipping email to: {Email}, order: {OrderCode}", email, orderCode);
+
+            var trackingLink = $"{_appSettings.GetFullUrl()}/Order/Track?code={Uri.EscapeDataString(orderCode)}";
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "Mon Amour"),
+                Subject = $"Đơn hàng #{orderCode} đang được giao",
+                IsBodyHtml = true,
+                Body = $@"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset='utf-8'>
+                        <style>
+                            body {{ font-family: 'Noto Serif', Arial, sans-serif; line-height: 1.6; color: #62000d; background-color: #fbf1e6; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(98, 0, 13, 0.1); }}
+                            .header {{ background-color: #62000d; padding: 24px; text-align: center; color: #fbf1e6; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 24px; }}
+                            .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
+                            .button:hover {{ background-color: #4a0009; }}
+                            .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
+                            .summary {{ background-color: #fbf1e6; padding: 16px; border-radius: 8px; margin: 20px 0; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <h2>Đơn hàng của bạn đang được giao</h2>
+                            </div>
+                            <div class='content'>
+                                <div class='summary'>
+                                    <p><strong>Mã đơn hàng:</strong> #{orderCode}</p>
+                                    <p><strong>Đơn vị vận chuyển:</strong> {System.Net.WebUtility.HtmlEncode(carrierName)}</p>
+                                    <p><strong>Mã vận đơn:</strong> {System.Net.WebUtility.HtmlEncode(trackingNumber)}</p>
+                                </div>
+                                <p>Bạn có thể theo dõi hành trình giao hàng bằng cách nhấn vào nút dưới đây.</p>
+                                <p style='text-align: center; margin: 30px 0;'>
+                                    <a href='{trackingLink}' class='button'>Theo dõi đơn hàng</a>
+                                </p>
+                            </div>
+                            <div class='footer'>
+                                <p>Trân trọng,<br><strong>Mon Amour Team</strong></p>
+                                <p>© 2024 Mon Amour. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>"
+            };
+            mailMessage.To.Add(email);
+
+            await _smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending order shipping email to {Email}", email);
+            throw;
+        }
+    }
+
+    public async Task SendOrderCompletedEmailAsync(string email, string orderCode, DateTime completedAt)
+    {
+        try
+        {
+            _logger.LogInformation("Sending order completed email to: {Email}, order: {OrderCode}", email, orderCode);
+
+            var orderLink = $"{_appSettings.GetFullUrl()}/Order/Details?code={Uri.EscapeDataString(orderCode)}";
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "Mon Amour"),
+                Subject = $"Đơn hàng #{orderCode} đã hoàn thành",
+                IsBodyHtml = true,
+                Body = $@"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset='utf-8'>
+                        <style>
+                            body {{ font-family: 'Noto Serif', Arial, sans-serif; line-height: 1.6; color: #62000d; background-color: #fbf1e6; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(98, 0, 13, 0.1); }}
+                            .header {{ background-color: #62000d; padding: 24px; text-align: center; color: #fbf1e6; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 24px; }}
+                            .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
+                            .button:hover {{ background-color: #4a0009; }}
+                            .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
+                            .summary {{ background-color: #fbf1e6; padding: 16px; border-radius: 8px; margin: 20px 0; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <h2>Đơn hàng đã hoàn thành</h2>
+                            </div>
+                            <div class='content'>
+                                <div class='summary'>
+                                    <p><strong>Mã đơn hàng:</strong> #{orderCode}</p>
+                                    <p><strong>Thời gian hoàn thành:</strong> {completedAt:HH:mm dd/MM/yyyy}</p>
+                                </div>
+                                <p>Cảm ơn bạn đã mua sắm tại Mon Amour. Rất mong nhận được đánh giá của bạn về trải nghiệm mua hàng.</p>
+                                <p style='text-align: center; margin: 30px 0;'>
+                                    <a href='{orderLink}' class='button'>Xem đơn hàng</a>
+                                </p>
+                            </div>
+                            <div class='footer'>
+                                <p>Trân trọng,<br><strong>Mon Amour Team</strong></p>
+                                <p>© 2024 Mon Amour. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>"
+            };
+            mailMessage.To.Add(email);
+
+            await _smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending order completed email to {Email}", email);
+            throw;
+        }
+    }
+
+    public async Task SendOrderCancelledEmailAsync(string email, string orderCode, string? reason = null)
+    {
+        try
+        {
+            _logger.LogInformation("Sending order cancelled email to: {Email}, order: {OrderCode}", email, orderCode);
+
+            var supportLink = $"mailto:{_emailSettings.From}";
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "Mon Amour"),
+                Subject = $"Đơn hàng #{orderCode} đã bị hủy",
+                IsBodyHtml = true,
+                Body = $@"
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset='utf-8'>
+                        <style>
+                            body {{ font-family: 'Noto Serif', Arial, sans-serif; line-height: 1.6; color: #62000d; background-color: #fbf1e6; }}
+                            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(98, 0, 13, 0.1); }}
+                            .header {{ background-color: #62000d; padding: 24px; text-align: center; color: #fbf1e6; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 24px; }}
+                            .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
+                            .button:hover {{ background-color: #4a0009; }}
+                            .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
+                            .summary {{ background-color: #fbf1e6; padding: 16px; border-radius: 8px; margin: 20px 0; }}
+                            .warning {{ background-color: #fff4f4; border: 1px solid #dc3545; color: #721c24; padding: 12px 16px; border-radius: 8px; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                <h2>Đơn hàng đã bị hủy</h2>
+                            </div>
+                            <div class='content'>
+                                <div class='summary'>
+                                    <p><strong>Mã đơn hàng:</strong> #{orderCode}</p>
+                                    {(string.IsNullOrWhiteSpace(reason) ? string.Empty : $"<p class='warning'><strong>Lý do:</strong> {System.Net.WebUtility.HtmlEncode(reason)}</p>")}
+                                </div>
+                                <p>Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ đội ngũ Mon Amour.</p>
+                                <p style='text-align: center; margin: 30px 0;'>
+                                    <a href='{supportLink}' class='button'>Liên hệ hỗ trợ</a>
+                                </p>
+                            </div>
+                            <div class='footer'>
+                                <p>Trân trọng,<br><strong>Mon Amour Team</strong></p>
+                                <p>© 2024 Mon Amour. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>"
+            };
+            mailMessage.To.Add(email);
+
+            await _smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending order cancelled email to {Email}", email);
+            throw;
+        }
+    }
 }

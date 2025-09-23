@@ -84,6 +84,7 @@
                                 @foreach (var item in order.OrderItems)
                                 {
                                     <div class="flex items-center space-x-4">
+                                        <a href="@Url.Action("BillDetail","Cart", new { orderId = order.OrderId })" class="flex items-center space-x-4 flex-1">
                                         @if (item.Product?.ProductImgs?.Any() == true)
                                         {
                                             <img src="@item.Product.ProductImgs.First().ImgUrl" 
@@ -98,20 +99,50 @@
                                                 </svg>
                                             </div>
                                         }
-                                        <div class="flex-1">
+                                            <div class="flex-1">
                                             <h4 class="font-medium text-foreground">@item.Product?.Name</h4>
                                             <p class="text-sm text-muted-foreground">
                                                 Số lượng: @item.Quantity
                                             </p>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="font-medium text-foreground">
-                                                @(item.TotalPrice)₫
                                             </div>
-                                            <div class="text-sm text-muted-foreground">
-                                                @(item.UnitPrice)₫ × @item.Quantity
+                                            <div class="text-right">
+                                                <div class="font-medium text-foreground">
+                                                    @(item.TotalPrice)₫
+                                                </div>
+                                                <div class="text-sm text-muted-foreground">
+                                                    @(item.UnitPrice)₫ × @item.Quantity
+                                                </div>
                                             </div>
-                                        </div>
+                                        </a>
+                                        @{
+                                            var reviewedIds = ViewBag.ReviewedProductIds as List<int> ?? new List<int>();
+                                            bool canReview = string.Equals(order.Status, "completed", StringComparison.OrdinalIgnoreCase)
+                                                             && order.DeliveredAt.HasValue
+                                                             && item.ProductId != null;
+                                            bool isReviewed = item.ProductId != null && reviewedIds.Contains(item.ProductId.Value);
+                                        }
+                                        @if (canReview)
+                                        {
+                                            if (isReviewed)
+                                            {
+                                                <button type="button"
+                                                        class="px-3 py-1 rounded ml-2 cursor-not-allowed bg-gray-300 text-gray-600"
+                                                        disabled>
+                                                    Đã đánh giá
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button"
+                                                        class="px-3 py-1 text-white rounded ml-2"
+                                                        style="background-color: #62000d;"
+                                                        data-review-button
+                                                        data-product-id="@item.ProductId"
+                                                        data-product-name="@(item.Product?.Name ?? ($"Sản phẩm #" + item.ProductId))">
+                                                    Đánh giá
+                                                </button>
+                                            }
+                                        }
                                     </div>
                                 }
                             </div>
@@ -133,7 +164,115 @@
                         </div>
                     </div>
                 }
+             
             </div>
         }
     </div>
+</div>
+
+@{
+    var antiForgery = Html.AntiForgeryToken();
+}
+
+<div id="reviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/50" data-modal-overlay></div>
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 relative">
+        <div class="px-6 py-4 border-b flex items-center justify-between">
+            <h3 class="text-lg font-semibold">Đánh giá sản phẩm</h3>
+            <button type="button" class="text-gray-500 hover:text-gray-700" data-modal-close>&times;</button>
+        </div>
+        <form id="reviewForm" class="px-6 py-4">
+            @antiForgery
+            <input type="hidden" name="targetId" id="reviewTargetId" />
+            <input type="hidden" name="targetType" value="Product" />
+            <div class="mb-3">
+                <label class="block text-sm mb-1">Sản phẩm</label>
+                <input type="text" id="reviewProductName" class="w-full p-2 border rounded" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm mb-1">Đánh giá</label>
+                <select name="rating" id="reviewRating" class="w-full p-2 border rounded" required>
+                    <option value="">Chọn</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm mb-1">Nhận xét</label>
+                <input type="text" name="comment" id="reviewComment" class="w-full p-2 border rounded" placeholder="Tùy chọn" />
+            </div>
+            <div class="flex justify-end gap-2 pb-4">
+                <button type="button" class="px-4 py-2 border rounded" data-modal-close>Hủy</button>
+                <button type="submit" class="px-4 py-2 text-white rounded" style="background-color: #62000d;">Gửi đánh giá</button>
+            </div>
+            <div id="reviewMessage" class="text-sm mt-2"></div>
+        </form>
+    </div>
+    <style>
+        #reviewModal.hidden { display: none; }
+        #reviewModal:not(.hidden) { display: flex; }
+    </style>
+    <script>
+        (function(){
+            const modal = document.getElementById('reviewModal');
+            const form = document.getElementById('reviewForm');
+            const targetIdInput = document.getElementById('reviewTargetId');
+            const productNameInput = document.getElementById('reviewProductName');
+            const messageBox = document.getElementById('reviewMessage');
+            const overlay = modal.querySelector('[data-modal-overlay]');
+            const closeButtons = modal.querySelectorAll('[data-modal-close]');
+
+            function openModal(productId, productName){
+                targetIdInput.value = productId;
+                productNameInput.value = productName;
+                messageBox.textContent = '';
+                messageBox.className = 'text-sm mt-2';
+                modal.classList.remove('hidden');
+            }
+            function closeModal(){
+                modal.classList.add('hidden');
+                form.reset();
+            }
+
+            document.addEventListener('click', function(e){
+                const btn = e.target.closest('[data-review-button]');
+                if(btn){
+                    const productId = btn.getAttribute('data-product-id');
+                    const productName = btn.getAttribute('data-product-name');
+                    openModal(productId, productName);
+                }
+            });
+            overlay.addEventListener('click', closeModal);
+            closeButtons.forEach(b => b.addEventListener('click', closeModal));
+
+            form.addEventListener('submit', async function(e){
+                e.preventDefault();
+                const formData = new FormData(form);
+                const tokenInput = form.querySelector('input[name="__RequestVerificationToken"]');
+                const token = tokenInput ? tokenInput.value : '';
+                try{
+                    const res = await fetch('@Url.Action("SubmitReview","Cart")', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'RequestVerificationToken': token },
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if(data.success){
+                        messageBox.textContent = data.message || 'Đã gửi đánh giá';
+                        messageBox.className = 'text-sm mt-2 text-green-600';
+                        setTimeout(() => { closeModal(); window.location.reload(); }, 800);
+                    } else {
+                        messageBox.textContent = data.message || 'Gửi đánh giá thất bại';
+                        messageBox.className = 'text-sm mt-2 text-red-600';
+                    }
+                } catch(err){
+                    messageBox.textContent = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                    messageBox.className = 'text-sm mt-2 text-red-600';
+                }
+            });
+        })();
+    </script>
 </div>

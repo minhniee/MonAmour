@@ -12,5 +12,11 @@ public interface IEmailService
     Task SendContactConfirmationEmailAsync(string customerEmail, string customerName, string htmlBody);
     Task SendAdminContactNotificationEmailAsync(string htmlBody, string? subject = null);
 
+    // Order status emails
+    Task SendOrderConfirmedEmailAsync(string email, string orderCode, decimal totalAmount, string? note = null);
+    Task SendOrderShippingEmailAsync(string email, string orderCode, string carrierName, string trackingNumber);
+    Task SendOrderCompletedEmailAsync(string email, string orderCode, DateTime completedAt);
+    Task SendOrderCancelledEmailAsync(string email, string orderCode, string? reason = null);
+
 
 }

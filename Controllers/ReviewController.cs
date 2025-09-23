@@ -6,6 +6,7 @@ using MonAmour.Services.Interfaces;
 
 namespace MonAmour.Controllers;
 
+[NonController]
 [Authorize]
 public class ReviewController : Controller
 {
