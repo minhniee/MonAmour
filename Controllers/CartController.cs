@@ -401,7 +401,7 @@ namespace MonAmour.Controllers
         // POST: /Cart/Checkout
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Checkout()
+        public async Task<IActionResult> Checkout()
         {
             int? userId = GetCurrentUserId();
             if (userId == null)
@@ -492,6 +492,20 @@ namespace MonAmour.Controllers
             order.UpdatedAt = DateTime.Now;
             _db.Orders.Update(order);
             _db.SaveChanges();
+
+            // Send order confirmation email
+            try
+            {
+                await _db.Entry(order).Reference(o => o.User).LoadAsync();
+                var customerEmail = order.User?.Email;
+                if (!string.IsNullOrWhiteSpace(customerEmail))
+                {
+                    var orderCode = order.OrderId.ToString();
+                    var totalAmount = order.TotalPrice ?? 0m;
+                    await _emailService.SendOrderConfirmedEmailAsync(customerEmail!, orderCode, totalAmount);
+                }
+            }
+            catch { /* Email failure should not block checkout flow */ }
 
             if (IsAjaxRequest())
             {
@@ -1318,6 +1332,20 @@ namespace MonAmour.Controllers
                 _db.Orders.Update(order);
 
                 await _db.SaveChangesAsync();
+
+                // Gửi email xác nhận đơn hàng
+                try
+                {
+                    await _db.Entry(order).Reference(o => o.User).LoadAsync();
+                    var customerEmail = order.User?.Email;
+                    if (!string.IsNullOrWhiteSpace(customerEmail))
+                    {
+                        var orderCode = order.OrderId.ToString();
+                        var totalAmount = order.TotalPrice ?? 0m;
+                        await _emailService.SendOrderConfirmedEmailAsync(customerEmail!, orderCode, totalAmount);
+                    }
+                }
+                catch { /* Không để lỗi email chặn flow */ }
 
                 return (true, "Thanh toán thành công! Đơn hàng đã được xác nhận và kho hàng đã được cập nhật.");
             }
