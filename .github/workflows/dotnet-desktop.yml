@@ -25,7 +25,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .          
-          file: ./Api/Dockerfile  
+          file: ./Dockerfile  
           push: true
-          tags: tungb12ok/discord_bot:latest
+          tags: l3ing/monamour:latest
           platforms: linux/amd64
