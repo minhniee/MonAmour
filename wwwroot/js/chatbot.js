@@ -19,6 +19,25 @@ const userData = {
     }
 };
 
+// Training data từ JSON
+let trainingData = null;
+let systemPrompt = "";
+
+// Load training data từ JSON
+const loadTrainingData = async () => {
+    try {
+        const response = await fetch('/data/chatbot_training_data.json');
+        const data = await response.json();
+        trainingData = data;
+        systemPrompt = data.system_prompt;
+        console.log('Training data loaded successfully:', data);
+    } catch (error) {
+        console.error('Error loading training data:', error);
+        // Fallback system prompt
+        systemPrompt = "Bạn là MonMon, chatbot chuyên nghiệp của Mon Amour - dịch vụ hẹn hò cao cấp. Hãy trả lời một cách thân thiện và hữu ích.";
+    }
+};
+
 // Context về Mon Amour cho chatbot
 const chatHistory = [
     {
@@ -54,12 +73,57 @@ const createMessageElement = (content, ...classes) => {
     return div;
 };
 
+// Tìm câu trả lời phù hợp từ training data
+const findBestAnswer = (userMessage) => {
+    if (!trainingData || !trainingData.training_data) return null;
+    
+    const userMessageLower = userMessage.toLowerCase();
+    let bestMatch = null;
+    let bestScore = 0;
+    
+    // Tìm kiếm theo keywords
+    for (const item of trainingData.training_data) {
+        let score = 0;
+        
+        // Kiểm tra keywords
+        if (item.keywords) {
+            for (const keyword of item.keywords) {
+                if (userMessageLower.includes(keyword.toLowerCase())) {
+                    score += 2;
+                }
+            }
+        }
+        
+        // Kiểm tra câu hỏi tương tự
+        const questionWords = item.question.toLowerCase().split(' ');
+        const userWords = userMessageLower.split(' ');
+        const commonWords = questionWords.filter(word => userWords.includes(word));
+        score += commonWords.length * 0.5;
+        
+        if (score > bestScore) {
+            bestScore = score;
+            bestMatch = item;
+        }
+    }
+    
+    return bestScore > 1 ? bestMatch : null;
+};
+
 // Generate bot response using API
 const generateBotResponse = async (incomingMessageDiv) => {
     const messageElement = incomingMessageDiv.querySelector(".message-text");
 
-    // Thêm context Mon Amour vào câu hỏi của user
-    const contextualMessage = `Với vai trò là trợ lý AI của Mon Amour - nền tảng dịch vụ hẹn hò cá nhân hóa, hãy trả lời câu hỏi sau một cách thân thiện và hữu ích: ${userData.message}`;
+    // Tìm câu trả lời từ training data trước
+    const trainingAnswer = findBestAnswer(userData.message);
+    
+    let contextualMessage;
+    if (trainingAnswer) {
+        // Sử dụng câu trả lời từ training data
+        contextualMessage = `${systemPrompt}\n\nDựa trên thông tin training data, hãy trả lời câu hỏi: "${userData.message}"\n\nThông tin tham khảo: ${trainingAnswer.answer}`;
+    } else {
+        // Sử dụng context chung
+        contextualMessage = `${systemPrompt}\n\nHãy trả lời câu hỏi sau một cách thân thiện và hữu ích: ${userData.message}`;
+    }
 
     chatHistory.push({
         role: "user",
@@ -100,7 +164,7 @@ const generateBotResponse = async (incomingMessageDiv) => {
                 <strong>Xin lỗi!</strong><br>
                 ${error.message}<br><br>
                 <em>Vui lòng thử lại sau hoặc liên hệ với chúng tôi qua:</em><br>
-                📞 Hotline: 0985613906<br>
+                📞 Hotline: 0868019255<br>
                 📧 Email: booking.monamour@gmail.com
             </div>
         `;
@@ -238,7 +302,10 @@ chatbotToggler.addEventListener("click", () => document.body.classList.toggle("s
 closeChatbot.addEventListener("click", () => document.body.classList.remove("show-chatbot"));
 
 // Initialize chatbot with welcome message
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load training data trước
+    await loadTrainingData();
+    
     // Add welcome message to chat body
     const welcomeMessageContent = `<svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024">
                 <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"></path>

@@ -1,0 +1,115 @@
+{
+  "training_data": [
+    {
+      "id": 1,
+      "question": "Bên bạn có hẹn hò nào tầm khoảng 1 triệu - 1 triệu rưỡi không?",
+      "answer": "Với ngân sách khoảng 1.199.000, Mon Amour có gói Standard. Đây là lựa chọn nhẹ nhàng, phù hợp cho những cặp đôi yêu thích sự đơn giản, ấm cúng.",
+      "category": "pricing",
+      "keywords": ["ngân sách", "1 triệu", "gói", "standard"]
+    },
+    {
+      "id": 2,
+      "question": "Standard và Signature khác nhau thế nào?",
+      "answer": "Gói Standard mang đến trải nghiệm vẽ tranh và làm nến thơm. Gói Signature là gói cao cấp hơn, Mon Amour thiết kế nhiều gói để phù hợp với các ngân sách khác nhau.",
+      "category": "comparison",
+      "keywords": ["standard", "signature", "so sánh", "khác nhau"]
+    },
+    {
+      "id": 3,
+      "question": "Đâu là những gói cao cấp nhất của Mon Amour?",
+      "answer": "Mon Amour có gói Premium A và Premium B là những gói cao cấp nhất. Gói Premium A có giá 2.799.000, bao gồm trải nghiệm vẽ tranh, làm nến thơm, làm bánh và một bữa ăn tối lãng mạn. Gói Premium B có giá 3.999.000, bao gồm tất cả những gì có trong gói Premium A, cộng thêm một buổi chụp ảnh chuyên nghiệp và một món quà đặc biệt.",
+      "category": "premium",
+      "keywords": ["cao cấp", "premium", "đắt nhất", "premium a", "premium b"]
+    },
+    {
+      "id": 4,
+      "question": "Gói training gói cơ bản của Mon Amour là gì?",
+      "answer": "Gói training cơ bản của Mon Amour là gói Standard, tập trung vào trải nghiệm vẽ tranh và làm nến thơm. Đây là gói phù hợp cho những người mới bắt đầu hoặc muốn có một buổi hẹn hò nhẹ nhàng.",
+      "category": "basic",
+      "keywords": ["training", "cơ bản", "standard", "mới bắt đầu"]
+    },
+    {
+      "id": 5,
+      "question": "Mon Amour có thể tổ chức sự kiện riêng tư không?",
+      "answer": "Có, Mon Amour có thể tổ chức các sự kiện riêng tư như sinh nhật, kỷ niệm, cầu hôn, v.v. Chúng tôi sẽ tùy chỉnh gói dịch vụ để phù hợp với yêu cầu của bạn.",
+      "category": "events",
+      "keywords": ["sự kiện", "riêng tư", "sinh nhật", "kỷ niệm", "cầu hôn"]
+    },
+    {
+      "id": 6,
+      "question": "Mình muốn buổi hẹn hò có gì đó sáng tạo và khác biệt, thì nên chọn gói nào?",
+      "answer": "Premium A là lựa chọn hoàn hảo. Với không gian riêng tư, lãng mạn, và các hoạt động độc đáo như làm nến thơm, vẽ tranh, hoặc làm bánh, Premium A mang đến trải nghiệm đáng nhớ.",
+      "category": "recommendation",
+      "keywords": ["sáng tạo", "khác biệt", "premium a", "hoạt động"]
+    },
+    {
+      "id": 7,
+      "question": "Gói nào hợp để 'điên điên' cả ngày mà không cần lo nghĩ nhiều?",
+      "answer": "Gói Signature với trải nghiệm homestay và các hoạt động thú vị sẽ phù hợp cho một ngày 'điên điên' mà không cần lo lắng gì.",
+      "category": "experience",
+      "keywords": ["điên điên", "cả ngày", "signature", "homestay"]
+    },
+    {
+      "id": 8,
+      "question": "Mon Amour có những hoạt động gì?",
+      "answer": "Mon Amour cung cấp nhiều hoạt động đa dạng: vẽ tranh, làm nến thơm, làm bánh, chụp ảnh chuyên nghiệp, bữa ăn tối lãng mạn, và nhiều trải nghiệm khác tùy theo gói bạn chọn.",
+      "category": "activities",
+      "keywords": ["hoạt động", "vẽ tranh", "làm nến", "làm bánh", "chụp ảnh"]
+    },
+    {
+      "id": 9,
+      "question": "Làm sao để đặt dịch vụ Mon Amour?",
+      "answer": "Bạn có thể đặt dịch vụ Mon Amour qua: 📞 Hotline: 0985613906, 📧 Email: booking.monamour@gmail.com, hoặc truy cập website monamour.vn để đặt trực tuyến.",
+      "category": "booking",
+      "keywords": ["đặt", "hotline", "email", "website", "booking"]
+    },
+    {
+      "id": 10,
+      "question": "Mon Amour có phục vụ ở đâu?",
+      "answer": "Mon Amour phục vụ tại nhiều địa điểm khác nhau tùy theo gói dịch vụ. Chúng tôi có các đối tác như Tròn Studio, Gent Steak, Uyen Garden và nhiều địa điểm khác để mang đến trải nghiệm tốt nhất.",
+      "category": "location",
+      "keywords": ["địa điểm", "phục vụ", "tròn studio", "gent steak", "uyen garden"]
+    }
+  ],
+  "system_prompt": "Bạn là MonMon, chatbot chuyên nghiệp của Mon Amour - dịch vụ hẹn hò cao cấp. Nhiệm vụ của bạn là tư vấn khách hàng về các gói dịch vụ, hoạt động và trải nghiệm mà Mon Amour cung cấp. Hãy trả lời một cách thân thiện, chuyên nghiệp và hữu ích.",
+  "company_info": {
+    "name": "Mon Amour",
+    "description": "Dịch vụ hẹn hò cao cấp với các gói trải nghiệm độc đáo",
+    "contact": {
+      "hotline": "0868019255",
+      "email": "booking.monamour@gmail.com",
+      "website": "monamour.vn"
+    },
+    "packages": [
+      {
+        "name": "Standard",
+        "price": "1.199.000 VND",
+        "activities": ["vẽ tranh", "làm nến thơm"],
+        "description": "Gói nhẹ nhàng, phù hợp cho những cặp đôi yêu thích sự đơn giản, ấm cúng"
+      },
+      {
+        "name": "Signature", 
+        "price": "2.499.000 VND",
+        "activities": ["homestay", "hoạt động thú vị"],
+        "description": "Gói cao cấp với trải nghiệm homestay và các hoạt động đặc biệt"
+      },
+      {
+        "name": "Premium A",
+        "price": "2.799.000 VND", 
+        "activities": ["làm nến thơm", "vẽ tranh", "làm bánh", "bữa ăn tối lãng mạn"],
+        "description": "Gói hoàn hảo với không gian riêng tư, lãng mạn và các hoạt động độc đáo"
+      },
+      {
+        "name": "Premium B",
+        "price": "3.999.000 VND",
+        "activities": ["tất cả hoạt động Premium A", "chụp ảnh chuyên nghiệp", "món quà đặc biệt"],
+        "description": "Gói cao cấp nhất với trải nghiệm đặc biệt và quà tặng"
+      }
+    ],
+    "partners": [
+      "Tròn Studio",
+      "Gent Steak", 
+      "Uyen Garden"
+    ]
+  }
+}
