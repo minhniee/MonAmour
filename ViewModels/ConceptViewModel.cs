@@ -130,8 +130,14 @@ namespace MonAmour.ViewModels
     public class ConceptCategoryDropdownViewModel
     {
         public int CategoryId { get; set; }
+        
+        [Required(ErrorMessage = "Tên danh mục là bắt buộc")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Tên danh mục phải có từ 2 đến 100 ký tự")]
         public string Name { get; set; } = string.Empty;
+        
+        [StringLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự")]
         public string? Description { get; set; }
+        
         public bool IsActive { get; set; } = true;
     }
 

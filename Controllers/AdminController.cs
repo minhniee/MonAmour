@@ -3100,27 +3100,37 @@ namespace MonAmour.Controllers
         {
             try
             {
+                _logger.LogInformation("EditConceptCategory POST called with CategoryId: {CategoryId}, Name: {Name}, Description: {Description}, IsActive: {IsActive}", 
+                    model.CategoryId, model.Name, model.Description, model.IsActive);
+
                 if (!ModelState.IsValid)
                 {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    _logger.LogWarning("ModelState validation failed: {Errors}", string.Join(", ", errors));
+                    await SetAdminViewBagAsync();
                     return View(model);
                 }
 
                 var result = await _conceptService.UpdateConceptCategoryAsync(model);
                 if (result)
                 {
+                    _logger.LogInformation("Concept category updated successfully: {CategoryId}", model.CategoryId);
                     TempData["SuccessMessage"] = "Cập nhật danh mục concept thành công!";
                     return RedirectToAction("ConceptCategories");
                 }
                 else
                 {
+                    _logger.LogWarning("Failed to update concept category: {CategoryId}", model.CategoryId);
                     TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật danh mục concept";
+                    await SetAdminViewBagAsync();
                     return View(model);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in EditConceptCategory POST action");
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật danh mục concept";
+                _logger.LogError(ex, "Error in EditConceptCategory POST action for CategoryId: {CategoryId}", model.CategoryId);
+                TempData["ErrorMessage"] = $"Có lỗi xảy ra khi cập nhật danh mục concept: {ex.Message}";
+                await SetAdminViewBagAsync();
                 return View(model);
             }
         }

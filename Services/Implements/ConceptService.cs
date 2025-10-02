@@ -241,6 +241,10 @@ namespace MonAmour.Services.Implements
                     return false;
                 }
 
+                // Log original values for debugging
+                _logger.LogInformation("Original values - Name: {OriginalName}, Price: {OriginalPrice}", concept.Name, concept.Price);
+                _logger.LogInformation("New values - Name: {NewName}, Price: {NewPrice}", model.Name, model.Price);
+
                 concept.Name = model.Name;
                 concept.Description = model.Description;
                 concept.Price = model.Price;
@@ -250,6 +254,15 @@ namespace MonAmour.Services.Implements
                 concept.PreparationTime = model.PreparationTime;
                 concept.AvailabilityStatus = model.AvailabilityStatus;
                 concept.UpdatedAt = DateTime.Now;
+
+                // Mark entity as modified and force change detection
+                _context.Entry(concept).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                
+                // Also mark specific properties as modified to ensure EF detects changes
+                _context.Entry(concept).Property(x => x.Name).IsModified = true;
+                _context.Entry(concept).Property(x => x.Description).IsModified = true;
+                _context.Entry(concept).Property(x => x.Price).IsModified = true;
+                _context.Entry(concept).Property(x => x.UpdatedAt).IsModified = true;
 
                 // Update color junctions
                 if (model.ColorIds != null)
@@ -522,8 +535,21 @@ namespace MonAmour.Services.Implements
         {
             try
             {
+                _logger.LogInformation("Updating concept image: ImageId={ImageId}, ConceptId={ConceptId}, DisplayOrder={DisplayOrder}", 
+                    model.ImgId, model.ConceptId, model.DisplayOrder);
+
                 var image = await _context.ConceptImgs.FindAsync(model.ImgId);
-                if (image == null) return false;
+                if (image == null) 
+                {
+                    _logger.LogWarning("Concept image not found: {ImageId}", model.ImgId);
+                    return false;
+                }
+
+                // Log original values for debugging
+                _logger.LogInformation("Original values - ImgUrl: {OriginalUrl}, ImgName: {OriginalName}, AltText: {OriginalAltText}", 
+                    image.ImgUrl, image.ImgName, image.AltText);
+                _logger.LogInformation("New values - ImgUrl: {NewUrl}, ImgName: {NewName}, AltText: {NewAltText}", 
+                    model.ImgUrl, model.ImgName, model.AltText);
 
                 // Auto-set IsPrimary and AltText based on DisplayOrder
                 bool isPrimary = model.DisplayOrder == 1;
@@ -551,7 +577,18 @@ namespace MonAmour.Services.Implements
                 image.IsPrimary = isPrimary;
                 image.DisplayOrder = model.DisplayOrder;
 
+                // Mark entity as modified to ensure EF tracks changes
+                _context.Entry(image).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                
+                // Also mark specific properties as modified to ensure EF detects changes
+                _context.Entry(image).Property(x => x.ImgUrl).IsModified = true;
+                _context.Entry(image).Property(x => x.ImgName).IsModified = true;
+                _context.Entry(image).Property(x => x.AltText).IsModified = true;
+                _context.Entry(image).Property(x => x.IsPrimary).IsModified = true;
+                _context.Entry(image).Property(x => x.DisplayOrder).IsModified = true;
+
                 var result = await _context.SaveChangesAsync();
+                _logger.LogInformation("Concept image updated successfully. Result: {Result}", result);
                 return result > 0;
             }
             catch (Exception ex)
@@ -866,19 +903,31 @@ namespace MonAmour.Services.Implements
         {
             try
             {
+                _logger.LogInformation("Updating concept category: CategoryId={CategoryId}, Name={Name}, Description={Description}, IsActive={IsActive}", 
+                    model.CategoryId, model.Name, model.Description, model.IsActive);
+
                 var category = await _context.ConceptCategories.FindAsync(model.CategoryId);
-                if (category == null) return false;
+                if (category == null) 
+                {
+                    _logger.LogWarning("Concept category not found: {CategoryId}", model.CategoryId);
+                    return false;
+                }
+
+                _logger.LogInformation("Found category: {OriginalName} -> {NewName}", category.Name, model.Name);
 
                 category.Name = model.Name;
                 category.Description = model.Description;
                 category.IsActive = model.IsActive;
 
+                _context.ConceptCategories.Update(category);
                 var result = await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Concept category updated successfully. Result: {Result}", result);
                 return result > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating concept category");
+                _logger.LogError(ex, "Error updating concept category: {CategoryId}", model.CategoryId);
                 throw;
             }
         }

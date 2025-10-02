@@ -205,6 +205,13 @@ namespace MonAmour.Services.Implements
                 if (string.IsNullOrWhiteSpace(cloudinaryUrl))
                     return null;
 
+                // Check if it's a valid Cloudinary URL
+                if (!cloudinaryUrl.Contains("cloudinary.com"))
+                {
+                    _logger.LogWarning("URL is not a Cloudinary URL, skipping deletion: {Url}", cloudinaryUrl);
+                    return null;
+                }
+
                 // Example URL: https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg
                 // Extract: sample (without extension)
                 
