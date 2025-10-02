@@ -468,11 +468,12 @@ namespace MonAmour.Services.Implements
         {
             try
             {
-                // Check if concept can add more images (limit to 6)
-                var canAddMore = await CanConceptAddMoreImagesAsync(model.ConceptId);
-                if (!canAddMore)
+                // Check if the specific position already has an image
+                var existingImages = await GetConceptImagesAsync(model.ConceptId);
+                var existingImageAtPosition = existingImages.FirstOrDefault(img => img.DisplayOrder == model.DisplayOrder);
+                if (existingImageAtPosition != null)
                 {
-                    return false;
+                    return false; // Position already occupied
                 }
 
                 // Auto-set IsPrimary and AltText based on DisplayOrder

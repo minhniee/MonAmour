@@ -584,12 +584,22 @@
                 return;
             }
             
-            // Kiểm tra giới hạn hình ảnh trước khi thêm
+            // Kiểm tra vị trí cụ thể trước khi thêm
+            const displayOrder = $('#addDisplayOrder').val();
+            if (!displayOrder) {
+                showAlert('danger', 'Vui lòng chọn vị trí hiển thị!');
+                return;
+            }
+            
             $.get('@Url.Action("GetConceptImageCount", "Admin")', { conceptId: conceptId }, function(result) {
-                if (result.success && result.canAddMore) {
-                    submitAddImageForm();
+                if (result.success) {
+                    if (result.occupiedPositions.includes(parseInt(displayOrder))) {
+                        showAlert('danger', `Vị trí ${displayOrder} đã có hình ảnh! Vui lòng chọn vị trí khác hoặc sử dụng chức năng chỉnh sửa.`);
+                    } else {
+                        submitAddImageForm();
+                    }
                 } else {
-                    showAlert('danger', result.message || 'Concept này đã đạt giới hạn 6 hình ảnh!');
+                    showAlert('danger', result.message || 'Có lỗi xảy ra khi kiểm tra vị trí!');
                 }
             });
         });
@@ -798,26 +808,43 @@
 
         // Add Image for specific concept
         function addImageForConcept(conceptId, conceptName) {
-            // Kiểm tra giới hạn hình ảnh
+            // Kiểm tra vị trí có sẵn
             $.get('@Url.Action("GetConceptImageCount", "Admin")', { conceptId: conceptId }, function(result) {
                 if (result.success && result.canAddMore) {
                     // Pre-fill form với concept đã chọn
                     $('#addConceptId').val(conceptId);
                     $('#addConceptId').prop('disabled', true);
-                    $('#addImageModalLabel').html('<i class="fas fa-plus mr-2"></i>Thêm Hình ảnh cho "' + conceptName + '"');
+                    $('#addImageModalLabel').html('<i class="fas fa-plus mr-2"></i>Thêm Hình ảnh cho "' + conceptName + '" (' + result.availablePositions.length + ' vị trí còn trống)');
+                    
+                    // Update available positions in dropdown
+                    const displayOrderSelect = $('#addDisplayOrder');
+                    displayOrderSelect.find('option').each(function() {
+                        const value = parseInt($(this).val());
+                        if (value && !result.availablePositions.includes(value)) {
+                            $(this).prop('disabled', true).text($(this).text() + ' (Đã có ảnh)');
+                        } else {
+                            $(this).prop('disabled', false);
+                        }
+                    });
+                    
                     var addModal = new bootstrap.Modal(document.getElementById('addImageModal'));
                     addModal.show();
                 } else {
-                    showAlert('warning', result.message || 'Concept này đã đạt giới hạn 6 hình ảnh!');
+                    showAlert('warning', result.message || 'Tất cả 6 vị trí đã có hình ảnh!');
                 }
             });
         }
 
         // Add Image for specific position
         function addImageForPosition(conceptId, conceptName, position) {
-            // Kiểm tra giới hạn hình ảnh
+            // Kiểm tra vị trí cụ thể
             $.get('@Url.Action("GetConceptImageCount", "Admin")', { conceptId: conceptId }, function(result) {
-                if (result.success && result.canAddMore) {
+                if (result.success) {
+                    if (result.occupiedPositions.includes(parseInt(position))) {
+                        showAlert('warning', `Vị trí ${position} đã có hình ảnh! Vui lòng sử dụng chức năng chỉnh sửa để thay thế.`);
+                        return;
+                    }
+                    
                     // Pre-fill form với concept và vị trí đã chọn
                     $('#addConceptId').val(conceptId);
                     $('#addConceptId').prop('disabled', true);
@@ -838,7 +865,7 @@
                     var addModal = new bootstrap.Modal(document.getElementById('addImageModal'));
                     addModal.show();
                 } else {
-                    showAlert('warning', result.message || 'Concept này đã đạt giới hạn 6 hình ảnh!');
+                    showAlert('danger', result.message || 'Có lỗi xảy ra khi kiểm tra vị trí!');
                 }
             });
         }
@@ -849,6 +876,25 @@
             $('#addDisplayOrder').prop('disabled', false);
             $('#addImageModalLabel').html('<i class="fas fa-plus mr-2"></i>Thêm Hình ảnh Mới');
             $('#imagePreview').hide();
+            
+            // Reset dropdown options text
+            $('#addDisplayOrder option').each(function() {
+                $(this).prop('disabled', false);
+                const value = $(this).val();
+                if (value) {
+                    const originalTexts = {
+                        '1': '1 - Ảnh chính (IsPrimary = true)',
+                        '2': '2 - Banner concept',
+                        '3': '3 - Banner concept', 
+                        '4': '4 - Ảnh mô tả',
+                        '5': '5 - Ảnh mô tả',
+                        '6': '6 - Ảnh mô tả'
+                    };
+                    if (originalTexts[value]) {
+                        $(this).text(originalTexts[value]);
+                    }
+                }
+            });
         });
 
         // Preview hình ảnh khi chọn file

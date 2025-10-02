@@ -3608,11 +3608,13 @@ namespace MonAmour.Controllers
                     return Json(new { success = false, message = "Vui lòng chọn file hình ảnh!" });
                 }
 
-                // Check if concept can add more images
-                var canAddMore = await _conceptService.CanConceptAddMoreImagesAsync(model.ConceptId);
-                if (!canAddMore)
+                // Check if the specific position already has an image
+                var existingImages = await _conceptService.GetConceptImagesAsync(model.ConceptId);
+                var existingImageAtPosition = existingImages.FirstOrDefault(img => img.DisplayOrder == model.DisplayOrder);
+                
+                if (existingImageAtPosition != null)
                 {
-                    return Json(new { success = false, message = "Concept này đã đạt giới hạn 3 hình ảnh!" });
+                    return Json(new { success = false, message = $"Vị trí {model.DisplayOrder} đã có hình ảnh! Vui lòng sử dụng chức năng chỉnh sửa để thay thế." });
                 }
 
                 try
@@ -3809,15 +3811,30 @@ namespace MonAmour.Controllers
         {
             try
             {
-                var count = await _conceptService.GetConceptImageCountAsync(conceptId);
-                var canAddMore = await _conceptService.CanConceptAddMoreImagesAsync(conceptId);
+                var images = await _conceptService.GetConceptImagesAsync(conceptId);
+                var count = images.Count;
+                var occupiedPositions = images.Select(img => img.DisplayOrder).ToList();
+                var availablePositions = new List<int>();
+                
+                // Check which positions (1-6) are available
+                for (int i = 1; i <= 6; i++)
+                {
+                    if (!occupiedPositions.Contains(i))
+                    {
+                        availablePositions.Add(i);
+                    }
+                }
+                
+                var canAddMore = availablePositions.Any();
 
                 return Json(new
                 {
                     success = true,
                     count = count,
                     canAddMore = canAddMore,
-                    message = canAddMore ? "Có thể thêm hình ảnh" : "Đã đạt giới hạn 6 hình ảnh"
+                    occupiedPositions = occupiedPositions,
+                    availablePositions = availablePositions,
+                    message = canAddMore ? $"Có thể thêm hình ảnh vào {availablePositions.Count} vị trí còn trống" : "Tất cả 6 vị trí đã có hình ảnh"
                 });
             }
             catch (Exception ex)
