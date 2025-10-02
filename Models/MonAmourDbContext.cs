@@ -243,7 +243,6 @@ public partial class MonAmourDbContext : DbContext
 
             entity.Property(e => e.ImgId).HasColumnName("img_id");
             entity.Property(e => e.AltText)
-                .HasMaxLength(255)
                 .HasColumnName("alt_text");
             entity.Property(e => e.ConceptId).HasColumnName("concept_id");
             entity.Property(e => e.CreatedAt)
