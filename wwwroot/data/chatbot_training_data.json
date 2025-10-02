@@ -2,73 +2,1367 @@
   "training_data": [
     {
       "id": 1,
-      "question": "Bên bạn có hẹn hò nào tầm khoảng 1 triệu - 1 triệu rưỡi không?",
-      "answer": "Với ngân sách khoảng 1.199.000, Mon Amour có gói Standard. Đây là lựa chọn nhẹ nhàng, phù hợp cho những cặp đôi yêu thích sự đơn giản, ấm cúng.",
-      "category": "pricing",
-      "keywords": ["ngân sách", "1 triệu", "gói", "standard"]
+      "question": "Bên bạn có gói hẹn hò nào tầm khoảng 1 triệu – 1 triệu rưỡi không?",
+      "answer": "Với ngân sách khoảng 1.199.000, Mon Amour xin gợi ý gói Standard. Đây là lựa chọn nhẹ nhàng, tinh tế và rất hợp cho một buổi hẹn đầu tiên hoặc một kỷ niệm nhỏ. Trong gói này, hai bạn sẽ cùng nhau tham gia workshop vẽ tranh tại Tròn Studio ở ngõ Thịnh Hào 1, Đống Đa. Sau đó là một bữa tối lãng mạn tại Gent Steak – không gian ấm cúng và sang trọng. Đi kèm còn có một tấm thiệp mã QR để bạn có thể giấu trong đó một thông điệp riêng hoặc một bài hát bất ngờ dành cho người thương.",
+      "category": "general",
+      "keywords": [
+        "bên",
+        "tầm",
+        "khoảng",
+        "triệu",
+        "rưỡi"
+      ]
     },
     {
       "id": 2,
       "question": "Standard và Signature khác nhau thế nào?",
-      "answer": "Gói Standard mang đến trải nghiệm vẽ tranh và làm nến thơm. Gói Signature là gói cao cấp hơn, Mon Amour thiết kế nhiều gói để phù hợp với các ngân sách khác nhau.",
+      "answer": "Gói Standard mang đến trải nghiệm nhẹ nhàng với hoạt động vẽ tranh và một bữa tối sang trọng. Gói Signature thì tinh tế hơn, khi có thêm workshop làm nến và quà handmade, giúp buổi hẹn trở thành một kỷ niệm có dấu ấn riêng.",
       "category": "comparison",
-      "keywords": ["standard", "signature", "so sánh", "khác nhau"]
+      "keywords": [
+        "standard",
+        "signature",
+        "khác",
+        "nhau",
+        "thế"
+      ]
     },
     {
       "id": 3,
-      "question": "Đâu là những gói cao cấp nhất của Mon Amour?",
-      "answer": "Mon Amour có gói Premium A và Premium B là những gói cao cấp nhất. Gói Premium A có giá 2.799.000, bao gồm trải nghiệm vẽ tranh, làm nến thơm, làm bánh và một bữa ăn tối lãng mạn. Gói Premium B có giá 3.999.000, bao gồm tất cả những gì có trong gói Premium A, cộng thêm một buổi chụp ảnh chuyên nghiệp và một món quà đặc biệt.",
-      "category": "premium",
-      "keywords": ["cao cấp", "premium", "đắt nhất", "premium a", "premium b"]
+      "question": "Đâu là những gói cao cấp nhất của Mon Amour",
+      "answer": "Ngoài hai gói cơ bản, Mon Amour còn cung cấp Premium và Haute Amour. Đây là những gói cao cấp với không gian setup độc quyền, homestay lãng mạn và quà tặng thiết kế riêng, phù hợp với những ai mong muốn một trải nghiệm toàn diện và đặc biệt hơn.",
+      "category": "general",
+      "keywords": [
+        "những",
+        "cao",
+        "cấp",
+        "nhất"
+      ]
     },
     {
       "id": 4,
-      "question": "Gói training gói cơ bản của Mon Amour là gì?",
-      "answer": "Gói training cơ bản của Mon Amour là gói Standard, tập trung vào trải nghiệm vẽ tranh và làm nến thơm. Đây là gói phù hợp cho những người mới bắt đầu hoặc muốn có một buổi hẹn hò nhẹ nhàng.",
-      "category": "basic",
-      "keywords": ["training", "cơ bản", "standard", "mới bắt đầu"]
+      "question": "Các gói hẹn hò của Mon Amour có đắt không?",
+      "answer": "Mon Amour thiết kế nhiều gói để phù hợp với các mức ngân sách khác nhau. Standard có giá 1.199.000, Signature là 1.899.000, và nếu mong muốn trải nghiệm cao cấp hơn thì có Premium hoặc Haute Amour. Mỗi gói đều được tính toán để cân đối chi phí với giá trị cảm xúc khách hàng nhận lại.",
+      "category": "pricing",
+      "keywords": [
+        "đắt"
+      ]
     },
     {
       "id": 5,
-      "question": "Mon Amour có thể tổ chức sự kiện riêng tư không?",
-      "answer": "Có, Mon Amour có thể tổ chức các sự kiện riêng tư như sinh nhật, kỷ niệm, cầu hôn, v.v. Chúng tôi sẽ tùy chỉnh gói dịch vụ để phù hợp với yêu cầu của bạn.",
-      "category": "events",
-      "keywords": ["sự kiện", "riêng tư", "sinh nhật", "kỷ niệm", "cầu hôn"]
+      "question": "Những hoạt động trong gói là Mon Amour tự tổ chức hay hợp tác cùng ai?",
+      "answer": "Mon Amour hợp tác với những đối tác uy tín như Tròn Studio cho workshop vẽ tranh, An’s Candle cho làm nến, Tam Giác Craft cho quà handmade, và Gent Steak cho bữa tối. Khách hàng sẽ được Mon Amour sắp xếp và booking sẵn toàn bộ, để chỉ cần đến và tận hưởng trọn vẹn khoảnh khắc.",
+      "category": "comparison",
+      "keywords": [
+        "những",
+        "hoạt",
+        "động",
+        "trong",
+        "chức",
+        "hợp"
+      ]
     },
     {
       "id": 6,
-      "question": "Mình muốn buổi hẹn hò có gì đó sáng tạo và khác biệt, thì nên chọn gói nào?",
-      "answer": "Premium A là lựa chọn hoàn hảo. Với không gian riêng tư, lãng mạn, và các hoạt động độc đáo như làm nến thơm, vẽ tranh, hoặc làm bánh, Premium A mang đến trải nghiệm đáng nhớ.",
-      "category": "recommendation",
-      "keywords": ["sáng tạo", "khác biệt", "premium a", "hoạt động"]
+      "question": "Thời gian cho hoạt động vẽ tranh trong gói Standard là bao lâu?",
+      "answer": "Workshop vẽ tranh trong gói Standard thường kéo dài từ 1,5 đến 2 tiếng, đủ để hai bạn cùng nhau trải nghiệm sáng tạo và hoàn thành một bức tranh làm kỷ niệm.",
+      "category": "duration",
+      "keywords": [
+        "thời",
+        "gian",
+        "hoạt",
+        "động",
+        "tranh",
+        "trong"
+      ]
     },
     {
       "id": 7,
-      "question": "Gói nào hợp để 'điên điên' cả ngày mà không cần lo nghĩ nhiều?",
-      "answer": "Gói Signature với trải nghiệm homestay và các hoạt động thú vị sẽ phù hợp cho một ngày 'điên điên' mà không cần lo lắng gì.",
-      "category": "experience",
-      "keywords": ["điên điên", "cả ngày", "signature", "homestay"]
+      "question": "Gói Standard có tặng quà gì không?",
+      "answer": "Trong gói Standard, Mon Amour chuẩn bị một tấm thiệp mã QR. Bạn có thể giấu trong đó một đoạn nhạc, một thông điệp bí mật hoặc một lời nhắn riêng để tạo bất ngờ cho người thương.",
+      "category": "gifts",
+      "keywords": [
+        "standard",
+        "tặng",
+        "quà"
+      ]
     },
     {
       "id": 8,
-      "question": "Mon Amour có những hoạt động gì?",
-      "answer": "Mon Amour cung cấp nhiều hoạt động đa dạng: vẽ tranh, làm nến thơm, làm bánh, chụp ảnh chuyên nghiệp, bữa ăn tối lãng mạn, và nhiều trải nghiệm khác tùy theo gói bạn chọn.",
-      "category": "activities",
-      "keywords": ["hoạt động", "vẽ tranh", "làm nến", "làm bánh", "chụp ảnh"]
+      "question": "Địa điểm ăn tối trong gói Standard và Signature ở đâu?",
+      "answer": "Cả hai gói đều bao gồm bữa tối lãng mạn tại Gent Steak – một nhà hàng steakhouse ấm cúng và sang trọng, thời gian dùng bữa khoảng từ 3 đến 4 tiếng.",
+      "category": "partners",
+      "keywords": [
+        "địa",
+        "điểm",
+        "tối",
+        "trong",
+        "standard",
+        "signature"
+      ]
     },
     {
       "id": 9,
-      "question": "Làm sao để đặt dịch vụ Mon Amour?",
-      "answer": "Bạn có thể đặt dịch vụ Mon Amour qua: 📞 Hotline: 0985613906, 📧 Email: booking.monamour@gmail.com, hoặc truy cập website monamour.vn để đặt trực tuyến.",
-      "category": "booking",
-      "keywords": ["đặt", "hotline", "email", "website", "booking"]
+      "question": "Làm nến thơm trong gói Signature có mất nhiều thời gian không?",
+      "answer": "Workshop làm nến thơm tại An’s Candle kéo dài khoảng 1 đến 2 tiếng. Đây là khoảng thời gian vừa đủ để hai bạn cùng nhau tạo ra một sản phẩm handmade mang dấu ấn riêng.",
+      "category": "duration",
+      "keywords": [
+        "làm",
+        "nến",
+        "thơm",
+        "trong",
+        "signature",
+        "mất"
+      ]
     },
     {
       "id": 10,
-      "question": "Mon Amour có phục vụ ở đâu?",
-      "answer": "Mon Amour phục vụ tại nhiều địa điểm khác nhau tùy theo gói dịch vụ. Chúng tôi có các đối tác như Tròn Studio, Gent Steak, Uyen Garden và nhiều địa điểm khác để mang đến trải nghiệm tốt nhất.",
-      "category": "location",
-      "keywords": ["địa điểm", "phục vụ", "tròn studio", "gent steak", "uyen garden"]
+      "question": "Trong gói Standard có hoạt động gì nổi bật?",
+      "answer": "Standard gồm các lựa chọn như vẽ tranh tại Tròn Studio (76 ngõ Thịnh Hào 1, Đống Đa, thời gian 1,5–2h) hoặc làm nến thơm tại An’s Candle (số 15 ngõ 7 Hoàng Minh Giám, Thanh Xuân, thời gian 1h).",
+      "category": "activities",
+      "keywords": [
+        "trong",
+        "standard",
+        "hoạt",
+        "động",
+        "nổi",
+        "bật"
+      ]
+    },
+    {
+      "id": 11,
+      "question": "Gói nào hợp cho buổi hẹn đầu tiên?",
+      "answer": "Gói Standard rất phù hợp cho first date. Hoạt động vẽ tranh giúp hai người có cơ hội trò chuyện, tương tác tự nhiên, sau đó kết thúc bằng một bữa tối nhẹ nhàng để tạo ấn tượng đẹp.",
+      "category": "general",
+      "keywords": [
+        "hợp",
+        "đầu",
+        "tiên"
+      ]
+    },
+    {
+      "id": 12,
+      "question": "Standard có ăn tối ở đâu?",
+      "answer": "Gói Standard ăn tối tại Gent Steak, với các cơ sở như Trung Yên, Bùi Thị Xuân hoặc Hoàng Cầu. Thời lượng bữa tối khoảng 3–4h.",
+      "category": "partners",
+      "keywords": [
+        "standard",
+        "tối"
+      ]
+    },
+    {
+      "id": 13,
+      "question": "Mon Amour có thể đặt chỗ giúp mình không?",
+      "answer": "Có ạ. Mon Amour sẽ liên hệ và booking sẵn với đối tác để bạn không cần lo lắng gì. Từ workshop, quà tặng cho đến bàn ăn, tất cả đều được chuẩn bị trước để buổi hẹn diễn ra suôn sẻ.",
+      "category": "booking",
+      "keywords": [
+        "thể",
+        "đặt",
+        "chỗ",
+        "giúp"
+      ]
+    },
+    {
+      "id": 14,
+      "question": "Các hoạt động handmade có phù hợp với nam giới không?",
+      "answer": "Hoàn toàn phù hợp. Workshop làm nến hoặc vẽ tranh được thiết kế để cả hai cùng tham gia, không phân biệt nam hay nữ. Trải nghiệm sẽ tập trung vào sự gắn kết và niềm vui sáng tạo chung.",
+      "category": "activities",
+      "keywords": [
+        "hoạt",
+        "động",
+        "handmade",
+        "phù",
+        "hợp",
+        "nam"
+      ]
+    },
+    {
+      "id": 15,
+      "question": "Gói Signature có giá bao nhiêu?",
+      "answer": "Signature được định giá 1.899.000.",
+      "category": "pricing",
+      "keywords": [
+        "signature",
+        "giá",
+        "bao",
+        "nhiêu"
+      ]
+    },
+    {
+      "id": 16,
+      "question": "Hoạt động chính trong gói Signature là gì?",
+      "answer": "Signature tập trung vào hoạt động thủ công: làm nến thơm (An’s Candle ở Hoàng Minh Giám – 1h, hoặc Lamor Studio ở Hào Nam – 1,5h), vẽ gốm (HaveU Studio – 2h, cần đợi thêm vài ngày để nung), và các lựa chọn khác như bodymist, bó hoa.",
+      "category": "activities",
+      "keywords": [
+        "hoạt",
+        "động",
+        "chính",
+        "trong",
+        "signature"
+      ]
+    },
+    {
+      "id": 17,
+      "question": "Gói Signature có ăn tối ở đâu?",
+      "answer": "Signature có ba lựa chọn ăn tối: Uyển Garden (đồ chay, 10/285 Trần Khát Chân), La Passion Restaurant (26 Hàng Thùng, Hoàn Kiếm, hoặc CS Lạc Long Quân/Tràng Tiền), và La Libra Steak House (cơ sở Lạc Long Quân và Tràng Tiền).",
+      "category": "partners",
+      "keywords": [
+        "signature",
+        "tối"
+      ]
+    },
+    {
+      "id": 18,
+      "question": "Gói Signature có quà gì không?",
+      "answer": "Ngoài thiệp mã QR, Signature còn có love card và quà cơ bản trị giá 250K.",
+      "category": "gifts",
+      "keywords": [
+        "signature",
+        "quà"
+      ]
+    },
+    {
+      "id": 19,
+      "question": "Gói Haute Amour có giá bao nhiêu?",
+      "answer": "Haute Amour là gói cao cấp nhất, giá 3.499.000.",
+      "category": "pricing",
+      "keywords": [
+        "haute",
+        "giá",
+        "bao",
+        "nhiêu"
+      ]
+    },
+    {
+      "id": 20,
+      "question": "Hoạt động chính trong Haute Amour là gì?",
+      "answer": "Haute Amour tập trung vào trải nghiệm đặc biệt như làm nhẫn đôi (Muoistudio – 3h hoặc Lamor Studio – 3h), làm nước hoa (Muoistudio – 2h), cùng với lựa chọn ăn tối tại Love ST, Pépé la poule hoặc Savvy Artisanal Restaurant.",
+      "category": "activities",
+      "keywords": [
+        "hoạt",
+        "động",
+        "chính",
+        "trong",
+        "haute"
+      ]
+    },
+    {
+      "id": 21,
+      "question": "Mon Amour có thể chia sẻ thêm về gói Premium không?",
+      "answer": "Dạ có ạ. Premium của Mon Amour được chia thành hai phiên bản – Premium A và Premium B. Premium A sẽ thiên về những trải nghiệm thủ công tinh tế và bữa tối cao cấp, còn Premium B lại mang đến sự kết hợp giữa ăn tối sang trọng tại Gent Steak và một đêm nghỉ lãng mạn tại homestay. Tùy theo mong muốn của mình, bạn có thể chọn hành trình phù hợp nhất cho hai người.",
+      "category": "general",
+      "keywords": [
+        "thể",
+        "chia",
+        "thêm",
+        "premium"
+      ]
+    },
+    {
+      "id": 22,
+      "question": "Premium A có giá bao nhiêu?",
+      "answer": "Premium A hiện có mức giá 2.599.000 – một lựa chọn cân bằng giữa sự sáng tạo và ẩm thực cao cấp, rất hợp cho những dịp muốn gây ấn tượng mạnh mẽ.",
+      "category": "pricing",
+      "keywords": [
+        "premium",
+        "giá",
+        "bao",
+        "nhiêu"
+      ]
+    },
+    {
+      "id": 23,
+      "question": "Premium A bao gồm những hoạt động gì?",
+      "answer": "Với Premium A, hai bạn sẽ cùng trải qua những khoảnh khắc đầy gắn kết: tự tay làm nến thơm, lựa chọn hương nước hoa tại Muoistudio, hay vẽ gốm tại HaveU Studio để giữ lại một kỷ vật thật riêng. Kết thúc ngày hẹn, bữa tối lãng mạn tại Love ST, Pépé la poule hoặc Savvy Artisanal Restaurant sẽ làm trọn vẹn không khí ngọt ngào ấy.",
+      "category": "activities",
+      "keywords": [
+        "premium",
+        "bao",
+        "gồm",
+        "những",
+        "hoạt",
+        "động"
+      ]
+    },
+    {
+      "id": 24,
+      "question": "Premium A có quà gì đi kèm không?",
+      "answer": "Đi cùng gói Premium A là một thiệp mã QR để bạn giấu thông điệp bí mật, cùng love card và món quà nhỏ trị giá 250K. Đây chính là những chi tiết nhỏ nhưng lại khiến đối phương bất ngờ và xúc động.",
+      "category": "gifts",
+      "keywords": [
+        "premium",
+        "quà",
+        "kèm"
+      ]
+    },
+    {
+      "id": 25,
+      "question": "Premium B có giá bao nhiêu?",
+      "answer": "Premium B cũng được thiết kế ở mức 2.599.000, nhưng lại mang một phong cách rất khác: lãng mạn, ấm áp và riêng tư.",
+      "category": "pricing",
+      "keywords": [
+        "premium",
+        "giá",
+        "bao",
+        "nhiêu"
+      ]
+    },
+    {
+      "id": 26,
+      "question": "Premium B khác Premium A ở điểm nào?",
+      "answer": "Điểm đặc biệt của Premium B là bữa tối sang trọng tại Gent Steak, sau đó là một đêm nghỉ trong homestay ấm cúng. Đây là lựa chọn hoàn hảo nếu bạn muốn kéo dài buổi hẹn thành một “chuyến đi tình yêu” trọn vẹn.",
+      "category": "general",
+      "keywords": [
+        "premium",
+        "khác",
+        "điểm"
+      ]
+    },
+    {
+      "id": 27,
+      "question": "Premium B có gì đặc biệt ở phần homestay?",
+      "answer": "Homestay trong Premium B được Mon Amour setup sẵn hoa, bánh và trang trí trị giá 600K. Không gian nhỏ xinh, đầy bất ngờ này sẽ biến buổi hẹn thành một ký ức khó quên.",
+      "category": "activities",
+      "keywords": [
+        "premium",
+        "đặc",
+        "biệt",
+        "phần",
+        "homestay"
+      ]
+    },
+    {
+      "id": 28,
+      "question": "Tổng chi phí tham khảo của Premium B là bao nhiêu?",
+      "answer": "Premium B có tổng chi phí cơ bản khoảng 2.000K, nhưng điều khách hàng nhớ mãi lại chính là trải nghiệm thân mật và riêng tư mà gói này đem đến.",
+      "category": "pricing",
+      "keywords": [
+        "tổng",
+        "chi",
+        "phí",
+        "tham",
+        "khảo",
+        "premium"
+      ]
+    },
+    {
+      "id": 29,
+      "question": "Standard hợp nhất cho dịp nào?",
+      "answer": "Standard sinh ra để dành cho những khoảnh khắc đầu tiên – một buổi hẹn giản dị nhưng đầy đủ sự tinh tế. Chỉ với một workshop vẽ tranh hoặc làm nến thơm, cùng bữa tối ấm áp tại Gent Steak, hai bạn đã có một kỷ niệm nhẹ nhàng mà vẫn đủ để trái tim rung động. Ngoài ra, bạn hoàn toàn có thể lựa chọn những gói cao cấp hơn bên mình để có thể có những trải nghiệm thú vị hơn nữa nhé",
+      "category": "general",
+      "keywords": [
+        "standard",
+        "hợp",
+        "nhất",
+        "dịp"
+      ]
+    },
+    {
+      "id": 30,
+      "question": "Vì sao Standard lại có thiệp mã QR?",
+      "answer": "Thiệp mã QR trong gói Standard giống như một “bí mật nhỏ” – bạn có thể giấu trong đó một lời nhắn, một đoạn nhạc, hay một lời tỏ tình tinh tế. Đôi khi chính những bất ngờ giản dị như vậy lại chạm đến trái tim sâu nhất.",
+      "category": "gifts",
+      "keywords": [
+        "sao",
+        "standard",
+        "lại",
+        "thiệp"
+      ]
+    },
+    {
+      "id": 31,
+      "question": "Signature khác biệt ở điểm nào so với Standard?",
+      "answer": "Signature mang đến nhiều sự lựa chọn hơn và một chút cầu kỳ hơn. Ngoài nến thơm và vẽ gốm, còn có bodymist, bó hoa hay bữa tối tại những nhà hàng tinh tế như Uyển Garden hay La Passion. Signature rất hợp để kỷ niệm những dấu mốc quan trọng, khi bạn muốn buổi hẹn mang nhiều tầng ý nghĩa hơn.",
+      "category": "comparison",
+      "keywords": [
+        "signature",
+        "khác",
+        "biệt",
+        "điểm",
+        "standard"
+      ]
+    },
+    {
+      "id": 32,
+      "question": "Nếu người yêu thích đồ chay, Signature có phù hợp không?",
+      "answer": "Rất phù hợp. Trong gói Signature có Uyên Garden – một nhà hàng chay nổi tiếng tại Hà Nội. Một không gian xanh, thanh lịch và những món chay tinh tế sẽ khiến bữa tối trở thành trải nghiệm thanh tịnh và khác biệt.",
+      "category": "comparison",
+      "keywords": [
+        "nếu",
+        "người",
+        "yêu",
+        "thích",
+        "chay",
+        "signature"
+      ]
+    },
+    {
+      "id": 33,
+      "question": "Signature có gì để buổi hẹn thêm lãng mạn?",
+      "answer": "Ngoài thiệp QR, Signature còn kèm theo love card và quà cơ bản trị giá 250K. Những món quà nhỏ xinh này như một lời nhắn gửi ngọt ngào, giúp buổi hẹn trở thành một bức tranh đầy cảm xúc.",
+      "category": "general",
+      "keywords": [
+        "signature",
+        "thêm",
+        "lãng",
+        "mạn"
+      ]
+    },
+    {
+      "id": 34,
+      "question": "Premium A hợp cho ai?",
+      "answer": "Premium A thường được chọn bởi những cặp đôi yêu thích sự sáng tạo. Tự tay làm nến, lựa chọn hương nước hoa riêng, vẽ gốm cùng nhau – tất cả tạo nên một chuỗi trải nghiệm thủ công đầy cá tính. Buổi tối kết lại bằng một bữa ăn tại Love ST hay Pépé la poule, lãng mạn và tràn đầy hương vị.",
+      "category": "general",
+      "keywords": [
+        "premium",
+        "hợp"
+      ]
+    },
+    {
+      "id": 35,
+      "question": "Vì sao Premium A lại có cả nước hoa và bodymist?",
+      "answer": "Bởi Mon Amour tin rằng hương thơm lưu giữ ký ức. Một lọ nước hoa hay bodymist không chỉ là món quà, mà còn là hương của riêng hai bạn, để mỗi lần thoảng qua đều gợi nhớ về buổi hẹn hôm ấy.",
+      "category": "general",
+      "keywords": [
+        "sao",
+        "premium",
+        "lại",
+        "nước",
+        "hoa",
+        "bodymist"
+      ]
+    },
+    {
+      "id": 36,
+      "question": "Premium B phù hợp cho dịp nào?",
+      "answer": "Premium B lý tưởng cho những cặp đôi muốn biến một buổi hẹn thành cả một chuyến đi ngắn. Ăn tối tại Gent Steak rồi nghỉ lại trong homestay được trang trí riêng cho hai người – đây là sự lựa chọn hoàn hảo để kỷ niệm ngày đặc biệt hoặc đơn giản là “trốn” khỏi guồng quay thường nhật.",
+      "category": "general",
+      "keywords": [
+        "premium",
+        "phù",
+        "hợp",
+        "dịp"
+      ]
+    },
+    {
+      "id": 37,
+      "question": "Homestay trong Premium B khác gì so với thuê ngoài?",
+      "answer": "Điểm khác biệt là sự chăm chút. Homestay của Mon Amour không chỉ đơn giản là một chỗ nghỉ. Không gian được setup sẵn hoa, bánh và trang trí cực kì tinh tế, biến căn phòng thành một nơi chứa đầy bất ngờ và cảm xúc.",
+      "category": "activities",
+      "keywords": [
+        "homestay",
+        "trong",
+        "premium",
+        "khác",
+        "thuê",
+        "ngoài"
+      ]
+    },
+    {
+      "id": 38,
+      "question": "Haute Amour có phải gói cao cấp nhất không?",
+      "answer": "Đúng vậy. Haute Amour là hành trình trọn vẹn nhất mà Mon Amour dành cho các cặp đôi. Từ việc cùng nhau làm nhẫn đôi, sáng tạo mùi hương nước hoa riêng, đến bữa tối tinh tế tại Love ST hay Savvy Artisanal Restaurant, rồi kết thúc trong homestay ấm áp – tất cả được gói lại trong một ngày đáng nhớ.",
+      "category": "general",
+      "keywords": [
+        "haute",
+        "phải",
+        "cao",
+        "cấp",
+        "nhất"
+      ]
+    },
+    {
+      "id": 39,
+      "question": "Haute Amour hợp cho dịp gì?",
+      "answer": "Đây là gói mà nhiều khách hàng chọn để cầu hôn hoặc kỷ niệm tình yêu lâu năm. Bởi từng chi tiết đều được thiết kế để mang đến sự bất ngờ, sang trọng và cảm xúc khó quên.",
+      "category": "general",
+      "keywords": [
+        "haute",
+        "hợp",
+        "dịp"
+      ]
+    },
+    {
+      "id": 40,
+      "question": "Haute Amour có gì đặc biệt hơn so với Premium?",
+      "answer": "Điểm đặc biệt nhất là hoạt động làm nhẫn đôi và nước hoa – những món quà mang tính cá nhân hóa cao, trở thành biểu tượng riêng của hai bạn. Thêm vào đó là homestay setup tinh tế, giúp cả ngày trở thành một hành trình yêu thương.",
+      "category": "general",
+      "keywords": [
+        "haute",
+        "đặc",
+        "biệt",
+        "hơn",
+        "premium"
+      ]
+    },
+    {
+      "id": 41,
+      "question": "Mình muốn một buổi hẹn nhẹ nhàng, không quá cầu kỳ thì chọn gói nào?",
+      "answer": "Vậy Standard là dành cho bạn rồi. Một buổi vẽ tranh hay làm nến nho nhỏ, sau đó là bữa tối ấm áp ở Gent Steak… tất cả vừa đủ để bạn và người ấy cảm thấy gần nhau hơn. Không cần quá phô trương, chỉ cần tinh tế và chân thành thôi cũng đủ làm trái tim rung động.",
+      "category": "general",
+      "keywords": [
+        "nhẹ",
+        "nhàng",
+        "quá",
+        "cầu",
+        "chọn"
+      ]
+    },
+    {
+      "id": 42,
+      "question": "Người yêu mình thích hoa, mình nên chọn gói nào?",
+      "answer": "Signature sẽ khiến người ấy mỉm cười ngay từ phút đầu. Trong gói này, bạn có thể tặng một bó hoa xinh xắn, kèm thêm buổi làm nến hoặc vẽ gốm. Kết thúc bằng một bữa tối lãng mạn tại La Passion hay Uyên Garden, chắc chắn sẽ khiến ngày hôm đó trở thành một kỷ niệm thật dịu dàng.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "hoa",
+        "nên",
+        "chọn"
+      ]
+    },
+    {
+      "id": 43,
+      "question": "Có gói nào khiến buổi hẹn trở nên cá tính hơn không?",
+      "answer": "Signature chính là lựa chọn “có dấu ấn riêng”. Những món quà handmade như nến thơm, vòng tay hay bodymist đều mang lại cảm giác “chỉ dành cho hai ta”. Nếu bạn muốn tình yêu được khắc họa bằng những chi tiết nhỏ mà độc đáo, thì Signature là gói đáng để trải nghiệm.",
+      "category": "general",
+      "keywords": [
+        "khiến",
+        "trở",
+        "nên",
+        "tính",
+        "hơn"
+      ]
+    },
+    {
+      "id": 44,
+      "question": "Mình muốn buổi hẹn có gì đó sáng tạo và khác biệt, thì nên chọn gì?",
+      "answer": "Premium A sẽ biến buổi hẹn thành một hành trình sáng tạo. Hai bạn có thể tự tay làm nến, chọn mùi hương nước hoa, hay vẽ một món gốm để lưu lại. Rồi khi ngồi vào bàn ăn tại Love ST hay Pépé la poule, mọi khoảnh khắc trong ngày sẽ đọng lại thành một kỷ niệm khó quên. Đây là gói mà nhiều cặp đôi chọn khi muốn “ghi dấu” một cột mốc thật ý nghĩa.",
+      "category": "comparison",
+      "keywords": [
+        "sáng",
+        "tạo",
+        "khác",
+        "biệt",
+        "nên",
+        "chọn"
+      ]
+    },
+    {
+      "id": 45,
+      "question": "Mình muốn biến buổi hẹn thành một bất ngờ, nên chọn gói nào?",
+      "answer": "Premium B là gói bất ngờ ngọt ngào nhất. Bạn có thể đưa người ấy đi ăn tối tại Gent Steak, rồi sau đó mở cửa homestay đã được setup sẵn hoa, bánh và ánh nến lung linh. Khoảnh khắc ấy thường làm trái tim đối phương tan chảy, bởi họ biết bạn đã thật sự dành cả tâm ý cho buổi hẹn này.",
+      "category": "general",
+      "keywords": [
+        "biến",
+        "thành",
+        "bất",
+        "ngờ",
+        "nên",
+        "chọn"
+      ]
+    },
+    {
+      "id": 46,
+      "question": "Gói nào hợp để “trốn đi chơi” cả ngày mà không cần lo nghĩ nhiều?",
+      "answer": "Premium B là lựa chọn hoàn hảo. Ăn tối sang trọng, nghỉ lại trong một homestay nhỏ xinh với không gian đã được chuẩn bị tinh tế… bạn và người ấy sẽ có nguyên một ngày để tận hưởng mà không phải lo lắng điều gì.",
+      "category": "general",
+      "keywords": [
+        "hợp",
+        "trốn",
+        "chơi",
+        "ngày",
+        "cần",
+        "nghĩ"
+      ]
+    },
+    {
+      "id": 47,
+      "question": "Nếu mình muốn cầu hôn thì nên chọn gói nào?",
+      "answer": "Haute Amour chính là gói mà nhiều khách chọn để thổ lộ lời cầu hôn. Bởi nó không chỉ là một buổi hẹn, mà là một hành trình trọn vẹn: làm nhẫn đôi, tạo mùi hương nước hoa riêng, bữa tối sang trọng, và homestay được trang trí bất ngờ. Từng chi tiết đều được sắp đặt để tạo nên khoảnh khắc khó quên nhất trong đời.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "cầu",
+        "hôn",
+        "nên",
+        "chọn"
+      ]
+    },
+    {
+      "id": 48,
+      "question": "Haute Amour có thật sự khác biệt so với Premium không?",
+      "answer": "Rất khác biệt. Nếu Premium là một buổi hẹn đặc biệt, thì Haute Amour là cả một “chuyến đi cảm xúc”. Những món quà mang tính biểu tượng như nhẫn đôi, nước hoa riêng biến buổi hẹn thành câu chuyện tình yêu mà bạn có thể kể lại mãi về sau.",
+      "category": "comparison",
+      "keywords": [
+        "haute",
+        "thật",
+        "khác",
+        "biệt",
+        "premium"
+      ]
+    },
+    {
+      "id": 49,
+      "question": "Mon Amour chỉ đặt nhà hàng thôi hay có thể lo cả kế hoạch buổi hẹn?",
+      "answer": "Mon Amour không chỉ dừng ở việc đặt bàn hay sắp xếp một hoạt động lẻ tẻ. Chúng mình lên trọn vẹn một hành trình cho hai bạn – từ hoạt động trải nghiệm, bữa tối, quà tặng đến không gian riêng. Bạn chỉ cần chia sẻ mong muốn, mọi chi tiết còn lại Mon Amour sẽ khéo léo dệt thành một buổi hẹn hoàn chỉnh.",
+      "category": "comparison",
+      "keywords": [
+        "chỉ",
+        "đặt",
+        "nhà",
+        "hàng",
+        "thôi",
+        "thể"
+      ]
+    },
+    {
+      "id": 50,
+      "question": "Nếu mình muốn setup một concept không gian bất ngờ thì sao?",
+      "answer": "Đó chính là điểm đặc biệt của Mon Amour. Tùy vào từng gói, không gian có thể được setup từ bàn ăn lãng mạn với hoa và nến, đến homestay được trang trí riêng cho hai bạn. Mỗi concept đều mang màu sắc khác nhau, nhưng điểm chung là sự tinh tế và cảm xúc",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "setup",
+        "concept",
+        "gian",
+        "bất",
+        "ngờ"
+      ]
+    },
+    {
+      "id": 51,
+      "question": "Mình sợ tự chuẩn bị không khéo, có cách nào để Mon Amour lo hết không?",
+      "answer": "Hoàn toàn có. Mon Amour sẽ đứng ở vai trò “người phía sau cánh gà” – lo từng bông hoa, ngọn nến, món quà nhỏ… Bạn chỉ cần xuất hiện và tận hưởng, còn mọi sự bất ngờ và cảm xúc hãy để Mon Amour thay bạn chuẩn bị.",
+      "category": "general",
+      "keywords": [
+        "chuẩn",
+        "khéo",
+        "cách",
+        "hết"
+      ]
+    },
+    {
+      "id": 52,
+      "question": "Concept setup có cố định không hay có thể thay đổi theo sở thích?",
+      "answer": "Không gian setup của Mon Amour luôn có khung cơ bản trong từng gói, nhưng hoàn toàn có thể tinh chỉnh theo sở thích. Ví dụ bạn thích tone pastel ngọt ngào, hay style vintage ấm áp, đội ngũ đều có thể biến tấu để buổi hẹn mang màu sắc “chỉ của riêng hai bạn”.",
+      "category": "comparison",
+      "keywords": [
+        "concept",
+        "setup",
+        "định",
+        "thể",
+        "thay",
+        "đổi"
+      ]
+    },
+    {
+      "id": 53,
+      "question": "Có thể đặt gói nhưng thay đổi nhà hàng hoặc homestay được không?",
+      "answer": "Được chứ. Các gói đã được Mon Amour hợp tác sẵn với những đối tác uy tín, nhưng nếu bạn có mong muốn riêng, chúng mình vẫn có thể đổi địa điểm ăn tối hoặc homestay. Quan trọng nhất là buổi hẹn thật sự hợp gu và đúng mong đợi của bạn.",
+      "category": "comparison",
+      "keywords": [
+        "thể",
+        "đặt",
+        "nhưng",
+        "thay",
+        "đổi",
+        "nhà"
+      ]
+    },
+    {
+      "id": 54,
+      "question": "Mon Amour có lên timeline cụ thể cho buổi hẹn không?",
+      "answer": "Có. Khi bạn chọn gói, Mon Amour sẽ soạn sẵn một timeline nhẹ nhàng: từ lúc bắt đầu hoạt động, di chuyển, đến bữa tối và cả phần bất ngờ cuối cùng. Timeline ấy vừa chi tiết để mọi thứ suôn sẻ, vừa linh hoạt để hai bạn vẫn thấy tự nhiên.",
+      "category": "general",
+      "keywords": [
+        "lên",
+        "timeline",
+        "thể"
+      ]
+    },
+    {
+      "id": 55,
+      "question": "Setup không gian có đi kèm quà tặng luôn không?",
+      "answer": "Thường thì có. Mon Amour tin rằng quà tặng chính là “dấu chấm hết ngọt ngào” cho một concept setup. Với Standard và Signature có thiệp QR hay quà handmade nhỏ, còn Premium và Haute Amour thì đi xa hơn với gift box hoặc nhẫn đôi, nước hoa… Tất cả đều gắn liền với không gian bạn đang trải qua, để buổi hẹn có chiều sâu hơn.",
+      "category": "gifts",
+      "keywords": [
+        "setup",
+        "gian",
+        "kèm",
+        "quà",
+        "tặng",
+        "luôn"
+      ]
+    },
+    {
+      "id": 56,
+      "question": "Nếu mình muốn gói hẹn thật riêng tư, không bị làm phiền thì sao?",
+      "answer": "Mon Amour có những setup tại homestay hoặc không gian độc quyền, nơi chỉ có hai bạn. Mọi chi tiết từ hoa, bánh, ánh sáng đều được chuẩn bị để đảm bảo riêng tư tuyệt đối. Đó là lý do nhiều cặp chọn Premium B hoặc Haute Amour để tận hưởng trọn vẹn cảm giác “chỉ có đôi ta”.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "thật",
+        "riêng",
+        "làm",
+        "phiền",
+        "sao"
+      ]
+    },
+    {
+      "id": 57,
+      "question": "Mon Amour có concept nào dành riêng cho cầu hôn không?",
+      "answer": "Có chứ. Haute Amour thường được khách hàng chọn cho khoảnh khắc ấy. Setup không gian sẽ được thiết kế sang trọng, bất ngờ, kết hợp nhẫn đôi, nước hoa riêng và homestay trang trí lãng mạn. Mọi thứ được chuẩn bị để biến giây phút cầu hôn thành một kỷ niệm sống mãi.",
+      "category": "general",
+      "keywords": [
+        "concept",
+        "dành",
+        "riêng",
+        "cầu",
+        "hôn"
+      ]
+    },
+    {
+      "id": 58,
+      "question": "Nếu mình muốn gói theo phong cách riêng – ví dụ Hàn Quốc, châu Âu, hay tối giản – Mon Amour có làm được không?",
+      "answer": "Mon Amour có thể cá nhân hóa concept theo mong muốn. Từ phong cách ngọt ngào kiểu Hàn Quốc, thanh lịch kiểu Pháp, đến tối giản và tinh tế, chúng mình đều có thể biến tấu trong khuôn khổ gói đã chọn. Buổi hẹn sẽ mang hơi thở của riêng bạn, chứ không rập khuôn một ai khác.",
+      "category": "comparison",
+      "keywords": [
+        "nếu",
+        "theo",
+        "phong",
+        "cách",
+        "riêng",
+        "hàn"
+      ]
+    },
+    {
+      "id": 59,
+      "question": "Mình muốn làm người yêu bất ngờ thì nên chọn gói nào?",
+      "answer": "Nếu bạn muốn tạo bất ngờ, Premium B là lựa chọn hoàn hảo. Sau bữa tối ở Gent Steak, người ấy sẽ bước vào homestay đã được setup hoa, bánh và ánh nến lung linh. Nhiều cặp đôi đã nói với Mon Amour rằng khoảnh khắc ấy là giây phút khó quên nhất.",
+      "category": "general",
+      "keywords": [
+        "làm",
+        "người",
+        "yêu",
+        "bất",
+        "ngờ",
+        "nên"
+      ]
+    },
+    {
+      "id": 60,
+      "question": "Có gói nào giúp buổi hẹn của mình trở nên thật đặc biệt không?",
+      "answer": "Haute Amour chính là gói biến buổi hẹn thành một ngày đáng nhớ. Từ việc làm nhẫn đôi, chọn hương nước hoa riêng, đến bữa tối sang trọng và homestay lãng mạn – tất cả khiến người ấy không thể ngờ rằng bạn đã chuẩn bị kỹ lưỡng đến thế.",
+      "category": "general",
+      "keywords": [
+        "giúp",
+        "trở",
+        "nên",
+        "thật",
+        "đặc",
+        "biệt"
+      ]
+    },
+    {
+      "id": 61,
+      "question": "Nếu mình muốn tặng quà bất ngờ trong buổi hẹn thì sao?",
+      "answer": "Trong mỗi gói đều có một phần quà nho nhỏ. Standard có thiệp QR, Signature có hoa và quà handmade, Premium và Haute Amour có gift box hoặc nhẫn đôi, nước hoa. Những bất ngờ ấy là điểm nhấn khiến đối phương nhớ mãi.",
+      "category": "gifts",
+      "keywords": [
+        "nếu",
+        "tặng",
+        "quà",
+        "bất",
+        "ngờ",
+        "trong"
+      ]
+    },
+    {
+      "id": 62,
+      "question": "Mình không khéo tay, liệu có thể làm bất ngờ vẫn hay không?",
+      "answer": "Bạn không cần lo đâu, vì Mon Amour đã chuẩn bị tất cả. Từ setup không gian, quà, đến hoạt động – mọi thứ đều được sắp xếp khéo léo. Bạn chỉ cần xuất hiện, còn việc gây bất ngờ cứ để Mon Amour lo.",
+      "category": "comparison",
+      "keywords": [
+        "khéo",
+        "tay",
+        "liệu",
+        "thể",
+        "làm",
+        "bất"
+      ]
+    },
+    {
+      "id": 63,
+      "question": "Người yêu mình thích điều bất ngờ nhỏ thôi, không cần cầu kỳ, có gói nào hợp không?",
+      "answer": "Standard sẽ rất hợp. Một bữa tối đơn giản nhưng tinh tế, thêm tấm thiệp QR giấu một thông điệp ngọt ngào – đôi khi chính sự giản dị lại làm tim người ta rung động nhiều nhất.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "điều",
+        "bất",
+        "ngờ"
+      ]
+    },
+    {
+      "id": 64,
+      "question": "Sinh nhật bạn gái mình sắp tới, chọn gói nào hợp?",
+      "answer": "Signature là lựa chọn tuyệt vời cho dịp sinh nhật. Một bó hoa tươi, một buổi làm nến thơm hoặc vẽ gốm, và bữa tối ở La Passion hay Uyển Garden sẽ khiến ngày sinh nhật trở thành kỷ niệm ngọt ngào nhất.",
+      "category": "general",
+      "keywords": [
+        "sinh",
+        "nhật",
+        "gái",
+        "sắp",
+        "tới",
+        "chọn"
+      ]
+    },
+    {
+      "id": 65,
+      "question": "Kỷ niệm 1 năm yêu nhau thì nên chọn gói nào?",
+      "answer": "Premium B là lựa chọn lý tưởng. Sau một năm bên nhau, một đêm nghỉ trong homestay được trang trí lãng mạn sẽ giúp cả hai có một kỷ niệm thật sự trọn vẹn.",
+      "category": "general",
+      "keywords": [
+        "niệm",
+        "năm",
+        "yêu",
+        "nhau",
+        "nên",
+        "chọn"
+      ]
+    },
+    {
+      "id": 66,
+      "question": "Muốn kỷ niệm ngày cầu hôn có gói nào đặc biệt không?",
+      "answer": "Haute Amour thường được khách chọn để cầu hôn. Với nhẫn đôi, nước hoa riêng và không gian homestay lãng mạn, mọi thứ được chuẩn bị để khoảnh khắc ấy trở thành giây phút khó quên nhất trong đời.",
+      "category": "general",
+      "keywords": [
+        "niệm",
+        "ngày",
+        "cầu",
+        "hôn",
+        "đặc",
+        "biệt"
+      ]
+    },
+    {
+      "id": 67,
+      "question": "Nếu mình muốn một bữa tối lãng mạn kỷ niệm ngày yêu thì sao?",
+      "answer": "Standard hoặc Signature đều có bữa tối tinh tế. Standard ở Gent Steak – sang trọng và ấm áp. Signature có thể chọn La Passion hay Uyên Garden – mỗi nơi một phong cách riêng, nhưng đều đem lại không khí lãng mạn.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "bữa",
+        "tối",
+        "lãng",
+        "mạn",
+        "niệm"
+      ]
+    },
+    {
+      "id": 68,
+      "question": "Các gói này có đắt quá không?",
+      "answer": "Mon Amour thiết kế nhiều mức giá khác nhau. Standard từ 1.199.000 là đã có một buổi hẹn trọn vẹn, còn Signature và Premium dành cho những ai muốn nhiều trải nghiệm hơn. Mỗi gói đều cân đối để bạn nhận lại giá trị cảm xúc vượt xa số tiền bỏ ra.",
+      "category": "pricing",
+      "keywords": [
+        "này",
+        "đắt",
+        "quá"
+      ]
+    },
+    {
+      "id": 69,
+      "question": "Mình sợ phát sinh chi phí thêm, có không?",
+      "answer": "Bạn yên tâm, giá mỗi gói đã trọn gói cho những gì liệt kê. Nếu muốn thêm dịch vụ ngoài như hoa cao cấp, bánh kem lớn hơn thì Mon Amour mới báo thêm, và luôn rõ ràng từ đầu.",
+      "category": "general",
+      "keywords": [
+        "phát",
+        "sinh",
+        "chi",
+        "phí",
+        "thêm"
+      ]
+    },
+    {
+      "id": 70,
+      "question": "Nếu ngân sách hạn chế thì gói nào hợp nhất?",
+      "answer": "Standard chính là lựa chọn hợp túi tiền nhưng vẫn trọn vẹn. Workshop + bữa tối + quà nhỏ, tất cả gói gọn để bạn vừa tiết kiệm, vừa khiến người ấy hạnh phúc.",
+      "category": "pricing",
+      "keywords": [
+        "nếu",
+        "ngân",
+        "sách",
+        "hạn",
+        "chế",
+        "hợp"
+      ]
+    },
+    {
+      "id": 71,
+      "question": "Vì sao không tự đặt nhà hàng, workshop mà phải chọn Mon Amour?",
+      "answer": "Tự đặt từng phần sẽ rời rạc và dễ thiếu sót. Mon Amour kết nối tất cả thành một hành trình liền mạch, từ không gian, hoạt động đến quà tặng. Quan trọng nhất, bạn không phải lo lắng gì, chỉ cần xuất hiện và tận hưởng.",
+      "category": "booking",
+      "keywords": [
+        "sao",
+        "đặt",
+        "nhà",
+        "hàng",
+        "workshop",
+        "phải"
+      ]
+    },
+    {
+      "id": 72,
+      "question": "Nếu mình muốn gói vừa đẹp vừa tiết kiệm thì có không?",
+      "answer": "Có chứ, Standard là “vừa vặn” nhất. Nó được thiết kế để tối ưu chi phí nhưng vẫn giữ sự tinh tế và bất ngờ cần có trong một buổi hẹn.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "vừa",
+        "đẹp",
+        "tiết",
+        "kiệm"
+      ]
+    },
+    {
+      "id": 73,
+      "question": "Nếu mình muốn buổi hẹn có hoa thì sao?",
+      "answer": "Signature và các gói cao hơn đều có hoa tươi đi kèm. Một bó hoa xuất hiện đúng lúc sẽ làm buổi hẹn thêm lãng mạn và đầy bất ngờ.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "hoa",
+        "sao"
+      ]
+    },
+    {
+      "id": 74,
+      "question": "Mình muốn buổi hẹn có quà handmade thì chọn gói nào?",
+      "answer": "Signature có quà handmade như vòng tay, móc khóa hoặc bodymist. Những món quà nhỏ nhưng chứa đựng sự tinh tế và dấu ấn riêng.",
+      "category": "gifts",
+      "keywords": [
+        "quà",
+        "handmade",
+        "chọn"
+      ]
+    },
+    {
+      "id": 75,
+      "question": "Mình sợ buổi hẹn bị gượng gạo thì nên chọn gói nào?",
+      "answer": "Standard là lựa chọn tuyệt vời. Vẽ tranh hoặc làm nến giúp hai bạn dễ dàng trò chuyện tự nhiên, rồi bữa tối sẽ trở thành khoảng lặng ngọt ngào để hiểu nhau hơn.",
+      "category": "general",
+      "keywords": [
+        "gượng",
+        "gạo",
+        "nên",
+        "chọn"
+      ]
+    },
+    {
+      "id": 76,
+      "question": "Người yêu mình hay ngại chỗ đông, có gói nào riêng tư hơn không?",
+      "answer": "Premium B và Haute Amour đều có homestay riêng, chỉ có hai bạn, không bị làm phiền. Đó sẽ là không gian lý tưởng để tận hưởng trọn vẹn tình yêu.",
+      "category": "comparison",
+      "keywords": [
+        "người",
+        "yêu",
+        "ngại",
+        "chỗ",
+        "đông",
+        "riêng"
+      ]
+    },
+    {
+      "id": 77,
+      "question": "Nếu mình muốn buổi hẹn không quá dài thì sao?",
+      "answer": "Standard với workshop ngắn 1–2 tiếng và bữa tối gọn gàng là lựa chọn vừa đủ, không kéo dài nhưng vẫn trọn vẹn cảm xúc.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "quá",
+        "dài",
+        "sao"
+      ]
+    },
+    {
+      "id": 78,
+      "question": "Người yêu mình thích sự tối giản, không cầu kỳ, nên chọn gì?",
+      "answer": "Signature với workshop làm nến và bó hoa nhỏ sẽ vừa tinh tế vừa gọn gàng, hợp với người yêu thích phong cách tối giản.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "tối",
+        "giản",
+        "cầu"
+      ]
+    },
+    {
+      "id": 79,
+      "question": "Có thể chọn giờ phù hợp không?",
+      "answer": "Có chứ. Mỗi gói đều linh hoạt giờ. Mon Amour sẽ sắp xếp timeline phù hợp nhất với lịch của hai bạn.",
+      "category": "general",
+      "keywords": [
+        "thể",
+        "chọn",
+        "giờ",
+        "phù",
+        "hợp"
+      ]
+    },
+    {
+      "id": 80,
+      "question": "Mình muốn buổi hẹn giản dị thôi, liệu có đủ ấn tượng không?",
+      "answer": "Đôi khi chính sự giản dị lại khiến người ta nhớ mãi. Một bức tranh vẽ cùng nhau, một tấm thiệp QR bí mật – những điều nhỏ bé ấy lại là kỷ niệm sâu sắc nhất.",
+      "category": "general",
+      "keywords": [
+        "giản",
+        "thôi",
+        "liệu",
+        "tượng"
+      ]
+    },
+    {
+      "id": 81,
+      "question": "Nếu đối phương không thích workshop thì sao?",
+      "answer": "Bạn có thể chọn nhà hàng hoặc homestay là điểm nhấn chính. Mon Amour sẽ giúp điều chỉnh để buổi hẹn vẫn suôn sẻ và hợp gu hai bạn.",
+      "category": "activities",
+      "keywords": [
+        "nếu",
+        "đối",
+        "phương",
+        "thích",
+        "workshop",
+        "sao"
+      ]
+    },
+    {
+      "id": 82,
+      "question": "Nếu hôm đó trời mưa thì sao?",
+      "answer": "Hầu hết các hoạt động trong gói đều trong nhà, nên mưa cũng không ảnh hưởng nhiều. Với Premium B hay Haute Amour, homestay riêng còn khiến buổi hẹn thêm ấm áp và lãng mạn.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "hôm",
+        "trời",
+        "mưa",
+        "sao"
+      ]
+    },
+    {
+      "id": 83,
+      "question": "Người yêu mình thích sự riêng tư tuyệt đối, có gói nào phù hợp?",
+      "answer": "Haute Amour là lựa chọn tuyệt vời. Homestay được setup riêng cho hai bạn, kết hợp nhẫn đôi và nước hoa cá nhân hóa – tất cả dành riêng cho tình yêu của bạn.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "riêng",
+        "tuyệt",
+        "đối"
+      ]
+    },
+    {
+      "id": 84,
+      "question": "Có gói nào hợp để hâm nóng tình cảm không?",
+      "answer": "Signature là lựa chọn ngọt ngào. Một bó hoa, một món quà handmade và bữa tối lãng mạn – đủ để hai bạn tìm lại cảm xúc thuở ban đầu.",
+      "category": "general",
+      "keywords": [
+        "hợp",
+        "hâm",
+        "nóng",
+        "tình",
+        "cảm"
+      ]
+    },
+    {
+      "id": 85,
+      "question": "Nếu mình muốn buổi hẹn có nhiều kỷ vật để giữ lại thì sao?",
+      "answer": "Premium A và Haute Amour đều có hoạt động tạo kỷ vật như nến, gốm, nhẫn đôi, nước hoa. Những món quà ấy chính là minh chứng cho tình yêu của bạn.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "nhiều",
+        "vật",
+        "giữ",
+        "lại",
+        "sao"
+      ]
+    },
+    {
+      "id": 86,
+      "question": "Có gói nào tạo cảm giác như một chuyến đi nhỏ không?",
+      "answer": "Premium B chính là “mini trip” của hai bạn. Ăn tối, rồi nghỉ trong homestay ấm cúng – trọn một ngày bên nhau không cần lo nghĩ.",
+      "category": "pricing",
+      "keywords": [
+        "tạo",
+        "cảm",
+        "giác",
+        "như",
+        "chuyến",
+        "nhỏ"
+      ]
+    },
+    {
+      "id": 87,
+      "question": "Mình muốn buổi hẹn mang phong cách sang trọng, nên chọn gì?",
+      "answer": "Haute Amour là lựa chọn sang trọng nhất. Mọi chi tiết – từ nhẫn đôi, nước hoa đến bữa tối – đều toát lên sự đẳng cấp và lãng mạn.",
+      "category": "general",
+      "keywords": [
+        "mang",
+        "phong",
+        "cách",
+        "sang",
+        "trọng",
+        "nên"
+      ]
+    },
+    {
+      "id": 88,
+      "question": "Có gói nào hợp để cầu hôn lãng mạn không?",
+      "answer": "Haute Amour thường được khách chọn cho cầu hôn. Setup homestay lãng mạn, nhẫn đôi, bữa tối sang trọng – tất cả tạo nên khoảnh khắc hoàn hảo cho lời thổ lộ.",
+      "category": "general",
+      "keywords": [
+        "hợp",
+        "cầu",
+        "hôn",
+        "lãng",
+        "mạn"
+      ]
+    },
+    {
+      "id": 89,
+      "question": "Người yêu mình thích hoa, nên chọn gói nào?",
+      "answer": "Signature có hoa tươi kèm trong gói, rất hợp cho những ai yêu sự lãng mạn nhẹ nhàng.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "hoa",
+        "nên",
+        "chọn"
+      ]
+    },
+    {
+      "id": 90,
+      "question": "Mình muốn buổi hẹn có bánh kem thì sao?",
+      "answer": "Bạn có thể thêm bánh kem vào bất kỳ gói nào. Mon Amour sẽ chuẩn bị sẵn, để bạn chỉ việc thắp nến và trao yêu thương.",
+      "category": "general",
+      "keywords": [
+        "bánh",
+        "kem",
+        "sao"
+      ]
+    },
+    {
+      "id": 91,
+      "question": "Có thể setup homestay theo chủ đề riêng không?",
+      "answer": "Hoàn toàn được. Mon Amour có thể setup theo chủ đề bạn muốn – pastel ngọt ngào, vintage ấm áp hay sang trọng kiểu Âu.",
+      "category": "activities",
+      "keywords": [
+        "thể",
+        "setup",
+        "homestay",
+        "theo",
+        "chủ",
+        "riêng"
+      ]
+    },
+    {
+      "id": 92,
+      "question": "Người yêu mình thích phong cách Hàn Quốc, có gói nào hợp?",
+      "answer": "Premium B với homestay trang trí tone pastel ngọt ngào sẽ khiến bạn ấy cảm giác như bước vào một bộ phim Hàn.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "phong",
+        "cách",
+        "hàn"
+      ]
+    },
+    {
+      "id": 93,
+      "question": "Mình có thể thay đổi địa điểm ăn tối không?",
+      "answer": "Có. Mon Amour có đối tác sẵn, nhưng nếu bạn muốn đổi nhà hàng hợp gu hơn, chúng mình sẽ sắp xếp linh hoạt.",
+      "category": "comparison",
+      "keywords": [
+        "thể",
+        "thay",
+        "đổi",
+        "địa",
+        "điểm",
+        "tối"
+      ]
+    },
+    {
+      "id": 94,
+      "question": "Người yêu mình thích phong cách tối giản, Mon Amour có làm được không?",
+      "answer": "Có. Setup có thể tinh chỉnh theo gu – chỉ cần hoa, nến, ánh sáng dịu, vẫn giữ được sự tối giản mà đầy cảm xúc.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "phong",
+        "cách",
+        "tối"
+      ]
+    },
+    {
+      "id": 95,
+      "question": "Nếu muốn không gian ngoài trời thì có được không?",
+      "answer": "Với Premium hoặc Haute Amour, Mon Amour có thể chuẩn bị không gian rooftop hoặc sân vườn riêng tư, rất lãng mạn.",
+      "category": "general",
+      "keywords": [
+        "nếu",
+        "gian",
+        "ngoài",
+        "trời",
+        "được"
+      ]
+    },
+    {
+      "id": 96,
+      "question": "Mình muốn quà tặng cá nhân hóa, Mon Amour có làm được không?",
+      "answer": "Có thể. Ngoài quà trong gói, Mon Amour có thể chuẩn bị gift box riêng theo concept bạn yêu cầu.",
+      "category": "gifts",
+      "keywords": [
+        "quà",
+        "tặng",
+        "nhân",
+        "hóa",
+        "làm",
+        "được"
+      ]
+    },
+    {
+      "id": 97,
+      "question": "Có gói nào vừa lãng mạn, vừa hiện đại không?",
+      "answer": "Premium A với workshop sáng tạo và bữa tối tại nhà hàng sang trọng sẽ mang đến sự cân bằng giữa lãng mạn và hiện đại.",
+      "category": "general",
+      "keywords": [
+        "vừa",
+        "lãng",
+        "mạn",
+        "hiện",
+        "đại"
+      ]
+    },
+    {
+      "id": 98,
+      "question": "Người yêu mình thích sự sang trọng, không thích quá dễ thương, thì sao?",
+      "answer": "Haute Amour là lựa chọn sang trọng nhất, từ setup đến trải nghiệm đều tinh tế và đẳng cấp.",
+      "category": "general",
+      "keywords": [
+        "người",
+        "yêu",
+        "thích",
+        "sang",
+        "trọng",
+        "quá"
+      ]
+    },
+    {
+      "id": 99,
+      "question": "Buổi hẹn kéo dài bao lâu?",
+      "answer": "Standard khoảng 4–5 tiếng, Signature 5–6 tiếng, Premium và Haute Amour có thể kéo dài cả ngày.",
+      "category": "duration",
+      "keywords": [
+        "kéo",
+        "dài",
+        "bao",
+        "lâu"
+      ]
+    },
+    {
+      "id": 100,
+      "question": "Có thể bắt đầu từ buổi chiều thay vì buổi tối không?",
+      "answer": "Được chứ. Mon Amour sẽ điều chỉnh timeline phù hợp với mong muốn của bạn.",
+      "category": "comparison",
+      "keywords": [
+        "thể",
+        "bắt",
+        "đầu",
+        "chiều",
+        "thay",
+        "tối"
+      ]
+    },
+    {
+      "id": 101,
+      "question": "Người yêu mình hay bận, buổi hẹn có thể ngắn gọn hơn không?",
+      "answer": "Standard sẽ hợp nhất – workshop 1–2 tiếng, bữa tối 2 tiếng – vừa gọn gàng, vừa đủ tình cảm.",
+      "category": "comparison",
+      "keywords": [
+        "người",
+        "yêu",
+        "bận",
+        "thể",
+        "ngắn",
+        "gọn"
+      ]
+    },
+    {
+      "id": 102,
+      "question": "Nếu muốn trải nghiệm nhiều hoạt động hơn thì chọn gì?",
+      "answer": "Premium A có nhiều hoạt động thủ công và quà tặng, phù hợp cho một ngày dài đầy trải nghiệm.",
+      "category": "activities",
+      "keywords": [
+        "nếu",
+        "trải",
+        "nghiệm",
+        "nhiều",
+        "hoạt",
+        "động"
+      ]
+    },
+    {
+      "id": 103,
+      "question": "Có thể chia nhỏ hoạt động thành hai ngày không?",
+      "answer": "Được. Với Premium và Haute Amour, Mon Amour có thể tách hoạt động và homestay thành hai ngày để bạn thoải mái tận hưởng.",
+      "category": "activities",
+      "keywords": [
+        "thể",
+        "chia",
+        "nhỏ",
+        "hoạt",
+        "động",
+        "thành"
+      ]
+    },
+    {
+      "id": 104,
+      "question": "Người yêu mình dễ mệt, có thể chọn gói ít hoạt động hơn không?",
+      "answer": "Standard và Signature với timeline nhẹ nhàng sẽ phù hợp hơn.",
+      "category": "activities",
+      "keywords": [
+        "người",
+        "yêu",
+        "mệt",
+        "thể",
+        "chọn",
+        "hoạt"
+      ]
+    },
+    {
+      "id": 105,
+      "question": "Mấy gói này có đắt lắm không?",
+      "answer": "Các gói của Mon Amour trải dài từ 1.199.000 đến 3.499.000. Nhưng giá trị không chỉ nằm ở chi phí, mà là ở cảm giác trọn vẹn bạn mang đến cho người ấy. Từ quà tặng, không gian cho đến trải nghiệm, mọi thứ đều được thiết kế để bạn không phải lo lắng, chỉ cần tận hưởng.",
+      "category": "pricing",
+      "keywords": [
+        "mấy",
+        "này",
+        "đắt",
+        "lắm"
+      ]
     }
   ],
   "system_prompt": "Bạn là MonMon, chatbot chuyên nghiệp của Mon Amour - dịch vụ hẹn hò cao cấp. Nhiệm vụ của bạn là tư vấn khách hàng về các gói dịch vụ, hoạt động và trải nghiệm mà Mon Amour cung cấp. Hãy trả lời một cách thân thiện, chuyên nghiệp và hữu ích.",
@@ -84,31 +1378,46 @@
       {
         "name": "Standard",
         "price": "1.199.000 VND",
-        "activities": ["vẽ tranh", "làm nến thơm"],
+        "activities": [
+          "vẽ tranh",
+          "làm nến thơm"
+        ],
         "description": "Gói nhẹ nhàng, phù hợp cho những cặp đôi yêu thích sự đơn giản, ấm cúng"
       },
       {
-        "name": "Signature", 
+        "name": "Signature",
         "price": "2.499.000 VND",
-        "activities": ["homestay", "hoạt động thú vị"],
+        "activities": [
+          "homestay",
+          "hoạt động thú vị"
+        ],
         "description": "Gói cao cấp với trải nghiệm homestay và các hoạt động đặc biệt"
       },
       {
         "name": "Premium A",
-        "price": "2.799.000 VND", 
-        "activities": ["làm nến thơm", "vẽ tranh", "làm bánh", "bữa ăn tối lãng mạn"],
+        "price": "2.799.000 VND",
+        "activities": [
+          "làm nến thơm",
+          "vẽ tranh",
+          "làm bánh",
+          "bữa ăn tối lãng mạn"
+        ],
         "description": "Gói hoàn hảo với không gian riêng tư, lãng mạn và các hoạt động độc đáo"
       },
       {
         "name": "Premium B",
         "price": "3.999.000 VND",
-        "activities": ["tất cả hoạt động Premium A", "chụp ảnh chuyên nghiệp", "món quà đặc biệt"],
+        "activities": [
+          "tất cả hoạt động Premium A",
+          "chụp ảnh chuyên nghiệp",
+          "món quà đặc biệt"
+        ],
         "description": "Gói cao cấp nhất với trải nghiệm đặc biệt và quà tặng"
       }
     ],
     "partners": [
       "Tròn Studio",
-      "Gent Steak", 
+      "Gent Steak",
       "Uyen Garden"
     ]
   }

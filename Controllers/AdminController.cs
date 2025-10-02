@@ -269,11 +269,11 @@ namespace MonAmour.Controllers
                         else
                         {
                             TempData["Error"] = "Không thể upload avatar. Vui lòng thử lại.";
-                            await SetAdminViewBagAsync();
-                            var roles = await _userManagementService.GetAllRolesAsync();
-                            ViewBag.Roles = roles;
-                            return View(model);
-                        }
+                        await SetAdminViewBagAsync();
+                        var roles = await _userManagementService.GetAllRolesAsync();
+                        ViewBag.Roles = roles;
+                        return View(model);
+                    }
                     }
                     catch (Exception ex)
                     {
@@ -454,10 +454,10 @@ namespace MonAmour.Controllers
                         else
                         {
                             TempData["Error"] = "Không thể upload avatar. Vui lòng thử lại.";
-                            var roles = await _userManagementService.GetAllRolesAsync();
-                            ViewBag.Roles = roles;
-                            return View(model);
-                        }
+                        var roles = await _userManagementService.GetAllRolesAsync();
+                        ViewBag.Roles = roles;
+                        return View(model);
+                    }
                     }
                     catch (Exception ex)
                     {
@@ -1871,9 +1871,9 @@ namespace MonAmour.Controllers
                         else
                         {
                             ModelState.AddModelError("AvatarFile", "Không thể upload avatar. Vui lòng thử lại.");
-                            await SetAdminViewBagAsync();
-                            return View(model);
-                        }
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
                     }
                     catch (Exception ex)
                     {
@@ -2258,9 +2258,9 @@ namespace MonAmour.Controllers
                         else
                         {
                             ModelState.AddModelError("AvatarFile", "Không thể upload avatar. Vui lòng thử lại.");
-                            await SetAdminViewBagAsync();
-                            return View(model);
-                        }
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
                     }
                     catch (Exception ex)
                     {

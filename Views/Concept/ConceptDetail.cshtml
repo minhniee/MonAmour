@@ -132,33 +132,24 @@
 		</section>
 	}
 
-	<!-- Main Color Palette Section -->
+	<!-- Primary Image Information Section -->
 	<section class="py-12">
 		<div class="container mx-auto px-4 text-center">
-			<h3 class="font-prata text-3xl text-wine-red mb-4">Tông màu chủ đạo</h3>
-			<p class="font-noto-serif text-lg text-gray-700 mb-8 max-w-2xl mx-auto">Mô tả về tông màu và phong cách thiết kế</p>
 			@{
-				var palette = Model.ConceptColorJunctions?
-					.Select(j => j.Color)
-					.Where(c => c != null && !string.IsNullOrWhiteSpace(c.Code))
-					.ToList();
+				var primaryImageInfo = Model.ConceptImgs?.FirstOrDefault(img => img.IsPrimary == true);
 			}
-			@if (palette != null && palette.Any())
+			@if (primaryImageInfo != null)
 			{
-				<div class="flex justify-center space-x-4">
-					@foreach (var color in palette)
-					{
-						<div class="w-16 h-16 rounded-full shadow-lg border-2 border-wine-red" style="background-color: @color.Code"></div>
-					}
+				<div class="space-y-4">
+					<h4 class="font-semibold text-wine-red text-xl text-center">@(primaryImageInfo.ImgName ?? "Hình ảnh chính concept")</h4>
+					<p class="text-gray-700 text-lg text-justify">@(primaryImageInfo.AltText ?? "Ảnh chính của concept " + Model.Name)</p>
 				</div>
 			}
 			else
 			{
-				<div class="flex justify-center space-x-4">
-					<div class="w-16 h-16 rounded-full bg-wine-red shadow-lg"></div>
-					<div class="w-16 h-16 rounded-full bg-beige border-2 border-wine-red shadow-lg"></div>
-					<div class="w-16 h-16 rounded-full bg-gray-300 shadow-lg"></div>
-					<div class="w-16 h-16 rounded-full bg-gray-600 shadow-lg"></div>
+				<div class="space-y-4">
+					<h4 class="font-semibold text-wine-red text-xl text-center">Hình ảnh chính concept</h4>
+					<p class="text-gray-700 text-lg text-justify">Ảnh chính của concept @Model.Name</p>
 				</div>
 			}
 		</div>
