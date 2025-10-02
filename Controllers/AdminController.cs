@@ -19,8 +19,9 @@ namespace MonAmour.Controllers
         private readonly IOrderService _orderService;
         private readonly ILogger<AdminController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, IConceptService conceptService, IOrderService orderService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
+        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, IConceptService conceptService, IOrderService orderService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment, ICloudinaryService cloudinaryService)
         {
             _authService = authService;
             _userManagementService = userManagementService;
@@ -31,6 +32,7 @@ namespace MonAmour.Controllers
             _orderService = orderService;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
+            _cloudinaryService = cloudinaryService;
         }
 
         /// <summary>
@@ -254,50 +256,34 @@ namespace MonAmour.Controllers
                 // Xử lý file upload avatar nếu có
                 if (AvatarFile != null && AvatarFile.Length > 0)
                 {
-                    // Kiểm tra kích thước file (5MB)
-                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    try
                     {
-                        TempData["Error"] = "File avatar quá lớn. Kích thước tối đa là 5MB.";
+                        // Upload to Cloudinary
+                        var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "avatars");
+                        
+                        if (!string.IsNullOrEmpty(avatarUrl))
+                        {
+                            model.Avatar = avatarUrl;
+                            _logger.LogInformation("Avatar uploaded successfully to Cloudinary: {Url}", avatarUrl);
+                        }
+                        else
+                        {
+                            TempData["Error"] = "Không thể upload avatar. Vui lòng thử lại.";
+                            await SetAdminViewBagAsync();
+                            var roles = await _userManagementService.GetAllRolesAsync();
+                            ViewBag.Roles = roles;
+                            return View(model);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error uploading avatar to Cloudinary");
+                        TempData["Error"] = "Có lỗi xảy ra khi upload avatar. Vui lòng thử lại.";
                         await SetAdminViewBagAsync();
                         var roles = await _userManagementService.GetAllRolesAsync();
                         ViewBag.Roles = roles;
                         return View(model);
                     }
-
-                    // Kiểm tra loại file
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
-                    if (!allowedExtensions.Contains(fileExtension))
-                    {
-                        TempData["Error"] = "Chỉ hỗ trợ file JPG, PNG, GIF cho avatar.";
-                        await SetAdminViewBagAsync();
-                        var roles = await _userManagementService.GetAllRolesAsync();
-                        ViewBag.Roles = roles;
-                        return View(model);
-                    }
-
-                    // Tạo tên file duy nhất
-                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
-
-                    // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
-
-                    // Tạo thư mục nếu chưa tồn tại
-                    if (!Directory.Exists(uploadPath))
-                    {
-                        Directory.CreateDirectory(uploadPath);
-                    }
-
-                    var filePath = Path.Combine(uploadPath, fileName);
-
-                    // Lưu file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await AvatarFile.CopyToAsync(stream);
-                    }
-
-                    // Cập nhật Avatar URL trong model
-                    model.Avatar = $"/Imagine/Avatars/{fileName}";
                 }
 
                 var result = await _userManagementService.CreateUserAsync(model, adminUserId.Value);
@@ -455,48 +441,32 @@ namespace MonAmour.Controllers
                 // Xử lý file upload avatar nếu có
                 if (AvatarFile != null && AvatarFile.Length > 0)
                 {
-                    // Kiểm tra kích thước file (5MB)
-                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    try
                     {
-                        TempData["Error"] = "File avatar quá lớn. Kích thước tối đa là 5MB.";
+                        // Upload to Cloudinary
+                        var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "avatars");
+                        
+                        if (!string.IsNullOrEmpty(avatarUrl))
+                        {
+                            model.Avatar = avatarUrl;
+                            _logger.LogInformation("Avatar uploaded successfully to Cloudinary: {Url}", avatarUrl);
+                        }
+                        else
+                        {
+                            TempData["Error"] = "Không thể upload avatar. Vui lòng thử lại.";
+                            var roles = await _userManagementService.GetAllRolesAsync();
+                            ViewBag.Roles = roles;
+                            return View(model);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error uploading avatar to Cloudinary");
+                        TempData["Error"] = "Có lỗi xảy ra khi upload avatar. Vui lòng thử lại.";
                         var roles = await _userManagementService.GetAllRolesAsync();
                         ViewBag.Roles = roles;
                         return View(model);
                     }
-
-                    // Kiểm tra loại file
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
-                    if (!allowedExtensions.Contains(fileExtension))
-                    {
-                        TempData["Error"] = "Chỉ hỗ trợ file JPG, PNG, GIF cho avatar.";
-                        var roles = await _userManagementService.GetAllRolesAsync();
-                        ViewBag.Roles = roles;
-                        return View(model);
-                    }
-
-                    // Tạo tên file duy nhất
-                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
-
-                    // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
-
-                    // Tạo thư mục nếu chưa tồn tại
-                    if (!Directory.Exists(uploadPath))
-                    {
-                        Directory.CreateDirectory(uploadPath);
-                    }
-
-                    var filePath = Path.Combine(uploadPath, fileName);
-
-                    // Lưu file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await AvatarFile.CopyToAsync(stream);
-                    }
-
-                    // Cập nhật Avatar URL trong model
-                    model.Avatar = $"/Imagine/Avatars/{fileName}";
                 }
                 else
                 {
@@ -1552,42 +1522,26 @@ namespace MonAmour.Controllers
                 // Xử lý file upload nếu có
                 if (ImageFile != null && ImageFile.Length > 0)
                 {
-                    // Kiểm tra kích thước file (5MB)
-                    if (ImageFile.Length > 5 * 1024 * 1024)
+                    try
                     {
-                        return Json(new { success = false, message = "File quá lớn. Kích thước tối đa là 5MB." });
+                        // Upload to Cloudinary
+                        var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "products");
+                        
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            model.ImgUrl = imageUrl;
+                            _logger.LogInformation("Product image uploaded successfully to Cloudinary: {Url}", imageUrl);
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Không thể upload hình ảnh. Vui lòng thử lại." });
+                        }
                     }
-
-                    // Kiểm tra loại file
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var fileExtension = Path.GetExtension(ImageFile.FileName).ToLowerInvariant();
-                    if (!allowedExtensions.Contains(fileExtension))
+                    catch (Exception ex)
                     {
-                        return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF." });
+                        _logger.LogError(ex, "Error uploading product image to Cloudinary");
+                        return Json(new { success = false, message = "Có lỗi xảy ra khi upload hình ảnh. Vui lòng thử lại." });
                     }
-
-                    // Tạo tên file duy nhất
-                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
-
-                    // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGProduct");
-
-                    // Tạo thư mục nếu chưa tồn tại
-                    if (!Directory.Exists(uploadPath))
-                    {
-                        Directory.CreateDirectory(uploadPath);
-                    }
-
-                    var filePath = Path.Combine(uploadPath, fileName);
-
-                    // Lưu file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await ImageFile.CopyToAsync(stream);
-                    }
-
-                    // Cập nhật URL trong model
-                    model.ImgUrl = $"/Imagine/IMGProduct/{fileName}";
                 }
                 else if (string.IsNullOrEmpty(model.ImgUrl))
                 {
@@ -1717,42 +1671,36 @@ namespace MonAmour.Controllers
                 // Xử lý file upload nếu có
                 if (ImageFile != null && ImageFile.Length > 0)
                 {
-                    // Kiểm tra kích thước file (5MB)
-                    if (ImageFile.Length > 5 * 1024 * 1024)
+                    try
                     {
-                        return Json(new { success = false, message = "File quá lớn. Kích thước tối đa là 5MB." });
+                        // Delete old image if it exists
+                        if (!string.IsNullOrEmpty(existingImage.ImgUrl))
+                        {
+                            var publicId = _cloudinaryService.ExtractPublicIdFromUrl(existingImage.ImgUrl);
+                            if (!string.IsNullOrEmpty(publicId))
+                            {
+                                await _cloudinaryService.DeleteImageAsync(publicId);
+                            }
+                        }
+                        
+                        // Upload new image to Cloudinary
+                        var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "products");
+                        
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            model.ImgUrl = imageUrl;
+                            _logger.LogInformation("Product image updated successfully to Cloudinary: {Url}", imageUrl);
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Không thể upload hình ảnh. Vui lòng thử lại." });
+                        }
                     }
-
-                    // Kiểm tra loại file
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var fileExtension = Path.GetExtension(ImageFile.FileName).ToLowerInvariant();
-                    if (!allowedExtensions.Contains(fileExtension))
+                    catch (Exception ex)
                     {
-                        return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF." });
+                        _logger.LogError(ex, "Error uploading product image to Cloudinary");
+                        return Json(new { success = false, message = "Có lỗi xảy ra khi upload hình ảnh. Vui lòng thử lại." });
                     }
-
-                    // Tạo tên file duy nhất
-                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
-
-                    // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
-                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGProduct");
-
-                    // Tạo thư mục nếu chưa tồn tại
-                    if (!Directory.Exists(uploadPath))
-                    {
-                        Directory.CreateDirectory(uploadPath);
-                    }
-
-                    var filePath = Path.Combine(uploadPath, fileName);
-
-                    // Lưu file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await ImageFile.CopyToAsync(stream);
-                    }
-
-                    // Cập nhật URL trong model
-                    model.ImgUrl = $"/Imagine/IMGProduct/{fileName}";
                 }
                 else
                 {
@@ -1907,48 +1855,33 @@ namespace MonAmour.Controllers
                     return View(model);
                 }
 
-                // Handle avatar file upload
+                // Handle avatar file upload using Cloudinary
                 if (AvatarFile != null && AvatarFile.Length > 0)
                 {
-                    // Validate file type
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
-
-                    if (!allowedExtensions.Contains(fileExtension))
+                    try
                     {
-                        ModelState.AddModelError("AvatarFile", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        // Upload to Cloudinary
+                        var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "partners");
+                        
+                        if (!string.IsNullOrEmpty(avatarUrl))
+                        {
+                            model.Avatar = avatarUrl;
+                            _logger.LogInformation("Partner avatar uploaded successfully to Cloudinary: {Url}", avatarUrl);
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("AvatarFile", "Không thể upload avatar. Vui lòng thử lại.");
+                            await SetAdminViewBagAsync();
+                            return View(model);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error uploading partner avatar to Cloudinary");
+                        ModelState.AddModelError("AvatarFile", "Có lỗi xảy ra khi upload avatar. Vui lòng thử lại.");
                         await SetAdminViewBagAsync();
                         return View(model);
                     }
-
-                    // Validate file size (max 5MB)
-                    if (AvatarFile.Length > 5 * 1024 * 1024)
-                    {
-                        ModelState.AddModelError("AvatarFile", "Kích thước file không được vượt quá 5MB");
-                        await SetAdminViewBagAsync();
-                        return View(model);
-                    }
-
-                    // Create unique filename
-                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
-                    var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
-
-                    // Ensure directory exists
-                    if (!Directory.Exists(uploadsPath))
-                    {
-                        Directory.CreateDirectory(uploadsPath);
-                    }
-
-                    var filePath = Path.Combine(uploadsPath, fileName);
-
-                    // Save file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await AvatarFile.CopyToAsync(stream);
-                    }
-
-                    // Update model with new avatar path
-                    model.Avatar = $"/Imagine/Avatars/{fileName}";
                 }
 
                 var result = await _partnerService.CreatePartnerAsync(model);
@@ -2296,48 +2229,55 @@ namespace MonAmour.Controllers
                     return View(model);
                 }
 
-                // Handle avatar file upload
+                // Handle avatar file upload using Cloudinary
                 if (AvatarFile != null && AvatarFile.Length > 0)
                 {
-                    // Validate file type
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
-
-                    if (!allowedExtensions.Contains(fileExtension))
+                    try
                     {
-                        ModelState.AddModelError("AvatarFile", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        // Get existing partner to delete old avatar if needed
+                        var existingPartner = await _partnerService.GetPartnerByIdAsync(model.PartnerId);
+                        
+                        // Delete old avatar if it exists
+                        if (existingPartner != null && !string.IsNullOrEmpty(existingPartner.Avatar))
+                        {
+                            var publicId = _cloudinaryService.ExtractPublicIdFromUrl(existingPartner.Avatar);
+                            if (!string.IsNullOrEmpty(publicId))
+                            {
+                                await _cloudinaryService.DeleteImageAsync(publicId);
+                            }
+                        }
+                        
+                        // Upload new avatar to Cloudinary
+                        var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "partners");
+                        
+                        if (!string.IsNullOrEmpty(avatarUrl))
+                        {
+                            model.Avatar = avatarUrl;
+                            _logger.LogInformation("Partner avatar updated successfully to Cloudinary: {Url}", avatarUrl);
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("AvatarFile", "Không thể upload avatar. Vui lòng thử lại.");
+                            await SetAdminViewBagAsync();
+                            return View(model);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error uploading partner avatar to Cloudinary");
+                        ModelState.AddModelError("AvatarFile", "Có lỗi xảy ra khi upload avatar. Vui lòng thử lại.");
                         await SetAdminViewBagAsync();
                         return View(model);
                     }
-
-                    // Validate file size (max 5MB)
-                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                }
+                else
+                {
+                    // If no new avatar file, keep existing avatar
+                    var existingPartner = await _partnerService.GetPartnerByIdAsync(model.PartnerId);
+                    if (existingPartner != null)
                     {
-                        ModelState.AddModelError("AvatarFile", "Kích thước file không được vượt quá 5MB");
-                        await SetAdminViewBagAsync();
-                        return View(model);
+                        model.Avatar = existingPartner.Avatar;
                     }
-
-                    // Create unique filename
-                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
-                    var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
-
-                    // Ensure directory exists
-                    if (!Directory.Exists(uploadsPath))
-                    {
-                        Directory.CreateDirectory(uploadsPath);
-                    }
-
-                    var filePath = Path.Combine(uploadsPath, fileName);
-
-                    // Save file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await AvatarFile.CopyToAsync(stream);
-                    }
-
-                    // Update model with new avatar path
-                    model.Avatar = $"/Imagine/Avatars/{fileName}";
                 }
 
                 var result = await _partnerService.UpdatePartnerAsync(model);
@@ -3668,20 +3608,6 @@ namespace MonAmour.Controllers
                     return Json(new { success = false, message = "Vui lòng chọn file hình ảnh!" });
                 }
 
-                // Validate file type
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF!" });
-                }
-
-                // Validate file size (5MB max)
-                if (imageFile.Length > 5 * 1024 * 1024)
-                {
-                    return Json(new { success = false, message = "Kích thước file không được vượt quá 5MB!" });
-                }
-
                 // Check if concept can add more images
                 var canAddMore = await _conceptService.CanConceptAddMoreImagesAsync(model.ConceptId);
                 if (!canAddMore)
@@ -3689,23 +3615,26 @@ namespace MonAmour.Controllers
                     return Json(new { success = false, message = "Concept này đã đạt giới hạn 3 hình ảnh!" });
                 }
 
-                // Generate unique filename
-                var fileName = Guid.NewGuid().ToString() + fileExtension;
-                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGConcept");
-
-                if (!Directory.Exists(uploadPath))
+                try
                 {
-                    Directory.CreateDirectory(uploadPath);
+                    // Upload to Cloudinary
+                    var imageUrl = await _cloudinaryService.UploadImageAsync(imageFile, "concepts");
+                    
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        model.ImgUrl = imageUrl;
+                        _logger.LogInformation("Concept image uploaded successfully to Cloudinary: {Url}", imageUrl);
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Không thể upload hình ảnh. Vui lòng thử lại." });
+                    }
                 }
-
-                var filePath = Path.Combine(uploadPath, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                catch (Exception ex)
                 {
-                    await imageFile.CopyToAsync(stream);
+                    _logger.LogError(ex, "Error uploading concept image to Cloudinary");
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi upload hình ảnh. Vui lòng thử lại." });
                 }
-
-                // Set image URL
-                model.ImgUrl = $"/Imagine/IMGConcept/{fileName}";
 
                 // Set default values
                 if (string.IsNullOrEmpty(model.ImgName))
@@ -3728,10 +3657,14 @@ namespace MonAmour.Controllers
                 }
                 else
                 {
-                    // Delete uploaded file if database operation failed
-                    if (System.IO.File.Exists(filePath))
+                    // If database operation failed, try to delete the uploaded image from Cloudinary
+                    if (!string.IsNullOrEmpty(model.ImgUrl))
                     {
-                        System.IO.File.Delete(filePath);
+                        var publicId = _cloudinaryService.ExtractPublicIdFromUrl(model.ImgUrl);
+                        if (!string.IsNullOrEmpty(publicId))
+                        {
+                            await _cloudinaryService.DeleteImageAsync(publicId);
+                        }
                     }
                     return Json(new { success = false, message = "Không thể thêm hình ảnh concept!" });
                 }
@@ -3757,47 +3690,36 @@ namespace MonAmour.Controllers
                 // If new image file is provided
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    // Validate file type
-                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                    var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-                    if (!allowedExtensions.Contains(fileExtension))
+                    try
                     {
-                        return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF!" });
-                    }
-
-                    // Validate file size (5MB max)
-                    if (imageFile.Length > 5 * 1024 * 1024)
-                    {
-                        return Json(new { success = false, message = "Kích thước file không được vượt quá 5MB!" });
-                    }
-
-                    // Generate unique filename
-                    var fileName = Guid.NewGuid().ToString() + fileExtension;
-                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGConcept");
-
-                    if (!Directory.Exists(uploadPath))
-                    {
-                        Directory.CreateDirectory(uploadPath);
-                    }
-
-                    var filePath = Path.Combine(uploadPath, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(stream);
-                    }
-
-                    // Delete old image file
-                    if (!string.IsNullOrEmpty(existingImage.ImgUrl))
-                    {
-                        var oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, existingImage.ImgUrl.TrimStart('/'));
-                        if (System.IO.File.Exists(oldFilePath))
+                        // Delete old image if it exists
+                        if (!string.IsNullOrEmpty(existingImage.ImgUrl))
                         {
-                            System.IO.File.Delete(oldFilePath);
+                            var publicId = _cloudinaryService.ExtractPublicIdFromUrl(existingImage.ImgUrl);
+                            if (!string.IsNullOrEmpty(publicId))
+                            {
+                                await _cloudinaryService.DeleteImageAsync(publicId);
+                            }
+                        }
+                        
+                        // Upload new image to Cloudinary
+                        var imageUrl = await _cloudinaryService.UploadImageAsync(imageFile, "concepts");
+                        
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            model.ImgUrl = imageUrl;
+                            _logger.LogInformation("Concept image updated successfully to Cloudinary: {Url}", imageUrl);
+                        }
+                        else
+                        {
+                            return Json(new { success = false, message = "Không thể upload hình ảnh. Vui lòng thử lại." });
                         }
                     }
-
-                    // Set new image URL
-                    model.ImgUrl = $"/Imagine/IMGConcept/{fileName}";
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error uploading concept image to Cloudinary");
+                        return Json(new { success = false, message = "Có lỗi xảy ra khi upload hình ảnh. Vui lòng thử lại." });
+                    }
                 }
                 else
                 {
@@ -3836,13 +3758,13 @@ namespace MonAmour.Controllers
                 var result = await _conceptService.DeleteConceptImageAsync(imageId);
                 if (result)
                 {
-                    // Delete image file
+                    // Delete image from Cloudinary
                     if (!string.IsNullOrEmpty(existingImage.ImgUrl))
                     {
-                        var filePath = Path.Combine(_webHostEnvironment.WebRootPath, existingImage.ImgUrl.TrimStart('/'));
-                        if (System.IO.File.Exists(filePath))
+                        var publicId = _cloudinaryService.ExtractPublicIdFromUrl(existingImage.ImgUrl);
+                        if (!string.IsNullOrEmpty(publicId))
                         {
-                            System.IO.File.Delete(filePath);
+                            await _cloudinaryService.DeleteImageAsync(publicId);
                         }
                     }
 

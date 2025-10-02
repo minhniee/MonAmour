@@ -89,11 +89,12 @@
 }
 else
 {
+    <!-- Desktop Login/Signup Buttons (hidden on mobile to avoid duplication) -->
     <div class="hidden md:flex items-center space-x-4">
-        <a href="@Url.Action("Login", "Auth")" class="text-sm md:text-base font-bold text-foreground hover:text-foreground/80">
+        <a href="@Url.Action("Login", "Auth")" class="text-base font-bold text-foreground hover:text-foreground/80">
             Đăng nhập
         </a>
-        <a href="@Url.Action("Signup", "Auth")" class="px-3 py-1.5 text-sm md:text-base font-bold bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+        <a href="@Url.Action("Signup", "Auth")" class="px-3 py-1.5 text-base font-bold bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
             Đăng ký
         </a>
     </div>

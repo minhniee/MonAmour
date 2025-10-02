@@ -11,11 +11,13 @@ public class UserManagementService : IUserManagementService
 {
     private readonly MonAmourDbContext _context;
     private readonly ILogger<UserManagementService> _logger;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public UserManagementService(MonAmourDbContext context, ILogger<UserManagementService> logger)
+    public UserManagementService(MonAmourDbContext context, ILogger<UserManagementService> logger, ICloudinaryService cloudinaryService)
     {
         _context = context;
         _logger = logger;
+        _cloudinaryService = cloudinaryService;
     }
 
     public async Task<(List<AdminUserViewModel.UserListViewModel> Users, int TotalCount)> GetUsersAsync(AdminUserViewModel.UserSearchViewModel searchModel)
@@ -177,94 +179,111 @@ public class UserManagementService : IUserManagementService
 
     public async Task<bool> CreateUserAsync(AdminUserViewModel.UserCreateViewModel model, int adminUserId)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            _logger.LogInformation("CreateUserAsync started with email: {Email}, phone: {Phone}, adminUserId: {AdminUserId}",
-                model.Email, model.Phone, adminUserId);
-
-            // Check for duplicates
-            var (emailExists, phoneExists) = await CheckDuplicateAsync(model.Email, model.Phone);
-
-            if (emailExists)
+            // Use execution strategy to handle retries and transactions
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                _logger.LogWarning("Email already exists: {Email}", model.Email);
-                throw new InvalidOperationException("EMAIL_EXISTS");
-            }
-
-            if (phoneExists)
-            {
-                _logger.LogWarning("Phone already exists: {Phone}", model.Phone);
-                throw new InvalidOperationException("PHONE_EXISTS");
-            }
-
-            _logger.LogInformation("Email and phone are available: {Email}, {Phone}", model.Email, model.Phone);
-
-            // Validate roles exist
-            var validRoleIds = await _context.Roles
-                .Where(r => model.RoleIds.Contains(r.RoleId))
-                .Select(r => r.RoleId)
-                .ToListAsync();
-
-            if (validRoleIds.Count != model.RoleIds.Count)
-            {
-                _logger.LogWarning("Some roles don't exist. Requested: {RequestedRoles}, Valid: {ValidRoles}",
-                    string.Join(",", model.RoleIds), string.Join(",", validRoleIds));
-                throw new InvalidOperationException("INVALID_ROLES");
-            }
-
-            var user = new User
-            {
-                Email = model.Email.Trim(),
-                Password = HashPassword(model.Password),
-                Name = model.Name?.Trim(),
-                Phone = model.Phone?.Trim(),
-                Avatar = string.IsNullOrWhiteSpace(model.Avatar) ? null : model.Avatar.Trim(),
-                BirthDate = model.BirthDate.HasValue ? DateOnly.FromDateTime(model.BirthDate.Value) : null,
-                Gender = model.Gender,
-                Status = model.Status,
-                Verified = model.Verified,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
-
-            _logger.LogInformation("Creating user object: Email={Email}, Name={Name}, Phone={Phone}",
-                user.Email, user.Name, user.Phone);
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("User saved to database, UserId: {UserId}", user.UserId);
-
-            // Assign roles
-            _logger.LogInformation("Assigning roles: {RoleIds}", string.Join(",", model.RoleIds));
-            foreach (var roleId in model.RoleIds)
-            {
-                var userRole = new UserRole
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    UserId = user.UserId,
-                    RoleId = roleId,
-                    AssignedAt = DateTime.Now,
-                    AssignedBy = adminUserId
-                };
-                _context.UserRoles.Add(userRole);
-            }
+                    _logger.LogInformation("CreateUserAsync started with email: {Email}, phone: {Phone}, adminUserId: {AdminUserId}",
+                        model.Email, model.Phone, adminUserId);
 
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
+                    // Check for duplicates
+                    var (emailExists, phoneExists) = await CheckDuplicateAsync(model.Email, model.Phone);
 
-            _logger.LogInformation("User created successfully: {UserId} by admin {AdminUserId}",
-                user.UserId, adminUserId);
-            return true;
+                    if (emailExists)
+                    {
+                        _logger.LogWarning("Email already exists: {Email}", model.Email);
+                        throw new InvalidOperationException("EMAIL_EXISTS");
+                    }
+
+                    if (phoneExists)
+                    {
+                        _logger.LogWarning("Phone already exists: {Phone}", model.Phone);
+                        throw new InvalidOperationException("PHONE_EXISTS");
+                    }
+
+                    _logger.LogInformation("Email and phone are available: {Email}, {Phone}", model.Email, model.Phone);
+
+                    // Validate roles exist
+                    var validRoleIds = await _context.Roles
+                        .Where(r => model.RoleIds.Contains(r.RoleId))
+                        .Select(r => r.RoleId)
+                        .ToListAsync();
+
+                    if (validRoleIds.Count != model.RoleIds.Count)
+                    {
+                        _logger.LogWarning("Some roles don't exist. Requested: {RequestedRoles}, Valid: {ValidRoles}",
+                            string.Join(",", model.RoleIds), string.Join(",", validRoleIds));
+                        throw new InvalidOperationException("INVALID_ROLES");
+                    }
+
+                    var user = new User
+                    {
+                        Email = model.Email.Trim(),
+                        Password = HashPassword(model.Password),
+                        Name = model.Name?.Trim(),
+                        Phone = model.Phone?.Trim(),
+                        Avatar = string.IsNullOrWhiteSpace(model.Avatar) ? null : model.Avatar.Trim(),
+                        BirthDate = model.BirthDate.HasValue ? DateOnly.FromDateTime(model.BirthDate.Value) : null,
+                        Gender = model.Gender,
+                        Status = model.Status,
+                        Verified = model.Verified,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+
+                    _logger.LogInformation("Creating user object: Email={Email}, Name={Name}, Phone={Phone}",
+                        user.Email, user.Name, user.Phone);
+
+                    _context.Users.Add(user);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("User saved to database, UserId: {UserId}", user.UserId);
+
+                    // Assign roles
+                    _logger.LogInformation("Assigning roles: {RoleIds}", string.Join(",", model.RoleIds));
+                    foreach (var roleId in model.RoleIds)
+                    {
+                        var userRole = new UserRole
+                        {
+                            UserId = user.UserId,
+                            RoleId = roleId,
+                            AssignedAt = DateTime.Now,
+                            AssignedBy = adminUserId
+                        };
+                        _context.UserRoles.Add(userRole);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation("User created successfully: {UserId} by admin {AdminUserId}",
+                        user.UserId, adminUserId);
+                    return true;
+                }
+                catch (InvalidOperationException)
+                {
+                    await transaction.RollbackAsync();
+                    throw; // Re-throw để controller xử lý
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error in transaction for user creation with email: {Email}", model.Email);
+                    throw;
+                }
+            });
         }
         catch (InvalidOperationException)
         {
-            await transaction.RollbackAsync();
-            throw; // Re-throw để controller xử lý
+            throw; // Re-throw business logic exceptions
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
             _logger.LogError(ex, "Error creating user with email: {Email}, phone: {Phone}", model.Email, model.Phone);
             return false;
         }

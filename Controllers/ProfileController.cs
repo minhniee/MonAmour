@@ -14,17 +14,17 @@ public class ProfileController : Controller
 {
     private readonly IAuthService _authService;
     private readonly ILogger<ProfileController> _logger;
-    private readonly IWebHostEnvironment _environment;
     private readonly MonAmourDbContext _db;
     private readonly IReviewService _reviewService;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public ProfileController(IAuthService authService, ILogger<ProfileController> logger, IWebHostEnvironment environment, MonAmourDbContext db, IReviewService reviewService)
+    public ProfileController(IAuthService authService, ILogger<ProfileController> logger, MonAmourDbContext db, IReviewService reviewService, ICloudinaryService cloudinaryService)
     {
         _authService = authService;
         _logger = logger;
-        _environment = environment;
         _db = db;
         _reviewService = reviewService;
+        _cloudinaryService = cloudinaryService;
     }
 
     [HttpGet]
@@ -92,39 +92,41 @@ public class ProfileController : Controller
             if (model.BirthDate == null) model.BirthDate = currentUser.BirthDate;
             if (string.IsNullOrWhiteSpace(model.Gender)) model.Gender = currentUser.Gender ?? string.Empty;
 
-            // Handle avatar upload (max 20MB, png/jpg/jpeg), save as wwwroot/avatars/{userId}.{ext}
+            // Handle avatar upload using Cloudinary
             if (avatar != null && avatar.Length > 0)
             {
-                const long maxBytes = 20L * 1024 * 1024; // 20MB
-                if (avatar.Length > maxBytes)
+                try
                 {
-                    ModelState.AddModelError("", "Ảnh đại diện vượt quá dung lượng tối đa 20MB.");
+                    // Delete old avatar if it exists
+                    if (!string.IsNullOrEmpty(currentUser.Avatar))
+                    {
+                        var publicId = _cloudinaryService.ExtractPublicIdFromUrl(currentUser.Avatar);
+                        if (!string.IsNullOrEmpty(publicId))
+                        {
+                            await _cloudinaryService.DeleteImageAsync(publicId);
+                        }
+                    }
+                    
+                    // Upload new avatar to Cloudinary
+                    var avatarUrl = await _cloudinaryService.UploadImageAsync(avatar, "avatars");
+                    
+                    if (!string.IsNullOrEmpty(avatarUrl))
+                    {
+                        model.Avatar = avatarUrl;
+                        _logger.LogInformation("Avatar uploaded successfully to Cloudinary: {Url}", avatarUrl);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Không thể upload ảnh đại diện. Vui lòng thử lại.");
+                        return View("Index", model);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading avatar to Cloudinary");
+                    ModelState.AddModelError("", "Có lỗi xảy ra khi upload ảnh đại diện. Vui lòng thử lại.");
                     return View("Index", model);
                 }
-
-                var ext = Path.GetExtension(avatar.FileName).ToLowerInvariant();
-                var allowed = new[] { ".png", ".jpg", ".jpeg" };
-                if (!allowed.Contains(ext))
-                {
-                    ModelState.AddModelError("", "Định dạng ảnh không hợp lệ. Chỉ hỗ trợ PNG/JPG/JPEG.");
-                    return View("Index", model);
-                }
-
-                var avatarsDir = Path.Combine(_environment.WebRootPath, "avatars");
-                if (!Directory.Exists(avatarsDir))
-                {
-                    Directory.CreateDirectory(avatarsDir);
-                }
-
-                var fileName = $"{userId.Value}{ext}";
-                var filePath = Path.Combine(avatarsDir, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    await avatar.CopyToAsync(stream);
-                }
-
-                model.Avatar = $"/avatars/{fileName}";
             }
             else
             {

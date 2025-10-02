@@ -9,13 +9,13 @@ namespace MonAmour.Services.Implements
     {
         private readonly MonAmourDbContext _context;
         private readonly ILogger<BannerManagementService> _logger;
-        private readonly IFileUploadService _fileUploadService;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public BannerManagementService(MonAmourDbContext context, ILogger<BannerManagementService> logger, IFileUploadService fileUploadService)
+        public BannerManagementService(MonAmourDbContext context, ILogger<BannerManagementService> logger, ICloudinaryService cloudinaryService)
         {
             _context = context;
             _logger = logger;
-            _fileUploadService = fileUploadService;
+            _cloudinaryService = cloudinaryService;
         }
 
         #region BannerService Methods
@@ -70,7 +70,7 @@ namespace MonAmour.Services.Implements
                 
                 if (model.ImageFile != null)
                 {
-                    imageUrl = await _fileUploadService.UploadBannerImageAsync(model.ImageFile, "service");
+                    imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "banners/service");
                     if (string.IsNullOrEmpty(imageUrl))
                     {
                         _logger.LogError("Failed to upload banner service image");
@@ -133,7 +133,18 @@ namespace MonAmour.Services.Implements
                 // Handle image update
                 if (model.ImageFile != null)
                 {
-                    var newImageUrl = await _fileUploadService.UpdateBannerImageAsync(model.ImageFile, banner.ImgUrl, "service");
+                    // Delete old image if it exists
+                    if (!string.IsNullOrEmpty(banner.ImgUrl))
+                    {
+                        var publicId = _cloudinaryService.ExtractPublicIdFromUrl(banner.ImgUrl);
+                        if (!string.IsNullOrEmpty(publicId))
+                        {
+                            await _cloudinaryService.DeleteImageAsync(publicId);
+                        }
+                    }
+                    
+                    // Upload new image
+                    var newImageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "banners/service");
                     if (!string.IsNullOrEmpty(newImageUrl))
                     {
                         banner.ImgUrl = newImageUrl;
@@ -181,8 +192,15 @@ namespace MonAmour.Services.Implements
                 var banner = await _context.BannerServices.FindAsync(id);
                 if (banner == null) return false;
 
-                // Delete associated image file
-                await _fileUploadService.DeleteBannerImageAsync(banner.ImgUrl);
+                // Delete associated image file from Cloudinary
+                if (!string.IsNullOrEmpty(banner.ImgUrl))
+                {
+                    var publicId = _cloudinaryService.ExtractPublicIdFromUrl(banner.ImgUrl);
+                    if (!string.IsNullOrEmpty(publicId))
+                    {
+                        await _cloudinaryService.DeleteImageAsync(publicId);
+                    }
+                }
 
                 _context.BannerServices.Remove(banner);
                 await _context.SaveChangesAsync();
@@ -301,7 +319,7 @@ namespace MonAmour.Services.Implements
                 
                 if (model.ImageFile != null)
                 {
-                    imageUrl = await _fileUploadService.UploadBannerImageAsync(model.ImageFile, "homepage");
+                    imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "banners/homepage");
                     if (string.IsNullOrEmpty(imageUrl))
                     {
                         _logger.LogError("Failed to upload banner homepage image");
@@ -364,7 +382,18 @@ namespace MonAmour.Services.Implements
                 // Handle image update
                 if (model.ImageFile != null)
                 {
-                    var newImageUrl = await _fileUploadService.UpdateBannerImageAsync(model.ImageFile, banner.ImgUrl, "homepage");
+                    // Delete old image if it exists
+                    if (!string.IsNullOrEmpty(banner.ImgUrl))
+                    {
+                        var publicId = _cloudinaryService.ExtractPublicIdFromUrl(banner.ImgUrl);
+                        if (!string.IsNullOrEmpty(publicId))
+                        {
+                            await _cloudinaryService.DeleteImageAsync(publicId);
+                        }
+                    }
+                    
+                    // Upload new image
+                    var newImageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "banners/homepage");
                     if (!string.IsNullOrEmpty(newImageUrl))
                     {
                         banner.ImgUrl = newImageUrl;
@@ -530,7 +559,7 @@ namespace MonAmour.Services.Implements
                 
                 if (model.ImageFile != null)
                 {
-                    imageUrl = await _fileUploadService.UploadBannerImageAsync(model.ImageFile, "product");
+                    imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "banners/product");
                     if (string.IsNullOrEmpty(imageUrl))
                     {
                         _logger.LogError("Failed to upload banner product image");
@@ -593,7 +622,18 @@ namespace MonAmour.Services.Implements
                 // Handle image update
                 if (model.ImageFile != null)
                 {
-                    var newImageUrl = await _fileUploadService.UpdateBannerImageAsync(model.ImageFile, banner.ImgUrl, "product");
+                    // Delete old image if it exists
+                    if (!string.IsNullOrEmpty(banner.ImgUrl))
+                    {
+                        var publicId = _cloudinaryService.ExtractPublicIdFromUrl(banner.ImgUrl);
+                        if (!string.IsNullOrEmpty(publicId))
+                        {
+                            await _cloudinaryService.DeleteImageAsync(publicId);
+                        }
+                    }
+                    
+                    // Upload new image
+                    var newImageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "banners/product");
                     if (!string.IsNullOrEmpty(newImageUrl))
                     {
                         banner.ImgUrl = newImageUrl;
@@ -642,8 +682,15 @@ namespace MonAmour.Services.Implements
                 var banner = await _context.BannerProducts.FindAsync(id);
                 if (banner == null) return false;
 
-                // Delete associated image file
-                await _fileUploadService.DeleteBannerImageAsync(banner.ImgUrl);
+                // Delete associated image file from Cloudinary
+                if (!string.IsNullOrEmpty(banner.ImgUrl))
+                {
+                    var publicId = _cloudinaryService.ExtractPublicIdFromUrl(banner.ImgUrl);
+                    if (!string.IsNullOrEmpty(publicId))
+                    {
+                        await _cloudinaryService.DeleteImageAsync(publicId);
+                    }
+                }
 
                 _context.BannerProducts.Remove(banner);
                 await _context.SaveChangesAsync();

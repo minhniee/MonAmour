@@ -14,15 +14,16 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<UserMenuFilter>();
 });
 
-// Add Entity Framework with optimized configuration for Azure
+// Add Entity Framework with optimized configuration
 builder.Services.AddDbContext<MonAmourDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
     {
-        sqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorNumbersToAdd: null);
+        // Disable retry strategy to allow manual transactions
+        // sqlOptions.EnableRetryOnFailure(
+        //     maxRetryCount: 5,
+        //     maxRetryDelay: TimeSpan.FromSeconds(30),
+        //     errorNumbersToAdd: null);
         sqlOptions.CommandTimeout(120); // 2 minutes timeout
     });
     
@@ -40,6 +41,7 @@ builder.Services.AddDbContext<MonAmourDbContext>(options =>
 // Configure Settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 
 // Add Session
 builder.Services.AddDistributedMemoryCache();
@@ -75,7 +77,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 // Booking service removed
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IBannerService, BannerManagementService>();
-builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 // Add SignalR
 builder.Services.AddSignalR();
