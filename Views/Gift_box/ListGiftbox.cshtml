@@ -105,43 +105,43 @@
         </div>
     </div>
 
-    <!-- Filter Section -->
-    <div class="bg-beige/30 backdrop-blur-sm border-b border-wine-red/20 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <form method="get" action="@Url.Action("ListGiftbox", "Gift_box")" class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center space-x-4">
-                    <span class="font-prata text-lg text-wine-red">Filter by:</span>
-                    <!-- Categories from database -->
-                    <select name="categoryId" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
-                        <option value="">All Categories</option>
-                        @if (ViewBag.Categories != null)
-                        {
-                            foreach (var c in ViewBag.Categories)
-                            {
-                                <option value="@c.CategoryId" selected="@((int?)ViewBag.SelectedCategoryId == (int)c.CategoryId)">@c.Name</option>
-                            }
-                        }
-                    </select>
-                    <!-- Price filter (static options, send to controller for filtering) -->
-                    <select name="price" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
-                        <option value="">All Prices</option>
-                        <option value="under500k" selected="@((string)ViewBag.SelectedPrice == "under500k")">Dưới 500k</option>
-                        <option value="500k-1m" selected="@((string)ViewBag.SelectedPrice == "500k-1m")">500k - 1 triệu</option>
-                        <option value="1m-2m" selected="@((string)ViewBag.SelectedPrice == "1m-2m")">1 - 2 triệu</option>
-                        <option value="above2m" selected="@((string)ViewBag.SelectedPrice == "above2m")">Trên 2 triệu</option>
-                    </select>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <span class="font-prata text-lg text-wine-red">Sort by:</span>
-                    <select name="sort" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
-                        <option value="newest" selected="@((string)ViewBag.SelectedSort == "newest")">Newest</option>
-                        <option value="price_asc" selected="@((string)ViewBag.SelectedSort == "price_asc")">Price: Low to High</option>
-                        <option value="price_desc" selected="@((string)ViewBag.SelectedSort == "price_desc")">Price: High to Low</option>
-                    </select>
-                </div>
-            </form>
-        </div>
-    </div>
+ <!-- Filter Section -->
+ <div class="bg-beige/30 backdrop-blur-sm border-b border-wine-red/20 sticky top-0 z-10">
+     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+         <form method="get" action="@Url.Action("ListGiftbox", "Gift_box")" class="flex flex-wrap items-center justify-between gap-4">
+             <div class="flex items-center space-x-4">
+                 <span class="font-prata text-lg text-wine-red">Lọc theo:</span>
+                 <!-- Categories from database -->
+                 <select name="categoryId" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
+                     <option value="">Tất cả danh mục</option>
+                     @if (ViewBag.Categories != null)
+                     {
+                         foreach (var c in ViewBag.Categories)
+                         {
+                             <option value="@c.CategoryId" selected="@((int?)ViewBag.SelectedCategoryId == (int)c.CategoryId)">@c.Name</option>
+                         }
+                     }
+                 </select>
+                 <!-- Price filter (static options, send to controller for filtering) -->
+                 <select name="price" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
+                     <option value="">Tất cả mức giá</option>
+                     <option value="under500k" selected="@((string)ViewBag.SelectedPrice == "under500k")">Dưới 500k</option>
+                     <option value="500k-1m" selected="@((string)ViewBag.SelectedPrice == "500k-1m")">500k - 1 triệu</option>
+                     <option value="1m-2m" selected="@((string)ViewBag.SelectedPrice == "1m-2m")">1 - 2 triệu</option>
+                     <option value="above2m" selected="@((string)ViewBag.SelectedPrice == "above2m")">Trên 2 triệu</option>
+                 </select>
+             </div>
+             <div class="flex items-center space-x-2">
+                 <span class="font-prata text-lg text-wine-red">Sắp xếp theo:</span>
+                 <select name="sort" class="bg-white border border-wine-red/30 rounded-lg px-4 py-2 text-wine-red focus:outline-none focus:ring-2 focus:ring-wine-red/50" onchange="this.form.submit()">
+                     <option value="newest" selected="@((string)ViewBag.SelectedSort == "newest")">Mới nhất</option>
+                     <option value="price_asc" selected="@((string)ViewBag.SelectedSort == "price_asc")">Giá: Thấp đến cao</option>
+                     <option value="price_desc" selected="@((string)ViewBag.SelectedSort == "price_desc")">Giá: Cao đến thấp</option>
+                 </select>
+             </div>
+         </form>
+     </div>
+ </div>
 
     <!-- Gift Box Grid -->
     <div id="product-list" class="bg-beige/20 py-12">
