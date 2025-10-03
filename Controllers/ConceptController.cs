@@ -17,7 +17,7 @@ namespace MonAmour.Controllers
             _emailService = emailService;
         }
 
-        public async Task<IActionResult> ListConcept(int? categoryId, int page = 1, string? city = null, string? q = null)
+        public async Task<IActionResult> ListConcept(int? categoryId, int page = 1, string? city = null, string? q = null, string? sortBy = null)
         {
             const int pageSize = 8;
             if (page < 1) page = 1;
@@ -67,7 +67,26 @@ namespace MonAmour.Controllers
                 );
             }
 
-            query = query.OrderByDescending(c => c.CreatedAt).ThenByDescending(c => c.ConceptId);
+            // Apply sorting
+            switch (sortBy)
+            {
+                case "price_asc":
+                    query = query.OrderBy(c => c.Price ?? decimal.MaxValue).ThenByDescending(c => c.CreatedAt);
+                    break;
+                case "price_desc":
+                    query = query.OrderByDescending(c => c.Price ?? decimal.MinValue).ThenByDescending(c => c.CreatedAt);
+                    break;
+                case "name_asc":
+                    query = query.OrderBy(c => c.Name).ThenByDescending(c => c.CreatedAt);
+                    break;
+                case "name_desc":
+                    query = query.OrderByDescending(c => c.Name).ThenByDescending(c => c.CreatedAt);
+                    break;
+                default:
+                    // Default: Sort by price ascending (lowest to highest)
+                    query = query.OrderBy(c => c.Price ?? decimal.MaxValue).ThenByDescending(c => c.CreatedAt);
+                    break;
+            }
 
             var totalItems = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
@@ -88,6 +107,7 @@ namespace MonAmour.Controllers
             ViewBag.Cities = cities;
             ViewBag.SelectedCity = city;
             ViewBag.Search = q;
+            ViewBag.SortBy = string.IsNullOrEmpty(sortBy) ? "price_asc" : sortBy;
 
             return View(items);
         }

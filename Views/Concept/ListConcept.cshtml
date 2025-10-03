@@ -135,6 +135,13 @@
                                  <option value="@c" selected="@(selectedCity == c)">@c</option>
 							}
 						</select>
+						<select name="sortBy" class="select w-full md:w-48">
+							<option value="">Sắp xếp theo</option>
+							<option value="price_asc" selected="@(ViewBag.SortBy == "price_asc")">Giá tăng dần</option>
+							<option value="price_desc" selected="@(ViewBag.SortBy == "price_desc")">Giá giảm dần</option>
+							<option value="name_asc" selected="@(ViewBag.SortBy == "name_asc")">Tên A-Z</option>
+							<option value="name_desc" selected="@(ViewBag.SortBy == "name_desc")">Tên Z-A</option>
+						</select>
 						<div class="flex gap-3 md:ml-2">
 							<button type="submit" class="btn-primary">Lọc</button>
                             <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = 1 })" class="btn-outline">Xóa lọc</a>
@@ -144,11 +151,11 @@
 				
 				<!-- Category Filter Tabs -->
 				<div class="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-12">
-                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = (int?)null, page = 1, city = selectedCity, q = search })" class="pill @(selectedCat == null ? "pill-active" : "")">Tất cả dịch vụ</a>
+                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = (int?)null, page = 1, city = selectedCity, q = search, sortBy = ViewBag.SortBy })" class="pill @(selectedCat == null ? "pill-active" : "")">Tất cả dịch vụ</a>
 					@foreach (var cat in categories)
 					{
 						var active = selectedCat == cat.CategoryId;
-                        <a href="@Url.Action("ListConcept", "Concept", new { categoryId = cat.CategoryId, page = 1, city = selectedCity, q = search })" class="pill @(active ? "pill-active" : "")">@cat.Name</a>
+                        <a href="@Url.Action("ListConcept", "Concept", new { categoryId = cat.CategoryId, page = 1, city = selectedCity, q = search, sortBy = ViewBag.SortBy })" class="pill @(active ? "pill-active" : "")">@cat.Name</a>
 					}
 				</div>
 			</div>
@@ -229,7 +236,7 @@
 					<div class="flex items-center justify-center gap-4 mt-8">
 						@if (currentPage > 1)
 						{
-                            <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = currentPage - 1, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
+                            <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = currentPage - 1, city = selectedCity, q = search, sortBy = ViewBag.SortBy })" class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
 								</svg>
@@ -251,7 +258,7 @@
 								
 								if (startPage > 1)
 								{
-                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = 1, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
+                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = 1, city = selectedCity, q = search, sortBy = ViewBag.SortBy })" class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
 										1
 									</a>
 									if (startPage > 2)
@@ -262,7 +269,7 @@
 								
 								for (int p = startPage; p <= endPage; p++)
 								{
-                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = p, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full @(p == currentPage ? "bg-wine-red text-beige" : "bg-beige text-wine-red hover:bg-wine-red hover:text-beige") transition-colors duration-200 font-prata">
+                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = p, city = selectedCity, q = search, sortBy = ViewBag.SortBy })" class="flex items-center justify-center w-10 h-10 rounded-full @(p == currentPage ? "bg-wine-red text-beige" : "bg-beige text-wine-red hover:bg-wine-red hover:text-beige") transition-colors duration-200 font-prata">
 										@p
 									</a>
 								}
@@ -273,7 +280,7 @@
 									{
 										<span class="text-wine-red font-prata">...</span>
 									}
-                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = totalPages, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
+                                    <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = totalPages, city = selectedCity, q = search, sortBy = ViewBag.SortBy })" class="flex items-center justify-center w-10 h-10 rounded-full bg-beige text-wine-red hover:bg-wine-red hover:text-beige transition-colors duration-200 font-prata">
 										@totalPages
 									</a>
 								}
@@ -282,7 +289,7 @@
 
 						@if (currentPage < totalPages)
 						{
-                            <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = currentPage + 1, city = selectedCity, q = search })" class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
+                            <a href="@Url.Action("ListConcept", "Concept", new { categoryId = selectedCat, page = currentPage + 1, city = selectedCity, q = search, sortBy = ViewBag.SortBy })" class="flex items-center justify-center w-10 h-10 rounded-full bg-wine-red text-beige hover:bg-wine-red/90 transition-colors duration-200">
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
 								</svg>
