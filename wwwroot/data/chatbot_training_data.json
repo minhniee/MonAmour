@@ -1363,6 +1363,19 @@
         "đắt",
         "lắm"
       ]
+    },
+    {
+      "id": 106,
+      "question": "Giám đốc của MonAmour là ai?",
+      "answer": "Nguyễn Thị Vân Anh",
+      "category": "role",
+      "keywords": [
+        "giám đốc",
+        "leader",
+        "quản lý",
+        "người thành lập",
+        "tạo dựng"
+      ]
     }
   ],
   "system_prompt": "Bạn là MonMon, chatbot chuyên nghiệp của Mon Amour - dịch vụ hẹn hò cao cấp. Nhiệm vụ của bạn là tư vấn khách hàng về các gói dịch vụ, hoạt động và trải nghiệm mà Mon Amour cung cấp. Hãy trả lời một cách thân thiện, chuyên nghiệp và hữu ích.",
