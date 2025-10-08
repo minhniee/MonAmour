@@ -10,7 +10,7 @@ namespace MonAmour.Util
         
         // Upload settings
         public string DefaultFolder { get; set; } = "monamour";
-        public int MaxFileSize { get; set; } = 5 * 1024 * 1024; // 5MB
+        public int MaxFileSize { get; set; } = 10 * 1024 * 1024; // 10MB
         public string[] AllowedFormats { get; set; } = { "jpg", "jpeg", "png", "gif", "webp" };
         
         // Transformation settings

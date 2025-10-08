@@ -14,6 +14,15 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<UserMenuFilter>();
 });
 
+// Configure form options for large file uploads
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10485760; // 10MB
+    options.ValueLengthLimit = int.MaxValue;
+    options.ValueCountLimit = int.MaxValue;
+    options.KeyLengthLimit = int.MaxValue;
+});
+
 // Add Entity Framework with optimized configuration
 builder.Services.AddDbContext<MonAmourDbContext>(options =>
 {
