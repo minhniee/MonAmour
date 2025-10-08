@@ -202,13 +202,10 @@
                 <div class="prose max-w-none">
                     @if (!string.IsNullOrWhiteSpace(Model.Description))
                     {
-                        <p class="font-noto-serif text-wine-red/80 leading-relaxed mb-6">
+                        <div class="font-noto-serif text-wine-red/80 leading-relaxed mb-6 whitespace-pre-line">
                             @Model.Description
-                        </p>
+                        </div>
                     }
-                    <ul class="space-y-2 font-noto-serif text-wine-red/80">
-                        <li>• Mã sản phẩm: @Model.ProductId</li>
-                    </ul>
                 </div>
             </div>
 

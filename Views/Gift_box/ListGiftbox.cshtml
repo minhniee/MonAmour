@@ -54,7 +54,7 @@
                         Hộp quà
                     </h1>
                     <p class="font-noto-serif text-lg text-gray-600 leading-relaxed">
-                        Mô tả về bộ sưu tập hộp quà thông minh của chúng tôi, được thiết kế đặc biệt để tạo nên những khoảnh khắc đáng nhớ và ý nghĩa cho mọi dịp đặc biệt.
+                        Bộ sưu tập Gift Box Mon Amour được thiết kế tinh tế để lưu giữ những khoảnh khắc đáng nhớ nhất. Mỗi hộp quà là sự kết hợp hoàn hảo giữa ý nghĩa – thẩm mỹ – cảm xúc, mang đến trải nghiệm trọn vẹn cho mọi dịp đặc biệt: từ kỷ niệm, sinh nhật, đến những lời tỏ tình ngọt ngào.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
                         <a href="#product-list" class="bg-wine-red text-beige px-8 py-3 rounded-lg font-prata text-lg hover:bg-wine-red/90 transition-colors duration-200 shadow-lg hover:shadow-xl">
@@ -154,18 +154,20 @@
                     var img = p.ProductImgs?.FirstOrDefault(pi => pi.IsPrimary == true)?.ImgUrl
                               ?? p.ProductImgs?.FirstOrDefault()?.ImgUrl
                               ?? "https://via.placeholder.com/600x400?text=No+Image";
-            <a href="@Url.Action("ProductDetail", "Gift_box", new { id = p.ProductId })" class="block group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-wine-red/10 cursor-pointer gift-card">
+            <a href="@Url.Action("ProductDetail", "Gift_box", new { id = p.ProductId })" class="block group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-wine-red/10 cursor-pointer gift-card h-full flex flex-col">
                 <div class="relative overflow-hidden">
                     <img src="@img" alt="@p.Name" class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300 gift-image">
                 </div>
-                <div class="p-6">
-                    <h3 class="font-prata text-xl font-bold text-wine-red mb-2">@p.Name</h3>
+                <div class="p-6 flex flex-col flex-grow">
+                    <h3 class="font-prata text-xl font-bold text-wine-red mb-2 line-clamp-2 min-h-[3.5rem]">@p.Name</h3>
                     <div class="flex items-center justify-between mb-4">
                         <span class="font-prata text-2xl font-bold text-wine-red">@String.Format("{0:N0}₫", p.Price)</span>
                         <span class="text-sm text-gray-600">@p.Category?.Name</span>
                     </div>
-                    <div class="w-full bg-wine-red text-beige py-3 rounded-lg font-medium hover:bg-wine-red/90 transition-colors duration-200 text-center">
-                        Xem chi tiết
+                    <div class="mt-auto">
+                        <div class="w-full bg-wine-red text-beige py-3 rounded-lg font-medium hover:bg-wine-red/90 transition-colors duration-200 text-center">
+                            Xem chi tiết
+                        </div>
                     </div>
                 </div>
             </a>
@@ -207,6 +209,12 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+    
+    .gift-card {
+        min-height: 500px;
     }
     
     .group:hover .group-hover\:scale-110 {
