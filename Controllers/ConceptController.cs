@@ -215,7 +215,7 @@ namespace MonAmour.Controllers
             customerHtml.Append(styles);
             customerHtml.Append("<div class='header'><h2>MonAmour - Xác nhận yêu cầu tư vấn</h2></div>");
             customerHtml.Append("<div class='content'>");
-            customerHtml.Append($"<p>Chào {fullName},</p><p>Chúng tôi đã nhận được yêu cầu tư vấn của bạn. Nhân viên sẽ liên hệ lại trong thời gian sớm nhất.</p>");
+            customerHtml.Append($"<p>Chào {fullName},</p><p>Mon Amour rất hạnh phúc khi nhận đã được sự tin tưởng từ bạn. Hãy yên tâm, chúng mình sẽ sớm kết nối để mang đến cho bạn sự tư vấn tận tình và những trải nghiệm ngọt ngào nhất 💞✨ ^^</p>");
             customerHtml.Append(details.ToString());
             customerHtml.Append(footer);
 
