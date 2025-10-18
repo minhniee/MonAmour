@@ -23,7 +23,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-wine-red mb-1">Nơi tổ chức</label>
-                    <select id="citySelect" name="location" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+                    <select id="citySelect" name="currentLocation" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
                         <option value="">Chọn thành phố</option>
                         @{
                             var cities = ViewBag.Cities as List<string>;
@@ -47,16 +47,16 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-wine-red mb-1">Loại hình sự kiện</label>
-                    <select id="eventTypeSelect" name="eventType" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
+                    <select id="eventTypeSelect" name="datePurpose" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
                         <option value="">Chọn loại sự kiện</option>
                         @{
-                            var categories = ViewBag.Categories as List<MonAmour.Models.ConceptCategory>;
+                            var categories = ViewBag.Categories as List<string>;
                         }
                         @if (categories != null)
                         {
                             foreach (var cat in categories)
                             {
-                                <option value="@cat.Name">@cat.Name</option>
+                                <option value="@cat">@cat</option>
                             }
                         }
                         <option value="other">Khác</option>
@@ -69,10 +69,10 @@
                     <label class="block text-sm font-medium text-wine-red mb-1">Ngân sách *</label>
                     <select id="budgetSelect" name="budget" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
                         <option value="">Chọn ngân sách</option>
-                        <option value="Standard">Dưới 1.000.000đ (Standard)</option>
-                        <option value="Signature">1.000.000đ – 2.000.000đ (Signature)</option>
-                        <option value="Premium">2.000.000đ – 4.000.000đ (Premium)</option>
-                        <option value="Haute Amour">Trên 5.000.000đ (Haute Amour)</option>
+                        <option value="Dưới 1.000.000đ (Standard)">Dưới 1.000.000đ (Standard)</option>
+                        <option value="1.000.000đ – 2.000.000đ (Signature)">1.000.000đ – 2.000.000đ (Signature)</option>
+                        <option value="2.000.000đ – 4.000.000đ (Premium)">2.000.000đ – 4.000.000đ (Premium)</option>
+                        <option value="Trên 5.000.000đ (Haute Amour)">Trên 5.000.000đ (Haute Amour)</option>
                         <option value="other">Khác</option>
                     </select>
 
@@ -87,7 +87,7 @@
                 <div>
                     <label class="block text-sm font-medium text-wine-red mb-1">Thời gian</label>
                     <div class="relative">
-                        <input id="bookingTime" name="eventTime" type="text" readonly onclick="showTimePicker()" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Chọn thời gian">
+                        <input id="bookingTime" name="eventStartTime" type="text" readonly onclick="showTimePicker()" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Chọn thời gian">
                         <div id="customTimePicker" class="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden timepicker">
                             <div class="grid grid-cols-2 gap-3">
                                 <div id="hoursColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>

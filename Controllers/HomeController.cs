@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
 
@@ -33,11 +32,15 @@ namespace MonAmour.Controllers
             "Nam Từ Liêm",
             "Hà Đông"
         };
+            List<string> categories = new List<string> {
+            "Sinh nhật", "Kỷ niệm", "Hẹn hò lần đầu", "Hẹn hò bình thường"
+        };
             ViewData["Title"] = "Liên hệ tư vấn - MonAmour";
-            ViewBag.Categories = await _db.ConceptCategories
-                .AsNoTracking()
-                .OrderBy(c => c.Name)
-                .ToListAsync();
+            //ViewBag.Categories = await _db.ConceptCategories
+            //    .AsNoTracking()
+            //    .OrderBy(c => c.Name)
+            //    .ToListAsync();
+            ViewBag.Categories = categories;
             //ViewBag.Cities = await _db.Locations
             //    .AsNoTracking()
             //    .Where(l => l.City != null && l.City != "")
