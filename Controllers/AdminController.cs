@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using MonAmour.Attributes;
 using MonAmour.Helpers;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
 
 namespace MonAmour.Controllers
 {
-    [AdminOnly]
+
     public class AdminController : Controller
     {
         private readonly IAuthService _authService;
@@ -260,7 +259,7 @@ namespace MonAmour.Controllers
                     {
                         // Upload to Cloudinary
                         var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "avatars");
-                        
+
                         if (!string.IsNullOrEmpty(avatarUrl))
                         {
                             model.Avatar = avatarUrl;
@@ -269,11 +268,11 @@ namespace MonAmour.Controllers
                         else
                         {
                             TempData["Error"] = "Không thể upload avatar. Vui lòng thử lại.";
-                        await SetAdminViewBagAsync();
-                        var roles = await _userManagementService.GetAllRolesAsync();
-                        ViewBag.Roles = roles;
-                        return View(model);
-                    }
+                            await SetAdminViewBagAsync();
+                            var roles = await _userManagementService.GetAllRolesAsync();
+                            ViewBag.Roles = roles;
+                            return View(model);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -445,7 +444,7 @@ namespace MonAmour.Controllers
                     {
                         // Upload to Cloudinary
                         var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "avatars");
-                        
+
                         if (!string.IsNullOrEmpty(avatarUrl))
                         {
                             model.Avatar = avatarUrl;
@@ -454,10 +453,10 @@ namespace MonAmour.Controllers
                         else
                         {
                             TempData["Error"] = "Không thể upload avatar. Vui lòng thử lại.";
-                        var roles = await _userManagementService.GetAllRolesAsync();
-                        ViewBag.Roles = roles;
-                        return View(model);
-                    }
+                            var roles = await _userManagementService.GetAllRolesAsync();
+                            ViewBag.Roles = roles;
+                            return View(model);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -1067,25 +1066,25 @@ namespace MonAmour.Controllers
             try
             {
                 await SetAdminViewBagAsync();
-                
+
                 // Set default values if not provided
                 if (string.IsNullOrEmpty(searchModel.SortBy))
                     searchModel.SortBy = "name";
                 if (string.IsNullOrEmpty(searchModel.SortOrder))
                     searchModel.SortOrder = "asc";
-                
+
                 var categories = await _productService.GetAllCategoriesAsync();
-                
+
                 // Apply search filter
                 if (!string.IsNullOrEmpty(searchModel.SearchTerm))
                 {
                     var searchTerm = searchModel.SearchTerm.ToLower();
-                    categories = categories.Where(c => 
+                    categories = categories.Where(c =>
                         c.Name.ToLower().Contains(searchTerm) ||
                         c.CategoryId.ToString().Contains(searchTerm)
                     ).ToList();
                 }
-                
+
                 // Apply status filter
                 if (!string.IsNullOrEmpty(searchModel.Status))
                 {
@@ -1099,12 +1098,12 @@ namespace MonAmour.Controllers
                             break;
                     }
                 }
-                
+
                 // Apply sorting
                 switch (searchModel.SortBy)
                 {
                     case "name":
-                        categories = searchModel.SortOrder == "desc" 
+                        categories = searchModel.SortOrder == "desc"
                             ? categories.OrderByDescending(c => c.Name).ToList()
                             : categories.OrderBy(c => c.Name).ToList();
                         break;
@@ -1119,7 +1118,7 @@ namespace MonAmour.Controllers
                             : categories.OrderBy(c => c.CategoryId).ToList();
                         break;
                 }
-                
+
                 ViewBag.SearchModel = searchModel;
                 return View(categories);
             }
@@ -1389,7 +1388,7 @@ namespace MonAmour.Controllers
                     // Tìm kiếm sản phẩm theo tên
                     var searchResults = await _productService.SearchProductsByNameAsync(searchTerm);
                     var searchResultsList = new List<object>();
-                    
+
                     foreach (dynamic product in searchResults)
                     {
                         var images = await _productService.GetProductImagesAsync(product.Value);
@@ -1403,7 +1402,7 @@ namespace MonAmour.Controllers
                             });
                         }
                     }
-                    
+
                     return View(searchResultsList);
                 }
                 else
@@ -1526,7 +1525,7 @@ namespace MonAmour.Controllers
                     {
                         // Upload to Cloudinary
                         var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "products");
-                        
+
                         if (!string.IsNullOrEmpty(imageUrl))
                         {
                             model.ImgUrl = imageUrl;
@@ -1627,7 +1626,7 @@ namespace MonAmour.Controllers
                 _logger.LogInformation("Calling SetPrimaryImageAsync for ProductId: {ProductId}, ImageId: {ImageId}", productId, imageId);
                 var result = await _productService.SetPrimaryImageAsync(productId, imageId);
                 _logger.LogInformation("SetPrimaryImageAsync result: {Result}", result);
-                
+
                 if (result)
                 {
                     return Json(new { success = true, message = "Đã cập nhật hình ảnh chính thành công!" });
@@ -1682,10 +1681,10 @@ namespace MonAmour.Controllers
                                 await _cloudinaryService.DeleteImageAsync(publicId);
                             }
                         }
-                        
+
                         // Upload new image to Cloudinary
                         var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "products");
-                        
+
                         if (!string.IsNullOrEmpty(imageUrl))
                         {
                             model.ImgUrl = imageUrl;
@@ -1780,13 +1779,13 @@ namespace MonAmour.Controllers
             try
             {
                 await SetAdminViewBagAsync();
-                
+
                 // Set default values if not provided
                 if (string.IsNullOrEmpty(searchModel.SortBy))
                     searchModel.SortBy = "name";
                 if (string.IsNullOrEmpty(searchModel.SortOrder))
                     searchModel.SortOrder = "asc";
-                
+
                 var (partners, totalCount) = await _partnerService.GetPartnersAsync(searchModel);
 
                 ViewBag.TotalCount = totalCount;
@@ -1862,7 +1861,7 @@ namespace MonAmour.Controllers
                     {
                         // Upload to Cloudinary
                         var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "partners");
-                        
+
                         if (!string.IsNullOrEmpty(avatarUrl))
                         {
                             model.Avatar = avatarUrl;
@@ -1871,9 +1870,9 @@ namespace MonAmour.Controllers
                         else
                         {
                             ModelState.AddModelError("AvatarFile", "Không thể upload avatar. Vui lòng thử lại.");
-                        await SetAdminViewBagAsync();
-                        return View(model);
-                    }
+                            await SetAdminViewBagAsync();
+                            return View(model);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -2236,7 +2235,7 @@ namespace MonAmour.Controllers
                     {
                         // Get existing partner to delete old avatar if needed
                         var existingPartner = await _partnerService.GetPartnerByIdAsync(model.PartnerId);
-                        
+
                         // Delete old avatar if it exists
                         if (existingPartner != null && !string.IsNullOrEmpty(existingPartner.Avatar))
                         {
@@ -2246,10 +2245,10 @@ namespace MonAmour.Controllers
                                 await _cloudinaryService.DeleteImageAsync(publicId);
                             }
                         }
-                        
+
                         // Upload new avatar to Cloudinary
                         var avatarUrl = await _cloudinaryService.UploadImageAsync(AvatarFile, "partners");
-                        
+
                         if (!string.IsNullOrEmpty(avatarUrl))
                         {
                             model.Avatar = avatarUrl;
@@ -2258,9 +2257,9 @@ namespace MonAmour.Controllers
                         else
                         {
                             ModelState.AddModelError("AvatarFile", "Không thể upload avatar. Vui lòng thử lại.");
-                        await SetAdminViewBagAsync();
-                        return View(model);
-                    }
+                            await SetAdminViewBagAsync();
+                            return View(model);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -2408,17 +2407,17 @@ namespace MonAmour.Controllers
             try
             {
                 await SetAdminViewBagAsync();
-                
+
                 // Initialize searchModel if null
                 if (searchModel == null)
                     searchModel = new LocationSearchViewModel();
-                
+
                 // Set default values if not provided
                 if (string.IsNullOrEmpty(searchModel.SortBy))
                     searchModel.SortBy = "name";
                 if (string.IsNullOrEmpty(searchModel.SortOrder))
                     searchModel.SortOrder = "asc";
-                
+
                 var (locations, totalCount) = await _locationService.GetLocationsAsync(searchModel);
 
                 ViewBag.TotalCount = totalCount;
@@ -2681,11 +2680,11 @@ namespace MonAmour.Controllers
             try
             {
                 await SetAdminViewBagAsync();
-                
+
                 // Initialize searchModel if null
                 if (searchModel == null)
                     searchModel = new ConceptSearchViewModel();
-                
+
                 // Set default values if not provided
                 if (string.IsNullOrEmpty(searchModel.SortBy))
                     searchModel.SortBy = "name";
@@ -2693,7 +2692,7 @@ namespace MonAmour.Controllers
                     searchModel.SortOrder = "asc";
                 if (searchModel.PageSize == 0)
                     searchModel.PageSize = 50; // Default page size
-                
+
                 var (concepts, totalCount) = await _conceptService.GetConceptsAsync(searchModel);
 
                 ViewBag.TotalCount = totalCount;
@@ -2988,20 +2987,20 @@ namespace MonAmour.Controllers
             try
             {
                 await SetAdminViewBagAsync();
-                
+
                 // Initialize searchModel if null
                 if (searchModel == null)
                     searchModel = new ConceptCategorySearchViewModel();
-                
+
                 // Set default values if not provided
                 if (string.IsNullOrEmpty(searchModel.SortBy))
                     searchModel.SortBy = "name";
                 if (string.IsNullOrEmpty(searchModel.SortOrder))
                     searchModel.SortOrder = "asc";
-                
+
                 var categories = await _conceptService.GetConceptCategoriesAsync(searchModel);
                 ViewBag.SearchModel = searchModel;
-                
+
                 return View(categories);
             }
             catch (Exception ex)
@@ -3100,7 +3099,7 @@ namespace MonAmour.Controllers
         {
             try
             {
-                _logger.LogInformation("EditConceptCategory POST called with CategoryId: {CategoryId}, Name: {Name}, Description: {Description}, IsActive: {IsActive}", 
+                _logger.LogInformation("EditConceptCategory POST called with CategoryId: {CategoryId}, Name: {Name}, Description: {Description}, IsActive: {IsActive}",
                     model.CategoryId, model.Name, model.Description, model.IsActive);
 
                 if (!ModelState.IsValid)
@@ -3179,20 +3178,20 @@ namespace MonAmour.Controllers
             try
             {
                 await SetAdminViewBagAsync();
-                
+
                 // Initialize searchModel if null
                 if (searchModel == null)
                     searchModel = new ConceptColorSearchViewModel();
-                
+
                 // Set default values if not provided
                 if (string.IsNullOrEmpty(searchModel.SortBy))
                     searchModel.SortBy = "name";
                 if (string.IsNullOrEmpty(searchModel.SortOrder))
                     searchModel.SortOrder = "asc";
-                
+
                 var colors = await _conceptService.GetConceptColorsAsync(searchModel);
                 ViewBag.SearchModel = searchModel;
-                
+
                 return View(colors);
             }
             catch (Exception ex)
@@ -3360,20 +3359,20 @@ namespace MonAmour.Controllers
             try
             {
                 await SetAdminViewBagAsync();
-                
+
                 // Initialize searchModel if null
                 if (searchModel == null)
                     searchModel = new ConceptAmbienceSearchViewModel();
-                
+
                 // Set default values if not provided
                 if (string.IsNullOrEmpty(searchModel.SortBy))
                     searchModel.SortBy = "name";
                 if (string.IsNullOrEmpty(searchModel.SortOrder))
                     searchModel.SortOrder = "asc";
-                
+
                 var ambiences = await _conceptService.GetConceptAmbiencesAsync(searchModel);
                 ViewBag.SearchModel = searchModel;
-                
+
                 return View(ambiences);
             }
             catch (Exception ex)
@@ -3567,7 +3566,7 @@ namespace MonAmour.Controllers
                 {
                     // Tìm kiếm concept theo tên
                     var searchResults = await _conceptService.SearchConceptsByNameAsync(searchTerm);
-                    
+
                     foreach (var concept in searchResults)
                     {
                         var images = await _conceptService.GetConceptImagesAsync(concept.ConceptId);
@@ -3621,7 +3620,7 @@ namespace MonAmour.Controllers
                 // Check if the specific position already has an image
                 var existingImages = await _conceptService.GetConceptImagesAsync(model.ConceptId);
                 var existingImageAtPosition = existingImages.FirstOrDefault(img => img.DisplayOrder == model.DisplayOrder);
-                
+
                 if (existingImageAtPosition != null)
                 {
                     return Json(new { success = false, message = $"Vị trí {model.DisplayOrder} đã có hình ảnh! Vui lòng sử dụng chức năng chỉnh sửa để thay thế." });
@@ -3631,7 +3630,7 @@ namespace MonAmour.Controllers
                 {
                     // Upload to Cloudinary
                     var imageUrl = await _cloudinaryService.UploadImageAsync(imageFile, "concepts");
-                    
+
                     if (!string.IsNullOrEmpty(imageUrl))
                     {
                         model.ImgUrl = imageUrl;
@@ -3713,10 +3712,10 @@ namespace MonAmour.Controllers
                                 await _cloudinaryService.DeleteImageAsync(publicId);
                             }
                         }
-                        
+
                         // Upload new image to Cloudinary
                         var imageUrl = await _cloudinaryService.UploadImageAsync(imageFile, "concepts");
-                        
+
                         if (!string.IsNullOrEmpty(imageUrl))
                         {
                             model.ImgUrl = imageUrl;
@@ -3825,7 +3824,7 @@ namespace MonAmour.Controllers
                 var count = images.Count;
                 var occupiedPositions = images.Select(img => img.DisplayOrder).ToList();
                 var availablePositions = new List<int>();
-                
+
                 // Check which positions (1-6) are available
                 for (int i = 1; i <= 6; i++)
                 {
@@ -3834,7 +3833,7 @@ namespace MonAmour.Controllers
                         availablePositions.Add(i);
                     }
                 }
-                
+
                 var canAddMore = availablePositions.Any();
 
                 return Json(new
@@ -3866,7 +3865,7 @@ namespace MonAmour.Controllers
                 await SetAdminViewBagAsync();
 
                 searchModel ??= new OrderSearchViewModel();
-                
+
                 // Set a large page size for admin to see all orders
                 if (searchModel.PageSize == 10) // Only override if using default
                 {
@@ -4083,7 +4082,7 @@ namespace MonAmour.Controllers
             try
             {
                 _logger.LogInformation($"AdminController.CancelOrder called for OrderId: {orderId}");
-                
+
                 var result = await _orderService.CancelOrderAsync(orderId);
                 if (result)
                 {

@@ -158,7 +158,7 @@ public class AuthService : IAuthService
 
             var role = new UserRole()
             {
-                RoleId = 2,
+                RoleId = 1,
                 UserId = user.UserId,
                 AssignedAt = null,
                 AssignedBy = null,

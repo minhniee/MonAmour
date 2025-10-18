@@ -7,41 +7,52 @@
 
     <!-- Search Section -->
     <div class="container mx-auto px-4 py-8">
+
         <!-- Hero Carousel -->
-        <div class="mb-10">
-            <div id="blog-hero-carousel" class="relative overflow-hidden rounded-xl shadow-lg">
-                <div class="carousel-track relative w-full h-[280px] sm:h-[340px] lg:h-[420px] bg-gray-200">
-                    @{
-                        var slides = Model.FeaturedPosts.Any() ? Model.FeaturedPosts : Model.RecentPosts.Take(5).ToList();
-                        var placeholder = Url.Content("~/images/placeholder-hero.jpg");
-                    }
-                    @for (int i = 0; i < slides.Count; i++)
-                    {
-                        var s = slides[i];
-                        var img = string.IsNullOrEmpty(s.FeaturedImage) ? placeholder : s.FeaturedImage;
-                        <a href="@Url.Action("Detail", "Blog", new { id = s.BlogId })" class="carousel-item absolute inset-0 transition-opacity duration-700 @(i == 0 ? "opacity-100" : "opacity-0 pointer-events-none")">
-                            <div class="w-full h-full flex items-center justify-center bg-white/90">
-                                <img src="@img" alt="@s.Title" class="max-w-full max-h-full object-contain ring-1 ring-gray-300 rounded-md" />
-                            </div>
-                            <div class="absolute inset-x-0 bottom-0 bg-black/40 text-white p-4">
-                                <div class="text-sm opacity-90">@s.CategoryName • @s.PublishedDate?.ToString("dd/MM/yyyy")</div>
-                                <div class="text-lg md:text-xl font-semibold">@s.Title</div>
-                            </div>
-                        </a>
-                    }
-                </div>
-                <!-- Controls -->
-                <button type="button" class="carousel-prev absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">‹</button>
-                <button type="button" class="carousel-next absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">›</button>
-                <!-- Indicators -->
-                <div class="carousel-dots absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
-                    @for (int i = 0; i < (Model.FeaturedPosts.Any() ? Model.FeaturedPosts.Count : Model.RecentPosts.Take(5).Count()); i++)
-                    {
-                        <button type="button" class="dot w-2.5 h-2.5 rounded-full @(i==0?"bg-white":"bg-white/50")"></button>
-                    }
-                </div>
+        <div id="blog-hero-carousel"
+             class="relative mx-auto w-full max-w-[896px] aspect-[16/9] rounded-xl overflow-hidden shadow-lg mb-10">
+            <div class="carousel-track relative w-full h-full bg-gray-200">
+                @{
+                    var slides = Model.FeaturedPosts.Any() ? Model.FeaturedPosts : Model.RecentPosts.Take(5).ToList();
+                    var placeholder = Url.Content("~/images/placeholder-hero.jpg");
+                }
+                @for (int i = 0; i < slides.Count; i++)
+                {
+                    var s = slides[i];
+                    var img = string.IsNullOrEmpty(s.FeaturedImage) ? placeholder : s.FeaturedImage;
+                    <a href="@Url.Action("Detail", "Blog", new { id = s.BlogId })"
+                       class="carousel-item absolute inset-0 transition-opacity duration-700 @(i == 0 ? "opacity-100" : "opacity-0 pointer-events-none")">
+                        <img src="@img" alt="@s.Title"
+                             class="w-full h-full object-cover ring-1 ring-gray-300" />
+                        <div class="absolute inset-x-0 bottom-0 bg-black/40 text-white p-4">
+                            <div class="text-sm opacity-90">@s.CategoryName • @s.PublishedDate?.ToString("dd/MM/yyyy")</div>
+                            <div class="text-lg md:text-xl font-semibold">@s.Title</div>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <!-- Controls -->
+            <button type="button"
+                    class="carousel-prev absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">
+                ‹
+            </button>
+            <button type="button"
+                    class="carousel-next absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white w-9 h-9 rounded-full flex items-center justify-center">
+                ›
+            </button>
+
+            <!-- Indicators -->
+            <div class="carousel-dots absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
+                @for (int i = 0; i < slides.Count; i++)
+                {
+                    <button type="button"
+                            class="dot w-2.5 h-2.5 rounded-full @(i == 0 ? "bg-white" : "bg-white/50")"></button>
+                }
             </div>
         </div>
+
+        <!-- Search Bar -->
         <div class="max-w-md mx-auto mb-8">
             <form method="post" action="@Url.Action("Search", "Blog")">
                 <div class="relative">
@@ -50,7 +61,8 @@
                            value="@Model.SearchTerm">
                     <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#62000d]">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </button>
                 </div>
@@ -59,7 +71,6 @@
 
         <!-- Filter Section -->
         <div class="flex flex-wrap justify-center gap-4 mb-8">
-            <!-- Sort Buttons -->
             <button class="px-6 py-2 rounded-full border border-gray-300 @(Model.SelectedFilter == "new" ? "bg-[#62000d] text-white" : "bg-white") hover:bg-[#62000d] hover:text-white transition-colors filter-btn" data-filter="new">
                 Lọc theo mới
             </button>
@@ -71,7 +82,8 @@
             </button>
 
             <!-- Category Dropdown -->
-            <select id="categoryFilter" class="px-6 py-2 rounded-full border border-gray-300 bg-white hover:border-[#62000d] focus:outline-none focus:border-[#62000d] transition-colors">
+            <select id="categoryFilter"
+                    class="px-6 py-2 rounded-full border border-gray-300 bg-white hover:border-[#62000d] focus:outline-none focus:border-[#62000d] transition-colors">
                 <option value="">Tất cả danh mục</option>
                 @foreach (var category in Model.Categories)
                 {
@@ -82,34 +94,18 @@
             </select>
         </div>
 
+        <!-- Featured and Recent Posts -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
-            <!-- Featured Post - Takes up 3 columns -->
             <div class="lg:col-span-7">
                 <h3 class="text-lg font-medium mb-6 text-gray-700" style="font-family: 'Noto Serif', serif;">Bài viết nổi bật</h3>
                 @if (Model.FeaturedPosts.Any())
                 {
                     var featured = Model.FeaturedPosts.First();
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" 
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
                          onclick="openBlogDetail(@featured.BlogId)">
                         <div class="h-[350px] bg-gray-200">
-                            <div class="carousel-container relative w-full h-full">
-                                @if (!string.IsNullOrEmpty(featured.FeaturedImage))
-                                {
-                                    <div class="carousel-slide active w-full h-full flex items-center justify-center">
-                                        <img src="@featured.FeaturedImage" 
-                                             alt="@featured.Title" 
-                                             class="max-w-full max-h-full object-contain" />
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="carousel-slide active w-full h-full flex items-center justify-center">
-                                        <img src="~/images/placeholder-hero.jpg" 
-                                             alt="Blog Placeholder" 
-                                             class="max-w-full max-h-full object-contain" />
-                                    </div>
-                                }
-                            </div>
+                            <img src="@(string.IsNullOrEmpty(featured.FeaturedImage) ? Url.Content("~/images/placeholder-hero.jpg") : featured.FeaturedImage)"
+                                 alt="@featured.Title" class="w-full h-full object-cover" />
                         </div>
                         <div class="p-8">
                             <div class="flex items-center text-sm text-gray-500 mb-3">
@@ -133,32 +129,16 @@
                 }
             </div>
 
-            <!-- Side Posts - Takes up 2 columns, arranged in 2x2 grid -->
+            <!-- Side Posts -->
             <div class="lg:col-span-5 mt-8 lg:mt-0">
                 <div class="grid grid-cols-2 mt-[50px] gap-6">
                     @foreach (var post in Model.RecentPosts)
                     {
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" 
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
                              onclick="openBlogDetail(@post.BlogId)">
                             <div class="bg-gray-200 h-[150px]">
-                                <div class="carousel-container relative w-full h-full">
-                                    @if (!string.IsNullOrEmpty(post.FeaturedImage))
-                                    {
-                                        <div class="carousel-slide active w-full h-full flex items-center justify-center">
-                                            <img src="@post.FeaturedImage" 
-                                                 alt="@post.Title" 
-                                                 class="max-w-full max-h-full object-contain" />
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="carousel-slide active w-full h-full flex items-center justify-center">
-                                            <img src="~/images/placeholder-hero.jpg" 
-                                                 alt="Blog Placeholder" 
-                                                 class="max-w-full max-h-full object-contain" />
-                                        </div>
-                                    }
-                                </div>
+                                <img src="@(string.IsNullOrEmpty(post.FeaturedImage) ? Url.Content("~/images/placeholder-hero.jpg") : post.FeaturedImage)"
+                                     alt="@post.Title" class="w-full h-full object-cover" />
                             </div>
                             <div class="p-5">
                                 <div class="flex items-center text-xs text-gray-500 mb-2">
@@ -182,7 +162,7 @@
             </div>
         </div>
 
-        <!-- Divider Line -->
+        <!-- Divider -->
         <div class="w-full my-8">
             <hr class="border-t-2 border-gray-200">
         </div>
@@ -196,27 +176,11 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach (var post in Model.DailyPosts)
                 {
-                    <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" 
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
                          onclick="openBlogDetail(@post.BlogId)">
                         <div class="aspect-video bg-gray-200">
-                            <div class="carousel-container relative w-full h-full">
-                                @if (!string.IsNullOrEmpty(post.FeaturedImage))
-                                {
-                                    <div class="carousel-slide active w-full h-full flex items-center justify-center">
-                                        <img src="@post.FeaturedImage" 
-                                             alt="@post.Title" 
-                                             class="max-w-full max-h-full object-contain" />
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="carousel-slide active w-full h-full flex items-center justify-center">
-                                        <img src="~/images/placeholder-hero.jpg" 
-                                             alt="Blog Placeholder" 
-                                             class="max-w-full max-h-full object-contain" />
-                                    </div>
-                                }
-                            </div>
+                            <img src="@(string.IsNullOrEmpty(post.FeaturedImage) ? Url.Content("~/images/placeholder-hero.jpg") : post.FeaturedImage)"
+                                 alt="@post.Title" class="w-full h-full object-cover" />
                         </div>
                         <div class="p-6">
                             <div class="flex items-center text-sm text-gray-500 mb-3">
@@ -241,7 +205,7 @@
                 <div class="flex justify-center items-center space-x-2 mt-8">
                     @if (Model.CurrentPage > 1)
                     {
-                        <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1, filter = Model.SelectedFilter, categoryId = Model.CategoryId, searchTerm = Model.SearchTerm })" 
+                        <a href="@Url.Action("Index", new { page = Model.CurrentPage - 1, filter = Model.SelectedFilter, categoryId = Model.CategoryId, searchTerm = Model.SearchTerm })"
                            class="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-[#62000d] hover:text-white transition-colors">
                             Trước
                         </a>
@@ -249,7 +213,7 @@
 
                     @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
                     {
-                        <a href="@Url.Action("Index", new { page = i, filter = Model.SelectedFilter, categoryId = Model.CategoryId, searchTerm = Model.SearchTerm })" 
+                        <a href="@Url.Action("Index", new { page = i, filter = Model.SelectedFilter, categoryId = Model.CategoryId, searchTerm = Model.SearchTerm })"
                            class="px-4 py-2 rounded-full border @(i == Model.CurrentPage ? "bg-[#62000d] text-white" : "bg-white hover:bg-[#62000d] hover:text-white") transition-colors">
                             @i
                         </a>
@@ -257,7 +221,7 @@
 
                     @if (Model.CurrentPage < Model.TotalPages)
                     {
-                        <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1, filter = Model.SelectedFilter, categoryId = Model.CategoryId, searchTerm = Model.SearchTerm })" 
+                        <a href="@Url.Action("Index", new { page = Model.CurrentPage + 1, filter = Model.SelectedFilter, categoryId = Model.CategoryId, searchTerm = Model.SearchTerm })"
                            class="px-4 py-2 rounded-full border border-gray-300 bg-white hover:bg-[#62000d] hover:text-white transition-colors">
                             Tiếp
                         </a>
@@ -273,36 +237,32 @@
         window.location.href = '/Blog/Detail/' + id;
     }
 
-    // Filter functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const filterButtons = document.querySelectorAll('.filter-btn');
         const categoryFilter = document.getElementById('categoryFilter');
 
         filterButtons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 const filter = this.getAttribute('data-filter');
                 const currentUrl = new URL(window.location.href);
                 currentUrl.searchParams.set('filter', filter);
-                currentUrl.searchParams.set('page', '1'); // Reset to first page when filter changes
+                currentUrl.searchParams.set('page', '1');
                 window.location.href = currentUrl.toString();
             });
         });
 
-        categoryFilter.addEventListener('change', function() {
+        categoryFilter.addEventListener('change', function () {
             const categoryId = this.value;
             const currentUrl = new URL(window.location.href);
-            if (categoryId) {
-                currentUrl.searchParams.set('categoryId', categoryId);
-            } else {
-                currentUrl.searchParams.delete('categoryId');
-            }
-            currentUrl.searchParams.set('page', '1'); // Reset to first page when category changes
+            if (categoryId) currentUrl.searchParams.set('categoryId', categoryId);
+            else currentUrl.searchParams.delete('categoryId');
+            currentUrl.searchParams.set('page', '1');
             window.location.href = currentUrl.toString();
         });
     });
 
     // Simple hero carousel
-    (function(){
+    (function () {
         const root = document.getElementById('blog-hero-carousel');
         if (!root) return;
         const items = Array.from(root.querySelectorAll('.carousel-item'));
@@ -311,26 +271,27 @@
         const next = root.querySelector('.carousel-next');
         let idx = 0;
 
-        function render(){
-            items.forEach((el,i)=>{
-                el.classList.toggle('opacity-100', i===idx);
-                el.classList.toggle('opacity-0', i!==idx);
-                if (i!==idx) el.classList.add('pointer-events-none'); else el.classList.remove('pointer-events-none');
+        function render() {
+            items.forEach((el, i) => {
+                el.classList.toggle('opacity-100', i === idx);
+                el.classList.toggle('opacity-0', i !== idx);
+                if (i !== idx) el.classList.add('pointer-events-none');
+                else el.classList.remove('pointer-events-none');
             });
-            dots.forEach((d,i)=>{
-                d.classList.toggle('bg-white', i===idx);
-                d.classList.toggle('bg-white/50', i!==idx);
+            dots.forEach((d, i) => {
+                d.classList.toggle('bg-white', i === idx);
+                d.classList.toggle('bg-white/50', i !== idx);
             });
         }
 
-        function go(n){ idx = (n+items.length)%items.length; render(); }
-        if (prev) prev.addEventListener('click', ()=>go(idx-1));
-        if (next) next.addEventListener('click', ()=>go(idx+1));
-        dots.forEach((d,i)=> d.addEventListener('click', ()=>go(i)));
+        function go(n) { idx = (n + items.length) % items.length; render(); }
+        if (prev) prev.addEventListener('click', () => go(idx - 1));
+        if (next) next.addEventListener('click', () => go(idx + 1));
+        dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
 
-        let timer = setInterval(()=>go(idx+1), 5000);
-        root.addEventListener('mouseenter', ()=>clearInterval(timer));
-        root.addEventListener('mouseleave', ()=>{ timer = setInterval(()=>go(idx+1), 5000); });
+        let timer = setInterval(() => go(idx + 1), 5000);
+        root.addEventListener('mouseenter', () => clearInterval(timer));
+        root.addEventListener('mouseleave', () => { timer = setInterval(() => go(idx + 1), 5000); });
         render();
     })();
 </script>

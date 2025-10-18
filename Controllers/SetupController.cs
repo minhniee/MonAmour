@@ -9,7 +9,7 @@ namespace MonAmour.Controllers
     /// Chỉ sử dụng trong development hoặc setup lần đầu
     /// </summary>
     // [Obsolete("This action is disabled.")]
-    [NonController]
+
     public class SetupController : Controller
     {
         private readonly IAuthService _authService;

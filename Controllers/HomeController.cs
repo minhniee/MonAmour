@@ -19,18 +19,33 @@ namespace MonAmour.Controllers
         }
         public async Task<IActionResult> Consultation()
         {
+            List<string> locations = new List<string> {
+            "Ba Đình",
+            "Hoàn Kiếm",
+            "Hai Bà Trưng",
+            "Đống Đa",
+            "Cầu Giấy",
+            "Tây Hồ",
+            "Thanh Xuân",
+            "Hoàng Mai",
+            "Long Biên",
+            "Bắc Từ Liêm",
+            "Nam Từ Liêm",
+            "Hà Đông"
+        };
             ViewData["Title"] = "Liên hệ tư vấn - MonAmour";
             ViewBag.Categories = await _db.ConceptCategories
                 .AsNoTracking()
                 .OrderBy(c => c.Name)
                 .ToListAsync();
-            ViewBag.Cities = await _db.Locations
-                .AsNoTracking()
-                .Where(l => l.City != null && l.City != "")
-                .Select(l => l.City!)
-                .Distinct()
-                .OrderBy(c => c)
-                .ToListAsync();
+            //ViewBag.Cities = await _db.Locations
+            //    .AsNoTracking()
+            //    .Where(l => l.City != null && l.City != "")
+            //    .Select(l => l.City!)
+            //    .Distinct()
+            //    .OrderBy(c => c)
+            //    .ToListAsync();
+            ViewBag.Cities = locations;
             return View();
         }
         public async Task<IActionResult> Index()
