@@ -8,8 +8,12 @@ const chatbotToggler = document.querySelector("#chatbot-toggler");
 const closeChatbot = document.querySelector("#close-chatbot");
 
 // API setup - Thay thế bằng API key của bạn
-const API_KEY = "AIzaSyD9QOuOGBhAsCw2DFA8pF9PW2m05i8c4wo"; // Cần thay thế bằng API key thực tế
+const API_KEY = "AIzaSyD9QOuOGBhAsCw2DFA8pF9PW2m05i8c4wo"; // Google Gemini API key
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+// OpenAI DALL-E 3 API setup - Thay thế bằng API key của bạn
+const OPENAI_API_KEY = "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"; // Điền OpenAI API key vào đây để sử dụng tính năng tạo ảnh
+const DALL_E_API_URL = "https://api.openai.com/v1/images/generations";
 
 const userData = {
     message: null,
@@ -24,7 +28,7 @@ let trainingData = null;
 let systemPrompt = "";
 
 // Load training data từ JSON
-const loadTrainingData = async () => {
+const loadTrainingData = async() => {
     try {
         const response = await fetch('/data/chatbot_training_data.json');
         const data = await response.json();
@@ -39,11 +43,10 @@ const loadTrainingData = async () => {
 };
 
 // Context về Mon Amour cho chatbot
-const chatHistory = [
-    {
-        role: "model",
-        parts: [{ 
-            text: `Tôi là trợ lý AI của Mon Amour - nền tảng cung cấp dịch vụ lên kế hoạch hẹn hò cá nhân hóa trọn gói. 
+const chatHistory = [{
+    role: "model",
+    parts: [{
+        text: `Tôi là trợ lý AI của Mon Amour - nền tảng cung cấp dịch vụ lên kế hoạch hẹn hò cá nhân hóa trọn gói. 
 
 Mon Amour chuyên:
 - Tổ chức các buổi hẹn lãng mạn, ấn tượng và ý nghĩa
@@ -58,10 +61,9 @@ Tôi có thể giúp bạn:
 📍 Tìm địa điểm hẹn hò lý tưởng
 💡 Giải đáp thắc mắc về dịch vụ Mon Amour
 
-Hãy cho tôi biết bạn cần hỗ trợ gì nhé!` 
-        }],
-    },
-];
+Hãy cho tôi biết bạn cần hỗ trợ gì nhé!`
+    }],
+}, ];
 
 const initialInputHeight = messageInput.scrollHeight;
 
@@ -76,15 +78,15 @@ const createMessageElement = (content, ...classes) => {
 // Tìm câu trả lời phù hợp từ training data
 const findBestAnswer = (userMessage) => {
     if (!trainingData || !trainingData.training_data) return null;
-    
+
     const userMessageLower = userMessage.toLowerCase();
     let bestMatch = null;
     let bestScore = 0;
-    
+
     // Tìm kiếm theo keywords
     for (const item of trainingData.training_data) {
         let score = 0;
-        
+
         // Kiểm tra keywords
         if (item.keywords) {
             for (const keyword of item.keywords) {
@@ -93,29 +95,155 @@ const findBestAnswer = (userMessage) => {
                 }
             }
         }
-        
+
         // Kiểm tra câu hỏi tương tự
         const questionWords = item.question.toLowerCase().split(' ');
         const userWords = userMessageLower.split(' ');
         const commonWords = questionWords.filter(word => userWords.includes(word));
         score += commonWords.length * 0.5;
-        
+
         if (score > bestScore) {
             bestScore = score;
             bestMatch = item;
         }
     }
-    
+
     return bestScore > 1 ? bestMatch : null;
 };
 
+// Kiểm tra xem người dùng có yêu cầu tạo ảnh không
+const isImageGenerationRequest = (userMessage) => {
+    const imageKeywords = [
+        'tạo ảnh', 'tạo hình', 'vẽ ảnh', 'vẽ hình', 'tạo hình ảnh', 'sinh ảnh',
+        'generar imagen', 'generate image', 'create image', 'tạo cho tôi ảnh',
+        'show me', 'cho tôi xem', 'visualize', 'visual', 'hình dung',
+        'không gian hẹn hò', 'concept hẹn hò', 'phong cách hẹn hò'
+    ];
+    const messageLower = userMessage.toLowerCase();
+    return imageKeywords.some(keyword => messageLower.includes(keyword.toLowerCase()));
+};
+
+// Generate image using DALL-E 3 API or fallback to Gemini description
+const generateImage = async(incomingMessageDiv) => {
+    const messageElement = incomingMessageDiv.querySelector(".message-text");
+
+    try {
+        // Nếu có OpenAI API key, sử dụng DALL-E 3 để tạo ảnh
+        if (OPENAI_API_KEY && OPENAI_API_KEY.trim() !== "") {
+            // Tạo prompt tối ưu cho DALL-E 3
+            const dallePrompt = `Professional romantic dating space setup, ${userData.message}, elegant romantic atmosphere, soft warm lighting, beautiful decorations with flowers and candles, high quality, photorealistic, interior design, cozy intimate setting`;
+
+            const requestOptions = {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "dall-e-3",
+                    prompt: dallePrompt,
+                    n: 1,
+                    size: "1024x1024",
+                    quality: "standard"
+                })
+            };
+
+            const response = await fetch(DALL_E_API_URL, requestOptions);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error?.message || "Có lỗi xảy ra khi tạo ảnh");
+            }
+
+            // Hiển thị ảnh được tạo bởi DALL-E 3
+            const imageUrl = data.data[0].url;
+            messageElement.innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <img src="${imageUrl}" style="max-width: 100%; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" alt="Không gian hẹn hò được tạo" />
+                </div>
+                <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                    🎨 Đây là concept không gian hẹn hò lãng mạn cho bạn! 💝<br>
+                    Bạn có muốn tôi tư vấn về các gói dịch vụ Mon Amour để biến concept này thành hiện thực không?
+                </p>
+            `;
+            return;
+        }
+
+        // Fallback: Sử dụng Gemini để mô tả concept nếu không có DALL-E API key
+        const imagePrompt = `Bạn là chuyên gia thiết kế không gian hẹn hò lãng mạn của Mon Amour. Hãy mô tả chi tiết một concept không gian hẹn hò lãng mạn theo yêu cầu: "${userData.message}". 
+
+Hãy mô tả một cách sống động và chi tiết về:
+- Không gian, bố cục, màu sắc
+- Ánh sáng và không khí lãng mạn
+- Các chi tiết trang trí (hoa, nến, khăn trải bàn, v.v.)
+- Cảm giác và trải nghiệm tổng thể
+
+Hãy viết một đoạn mô tả dài khoảng 200-300 từ, sử dụng ngôn ngữ thơ mộng, gợi cảm để người đọc có thể hình dung rõ ràng về không gian hẹn hò này.`;
+
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{
+                    role: "user",
+                    parts: [{ text: imagePrompt }]
+                }]
+            })
+        };
+
+        const response = await fetch(API_URL, requestOptions);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error?.message || "Có lỗi xảy ra khi tạo concept");
+        }
+
+        // Extract and display bot's response text
+        const apiResponseText = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
+
+        messageElement.innerHTML = `
+            <div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white; line-height: 1.8;">
+                <h4 style="margin: 0 0 15px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    🎨 Concept Không Gian Hẹn Hò Mon Amour
+                </h4>
+                <p style="margin: 0; font-size: 0.95rem; text-align: justify; white-space: pre-line;">
+                    ${apiResponseText}
+                </p>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 0.9rem;">
+                    💝 <strong>Lưu ý:</strong> Để tạo hình ảnh thực tế, vui lòng cấu hình OpenAI DALL-E API key trong file chatbot.js
+                </div>
+            </div>
+        `;
+
+        chatHistory.push({
+            role: "model",
+            parts: [{ text: apiResponseText }]
+        });
+    } catch (error) {
+        console.error("Image Generation Error:", error);
+        messageElement.innerHTML = `
+            <div style="color: #ff0000; font-size: 0.9rem;">
+                <strong>Xin lỗi!</strong><br>
+                ${error.message}<br><br>
+                <em>Vui lòng thử lại sau hoặc liên hệ với chúng tôi qua:</em><br>
+                📞 Hotline: 0868019255<br>
+                📧 Email: booking.monamour@gmail.com
+            </div>
+        `;
+    } finally {
+        userData.file = {};
+        incomingMessageDiv.classList.remove("thinking");
+        chatBody.scrollTo({ behavior: "smooth", top: chatBody.scrollHeight });
+    }
+};
+
 // Generate bot response using API
-const generateBotResponse = async (incomingMessageDiv) => {
+const generateBotResponse = async(incomingMessageDiv) => {
     const messageElement = incomingMessageDiv.querySelector(".message-text");
 
     // Tìm câu trả lời từ training data trước
     const trainingAnswer = findBestAnswer(userData.message);
-    
+
     let contextualMessage;
     if (trainingAnswer) {
         // Sử dụng câu trả lời từ training data
@@ -177,14 +305,14 @@ const generateBotResponse = async (incomingMessageDiv) => {
 
 // Handle outgoing user message
 const handleOutgoingMessage = (e) => {
-    e.preventDefault();
-    userData.message = messageInput.value.trim();
-    messageInput.value = "";
-    fileUploadWrapper.classList.remove("file-uploaded");
-    messageInput.dispatchEvent(new Event("input"));
+        e.preventDefault();
+        userData.message = messageInput.value.trim();
+        messageInput.value = "";
+        fileUploadWrapper.classList.remove("file-uploaded");
+        messageInput.dispatchEvent(new Event("input"));
 
-    // Create and display user message
-    const messageContent = `<div class="message-text"></div>
+        // Create and display user message
+        const messageContent = `<div class="message-text"></div>
                             ${userData.file.data ? `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="attachment" />` : ""}`;
 
     const outgoingMessageDiv = createMessageElement(messageContent, "user-message");
@@ -208,7 +336,13 @@ const handleOutgoingMessage = (e) => {
         const incomingMessageDiv = createMessageElement(messageContent, "bot-message", "thinking");
         chatBody.appendChild(incomingMessageDiv);
         chatBody.scrollTo({ behavior: "smooth", top: chatBody.scrollHeight });
-        generateBotResponse(incomingMessageDiv);
+        
+        // Kiểm tra xem có phải yêu cầu tạo ảnh không
+        if (isImageGenerationRequest(userData.message)) {
+            generateImage(incomingMessageDiv);
+        } else {
+            generateBotResponse(incomingMessageDiv);
+        }
     }, 600);
 };
 
@@ -310,7 +444,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const welcomeMessageContent = `<svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024">
                 <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"></path>
             </svg>
-            <div class="message-text">Xin chào! 👋<br><br>Tôi là trợ lý AI của <strong>Mon Amour</strong> - nền tảng dịch vụ hẹn hò cá nhân hóa.<br><br>Tôi có thể giúp bạn:<br>💝 Tư vấn ý tưởng hẹn hò lãng mạn<br>🎁 Gợi ý quà tặng ý nghĩa<br>📍 Tìm địa điểm hẹn hò lý tưởng<br>💡 Giải đáp về dịch vụ Mon Amour<br><br>Hãy cho tôi biết bạn cần hỗ trợ gì nhé!</div>`;
+            <div class="message-text">Xin chào! 👋<br><br>Tôi là trợ lý AI của <strong>Mon Amour</strong> - nền tảng dịch vụ hẹn hò cá nhân hóa.<br><br>Tôi có thể giúp bạn:<br>💝 Tư vấn ý tưởng hẹn hò lãng mạn<br>🎁 Gợi ý quà tặng ý nghĩa<br>📍 Tìm địa điểm hẹn hò lý tưởng<br>🎨 Thiết kế concept không gian hẹn hò đặc biệt (chỉ cần nói "tạo concept hẹn hò" hoặc "mô tả không gian lãng mạn")<br>💡 Giải đáp về dịch vụ Mon Amour<br><br>Hãy cho tôi biết bạn cần hỗ trợ gì nhé!</div>`;
 
     const welcomeMessageDiv = createMessageElement(welcomeMessageContent, "bot-message");
     if (chatBody) {
