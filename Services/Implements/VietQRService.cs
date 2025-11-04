@@ -19,6 +19,15 @@ namespace MonAmour.Services.Implements
         {
             try
             {
+                var clientId = _config["VietQR:ClientId"];
+                var apiKey = _config["VietQR:ApiKey"];
+                
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(apiKey))
+                {
+                    // Fallback to URL method if API keys not configured
+                    return "";
+                }
+
                 var requestData = new
                 {
                     accountNo = _config["VietQR:AccountNo"],
@@ -32,6 +41,11 @@ namespace MonAmour.Services.Implements
                 var json = JsonSerializer.Serialize(requestData);
                 var content_data = new StringContent(json, Encoding.UTF8, "application/json");
 
+                // Add headers for VietQR API
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("x-client-id", clientId);
+                _httpClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
+
                 var response = await _httpClient.PostAsync("/v2/generate", content_data);
                 
                 if (response.IsSuccessStatusCode)
@@ -39,7 +53,15 @@ namespace MonAmour.Services.Implements
                     var responseContent = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"VietQR Response: {responseContent}");
                     var result = JsonSerializer.Deserialize<VietQRResponse>(responseContent);
-                    return result?.Data?.QrCode ?? "";
+                    var qrCode = result?.Data?.QrCode ?? "";
+                    
+                    // Convert base64 to data URL if needed
+                    if (!string.IsNullOrEmpty(qrCode) && !qrCode.StartsWith("data:image"))
+                    {
+                        qrCode = $"data:image/png;base64,{qrCode}";
+                    }
+                    
+                    return qrCode;
                 }
                 else
                 {

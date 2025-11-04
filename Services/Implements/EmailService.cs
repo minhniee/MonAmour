@@ -3,6 +3,7 @@ using MonAmour.Services.Interfaces;
 using MonAmour.Util;
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 
 namespace MonAmour.Services.Implements;
 
@@ -333,6 +334,60 @@ public class EmailService : IEmailService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending contact confirmation to {Email}", customerEmail);
+            throw;
+        }
+    }
+
+    public async Task SendContactConfirmationEmailWithQrAsync(string customerEmail, string customerName, string htmlBody, string qrCodeBase64)
+    {
+        try
+        {
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_emailSettings.From, "MonAmour"),
+                Subject = "Xác nhận đặt concept - MonAmour",
+                IsBodyHtml = true,
+                Body = htmlBody
+            };
+            mailMessage.To.Add(customerEmail);
+
+            // Convert base64 QR code to image attachment and embed in email
+            if (!string.IsNullOrEmpty(qrCodeBase64))
+            {
+                try
+                {
+                    // Remove data:image/png;base64, prefix if present
+                    string base64Data = qrCodeBase64;
+                    if (base64Data.Contains(","))
+                    {
+                        base64Data = base64Data.Split(',')[1];
+                    }
+
+                    // Convert base64 to byte array
+                    byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+                    // Create attachment from memory stream (don't dispose until email is sent)
+                    var ms = new MemoryStream(imageBytes);
+                    var attachment = new Attachment(ms, "qrcode.png", "image/png");
+                    attachment.ContentId = "qrcode";
+                    attachment.ContentDisposition.Inline = true;
+                    attachment.ContentDisposition.DispositionType = "inline";
+                    mailMessage.Attachments.Add(attachment);
+                    // Stream will be disposed when MailMessage is disposed
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to attach QR code image to email, will use base64 in HTML");
+                    // If attachment fails, HTML will still try to show base64
+                }
+            }
+
+            using var smtp = CreateSmtpClient();
+            await smtp.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending contact confirmation with QR to {Email}", customerEmail);
             throw;
         }
     }

@@ -155,127 +155,46 @@
 		</div>
 	</section>
 
-	<!-- Contact CTA Button -->
-	<section class="pb-2 -mt-6">
-		<div class="container mx-auto px-4 text-center">
-			<a href="#contact-section" class="inline-block px-8 py-3 bg-wine-red text-white rounded-full shadow-lg hover:shadow-xl hover:bg-wine-red/90 transition-all duration-200 font-prata text-lg">Liên hệ ngay</a>
-		</div>
-	</section>
-
-	<!-- Contact Form Section -->
-	<section id="contact-section" class="py-12 bg-white/50">
+	<!-- Chatbot Consultation Section -->
+	<section id="chatbot-section" class="py-12 bg-white/50">
+		@Html.AntiForgeryToken()
 		<div class="container mx-auto px-4">
-			<h3 class="font-prata text-3xl text-wine-red text-center mb-8">Thông tin liên hệ</h3>
-			<form id="contactForm" method="post" action="@Url.Action("SubmitContact","Concept")" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
-				@Html.AntiForgeryToken()
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Họ tên *</label>
-						<input name="fullName" type="text" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="Nhập họ tên">
-						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Địa chỉ email *</label>
-						<input name="email" type="email" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="you@example.com">
-						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Số điện thoại *</label>
-						<input name="phone" type="tel" required pattern="^0[0-9]{9}$" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="0xxxxxxxxx">
-						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Nơi sống hiện tại</label>
-						<input name="currentLocation" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Thành phố / Tỉnh">
-					</div>
-				</div>
-
-				<h4 class="font-prata text-2xl text-wine-red mt-8 mb-4">Thông tin chi tiết</h4>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Mục đích buổi hẹn hò *</label>
-						<select id="datePurposeSelect" name="datePurpose" required class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500">
-							<option value="">Chọn mục đích buổi hẹn</option>
-							<option value="First date">First date</option>
-							<option value="Normal date">Normal date</option>
-							<option value="Anniversary/Birthday">Kỷ niệm ngày đặc biệt (Anniversary, Birthday)</option>
-							<option value="Proposal">Cầu hôn/Proposal</option>
-							<option value="other">Khác (ghi rõ trong phần ghi chú)</option>
-						</select>
-						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Ngân sách mong muốn *</label>
-						<select id="budgetSelect" name="budget" required class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500">
-							<option value="">Chọn ngân sách</option>
-							<option value="Standard">Dưới 1.000.000đ (Standard)</option>
-							<option value="Signature">1.000.000đ – 2.000.000đ (Signature)</option>
-							<option value="Premium">2.000.000đ – 4.000.000đ (Premium)</option>
-							<option value="Haute Amour">Trên 5.000.000đ (Haute Amour)</option>
-						</select>
-						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Ngày bạn muốn hẹn hò</label>
-						<input id="eventDate" name="eventDate" type="text" placeholder="dd/mm/yyyy" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40">
-						<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-wine-red mb-1">Khoảng thời gian mong muốn</label>
-						<div class="grid grid-cols-2 gap-2">
-							<div class="relative">
-								<input id="bookingStartTime" name="eventStartTime" type="text" readonly onclick="showTimePicker('bookingStartTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="From (hh:mm)">
-							</div>
-							<div class="relative">
-								<input id="bookingEndTime" name="eventEndTime" type="text" readonly onclick="showTimePicker('bookingEndTime')" class="w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="To (hh:mm)">
-							</div>
-							<p id="durationText" class="text-sm text-gray-600 mt-1 col-span-2"></p>
-							<div id="customTimePicker" class="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 hidden timepicker">
-								<div class="grid grid-cols-2 gap-3">
-									<div id="hoursColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
-									<div id="minutesColumn" class="max-h-48 overflow-y-auto border rounded-md"></div>
+			<h3 class="font-prata text-3xl text-wine-red text-center mb-8">Tư vấn với MonMon AI</h3>
+			<div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+				<!-- Embedded Chatbot -->
+				<div class="chatbot-embedded" data-concept-id="@Model.ConceptId" data-concept-name="@Model.Name" data-concept-price="@(Model.Price ?? 0)" data-concept-image="@primaryImage">
+					<!-- Chatbot Header -->
+					<div class="chat-header" style="background: #7f1d1d; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+						<div class="header-info" style="display: flex; align-items: center; gap: 12px;">
+							<!-- Logo với icon tròn và text -->
+							<div style="display: flex; align-items: center; gap: 12px; background: rgba(251, 241, 230, 0.1); padding: 8px 16px; border-radius: 24px; border: 1px solid rgba(251, 241, 230, 0.2);">
+								<div style="width: 40px; height: 40px; background: #fbf1e6; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+									<svg class="chatbot-logo" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024" style="fill: #7f1d1d;">
+										<path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z" />
+									</svg>
 								</div>
+								<h2 class="logo-text" style="color: #fbf1e6; font-family: 'Prata', serif; font-size: 1.25rem; margin: 0; font-weight: 600; letter-spacing: 0.5px;">MonMon AI</h2>
 							</div>
 						</div>
 					</div>
-					<div class="col-span-1 md:col-span-2">
-						<label class="block text-sm font-medium text-wine-red mb-1">Không gian bạn hướng đến</label>
-						<select id="spaceSelect" name="spacePreference" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
-							<option value="">Chọn không gian</option>
-							<option value="Private">Tại nhà/ Homestay/ Không gian riêng</option>
-							<option value="Restaurant/Cafe">Nhà hàng/ Quán Café</option>
-							<option value="Rooftop/Outdoor">Rooftop/ Outdoor</option>
-							<option value="Beach/Lake/Garden">Bãi biển/ Hồ/ Sân vườn</option>
-							<option value="other">Khác (ghi rõ)</option>
-						</select>
-						<div id="spaceOtherWrapper" class="mt-2 hidden">
-							<input id="spaceOther" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40" placeholder="Nhập không gian khác">
-						</div>
+					<!-- Chatbot Body -->
+					<div class="chat-body-embedded" style="height: 500px; overflow-y: auto; padding: 20px; background: #f9f9f9;">
+						<!-- Messages will be added by JavaScript -->
+					</div>
+					<!-- Chatbot Footer -->
+					<div class="chat-footer-embedded" style="padding: 16px; background: white; border-top: 1px solid #e5e5e5;">
+						<form action="#" class="chat-form-embedded" style="display: flex; gap: 8px; align-items: flex-end;">
+							<textarea placeholder="Nhập tin nhắn..." class="message-input-embedded" required style="flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 12px 16px; resize: none; min-height: 44px; max-height: 120px; font-family: inherit; font-size: 14px;"></textarea>
+							<button type="submit" id="send-message-embedded" style="background: #7f1d1d; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;">
+								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<line x1="22" y1="2" x2="11" y2="13"></line>
+									<polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+								</svg>
+							</button>
+						</form>
 					</div>
 				</div>
-
-				<div class="mt-6">
-					<label class="block text-sm font-medium text-wine-red mb-1">Điều bạn muốn MonAmour lưu ý * <span class="text-sm text-gray-500">(Let us know your wishes in more detail)</span></label>
-					<textarea name="message" rows="4" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine-red/40 invalid:border-red-500" placeholder="✍️ Hãy cho chúng tôi biết chi tiết về mong muốn của bạn..."></textarea>
-					<div class="error-message text-red-500 text-sm mt-1 hidden"></div>
-				</div>
-
-				<div class="mt-6">
-					<label class="block text-sm font-medium text-wine-red mb-1">Bạn biết đến MonAmour qua kênh nào?</label>
-					<select name="referral" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-wine-red/40">
-						<option>Facebook</option>
-						<option>Instagram</option>
-						<option>TikTok</option>
-						<option>Tìm kiếm Google</option>
-						<option>Người quen giới thiệu</option>
-						<option>Khác</option>
-					</select>
-				</div>
-
-				<div class="mt-8 text-center">
-					<button id="submitContactBtn" type="submit" class="px-8 py-3 bg-wine-red text-white rounded-full shadow-lg hover:shadow-xl hover:bg-wine-red/90 transition-all duration-200">Gửi yêu cầu</button>
-				</div>
-			</form>
+			</div>
 		</div>
 	</section>
 
@@ -935,5 +854,766 @@
 				}
 			});
 		}
+	})();
+</script>
+
+<script>
+	// Embedded Chatbot for Concept Detail Page
+	(function() {
+		const chatbotContainer = document.querySelector('.chatbot-embedded');
+		if (!chatbotContainer) return;
+
+		const chatBody = chatbotContainer.querySelector('.chat-body-embedded');
+		const messageInput = chatbotContainer.querySelector('.message-input-embedded');
+		const sendButton = chatbotContainer.querySelector('#send-message-embedded');
+		const chatForm = chatbotContainer.querySelector('.chat-form-embedded');
+
+		const conceptId = parseInt(chatbotContainer.dataset.conceptId);
+		const conceptName = chatbotContainer.dataset.conceptName;
+		const conceptPrice = parseFloat(chatbotContainer.dataset.conceptPrice);
+		const conceptImage = chatbotContainer.dataset.conceptImage;
+
+		// API setup - Same as main chatbot
+		const API_KEY = "AIzaSyD9QOuOGBhAsCw2DFA8pF9PW2m05i8c4wo";
+		const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+		let chatHistory = [{
+			role: "model",
+			parts: [{
+				text: `Xin chào! 👋 Tôi là MonMon AI, trợ lý của Mon Amour. 
+
+Tôi sẽ tạo concept không gian hẹn hò lãng mạn cho bạn dựa trên concept "${conceptName}" với giá ${conceptPrice.toLocaleString('vi-VN')}₫.
+
+Hãy để tôi tạo hình ảnh concept cho bạn... 🎨`
+			}],
+		}];
+
+		let selectedConcept = false;
+		let generatedConceptImageUrl = null;
+		let formData = {};
+		let currentImageElement = null; // Track current image element to remove when creating new one
+		let userBookingInfo = null; // Store user booking information for chatbot context
+		
+		// Training data from JSON
+		let trainingData = null;
+		let trainingSystemPrompt = "";
+		let companyInfo = null;
+		
+		// Load training data from JSON
+		async function loadTrainingData() {
+			try {
+				const response = await fetch('/data/chatbot_training_data.json');
+				const data = await response.json();
+				trainingData = data.training_data || [];
+				trainingSystemPrompt = data.system_prompt || "";
+				companyInfo = data.company_info || null;
+				console.log('Training data loaded successfully:', data);
+			} catch (error) {
+				console.error('Error loading training data:', error);
+				trainingData = [];
+				trainingSystemPrompt = "Bạn là MonMon AI, trợ lý chuyên nghiệp của Mon Amour - dịch vụ hẹn hò cao cấp. Hãy trả lời một cách thân thiện và hữu ích.";
+			}
+		}
+		
+		// Find best answer from training data based on user message
+		function findBestAnswer(userMessage) {
+			if (!trainingData || trainingData.length === 0) return null;
+			
+			const msgLower = userMessage.toLowerCase().trim();
+			let bestMatch = null;
+			let maxScore = 0;
+			
+			// Score based on keyword matches and question similarity
+			for (const item of trainingData) {
+				let score = 0;
+				
+				// Check keywords match
+				if (item.keywords && Array.isArray(item.keywords)) {
+					for (const keyword of item.keywords) {
+						if (msgLower.includes(keyword.toLowerCase())) {
+							score += 2; // Keyword match gives higher score
+						}
+					}
+				}
+				
+				// Check question similarity (simple word matching)
+				const questionLower = item.question.toLowerCase();
+				const questionWords = questionLower.split(/\s+/);
+				const userWords = msgLower.split(/\s+/);
+				
+				for (const userWord of userWords) {
+					if (userWord.length > 2 && questionLower.includes(userWord)) {
+						score += 1; // Word match gives lower score
+					}
+				}
+				
+				// Check exact phrase match
+				if (questionLower.includes(msgLower) || msgLower.includes(questionLower.substring(0, 20))) {
+					score += 5; // Phrase match gives highest score
+				}
+				
+				if (score > maxScore) {
+					maxScore = score;
+					bestMatch = item;
+				}
+			}
+			
+			// Only return if score is above threshold
+			return maxScore >= 2 ? bestMatch : null;
+		}
+		
+		// OpenAI DALL-E 3 API setup
+			const OPENAI_API_KEY = "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";
+		const DALL_E_API_URL = "https://api.openai.com/v1/images/generations";
+
+		// Format bot response with icons and line breaks (only for AI text responses)
+		function formatBotResponse(text) {
+			if (!text) return text;
+			
+			// Replace markdown lists with formatted lists
+			text = text.replace(/\*\s+/g, '• ');
+			text = text.replace(/^\d+\.\s+/gm, '• ');
+			
+			// Add line breaks before bullet points for better readability
+			text = text.replace(/(•\s+[^\n]+)/g, '\n$1');
+			
+			// Format common patterns with icons
+			text = text.replace(/Giá:|Giá concept:/gi, '💰 Giá:');
+			text = text.replace(/Ngày hẹn hò:|Ngày:/gi, '📅 Ngày hẹn hò:');
+			text = text.replace(/Thời gian:|Khoảng thời gian:/gi, '⏰ Thời gian:');
+			text = text.replace(/Email:|email:/gi, '📧 Email:');
+			text = text.replace(/Số điện thoại:|SĐT:|Phone:/gi, '📞 SĐT:');
+			text = text.replace(/Thanh toán:|Payment:/gi, '💳 Thanh toán:');
+			text = text.replace(/Booking:|Đặt concept:/gi, '📋 Booking:');
+			text = text.replace(/Concept:|Concept đã chọn:/gi, '🎨 Concept:');
+			text = text.replace(/Mục đích:|Mục đích buổi hẹn hò:/gi, '💝 Mục đích:');
+			text = text.replace(/Ngân sách:|Budget:/gi, '💵 Ngân sách:');
+			text = text.replace(/Không gian:|Không gian mong muốn:/gi, '🏠 Không gian:');
+			text = text.replace(/Thông tin:|Thông tin booking:/gi, 'ℹ️ Thông tin:');
+			
+			// Add icons to common phrases
+			text = text.replace(/Tư vấn/gi, '💬 Tư vấn');
+			text = text.replace(/Hỗ trợ/gi, '🤝 Hỗ trợ');
+			text = text.replace(/Lợi ích/gi, '✨ Lợi ích');
+			text = text.replace(/Kết nối/gi, '🔗 Kết nối');
+			text = text.replace(/Hồ sơ/gi, '📄 Hồ sơ');
+			text = text.replace(/Chụp ảnh/gi, '📸 Chụp ảnh');
+			
+			// Add spacing between paragraphs
+			text = text.replace(/\n\n+/g, '\n\n');
+			
+			// Clean up extra spaces
+			text = text.trim();
+			
+			return text;
+		}
+
+		// Create message element
+		function createMessageElement(content, isUser = false, isHtmlContent = false) {
+			const div = document.createElement('div');
+			div.style.cssText = `display: flex; gap: 10px; margin-bottom: 16px; ${isUser ? 'flex-direction: row-reverse;' : ''}`;
+			
+			// Format bot response with icons and line breaks (only for plain text AI responses, not HTML content like forms/QR)
+			let formattedContent = content;
+			if (!isUser && !isHtmlContent && !content.includes('<div') && !content.includes('<form') && !content.includes('<img')) {
+				formattedContent = formatBotResponse(content);
+				// Convert newlines to <br> for proper line breaks
+				formattedContent = formattedContent.replace(/\n/g, '<br>');
+			}
+			
+			if (!isUser) {
+				div.innerHTML = `
+					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 1024 1024" style="fill: #7f1d1d; flex-shrink: 0;">
+						<path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9z"/>
+					</svg>
+					<div style="background: white; padding: 12px 16px; border-radius: 18px; max-width: 75%; box-shadow: 0 1px 2px rgba(0,0,0,0.1); ${!isHtmlContent ? 'line-height: 1.6; word-wrap: break-word;' : ''}">
+						<div class="message-text" ${!isHtmlContent ? 'style="white-space: pre-wrap;"' : ''}>${formattedContent}</div>
+					</div>
+				`;
+			} else {
+				div.innerHTML = `
+					<div style="background: #7f1d1d; color: white; padding: 12px 16px; border-radius: 18px; max-width: 75%; line-height: 1.6; word-wrap: break-word;">
+						<div class="message-text" style="white-space: pre-wrap;">${content}</div>
+					</div>
+				`;
+			}
+			
+			return div;
+		}
+
+		// Check if user wants to generate image
+		function isImageGenerationRequest(message) {
+			const imageKeywords = [
+				'tạo ảnh', 'tạo hình', 'vẽ ảnh', 'vẽ hình', 'tạo hình ảnh', 'sinh ảnh',
+				'generate image', 'create image', 'tạo cho tôi ảnh', 'tạo concept',
+				'cho tôi xem', 'visualize', 'hình dung', 'không gian hẹn hò',
+				'concept hẹn hò', 'phong cách hẹn hò', 'tạo lại', 'tạo mới'
+			];
+			const msgLower = message.toLowerCase();
+			return imageKeywords.some(keyword => msgLower.includes(keyword.toLowerCase()));
+		}
+
+		// Generate concept image
+		async function generateConceptImage(customPrompt = null) {
+			// Remove previous image element if exists
+			if (currentImageElement) {
+				currentImageElement.remove();
+				currentImageElement = null;
+			}
+			
+			const thinkingDiv = createMessageElement('<div style="display: flex; gap: 4px;"><div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: pulse 1s infinite;"></div><div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: pulse 1s infinite 0.2s;"></div><div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: pulse 1s infinite 0.4s;"></div></div>', false);
+			chatBody.appendChild(thinkingDiv);
+			chatBody.scrollTop = chatBody.scrollHeight;
+
+			try {
+				// Use DALL-E 3 to generate image
+				if (OPENAI_API_KEY && OPENAI_API_KEY.trim() !== "") {
+					// Use custom prompt if provided, otherwise use default
+					let dallePrompt;
+					if (customPrompt) {
+						dallePrompt = `Professional romantic dating space setup, ${customPrompt}, elegant romantic atmosphere, soft warm lighting, beautiful decorations with flowers and candles, high quality, photorealistic, interior design, cozy intimate setting, Mon Amour style`;
+					} else {
+						dallePrompt = `Professional romantic dating space setup inspired by "${conceptName}", elegant romantic atmosphere, soft warm lighting, beautiful decorations with flowers and candles, high quality, photorealistic, interior design, cozy intimate setting, Mon Amour style`;
+					}
+					
+					const requestOptions = {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"Authorization": `Bearer ${OPENAI_API_KEY}`
+						},
+						body: JSON.stringify({
+							model: "dall-e-3",
+							prompt: dallePrompt,
+							n: 1,
+							size: "1024x1024",
+							quality: "standard"
+						})
+					};
+
+					const response = await fetch(DALL_E_API_URL, requestOptions);
+					const data = await response.json();
+
+					if (!response.ok) {
+						throw new Error(data.error?.message || "Có lỗi xảy ra khi tạo ảnh");
+					}
+
+					generatedConceptImageUrl = data.data[0].url;
+					
+					thinkingDiv.remove();
+					
+					// Generate unique ID for button
+					const uniqueId = 'book-concept-btn-' + Date.now();
+					
+					const imageHtml = `
+						<div style="background: white; padding: 20px; border-radius: 12px; margin: 16px 0; border: 2px solid #7f1d1d;">
+							<h4 style="color: #7f1d1d; margin-top: 0; margin-bottom: 16px; font-family: 'Prata', serif;">🎨 Concept không gian hẹn hò của bạn</h4>
+							<img src="${generatedConceptImageUrl}" alt="Concept hẹn hò" style="width: 100%; max-width: 100%; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+							<p style="color: #666; font-size: 14px; margin-bottom: 16px;">Đây là concept không gian hẹn hò lãng mạn được tạo riêng cho bạn! 💝</p>
+							<p style="color: #666; font-size: 14px; margin-bottom: 16px;"><strong>Giá:</strong> ${conceptPrice.toLocaleString('vi-VN')}₫</p>
+							<button id="${uniqueId}" style="background: #7f1d1d; color: white; padding: 12px 24px; border: none; border-radius: 24px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; margin-top: 8px;">
+								💝 Tôi muốn đặt concept này
+							</button>
+						</div>
+					`;
+					
+					const imageDiv = createMessageElement(imageHtml, false, true); // true = isHtmlContent, don't format
+					chatBody.appendChild(imageDiv);
+					currentImageElement = imageDiv; // Store reference to current image element
+					chatBody.scrollTop = chatBody.scrollHeight;
+					
+					// Add event listener to button
+					const bookBtn = document.getElementById(uniqueId);
+					if (bookBtn) {
+						bookBtn.addEventListener('click', () => {
+							if (!selectedConcept) {
+								showBookingForm();
+							}
+						});
+					}
+				} else {
+					throw new Error("OpenAI API key chưa được cấu hình");
+				}
+			} catch (error) {
+				console.error("Image Generation Error:", error);
+				thinkingDiv.remove();
+				const errorMsg = createMessageElement(`Xin lỗi, có lỗi xảy ra khi tạo hình ảnh concept. ${error.message}`, false);
+				chatBody.appendChild(errorMsg);
+				chatBody.scrollTop = chatBody.scrollHeight;
+			}
+		}
+
+		// Add welcome message
+		function addWelcomeMessage() {
+			const welcomeMsg = chatHistory[0].parts[0].text;
+			const msgDiv = createMessageElement(welcomeMsg, false);
+			chatBody.appendChild(msgDiv);
+			
+			// Auto-generate concept image
+			setTimeout(() => generateConceptImage(), 1000);
+		}
+
+		// Check if user wants to fill contact form (explicit request only)
+		function isBookingFormRequest(message) {
+			const formKeywords = [
+				'điền thông tin', 'điền form', 'nhập thông tin', 'điền thông tin liên hệ',
+				'tôi muốn đặt', 'muốn đặt concept', 'đặt concept', 'đặt booking',
+				'xác nhận đặt', 'đặt ngay', 'đặt ngay concept',
+				'fill form', 'fill information', 'book now', 'book concept'
+			];
+			const msgLower = message.toLowerCase();
+			return formKeywords.some(keyword => msgLower.includes(keyword));
+		}
+
+		// Show booking form
+		function showBookingForm() {
+			if (selectedConcept) return; // Already shown
+			selectedConcept = true;
+
+			const formHtml = `
+				<div style="background: white; padding: 20px; border-radius: 12px; margin: 16px 0; border: 2px solid #7f1d1d;">
+					<h4 style="color: #7f1d1d; margin-top: 0; margin-bottom: 16px; font-family: 'Prata', serif;">📋 Điền thông tin đặt concept</h4>
+					<form id="chatbot-booking-form" style="display: grid; gap: 12px;">
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Họ tên *</label>
+								<input type="text" name="fullName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+							</div>
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Email *</label>
+								<input type="email" name="email" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+							</div>
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Số điện thoại *</label>
+								<input type="tel" name="phone" required pattern="^0[0-9]{9}$" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;" placeholder="0xxxxxxxxx">
+							</div>
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Nơi sống hiện tại</label>
+								<input type="text" name="currentLocation" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+							</div>
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Mục đích buổi hẹn hò *</label>
+								<select name="datePurpose" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+									<option value="">Chọn mục đích</option>
+									<option value="First date">First date</option>
+									<option value="Normal date">Normal date</option>
+									<option value="Anniversary/Birthday">Kỷ niệm ngày đặc biệt</option>
+									<option value="Proposal">Cầu hôn/Proposal</option>
+									<option value="other">Khác</option>
+								</select>
+							</div>
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Ngân sách mong muốn *</label>
+								<select name="budget" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+									<option value="">Chọn ngân sách</option>
+									<option value="Standard">Dưới 1.000.000đ</option>
+									<option value="Signature">1.000.000đ – 2.000.000đ</option>
+									<option value="Premium">2.000.000đ – 4.000.000đ</option>
+									<option value="Haute Amour">Trên 5.000.000đ</option>
+								</select>
+							</div>
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Ngày hẹn hò</label>
+								<input type="text" name="eventDate" placeholder="dd/mm/yyyy" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+							</div>
+							<div>
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Khoảng thời gian</label>
+								<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+									<input type="text" name="eventStartTime" placeholder="Từ (hh:mm)" style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+									<input type="text" name="eventEndTime" placeholder="Đến (hh:mm)" style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+								</div>
+							</div>
+							<div style="grid-column: 1 / -1;">
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Không gian mong muốn</label>
+								<select name="spacePreference" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+									<option value="">Chọn không gian</option>
+									<option value="Private">Tại nhà/Homestay</option>
+									<option value="Restaurant/Cafe">Nhà hàng/Quán Café</option>
+									<option value="Rooftop/Outdoor">Rooftop/Outdoor</option>
+									<option value="Beach/Lake/Garden">Bãi biển/Hồ/Sân vườn</option>
+									<option value="other">Khác</option>
+								</select>
+							</div>
+							<div style="grid-column: 1 / -1;">
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Điều bạn muốn MonAmour lưu ý *</label>
+								<textarea name="message" required rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical;"></textarea>
+							</div>
+							<div style="grid-column: 1 / -1;">
+								<label style="display: block; font-size: 12px; color: #7f1d1d; margin-bottom: 4px; font-weight: 600;">Bạn biết đến MonAmour qua?</label>
+								<select name="referral" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+									<option>Facebook</option>
+									<option>Instagram</option>
+									<option>TikTok</option>
+									<option>Tìm kiếm Google</option>
+									<option>Người quen giới thiệu</option>
+									<option>Khác</option>
+								</select>
+							</div>
+						</div>
+						<button type="submit" style="background: #7f1d1d; color: white; padding: 12px 24px; border: none; border-radius: 24px; font-weight: 600; cursor: pointer; margin-top: 8px;">
+							Xác nhận đặt concept
+						</button>
+					</form>
+				</div>
+			`;
+
+			const formDiv = createMessageElement(formHtml, false, true); // true = isHtmlContent, don't format
+			chatBody.appendChild(formDiv);
+			chatBody.scrollTop = chatBody.scrollHeight;
+
+			// Handle form submission
+			const form = document.getElementById('chatbot-booking-form');
+			if (form) {
+				form.addEventListener('submit', async (e) => {
+					e.preventDefault();
+					const submitBtn = form.querySelector('button[type="submit"]');
+					submitBtn.disabled = true;
+					submitBtn.textContent = 'Đang xử lý...';
+
+					const formDataObj = new FormData(form);
+					formDataObj.append('conceptId', conceptId);
+					
+					// Add concept image URL from chatbot
+					if (generatedConceptImageUrl) {
+						formDataObj.append('conceptImageUrl', generatedConceptImageUrl);
+					}
+					
+					// Get AntiForgeryToken from page
+					const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+					if (token) {
+						formDataObj.append('__RequestVerificationToken', token);
+					}
+
+					try {
+						const response = await fetch('@Url.Action("SubmitChatbotContact", "Concept")', {
+							method: 'POST',
+							body: formDataObj,
+							headers: {
+								'X-Requested-With': 'XMLHttpRequest'
+							}
+						});
+
+						const result = await response.json();
+
+						if (result.success) {
+							// Save user booking information to localStorage for chatbot context
+							const bookingInfo = {
+								fullName: formDataObj.get('fullName'),
+								email: formDataObj.get('email'),
+								phone: formDataObj.get('phone'),
+								currentLocation: formDataObj.get('currentLocation'),
+								datePurpose: formDataObj.get('datePurpose'),
+								budget: formDataObj.get('budget'),
+								eventDate: formDataObj.get('eventDate'),
+								eventStartTime: formDataObj.get('eventStartTime'),
+								eventEndTime: formDataObj.get('eventEndTime'),
+								spacePreference: formDataObj.get('spacePreference'),
+								message: formDataObj.get('message'),
+								referral: formDataObj.get('referral'),
+								conceptId: conceptId,
+								conceptName: conceptName,
+								conceptPrice: conceptPrice,
+								conceptImageUrl: generatedConceptImageUrl || conceptImage,
+								submittedAt: new Date().toISOString()
+							};
+							localStorage.setItem('monamour_booking_info', JSON.stringify(bookingInfo));
+							
+							// Show QR code - use same format as Cart/Index.cshtml
+							let qrImageUrl = '';
+							
+							// Try to get qrDataURL from response (like Cart/Index.cshtml)
+							if (result.response && result.response.data && result.response.data.qrDataURL) {
+								qrImageUrl = result.response.data.qrDataURL;
+							}
+							// Fallback to qrCodeBase64
+							else if (result.qrCodeBase64) {
+								qrImageUrl = result.qrCodeBase64;
+							}
+							// Fallback to qrCodeUrl
+							else if (result.qrCodeUrl) {
+								qrImageUrl = result.qrCodeUrl;
+							}
+							
+							let qrHtml = '';
+							if (qrImageUrl && qrImageUrl.trim() !== '') {
+								qrHtml = `
+									<div style="background: white; padding: 20px; border-radius: 12px; margin: 16px 0; border: 2px solid #7f1d1d; text-align: center;">
+										<h4 style="color: #7f1d1d; margin-top: 0; margin-bottom: 16px; font-family: 'Prata', serif;">✅ Đã gửi yêu cầu thành công!</h4>
+										<p style="margin-bottom: 16px;">Vui lòng quét mã QR để thanh toán:</p>
+										<img src="${qrImageUrl}" alt="QR Code" style="max-width: 300px; margin: 0 auto; display: block; border-radius: 8px;">
+										<p style="margin-top: 16px; font-size: 14px; color: #666;">Sau khi thanh toán, chúng mình sẽ liên hệ với bạn qua email để xác nhận.</p>
+									</div>
+								`;
+							} else {
+								qrHtml = `
+									<div style="background: white; padding: 20px; border-radius: 12px; margin: 16px 0; border: 2px solid #7f1d1d; text-align: center;">
+										<h4 style="color: #7f1d1d; margin-top: 0; margin-bottom: 16px; font-family: 'Prata', serif;">✅ Đã gửi yêu cầu thành công!</h4>
+										<p style="margin-bottom: 16px; color: #e74c3c;">Không thể tạo mã QR. Vui lòng kiểm tra email để xem mã QR hoặc liên hệ hotline: 0868019255</p>
+										<p style="margin-top: 16px; font-size: 14px; color: #666;">Chúng mình sẽ liên hệ với bạn qua email để xác nhận.</p>
+									</div>
+								`;
+							}
+							
+							const qrDiv = createMessageElement(qrHtml, false, true); // true = isHtmlContent, don't format
+							chatBody.appendChild(qrDiv);
+							chatBody.scrollTop = chatBody.scrollHeight;
+
+							// Remove form
+							formDiv.remove();
+							
+							// Update chatbot context with booking info
+							updateChatbotContext(bookingInfo);
+						} else {
+							alert(result.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+							submitBtn.disabled = false;
+							submitBtn.textContent = 'Xác nhận đặt concept';
+						}
+					} catch (error) {
+						console.error('Error:', error);
+						alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
+						submitBtn.disabled = false;
+						submitBtn.textContent = 'Xác nhận đặt concept';
+					}
+				});
+			}
+		}
+
+		// Load user booking info from localStorage
+		function loadUserBookingInfo() {
+			try {
+				const savedInfo = localStorage.getItem('monamour_booking_info');
+				if (savedInfo) {
+					userBookingInfo = JSON.parse(savedInfo);
+					// Check if booking is for current concept
+					if (userBookingInfo.conceptId === conceptId) {
+						return userBookingInfo;
+					}
+				}
+			} catch (error) {
+				console.error('Error loading booking info:', error);
+			}
+			return null;
+		}
+
+		// Update chatbot context with booking info
+		function updateChatbotContext(bookingInfo) {
+			userBookingInfo = bookingInfo;
+			// Show a message that chatbot now knows about the booking
+			const contextMsg = createMessageElement(
+				`✅ Tôi đã ghi nhận thông tin đặt concept của bạn! Bạn có thể hỏi tôi về bất cứ điều gì liên quan đến booking của mình.`,
+				false
+			);
+			chatBody.appendChild(contextMsg);
+			chatBody.scrollTop = chatBody.scrollHeight;
+		}
+
+		// Build context string for system prompt
+		function buildUserContext() {
+			if (!userBookingInfo) return '';
+			
+			let context = `\n\nTHÔNG TIN BOOKING CỦA KHÁCH HÀNG:\n`;
+			context += `- Họ tên: ${userBookingInfo.fullName}\n`;
+			context += `- Email: ${userBookingInfo.email}\n`;
+			context += `- Số điện thoại: ${userBookingInfo.phone}\n`;
+			if (userBookingInfo.currentLocation) context += `- Nơi sống: ${userBookingInfo.currentLocation}\n`;
+			if (userBookingInfo.datePurpose) context += `- Mục đích: ${userBookingInfo.datePurpose}\n`;
+			if (userBookingInfo.budget) context += `- Ngân sách: ${userBookingInfo.budget}\n`;
+			if (userBookingInfo.eventDate) context += `- Ngày hẹn hò: ${userBookingInfo.eventDate}\n`;
+			if (userBookingInfo.eventStartTime || userBookingInfo.eventEndTime) {
+				context += `- Thời gian: ${userBookingInfo.eventStartTime || ''} - ${userBookingInfo.eventEndTime || ''}\n`;
+			}
+			if (userBookingInfo.spacePreference) context += `- Không gian mong muốn: ${userBookingInfo.spacePreference}\n`;
+			if (userBookingInfo.message) context += `- Ghi chú: ${userBookingInfo.message}\n`;
+			context += `- Concept đã chọn: ${userBookingInfo.conceptName || conceptName}\n`;
+			context += `- Giá: ${(userBookingInfo.conceptPrice || conceptPrice).toLocaleString('vi-VN')}₫\n`;
+			
+			context += `\nLƯU Ý: Khi khách hàng hỏi về booking, thông tin đặt concept, thanh toán, hoặc bất kỳ câu hỏi liên quan đến đơn đặt của họ, hãy sử dụng thông tin trên để trả lời chính xác và hữu ích.`;
+			
+			return context;
+		}
+
+		// Generate bot response
+		async function generateBotResponse(userMessage) {
+			// Load booking info if not loaded
+			if (!userBookingInfo) {
+				loadUserBookingInfo();
+			}
+			
+			// Find best answer from training data
+			const trainingAnswer = findBestAnswer(userMessage);
+			
+			// Build base system prompt
+			let systemPrompt = trainingSystemPrompt || `Bạn là MonMon AI, trợ lý thân thiện của Mon Amour - dịch vụ hẹn hò cao cấp. `;
+			
+			systemPrompt += `\n\nQUAN TRỌNG - Yêu cầu trả lời:
+- Trả lời NGẮN GỌN, TRỌNG TÂM vào câu hỏi (tối đa 3-4 câu)
+- Sử dụng xuống dòng để tách các ý chính, dễ đọc hơn
+- Thêm emoji phù hợp cho các thông tin quan trọng (💰 cho giá, 📅 cho ngày, 📞 cho SĐT, etc.)
+- Tập trung vào câu trả lời trực tiếp, không dài dòng
+- Nếu cần liệt kê, dùng dấu gạch đầu dòng (•) hoặc số thứ tự
+- Thân thiện nhưng chuyên nghiệp
+
+Bạn đang tư vấn về concept "${conceptName}" với giá ${conceptPrice.toLocaleString('vi-VN')}₫.`;
+			
+			// Add company info if available
+			if (companyInfo) {
+				systemPrompt += `\n\nTHÔNG TIN CÔNG TY:
+- Tên: ${companyInfo.name}
+- Hotline: ${companyInfo.contact?.hotline || '0868019255'}
+- Email: ${companyInfo.contact?.email || 'booking.monamour@gmail.com'}
+- Website: ${companyInfo.contact?.website || 'monamour.vn'}`;
+				
+				// Add packages info
+				if (companyInfo.packages && companyInfo.packages.length > 0) {
+					systemPrompt += `\n\nCÁC GÓI DỊCH VỤ:`;
+					for (const pkg of companyInfo.packages) {
+						systemPrompt += `\n- ${pkg.name}: ${pkg.price}`;
+					}
+				}
+			}
+			
+			// Add training data context if found
+			if (trainingAnswer) {
+				systemPrompt += `\n\nTHÔNG TIN THAM KHẢO TỪ TRAINING DATA:
+Câu hỏi tương tự: "${trainingAnswer.question}"
+Câu trả lời tham khảo: "${trainingAnswer.answer}"
+Hãy sử dụng thông tin này để trả lời chính xác và chi tiết hơn.`;
+			}
+			
+			// Add user booking context if available
+			if (userBookingInfo && userBookingInfo.conceptId === conceptId) {
+				systemPrompt += buildUserContext();
+				systemPrompt += `\n\nKhách hàng đã đặt concept này. Bạn có thể trả lời các câu hỏi về booking của họ, thông tin đã đặt, thanh toán, hoặc các vấn đề khác liên quan.`;
+			} else {
+				systemPrompt += ` Nếu khách hàng muốn đặt concept, hãy gợi ý họ nói "tôi muốn đặt" hoặc "đặt concept".`;
+			}
+
+			chatHistory.push({
+				role: "user",
+				parts: [{ text: userMessage }]
+			});
+
+				const requestOptions = {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					contents: [{
+						role: "user",
+						parts: [{ text: `${systemPrompt}\n\nCâu hỏi của khách hàng: ${userMessage}\n\nHãy trả lời NGẮN GỌN, TRỌNG TÂM vào câu hỏi trên. Sử dụng xuống dòng để tách các ý chính.` }]
+					}]
+				})
+			};
+
+			try {
+				const response = await fetch(API_URL, requestOptions);
+				const data = await response.json();
+				
+				if (!response.ok) throw new Error(data.error?.message || "Có lỗi xảy ra");
+
+				let apiResponseText = data.candidates[0].content.parts[0].text.trim();
+				
+				// Remove markdown formatting
+				apiResponseText = apiResponseText.replace(/\*\*(.*?)\*\*/g, "$1");
+				apiResponseText = apiResponseText.replace(/\*(.*?)\*/g, "$1");
+				
+				chatHistory.push({
+					role: "model",
+					parts: [{ text: apiResponseText }]
+				});
+
+				return apiResponseText;
+			} catch (error) {
+				console.error('Chatbot Error:', error);
+				return 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau hoặc liên hệ hotline: 0868019255';
+			}
+		}
+
+		// Handle message send
+		async function handleSendMessage(e) {
+			e.preventDefault();
+			const userMessage = messageInput.value.trim();
+			if (!userMessage) return;
+
+			// Add user message
+			const userMsgDiv = createMessageElement(userMessage, true);
+			chatBody.appendChild(userMsgDiv);
+			chatBody.scrollTop = chatBody.scrollHeight;
+
+			messageInput.value = '';
+			messageInput.style.height = 'auto';
+
+			// Check if user wants to generate image
+			if (isImageGenerationRequest(userMessage)) {
+				// Extract the prompt from user message (remove keywords)
+				const imageKeywords = ['tạo ảnh', 'tạo hình', 'vẽ ảnh', 'vẽ hình', 'tạo hình ảnh', 'sinh ảnh', 'generate image', 'create image', 'tạo cho tôi ảnh', 'tạo concept', 'cho tôi xem', 'visualize', 'hình dung', 'tạo lại', 'tạo mới'];
+				let customPrompt = userMessage;
+				for (const keyword of imageKeywords) {
+					customPrompt = customPrompt.replace(new RegExp(keyword, 'gi'), '').trim();
+				}
+				// If no custom prompt, use the full message
+				if (!customPrompt || customPrompt.length < 3) {
+					customPrompt = userMessage;
+				}
+				
+				// Generate new image with custom prompt
+				await generateConceptImage(customPrompt);
+				return;
+			}
+
+			// Check if user explicitly requests to fill contact form
+			if (isBookingFormRequest(userMessage) && !selectedConcept) {
+				showBookingForm();
+				return;
+			}
+
+			// Show thinking indicator
+			const thinkingDiv = createMessageElement('<div style="display: flex; gap: 4px;"><div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: pulse 1s infinite;"></div><div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: pulse 1s infinite 0.2s;"></div><div style="width: 8px; height: 8px; background: #999; border-radius: 50%; animation: pulse 1s infinite 0.4s;"></div></div>', false);
+			chatBody.appendChild(thinkingDiv);
+			chatBody.scrollTop = chatBody.scrollHeight;
+
+			// Generate response
+			const botResponse = await generateBotResponse(userMessage);
+			
+			// Remove thinking indicator
+			thinkingDiv.remove();
+
+			// Add bot response
+			const botMsgDiv = createMessageElement(botResponse, false);
+			chatBody.appendChild(botMsgDiv);
+			chatBody.scrollTop = chatBody.scrollHeight;
+		}
+
+		// Event listeners
+		chatForm.addEventListener('submit', handleSendMessage);
+		
+		messageInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' && !e.shiftKey) {
+				e.preventDefault();
+				handleSendMessage(e);
+			}
+		});
+
+		messageInput.addEventListener('input', () => {
+			messageInput.style.height = 'auto';
+			messageInput.style.height = messageInput.scrollHeight + 'px';
+		});
+
+		// Initialize
+		// Load training data and user booking info on page load
+		(async () => {
+			await loadTrainingData();
+			loadUserBookingInfo();
+			addWelcomeMessage();
+		})();
+
+		// Add CSS for pulse animation
+		const style = document.createElement('style');
+		style.textContent = `
+			@@keyframes pulse {
+				0%, 100% { opacity: 0.4; }
+				50% { opacity: 1; }
+			}
+		`;
+		document.head.appendChild(style);
 	})();
 </script>

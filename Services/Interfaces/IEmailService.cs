@@ -10,6 +10,7 @@ public interface IEmailService
 
     // Contact form emails
     Task SendContactConfirmationEmailAsync(string customerEmail, string customerName, string htmlBody);
+    Task SendContactConfirmationEmailWithQrAsync(string customerEmail, string customerName, string htmlBody, string qrCodeBase64);
     Task SendAdminContactNotificationEmailAsync(string htmlBody, string? subject = null);
 
     // Order status emails

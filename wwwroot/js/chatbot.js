@@ -12,7 +12,7 @@ const API_KEY = "AIzaSyD9QOuOGBhAsCw2DFA8pF9PW2m05i8c4wo"; // Google Gemini API 
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 // OpenAI DALL-E 3 API setup - Thay thế bằng API key của bạn
-const OPENAI_API_KEY = "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"; // Điền OpenAI API key vào đây để sử dụng tính năng tạo ảnh
+const OPENAI_API_KEY = "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"; // Điền OpenAI API key vào đây để sử dụng tính năng tạo ảnh
 const DALL_E_API_URL = "https://api.openai.com/v1/images/generations";
 
 const userData = {
