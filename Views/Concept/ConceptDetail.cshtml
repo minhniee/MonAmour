@@ -1044,10 +1044,66 @@ Hãy để tôi tạo hình ảnh concept cho bạn... 🎨`
 		// Check if user wants to generate image
 		function isImageGenerationRequest(message) {
 			const imageKeywords = [
+				// Tạo ảnh/hình cơ bản
 				'tạo ảnh', 'tạo hình', 'vẽ ảnh', 'vẽ hình', 'tạo hình ảnh', 'sinh ảnh',
-				'generate image', 'create image', 'tạo cho tôi ảnh', 'tạo concept',
+				'generate image', 'create image', 'tạo cho tôi ảnh', 'tạo ảnh cho tôi',
+				'vẽ cho tôi', 'tạo hình cho tôi', 'show me image', 'show image',
+				
+				// Concept mới/thay đổi
+				'tạo concept', 'tạo concept mới', 'concept mới', 'concept khác', 'concept khác đi',
+				'thay đổi concept', 'đổi concept', 'muốn concept khác', 'concept khác đi',
+				'tạo lại concept', 'tạo concept khác', 'concept khác', 'concept khác đi',
+				'new concept', 'different concept', 'another concept', 'change concept',
+				'concept khác được không', 'có concept khác không', 'concept khác đi được không',
+				'đổi concept được không', 'thay concept được không', 'concept mới đi',
+				'concept khác xem', 'xem concept khác', 'concept khác thử',
+				
+				// Không gian/setup
 				'cho tôi xem', 'visualize', 'hình dung', 'không gian hẹn hò',
-				'concept hẹn hò', 'phong cách hẹn hò', 'tạo lại', 'tạo mới'
+				'concept hẹn hò', 'phong cách hẹn hò', 'không gian mới', 'setup mới',
+				'trang trí mới', 'không gian khác', 'new space', 'different space',
+				'setup khác', 'trang trí khác', 'không gian khác đi',
+				'không gian khác được không', 'setup khác được không', 'trang trí khác được không',
+				'không gian khác xem', 'xem không gian khác', 'không gian khác thử',
+				'không gian mới xem', 'xem không gian mới', 'setup mới xem',
+				'decoration', 'interior design', 'room setup', 'space design',
+				
+				// Tạo lại/mới
+				'tạo lại', 'tạo mới', 'tạo lại concept', 'tạo concept mới',
+				'regenerate', 'create new', 'make new', 'generate new',
+				'tạo lại đi', 'tạo mới đi', 'tạo lại xem', 'tạo mới xem',
+				'redo', 'remake', 'recreate', 'regenerate image',
+				
+				// Yêu cầu thay đổi
+				'muốn concept khác', 'muốn không gian khác', 'muốn thay đổi',
+				'có concept khác không', 'có không gian khác không', 'want different',
+				'want another', 'want new', 'muốn đổi', 'muốn thay',
+				'có thể đổi không', 'có thể thay đổi không', 'đổi được không',
+				'can change', 'can i change', 'can we change',
+				
+				// Mô tả không gian
+				'mô tả không gian', 'thiết kế không gian', 'design space',
+				'concept không gian', 'không gian lãng mạn', 'romantic space',
+				'không gian như thế nào', 'không gian ra sao', 'không gian như nào',
+				'what space', 'how space', 'describe space',
+				
+				// Yêu cầu xem/visualize
+				'cho xem', 'xem thử', 'xem concept', 'xem không gian',
+				'xem hình', 'xem ảnh', 'show me', 'let me see',
+				'can i see', 'i want to see', 'show concept',
+				
+				// Yêu cầu tạo với mô tả cụ thể
+				'tạo không gian', 'tạo setup', 'tạo trang trí',
+				'create space', 'create setup', 'create decoration',
+				'design for me', 'make space', 'build space',
+				
+				// Các từ khóa khác
+				'concept khác đi', 'không gian khác đi', 'setup khác đi',
+				'concept mới đi', 'không gian mới đi', 'setup mới đi',
+				'thử concept khác', 'thử không gian khác', 'thử setup khác',
+				'try different', 'try another', 'try new',
+				'other concept', 'other space', 'other design',
+				'alternative', 'alternate', 'variation', 'variant'
 			];
 			const msgLower = message.toLowerCase();
 			return imageKeywords.some(keyword => msgLower.includes(keyword.toLowerCase()));
@@ -1545,11 +1601,58 @@ Hãy sử dụng thông tin này để trả lời chính xác và chi tiết h�
 			// Check if user wants to generate image
 			if (isImageGenerationRequest(userMessage)) {
 				// Extract the prompt from user message (remove keywords)
-				const imageKeywords = ['tạo ảnh', 'tạo hình', 'vẽ ảnh', 'vẽ hình', 'tạo hình ảnh', 'sinh ảnh', 'generate image', 'create image', 'tạo cho tôi ảnh', 'tạo concept', 'cho tôi xem', 'visualize', 'hình dung', 'tạo lại', 'tạo mới'];
+				const imageKeywords = [
+					'tạo ảnh', 'tạo hình', 'vẽ ảnh', 'vẽ hình', 'tạo hình ảnh', 'sinh ảnh',
+					'generate image', 'create image', 'tạo cho tôi ảnh', 'tạo ảnh cho tôi',
+					'vẽ cho tôi', 'tạo hình cho tôi', 'show me image', 'show image',
+					'tạo concept', 'tạo concept mới', 'concept mới', 'concept khác', 'concept khác đi',
+					'thay đổi concept', 'đổi concept', 'muốn concept khác',
+					'tạo lại concept', 'tạo concept khác',
+					'concept khác được không', 'có concept khác không', 'concept khác đi được không',
+					'đổi concept được không', 'thay concept được không', 'concept mới đi',
+					'concept khác xem', 'xem concept khác', 'concept khác thử',
+					'new concept', 'different concept', 'another concept', 'change concept',
+					'cho tôi xem', 'visualize', 'hình dung', 'không gian hẹn hò',
+					'concept hẹn hò', 'phong cách hẹn hò', 'không gian mới', 'setup mới',
+					'trang trí mới', 'không gian khác', 'new space', 'different space',
+					'setup khác', 'trang trí khác', 'không gian khác đi',
+					'không gian khác được không', 'setup khác được không', 'trang trí khác được không',
+					'không gian khác xem', 'xem không gian khác', 'không gian khác thử',
+					'không gian mới xem', 'xem không gian mới', 'setup mới xem',
+					'decoration', 'interior design', 'room setup', 'space design',
+					'tạo lại', 'tạo mới', 'regenerate', 'create new', 'make new', 'generate new',
+					'tạo lại đi', 'tạo mới đi', 'tạo lại xem', 'tạo mới xem',
+					'redo', 'remake', 'recreate', 'regenerate image',
+					'muốn concept khác', 'muốn không gian khác', 'muốn thay đổi',
+					'có concept khác không', 'có không gian khác không', 'want different',
+					'want another', 'want new', 'muốn đổi', 'muốn thay',
+					'có thể đổi không', 'có thể thay đổi không', 'đổi được không',
+					'can change', 'can i change', 'can we change',
+					'mô tả không gian', 'thiết kế không gian', 'design space',
+					'concept không gian', 'không gian lãng mạn', 'romantic space',
+					'không gian như thế nào', 'không gian ra sao', 'không gian như nào',
+					'what space', 'how space', 'describe space',
+					'cho xem', 'xem thử', 'xem concept', 'xem không gian',
+					'xem hình', 'xem ảnh', 'show me', 'let me see',
+					'can i see', 'i want to see', 'show concept',
+					'tạo không gian', 'tạo setup', 'tạo trang trí',
+					'create space', 'create setup', 'create decoration',
+					'design for me', 'make space', 'build space',
+					'concept khác đi', 'không gian khác đi', 'setup khác đi',
+					'concept mới đi', 'không gian mới đi', 'setup mới đi',
+					'thử concept khác', 'thử không gian khác', 'thử setup khác',
+					'try different', 'try another', 'try new',
+					'other concept', 'other space', 'other design',
+					'alternative', 'alternate', 'variation', 'variant'
+				];
 				let customPrompt = userMessage;
 				for (const keyword of imageKeywords) {
 					customPrompt = customPrompt.replace(new RegExp(keyword, 'gi'), '').trim();
 				}
+				// Clean up extra spaces and common Vietnamese particles
+				customPrompt = customPrompt.replace(/\s+/g, ' ').trim();
+				customPrompt = customPrompt.replace(/^(được không|được|không|đi|xem|thử|cho|tôi|bạn|mình)\s+/gi, '').trim();
+				customPrompt = customPrompt.replace(/\s+(được không|được|không|đi|xem|thử)$/gi, '').trim();
 				// If no custom prompt, use the full message
 				if (!customPrompt || customPrompt.length < 3) {
 					customPrompt = userMessage;
