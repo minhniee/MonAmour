@@ -8,7 +8,7 @@ const chatbotToggler = document.querySelector("#chatbot-toggler");
 const closeChatbot = document.querySelector("#close-chatbot");
 
 // API setup - Thay thế bằng API key của bạn
-const API_KEY = "AIzaSyD9QOuOGBhAsCw2DFA8pF9PW2m05i8c4wo"; // Google Gemini API key
+const API_KEY = "AIzaSyB9ds49UPxds-jBbeAKEABFSaM-yaOxdHw"; // Google Gemini API key
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 // OpenAI DALL-E 3 API setup - Thay thế bằng API key của bạn
