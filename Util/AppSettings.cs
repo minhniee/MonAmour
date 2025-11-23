@@ -12,6 +12,6 @@ public class AppSettings
 
     public string GetFullUrl()
     {
-        return AppUrl;
+        return AppUrl.TrimEnd('/');
     }
 }

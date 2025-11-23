@@ -57,11 +57,11 @@ public class AuthService : IAuthService
             }
 
             // Kiểm tra email đã được xác thực chưa
-            //if (user.Verified != true)
-            //{
-            //    _logger.LogWarning("Login failed - email not verified: {Email}", model.Email);
-            //    return (false, "Vui lòng xác thực email trước khi đăng nhập.");
-            //}
+            if (user.Verified != true)
+            {
+                _logger.LogWarning("Login failed - email not verified: {Email}", model.Email);
+                return (false, "Vui lòng xác thực email trước khi đăng nhập.");
+            }
 
             // Lấy roles của user
             var roles = await _context.UserRoles
@@ -154,35 +154,27 @@ public class AuthService : IAuthService
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            await _emailService.SendWelcomeEmailAsync(user.Email, user.Name ?? "O co loi a");
 
-            var role = new UserRole()
-            {
-                RoleId = 1,
-                UserId = user.UserId,
-                AssignedAt = null,
-                AssignedBy = null,
-            };
-
-            _context.UserRoles.Add(role);
+            // Gán role "User" cho người dùng mới
+            await RoleHelper.AssignRoleToUserAsync(_context, user.UserId, Role.Names.User);
 
             // Tạo token xác thực email
-            //var verificationToken = GenerateToken();
-            //var token = new Token
-            //{
-            //    UserId = user.UserId,
-            //    TokenValue = verificationToken,
-            //    TokenType = "email_verification",
-            //    ExpiresAt = DateTime.Now.AddHours(24),
-            //    IsActive = true,
-            //    CreatedAt = DateTime.Now
-            //};
+            var verificationToken = GenerateToken();
+            var token = new Token
+            {
+                UserId = user.UserId,
+                TokenValue = verificationToken,
+                TokenType = "email_verification",
+                ExpiresAt = DateTime.Now.AddHours(24),
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
 
-            //_context.Tokens.Add(token);
-            //await _context.SaveChangesAsync();
+            _context.Tokens.Add(token);
+            await _context.SaveChangesAsync();
 
-            //// Gửi email xác thực
-            //await _emailService.SendVerificationEmailAsync(user.Email, verificationToken);
+            // Gửi email xác thực
+            await _emailService.SendVerificationEmailAsync(user.Email, verificationToken);
 
             _logger.LogInformation("User registered successfully: {Email}", model.Email);
             return (true, null);

@@ -92,9 +92,8 @@ namespace MonAmour.Controllers
 
                 if (success)
                 {
-                    TempData["SuccessMessage"] = "Đăng ký thành công! Chào mừng bạn đến với trang web của chúng tôiii <3";
                     _logger.LogInformation("User registered successfully: {Email}", model.Email);
-                    return View();
+                    return RedirectToAction("SignupSuccess", new { email = model.Email });
                 }
                 else
                 {
@@ -108,6 +107,13 @@ namespace MonAmour.Controllers
                 ModelState.AddModelError("", "Có lỗi xảy ra. Vui lòng thử lại sau. Trân thành cin lỗi bạn về sự bất tiện này");
                 return View(model);
             }
+        }
+
+        [HttpGet]
+        public IActionResult SignupSuccess(string email)
+        {
+            ViewBag.Email = email;
+            return View();
         }
 
         [HttpGet]

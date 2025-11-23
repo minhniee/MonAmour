@@ -43,12 +43,12 @@ public class EmailService : IEmailService
         {
             _logger.LogInformation("Sending verification email to: {Email}", email);
 
-            var verificationLink = $"{_appSettings.AppUrl}/Auth/VerifyEmail?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
+            var verificationLink = $"{_appSettings.AppUrl}Auth/VerifyEmail?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(email)}";
 
             var mailMessage = new MailMessage
             {
                 From = new MailAddress(_emailSettings.From, "Mon Amour"),
-                Subject = "Xác thực tài khoản Mon Amour",
+                Subject = "Xác thực tài khoản Mon Amour 🎉",
                 IsBodyHtml = true,
                 Body = $@"
                     <!DOCTYPE html>
@@ -63,27 +63,60 @@ public class EmailService : IEmailService
                             .button {{ display: inline-block; padding: 12px 32px; background-color: #62000d; color: #fbf1e6; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }}
                             .button:hover {{ background-color: #4a0009; }}
                             .footer {{ background-color: #fbf1e6; padding: 20px; text-align: center; font-size: 12px; color: #62000d; border-radius: 0 0 8px 8px; }}
+                            .features {{ background-color: #fbf1e6; padding: 24px; border-radius: 8px; margin: 24px 0; }}
+                            .feature-item {{ margin: 12px 0; padding: 16px; background-color: white; border-radius: 8px; border-left: 4px solid #62000d; box-shadow: 0 2px 4px rgba(98, 0, 13, 0.05); }}
                         </style>
                     </head>
                     <body>
                         <div class='container'>
                             <div class='header'>
-                                <h2>Xác thực tài khoản Mon Amour</h2>
+                                <h1>🎉 Chào mừng đến với Mon Amour!</h1>
+                                <p>Chỉ còn một bước nữa thôi!</p>
                             </div>
                             <div class='content'>
-                                <p>Chào mừng bạn đến với Mon Amour!</p>
-                                <p>Vui lòng click vào nút dưới đây để xác thực tài khoản của bạn:</p>
-                                <p style='text-align: center; margin: 30px 0;'>
-                                    <a href='{verificationLink}' class='button'>Xác thực tài khoản</a>
+                                <p>Cảm ơn bạn đã đăng ký tài khoản tại Mon Amour! Chúng tôi rất vui mừng được chào đón bạn.</p>
+                                
+                                <div class='features'>
+                                    <h3>🌟 Sau khi xác thực, bạn có thể:</h3>
+                                    <div class='feature-item'>
+                                        <strong>📸 Khám phá concepts chụp ảnh độc đáo</strong><br>
+                                        Tìm hiểu các phong cách chụp ảnh đa dạng và sáng tạo
+                                    </div>
+                                    <div class='feature-item'>
+                                        <strong>📅 Đặt lịch với nhiếp ảnh gia chuyên nghiệp</strong><br>
+                                        Lựa chọn và đặt lịch với các photographer tài năng
+                                    </div>
+                                    <div class='feature-item'>
+                                        <strong>🛍️ Mua sắm thời trang và phụ kiện</strong><br>
+                                        Khám phá bộ sưu tập sản phẩm thời trang độc đáo
+                                    </div>
+                                    <div class='feature-item'>
+                                        <strong>💎 Và nhiều điều thú vị khác!</strong><br>
+                                        Trải nghiệm các tính năng đặc biệt dành riêng cho thành viên
+                                    </div>
+                                </div>
+                                
+                                <p style='text-align: center; margin: 40px 0;'>
+                                    <a href='{verificationLink}' class='button'>✅ Xác thực tài khoản ngay</a>
                                 </p>
-                                <p>Hoặc copy link sau vào trình duyệt:</p>
-                                <p style='word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 3px;'>{verificationLink}</p>
-                                <p><strong>Lưu ý:</strong> Link xác thực sẽ hết hạn sau 24 giờ.</p>
+                                
+                                <p><strong>⏰ Lưu ý:</strong> Link xác thực sẽ hết hạn sau 24 giờ.</p>
                                 <p>Nếu bạn không đăng ký tài khoản tại Mon Amour, vui lòng bỏ qua email này.</p>
                             </div>
                             <div class='footer'>
-                                <p>Trân trọng,<br><strong>Mon Amour Team</strong></p>
-                                <p>© 2024 Mon Amour. All rights reserved.</p>
+                                <p>
+                                    📧 
+                                    <a href=""mailto:booking.monamour@gmail.com"" class=""hover:underline"">
+                                        booking.monamour@gmail.com
+                                    </a>
+                                </p>
+                                <p>
+                                    📞 
+                                    <a href=""tel:0985613906"" class=""hover:underline"">
+                                        0985613906
+                                    </a>
+                                </p>
+                                <p>📍 Ngõ 83 Đào Tấn, Giảng Võ, Hà Nội</p>
                             </div>
                         </div>
                     </body>

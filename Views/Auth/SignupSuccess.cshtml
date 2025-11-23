@@ -1,0 +1,88 @@
+@{
+    ViewData["Title"] = "Kiểm tra email của bạn";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    var email = ViewBag.Email as string;
+}
+
+<div class="text-center space-y-6">
+    <!-- Icon -->
+    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-primary/10">
+        <svg class="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+    </div>
+
+    <!-- Title -->
+    <div>
+        <h2 class="text-2xl font-bold text-foreground">Kiểm tra email của bạn!</h2>
+        <p class="mt-2 text-sm text-muted-foreground">
+            Chúng tôi đã gửi email xác thực đến
+        </p>
+        @if (!string.IsNullOrEmpty(email))
+        {
+            <p class="mt-1 text-base font-semibold text-primary">@email</p>
+        }
+    </div>
+
+    <!-- Instructions -->
+    <div class="bg-muted/50 rounded-lg p-6 text-left space-y-4">
+        <h3 class="font-semibold text-foreground flex items-center">
+            <svg class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Các bước tiếp theo:
+        </h3>
+        <ol class="space-y-3 text-sm text-muted-foreground">
+            <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold mr-3">1</span>
+                <span class="pt-0.5">Mở hộp thư email của bạn</span>
+            </li>
+            <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold mr-3">2</span>
+                <span class="pt-0.5">Tìm email từ <strong>Mon Amour</strong> với tiêu đề "Xác thực tài khoản Mon Amour 🎉"</span>
+            </li>
+            <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold mr-3">3</span>
+                <span class="pt-0.5">Click vào nút <strong>"Xác thực tài khoản ngay"</strong> trong email</span>
+            </li>
+            <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold mr-3">4</span>
+                <span class="pt-0.5">Sau khi xác thực thành công, bạn có thể đăng nhập vào tài khoản</span>
+            </li>
+        </ol>
+    </div>
+
+    <!-- Warning -->
+    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 text-left">
+        <div class="flex">
+            <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div class="text-sm">
+                <p class="font-semibold text-yellow-800 dark:text-yellow-500">Không thấy email?</p>
+                <ul class="mt-2 text-yellow-700 dark:text-yellow-400 space-y-1">
+                    <li>• Kiểm tra thư mục <strong>Spam</strong> hoặc <strong>Junk</strong></li>
+                    <li>• Đợi vài phút, email có thể bị trễ</li>
+                    <li>• Link xác thực có hiệu lực trong <strong>24 giờ</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-y-3">
+        <form asp-action="ResendVerification" asp-controller="Auth" method="post" class="inline">
+            <input type="hidden" name="email" value="@email" />
+            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-primary text-sm font-medium rounded-md text-primary bg-background hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Gửi lại email xác thực
+            </button>
+        </form>
+
+        <a href="/Auth/Login" class="block w-full text-center px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+            Quay lại trang đăng nhập
+        </a>
+    </div>
+</div>

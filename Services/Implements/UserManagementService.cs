@@ -365,13 +365,22 @@ public class UserManagementService : IUserManagementService
                 return false;
             }
 
-            // Delete related data
+            // Delete related data in correct order
+            // 1. Delete user roles
             var userRoles = await _context.UserRoles
                 .Where(ur => ur.UserId == userId)
                 .AsTracking()
                 .ToListAsync();
             _context.UserRoles.RemoveRange(userRoles);
 
+            // 2. Delete user tokens (verification, password reset, etc.)
+            var userTokens = await _context.Tokens
+                .Where(t => t.UserId == userId)
+                .AsTracking()
+                .ToListAsync();
+            _context.Tokens.RemoveRange(userTokens);
+
+            // 3. Delete user
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 

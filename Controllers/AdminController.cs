@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using MonAmour.Helpers;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
+using MonAmour.Attributes;
 
 namespace MonAmour.Controllers
 {
-
+    [AdminOnly]
     public class AdminController : Controller
     {
         private readonly IAuthService _authService;
