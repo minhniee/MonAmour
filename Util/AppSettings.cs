@@ -9,9 +9,4 @@ public class AppSettings
     public int SessionTimeoutMinutes { get; set; } = 30;
     public bool EnableRememberMe { get; set; } = true;
     public int RememberMeDays { get; set; } = 30;
-
-    public string GetFullUrl()
-    {
-        return AppUrl.TrimEnd('/');
-    }
 }
