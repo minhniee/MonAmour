@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace MonAmour.AuthViewModel;
 
@@ -22,6 +23,8 @@ public class CreateReviewViewModel
 
     [MaxLength(1000, ErrorMessage = "Comment cannot exceed 1000 characters")]
     public string? Comment { get; set; }
+
+    public IFormFile? ImageFile { get; set; }
 }
 
 public class UpdateReviewViewModel
@@ -35,6 +38,8 @@ public class UpdateReviewViewModel
 
     [MaxLength(1000, ErrorMessage = "Comment cannot exceed 1000 characters")]
     public string? Comment { get; set; }
+
+    public IFormFile? ImageFile { get; set; }
 }
 
 public class ReviewViewModel
@@ -59,6 +64,8 @@ public class ReviewViewModel
 
     public int Rating { get; set; }
     public string? Comment { get; set; }
+
+    public string? ImageUrl { get; set; }
 
     [Display(Name = "Created At")]
     public DateTime? CreatedAt { get; set; }

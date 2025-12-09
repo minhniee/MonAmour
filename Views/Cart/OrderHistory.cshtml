@@ -204,6 +204,15 @@
                 <label class="block text-sm mb-1">Nhận xét</label>
                 <input type="text" name="comment" id="reviewComment" class="w-full p-2 border rounded" placeholder="Tùy chọn" />
             </div>
+            <div class="mb-4">
+                <label class="block text-sm mb-1">Ảnh đánh giá (tùy chọn)</label>
+                <input type="file" name="imageFile" id="reviewImageFile" accept="image/*" class="w-full p-2 border rounded" />
+                <p class="text-xs text-gray-500 mt-1">Chọn ảnh để chia sẻ trải nghiệm của bạn</p>
+                <div id="reviewImagePreview" class="mt-2 hidden">
+                    <img id="reviewImagePreviewImg" src="" alt="Preview" class="max-w-xs rounded-lg border border-gray-300" />
+                    <button type="button" id="reviewImageRemove" class="mt-2 text-sm text-red-600 hover:text-red-800">Xóa ảnh</button>
+                </div>
+            </div>
             <div class="flex justify-end gap-2 pb-4">
                 <button type="button" class="px-4 py-2 border rounded" data-modal-close>Hủy</button>
                 <button type="submit" class="px-4 py-2 text-white rounded" style="background-color: #62000d;">Gửi đánh giá</button>
@@ -235,6 +244,36 @@
             function closeModal(){
                 modal.classList.add('hidden');
                 form.reset();
+                document.getElementById('reviewImagePreview').classList.add('hidden');
+                document.getElementById('reviewImagePreviewImg').src = '';
+            }
+
+            // Image preview functionality
+            const imageFileInput = document.getElementById('reviewImageFile');
+            const imagePreview = document.getElementById('reviewImagePreview');
+            const imagePreviewImg = document.getElementById('reviewImagePreviewImg');
+            const imageRemoveBtn = document.getElementById('reviewImageRemove');
+
+            if (imageFileInput) {
+                imageFileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            imagePreviewImg.src = e.target.result;
+                            imagePreview.classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            if (imageRemoveBtn) {
+                imageRemoveBtn.addEventListener('click', function() {
+                    imageFileInput.value = '';
+                    imagePreview.classList.add('hidden');
+                    imagePreviewImg.src = '';
+                });
             }
 
             document.addEventListener('click', function(e){

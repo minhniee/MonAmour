@@ -289,6 +289,7 @@ CREATE TABLE Review (
     target_id INT NOT NULL,
     rating INT CHECK (rating BETWEEN 1 AND 5),
     comment NVARCHAR(MAX),
+    image_url NVARCHAR(MAX),
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );

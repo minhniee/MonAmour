@@ -725,6 +725,7 @@ public partial class MonAmourDbContext : DbContext
 
             entity.Property(e => e.ReviewId).HasColumnName("review_id");
             entity.Property(e => e.Comment).HasColumnName("comment");
+            entity.Property(e => e.ImageUrl).HasColumnName("image_url");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")

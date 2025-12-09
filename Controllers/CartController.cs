@@ -205,7 +205,7 @@ namespace MonAmour.Controllers
         // POST: /Cart/SubmitReview - Chỉ cho phép khách đã mua hàng và đơn ở trạng thái completed/confirmed
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitReview([FromForm] int targetId, [FromForm] string targetType, [FromForm] int rating, [FromForm] string? comment)
+        public async Task<IActionResult> SubmitReview([FromForm] int targetId, [FromForm] string targetType, [FromForm] int rating, [FromForm] string? comment, [FromForm] IFormFile? imageFile)
         {
             int? userId = GetCurrentUserId();
             if (userId == null)
@@ -258,7 +258,8 @@ namespace MonAmour.Controllers
                 TargetType = "Product",
                 TargetId = targetId,
                 Rating = rating,
-                Comment = string.IsNullOrWhiteSpace(comment) ? null : comment!.Trim()
+                Comment = string.IsNullOrWhiteSpace(comment) ? null : comment!.Trim(),
+                ImageFile = imageFile
             };
 
             try

@@ -9,11 +9,13 @@ public class ReviewService : IReviewService
 {
     private readonly MonAmourDbContext _context;
     private readonly ILogger<ReviewService> _logger;
+    private readonly ICloudinaryService? _cloudinaryService;
 
-    public ReviewService(MonAmourDbContext context, ILogger<ReviewService> logger)
+    public ReviewService(MonAmourDbContext context, ILogger<ReviewService> logger, ICloudinaryService? cloudinaryService = null)
     {
         _context = context;
         _logger = logger;
+        _cloudinaryService = cloudinaryService; // Will be injected by DI container if registered
     }
 
     public async Task<ReviewViewModel> CreateReviewAsync(CreateReviewViewModel dto)
@@ -50,6 +52,25 @@ public class ReviewService : IReviewService
                 throw new InvalidOperationException("User has already reviewed this item. Use update instead.");
             }
 
+            // Upload image if provided
+            string? imageUrl = null;
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0 && _cloudinaryService != null)
+            {
+                try
+                {
+                    imageUrl = await _cloudinaryService.UploadImageAsync(dto.ImageFile, "reviews");
+                    if (string.IsNullOrEmpty(imageUrl))
+                    {
+                        _logger.LogWarning("Failed to upload review image for user {UserId}", dto.UserId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading review image for user {UserId}", dto.UserId);
+                    // Continue without image if upload fails
+                }
+            }
+
             // Create new review
             var review = new Review
             {
@@ -58,6 +79,7 @@ public class ReviewService : IReviewService
                 TargetId = dto.TargetId,
                 Rating = dto.Rating,
                 Comment = dto.Comment,
+                ImageUrl = imageUrl,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
@@ -88,6 +110,31 @@ public class ReviewService : IReviewService
             if (review == null)
             {
                 throw new ArgumentException($"Review with ID {dto.ReviewId} not found.");
+            }
+
+            // Upload new image if provided
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0 && _cloudinaryService != null)
+            {
+                try
+                {
+                    // Delete old image if exists
+                    if (!string.IsNullOrEmpty(review.ImageUrl) && _cloudinaryService != null)
+                    {
+                        // Extract public ID from URL if needed (Cloudinary specific)
+                        // For now, we'll just upload new image
+                    }
+
+                    var imageUrl = await _cloudinaryService.UploadImageAsync(dto.ImageFile, "reviews");
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        review.ImageUrl = imageUrl;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading review image for review {ReviewId}", dto.ReviewId);
+                    // Continue without updating image if upload fails
+                }
             }
 
             // Update review
@@ -188,6 +235,7 @@ public class ReviewService : IReviewService
                     TargetName = product.Name ?? "",
                     Rating = r.Rating ?? 0,
                     Comment = r.Comment,
+                    ImageUrl = r.ImageUrl,
                     CreatedAt = r.CreatedAt,
                     UpdatedAt = r.UpdatedAt
                 })
@@ -261,6 +309,7 @@ public class ReviewService : IReviewService
                     TargetName = concept.Name ?? "",
                     Rating = r.Rating ?? 0,
                     Comment = r.Comment,
+                    ImageUrl = r.ImageUrl,
                     CreatedAt = r.CreatedAt,
                     UpdatedAt = r.UpdatedAt
                 })
@@ -350,6 +399,7 @@ public class ReviewService : IReviewService
                     TargetName = targetName,
                     Rating = review.Rating ?? 0,
                     Comment = review.Comment,
+                    ImageUrl = review.ImageUrl,
                     CreatedAt = review.CreatedAt,
                     UpdatedAt = review.UpdatedAt
                 });
@@ -439,6 +489,7 @@ public class ReviewService : IReviewService
                     TargetName = targetName,
                     Rating = review.Rating ?? 0,
                     Comment = review.Comment,
+                    ImageUrl = review.ImageUrl,
                     CreatedAt = review.CreatedAt,
                     UpdatedAt = review.UpdatedAt
                 });
@@ -558,6 +609,7 @@ public class ReviewService : IReviewService
             TargetName = targetName,
             Rating = review.Rating ?? 0,
             Comment = review.Comment,
+            ImageUrl = review.ImageUrl,
             CreatedAt = review.CreatedAt,
             UpdatedAt = review.UpdatedAt
         };
