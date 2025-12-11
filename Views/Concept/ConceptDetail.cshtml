@@ -873,8 +873,8 @@
 		const conceptPrice = parseFloat(chatbotContainer.dataset.conceptPrice);
 		const conceptImage = chatbotContainer.dataset.conceptImage;
 
-		// API setup - Same as main chatbot
-			const API_KEY = "AIzaSyB9ds49UPxds-jBbeAKEABFSaM-yaOxdHw";
+		// API setup - Get keys from ViewBag (injected from appsettings.json)
+		const API_KEY = "@ViewBag.GeminiApiKey";
 		const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 		let chatHistory = [{
@@ -962,8 +962,8 @@ Hãy để tôi tạo hình ảnh concept cho bạn... 🎨`
 			return maxScore >= 2 ? bestMatch : null;
 		}
 		
-		// OpenAI DALL-E 3 API setup
-				const OPENAI_API_KEY = "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";
+		// OpenAI DALL-E 3 API setup - Get key from ViewBag (injected from appsettings.json)
+		const OPENAI_API_KEY = "@ViewBag.OpenAIApiKey";
 		const DALL_E_API_URL = "https://api.openai.com/v1/images/generations";
 
 		// Format bot response with icons and line breaks (only for AI text responses)

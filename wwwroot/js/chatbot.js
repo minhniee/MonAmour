@@ -7,13 +7,31 @@ const fileCancelButton = document.querySelector("#file-cancel");
 const chatbotToggler = document.querySelector("#chatbot-toggler");
 const closeChatbot = document.querySelector("#close-chatbot");
 
-// API setup - Thay thế bằng API key của bạn
-const API_KEY = "AIzaSyB9ds49UPxds-jBbeAKEABFSaM-yaOxdHw"; // Google Gemini API key
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-
-// OpenAI DALL-E 3 API setup - Thay thế bằng API key của bạn
-const OPENAI_API_KEY = "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"; // Điền OpenAI API key vào đây để sử dụng tính năng tạo ảnh
+// API setup - Load keys from backend API (from appsettings.json)
+let API_KEY = null;
+let OPENAI_API_KEY = null;
+const API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 const DALL_E_API_URL = "https://api.openai.com/v1/images/generations";
+
+// Load API keys from backend
+async function loadApiKeys() {
+    try {
+        const response = await fetch('/api/chatbot/config');
+        const config = await response.json();
+        API_KEY = config.geminiApiKey;
+        OPENAI_API_KEY = config.openAIApiKey;
+    } catch (error) {
+        console.error('Error loading API keys:', error);
+    }
+}
+
+// Initialize API keys on page load
+loadApiKeys();
+
+// Helper function to get API URL with key
+function getApiUrl() {
+    return `${API_URL_BASE}?key=${API_KEY}`;
+}
 
 const userData = {
     message: null,
@@ -128,6 +146,11 @@ const generateImage = async(incomingMessageDiv) => {
     const messageElement = incomingMessageDiv.querySelector(".message-text");
 
     try {
+        // Load API keys if not already loaded
+        if (!OPENAI_API_KEY || !API_KEY) {
+            await loadApiKeys();
+        }
+
         // Nếu có OpenAI API key, sử dụng DALL-E 3 để tạo ảnh
         if (OPENAI_API_KEY && OPENAI_API_KEY.trim() !== "") {
             // Tạo prompt tối ưu cho DALL-E 3
@@ -191,7 +214,12 @@ Hãy viết một đoạn mô tả dài khoảng 200-300 từ, sử dụng ngôn
             })
         };
 
-        const response = await fetch(API_URL, requestOptions);
+        // Wait for API key to be loaded if not already loaded
+        if (!API_KEY) {
+            await loadApiKeys();
+        }
+
+        const response = await fetch(getApiUrl(), requestOptions);
         const data = await response.json();
 
         if (!response.ok) {
@@ -268,13 +296,18 @@ const generateBotResponse = async(incomingMessageDiv) => {
     }
 
     try {
+        // Wait for API key to be loaded if not already loaded
+        if (!API_KEY) {
+            await loadApiKeys();
+        }
+
         // Kiểm tra xem API key đã được cấu hình chưa
-        if (API_KEY === "null") {
-            throw new Error("Vui lòng cấu hình API key của Google Gemini trong file chatbot.js");
+        if (!API_KEY || API_KEY === "null") {
+            throw new Error("Vui lòng cấu hình API key của Google Gemini trong appsettings.json");
         }
 
         // Fetch bot response from API
-        const response = await fetch(API_URL, requestOptions);
+        const response = await fetch(getApiUrl(), requestOptions);
         const data = await response.json();
         if (!response.ok) throw new Error(data.error?.message || "Có lỗi xảy ra khi kết nối API");
 

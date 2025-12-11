@@ -9,12 +9,14 @@ namespace MonAmour.Controllers
         private readonly IBannerService _bannerService;
         private readonly IPartnerService _partnerService;
         private readonly MonAmour.Models.MonAmourDbContext _db;
+        private readonly IConfiguration _config;
 
-        public HomeController(IBannerService bannerService, IPartnerService partnerService, MonAmour.Models.MonAmourDbContext db)
+        public HomeController(IBannerService bannerService, IPartnerService partnerService, MonAmour.Models.MonAmourDbContext db, IConfiguration config)
         {
             _bannerService = bannerService;
             _partnerService = partnerService;
             _db = db;
+            _config = config;
         }
         public async Task<IActionResult> Consultation()
         {
@@ -133,6 +135,20 @@ namespace MonAmour.Controllers
                     timestamp = DateTime.UtcNow
                 });
             }
+        }
+
+        /// <summary>
+        /// API endpoint để lấy chatbot API keys
+        /// GET /api/chatbot/config
+        /// </summary>
+        [HttpGet("api/chatbot/config")]
+        public IActionResult GetChatbotConfig()
+        {
+            return Json(new
+            {
+                geminiApiKey = _config["Chatbot:GeminiApiKey"],
+                openAIApiKey = _config["Chatbot:OpenAIApiKey"]
+            });
         }
     }
 }

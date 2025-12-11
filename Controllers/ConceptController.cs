@@ -164,6 +164,10 @@ namespace MonAmour.Controllers
                 .OrderBy(c => c)
                 .ToListAsync();
 
+            // Inject API keys from configuration
+            ViewBag.GeminiApiKey = _config["Chatbot:GeminiApiKey"];
+            ViewBag.OpenAIApiKey = _config["Chatbot:OpenAIApiKey"];
+
             return View(concept);
         }
 
