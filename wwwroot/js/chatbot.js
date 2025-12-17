@@ -8,9 +8,8 @@ const chatbotToggler = document.querySelector("#chatbot-toggler");
 const closeChatbot = document.querySelector("#close-chatbot");
 
 // API setup - Load keys from backend API (from appsettings.json)
-let API_KEY = null;
 let OPENAI_API_KEY = null;
-const API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const OPENAI_CHAT_API_URL = "https://api.openai.com/v1/chat/completions";
 const DALL_E_API_URL = "https://api.openai.com/v1/images/generations";
 
 // Load API keys from backend
@@ -18,7 +17,6 @@ async function loadApiKeys() {
     try {
         const response = await fetch('/api/chatbot/config');
         const config = await response.json();
-        API_KEY = config.geminiApiKey;
         OPENAI_API_KEY = config.openAIApiKey;
     } catch (error) {
         console.error('Error loading API keys:', error);
@@ -27,11 +25,6 @@ async function loadApiKeys() {
 
 // Initialize API keys on page load
 loadApiKeys();
-
-// Helper function to get API URL with key
-function getApiUrl() {
-    return `${API_URL_BASE}?key=${API_KEY}`;
-}
 
 const userData = {
     message: null,
@@ -60,11 +53,10 @@ const loadTrainingData = async() => {
     }
 };
 
-// Context về Mon Amour cho chatbot
+// Context về Mon Amour cho chatbot - OpenAI format
 const chatHistory = [{
-    role: "model",
-    parts: [{
-        text: `Tôi là trợ lý AI của Mon Amour - nền tảng cung cấp dịch vụ lên kế hoạch hẹn hò cá nhân hóa trọn gói. 
+    role: "assistant",
+    content: `Tôi là trợ lý AI của Mon Amour - nền tảng cung cấp dịch vụ lên kế hoạch hẹn hò cá nhân hóa trọn gói. 
 
 Mon Amour chuyên:
 - Tổ chức các buổi hẹn lãng mạn, ấn tượng và ý nghĩa
@@ -80,8 +72,7 @@ Tôi có thể giúp bạn:
 💡 Giải đáp thắc mắc về dịch vụ Mon Amour
 
 Hãy cho tôi biết bạn cần hỗ trợ gì nhé!`
-    }],
-}, ];
+}];
 
 const initialInputHeight = messageInput.scrollHeight;
 
@@ -141,13 +132,13 @@ const isImageGenerationRequest = (userMessage) => {
     return imageKeywords.some(keyword => messageLower.includes(keyword.toLowerCase()));
 };
 
-// Generate image using DALL-E 3 API or fallback to Gemini description
+// Generate image using DALL-E 3 API or fallback to OpenAI GPT description
 const generateImage = async(incomingMessageDiv) => {
     const messageElement = incomingMessageDiv.querySelector(".message-text");
 
     try {
         // Load API keys if not already loaded
-        if (!OPENAI_API_KEY || !API_KEY) {
+        if (!OPENAI_API_KEY) {
             await loadApiKeys();
         }
 
@@ -192,7 +183,7 @@ const generateImage = async(incomingMessageDiv) => {
             return;
         }
 
-        // Fallback: Sử dụng Gemini để mô tả concept nếu không có DALL-E API key
+        // Fallback: Sử dụng OpenAI GPT để mô tả concept nếu không có DALL-E API key
         const imagePrompt = `Bạn là chuyên gia thiết kế không gian hẹn hò lãng mạn của Mon Amour. Hãy mô tả chi tiết một concept không gian hẹn hò lãng mạn theo yêu cầu: "${userData.message}". 
 
 Hãy mô tả một cách sống động và chi tiết về:
@@ -205,21 +196,28 @@ Hãy viết một đoạn mô tả dài khoảng 200-300 từ, sử dụng ngôn
 
         const requestOptions = {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENAI_API_KEY}`
+            },
             body: JSON.stringify({
-                contents: [{
-                    role: "user",
-                    parts: [{ text: imagePrompt }]
-                }]
+                model: "gpt-4o-mini",
+                messages: [
+                    {
+                        role: "system",
+                        content: "Bạn là chuyên gia thiết kế không gian hẹn hò lãng mạn của Mon Amour. Hãy mô tả chi tiết và thơ mộng."
+                    },
+                    {
+                        role: "user",
+                        content: imagePrompt
+                    }
+                ],
+                max_tokens: 500,
+                temperature: 0.7
             })
         };
 
-        // Wait for API key to be loaded if not already loaded
-        if (!API_KEY) {
-            await loadApiKeys();
-        }
-
-        const response = await fetch(getApiUrl(), requestOptions);
+        const response = await fetch(OPENAI_CHAT_API_URL, requestOptions);
         const data = await response.json();
 
         if (!response.ok) {
@@ -227,7 +225,7 @@ Hãy viết một đoạn mô tả dài khoảng 200-300 từ, sử dụng ngôn
         }
 
         // Extract and display bot's response text
-        const apiResponseText = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
+        const apiResponseText = data.choices[0].message.content.replace(/\*\*(.*?)\*\*/g, "$1").trim();
 
         messageElement.innerHTML = `
             <div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white; line-height: 1.8;">
@@ -238,14 +236,14 @@ Hãy viết một đoạn mô tả dài khoảng 200-300 từ, sử dụng ngôn
                     ${apiResponseText}
                 </p>
                 <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 0.9rem;">
-                    💝 <strong>Lưu ý:</strong> Để tạo hình ảnh thực tế, vui lòng cấu hình OpenAI DALL-E API key trong file chatbot.js
+                    💝 <strong>Lưu ý:</strong> Để tạo hình ảnh thực tế, vui lòng cấu hình OpenAI DALL-E API key trong appsettings.json
                 </div>
             </div>
         `;
 
         chatHistory.push({
-            role: "model",
-            parts: [{ text: apiResponseText }]
+            role: "assistant",
+            content: apiResponseText
         });
     } catch (error) {
         console.error("Image Generation Error:", error);
@@ -265,58 +263,78 @@ Hãy viết một đoạn mô tả dài khoảng 200-300 từ, sử dụng ngôn
     }
 };
 
-// Generate bot response using API
+// Generate bot response using OpenAI GPT API
 const generateBotResponse = async(incomingMessageDiv) => {
     const messageElement = incomingMessageDiv.querySelector(".message-text");
 
     // Tìm câu trả lời từ training data trước
     const trainingAnswer = findBestAnswer(userData.message);
 
-    let contextualMessage;
+    // Build system message
+    let systemMessage = systemPrompt || "Bạn là MonMon, chatbot chuyên nghiệp của Mon Amour - dịch vụ hẹn hò cao cấp. Hãy trả lời một cách thân thiện và hữu ích.";
+    
     if (trainingAnswer) {
-        // Sử dụng câu trả lời từ training data
-        contextualMessage = `${systemPrompt}\n\nDựa trên thông tin training data, hãy trả lời câu hỏi: "${userData.message}"\n\nThông tin tham khảo: ${trainingAnswer.answer}`;
-    } else {
-        // Sử dụng context chung
-        contextualMessage = `${systemPrompt}\n\nHãy trả lời câu hỏi sau một cách thân thiện và hữu ích: ${userData.message}`;
+        systemMessage += `\n\nThông tin tham khảo: ${trainingAnswer.answer}`;
     }
 
+    // Add user message to history
     chatHistory.push({
         role: "user",
-        parts: [{ text: contextualMessage }, ...(userData.file.data ? [{ inline_data: userData.file }] : [])],
+        content: userData.message
     });
-
-    // API request options
-    const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: chatHistory
-        })
-    }
 
     try {
         // Wait for API key to be loaded if not already loaded
-        if (!API_KEY) {
+        if (!OPENAI_API_KEY) {
             await loadApiKeys();
         }
 
         // Kiểm tra xem API key đã được cấu hình chưa
-        if (!API_KEY || API_KEY === "null") {
-            throw new Error("Vui lòng cấu hình API key của Google Gemini trong appsettings.json");
+        if (!OPENAI_API_KEY || OPENAI_API_KEY === "null" || OPENAI_API_KEY === "") {
+            throw new Error("API key chưa được cấu hình. Vui lòng kiểm tra appsettings.json và restart ứng dụng.");
         }
 
+        // Prepare messages for OpenAI - include system prompt and chat history
+        const messages = [
+            {
+                role: "system",
+                content: systemMessage
+            },
+            ...chatHistory
+        ];
+
+        // API request options
+        const requestOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                messages: messages,
+                max_tokens: 500,
+                temperature: 0.7
+            })
+        };
+
         // Fetch bot response from API
-        const response = await fetch(getApiUrl(), requestOptions);
+        const response = await fetch(OPENAI_CHAT_API_URL, requestOptions);
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error?.message || "Có lỗi xảy ra khi kết nối API");
+        
+        if (!response.ok) {
+            const errorMsg = data.error?.message || data.error?.type || "Có lỗi xảy ra khi kết nối API";
+            throw new Error(`OpenAI API Error (${response.status}): ${errorMsg}`);
+        }
 
         // Extract and display bot's response text
-        const apiResponseText = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
+        const apiResponseText = data.choices[0].message.content.replace(/\*\*(.*?)\*\*/g, "$1").trim();
         messageElement.innerText = apiResponseText;
+        
+        // Add assistant response to history
         chatHistory.push({
-            role: "model",
-            parts: [{ text: apiResponseText }]
+            role: "assistant",
+            content: apiResponseText
         });
     } catch (error) {
         console.error("Chatbot Error:", error);

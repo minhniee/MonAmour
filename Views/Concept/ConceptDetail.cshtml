@@ -874,18 +874,21 @@
 		const conceptImage = chatbotContainer.dataset.conceptImage;
 
 		// API setup - Get keys from ViewBag (injected from appsettings.json)
-		const API_KEY = "@ViewBag.GeminiApiKey";
-		const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+		const OPENAI_API_KEY = "@ViewBag.OpenAIApiKey";
+		const OPENAI_CHAT_API_URL = "https://api.openai.com/v1/chat/completions";
 
 		let chatHistory = [{
-			role: "model",
-			parts: [{
-				text: `Xin chào! 👋 Tôi là MonMon AI, trợ lý của Mon Amour. 
+			role: "assistant",
+			content: `Xin chào! 👋 Tôi là MonMon AI, trợ lý của Mon Amour. 
 
-Tôi sẽ tạo concept không gian hẹn hò lãng mạn cho bạn dựa trên concept "${conceptName}" với giá ${conceptPrice.toLocaleString('vi-VN')}₫.
+Tôi có thể tư vấn cho bạn về concept "${conceptName}" với giá ${conceptPrice.toLocaleString('vi-VN')}₫.
 
-Hãy để tôi tạo hình ảnh concept cho bạn... 🎨`
-			}],
+Bạn có muốn tôi:
+🎨 Tạo hình ảnh concept không gian hẹn hò cho bạn?
+💬 Tư vấn chi tiết về concept này?
+📋 Hướng dẫn đặt concept?
+
+Hãy cho tôi biết bạn cần gì nhé!`
 		}];
 
 		let selectedConcept = false;
@@ -962,8 +965,7 @@ Hãy để tôi tạo hình ảnh concept cho bạn... 🎨`
 			return maxScore >= 2 ? bestMatch : null;
 		}
 		
-		// OpenAI DALL-E 3 API setup - Get key from ViewBag (injected from appsettings.json)
-		const OPENAI_API_KEY = "@ViewBag.OpenAIApiKey";
+		// OpenAI DALL-E 3 API setup
 		const DALL_E_API_URL = "https://api.openai.com/v1/images/generations";
 
 		// Format bot response with icons and line breaks (only for AI text responses)
@@ -1201,12 +1203,9 @@ Hãy để tôi tạo hình ảnh concept cho bạn... 🎨`
 
 		// Add welcome message
 		function addWelcomeMessage() {
-			const welcomeMsg = chatHistory[0].parts[0].text;
+			const welcomeMsg = chatHistory[0].content;
 			const msgDiv = createMessageElement(welcomeMsg, false);
 			chatBody.appendChild(msgDiv);
-			
-			// Auto-generate concept image
-			setTimeout(() => generateConceptImage(), 1000);
 		}
 
 		// Check if user wants to fill contact form (explicit request only)
@@ -1488,7 +1487,7 @@ Hãy để tôi tạo hình ảnh concept cho bạn... 🎨`
 			return context;
 		}
 
-		// Generate bot response
+		// Generate bot response using OpenAI GPT
 		async function generateBotResponse(userMessage) {
 			// Load booking info if not loaded
 			if (!userBookingInfo) {
@@ -1544,37 +1543,54 @@ Hãy sử dụng thông tin này để trả lời chính xác và chi tiết h�
 				systemPrompt += ` Nếu khách hàng muốn đặt concept, hãy gợi ý họ nói "tôi muốn đặt" hoặc "đặt concept".`;
 			}
 
+			// Add user message to history
 			chatHistory.push({
 				role: "user",
-				parts: [{ text: userMessage }]
+				content: userMessage
 			});
 
-				const requestOptions = {
+			// Prepare messages for OpenAI
+			const messages = [
+				{
+					role: "system",
+					content: systemPrompt
+				},
+				...chatHistory
+			];
+
+			const requestOptions = {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${OPENAI_API_KEY}`
+				},
 				body: JSON.stringify({
-					contents: [{
-						role: "user",
-						parts: [{ text: `${systemPrompt}\n\nCâu hỏi của khách hàng: ${userMessage}\n\nHãy trả lời NGẮN GỌN, TRỌNG TÂM vào câu hỏi trên. Sử dụng xuống dòng để tách các ý chính.` }]
-					}]
+					model: "gpt-3.5-turbo",
+					messages: messages,
+					max_tokens: 500,
+					temperature: 0.7
 				})
 			};
 
 			try {
-				const response = await fetch(API_URL, requestOptions);
+				const response = await fetch(OPENAI_CHAT_API_URL, requestOptions);
 				const data = await response.json();
 				
-				if (!response.ok) throw new Error(data.error?.message || "Có lỗi xảy ra");
+				if (!response.ok) {
+					const errorMsg = data.error?.message || data.error?.type || "Có lỗi xảy ra";
+					throw new Error(`OpenAI API Error (${response.status}): ${errorMsg}`);
+				}
 
-				let apiResponseText = data.candidates[0].content.parts[0].text.trim();
+				let apiResponseText = data.choices[0].message.content.trim();
 				
 				// Remove markdown formatting
 				apiResponseText = apiResponseText.replace(/\*\*(.*?)\*\*/g, "$1");
 				apiResponseText = apiResponseText.replace(/\*(.*?)\*/g, "$1");
 				
+				// Add assistant response to history
 				chatHistory.push({
-					role: "model",
-					parts: [{ text: apiResponseText }]
+					role: "assistant",
+					content: apiResponseText
 				});
 
 				return apiResponseText;

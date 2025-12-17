@@ -138,7 +138,7 @@ namespace MonAmour.Controllers
         }
 
         /// <summary>
-        /// API endpoint để lấy chatbot API keys
+        /// API endpoint để lấy chatbot API key (OpenAI only)
         /// GET /api/chatbot/config
         /// </summary>
         [HttpGet("api/chatbot/config")]
@@ -146,7 +146,6 @@ namespace MonAmour.Controllers
         {
             return Json(new
             {
-                geminiApiKey = _config["Chatbot:GeminiApiKey"],
                 openAIApiKey = _config["Chatbot:OpenAIApiKey"]
             });
         }
