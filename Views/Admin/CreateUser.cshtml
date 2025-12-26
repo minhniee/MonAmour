@@ -49,7 +49,7 @@
                     Thông tin người dùng
                 </div>
                 <div class="card-body">
-                    <form asp-action="CreateUser" method="post">
+                    <form asp-action="CreateUser" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
                         
                         <div class="row">
@@ -145,10 +145,13 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label asp-for="Avatar" class="form-label">Avatar</label>
-                            <input asp-for="Avatar" class="form-control" placeholder="URL hình ảnh avatar" />
+                            <label for="avatarFile" class="form-label">Avatar</label>
+                            <input type="file" id="avatarFile" name="AvatarFile" class="form-control" accept="image/*" onchange="previewAvatar(this)">
                             <span asp-validation-for="Avatar" class="text-danger"></span>
-                            <small class="form-text text-muted">Nhập URL hình ảnh hoặc để trống</small>
+                            <small class="form-text text-muted">Hỗ trợ: JPG, PNG, GIF. Kích thước tối đa: 5MB. Để trống nếu không muốn thêm avatar.</small>
+                            <div id="avatarPreview" class="mt-2" style="display: none;">
+                                <img id="previewAvatarImg" src="" alt="Avatar Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                            </div>
                         </div>
 
                         <div class="form-group mb-3">
@@ -190,6 +193,7 @@
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Tạo người dùng
                             </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -395,24 +399,80 @@
             }
             </text>
         }
-        
-        // Test database connection
-        function testDatabase() {
-            console.log('Testing database connection...');
-            fetch('@Url.Action("TestDatabase", "Admin")')
+                document.getElementById('Phone').addEventListener('blur', function() {
+            const phone = this.value;
+            const email = document.getElementById('Email').value;
+
+            if (phone && email) {
+                checkDuplicate(email, phone);
+            }
+        });
+
+        document.getElementById('Email').addEventListener('blur', function() {
+            const email = this.value;
+            const phone = document.getElementById('Phone').value;
+
+            if (phone && email) {
+                checkDuplicate(email, phone);
+            }
+        });
+
+        function checkDuplicate(email, phone) {
+            fetch(`@Url.Action("CheckDuplicate", "Admin")?email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Database test result:', data);
-                    if (data.Success) {
-                        alert(`Database connection successful!\nRoles: ${data.RolesCount}\nUser Stats: ${JSON.stringify(data.UserStats)}`);
-                    } else {
-                        alert(`Database connection failed: ${data.Error}`);
+                    console.log('Duplicate check result:', data);
+
+                    const emailField = document.getElementById('Email');
+                    const phoneField = document.getElementById('Phone');
+
+                    // Clear previous errors
+                    emailField.classList.remove('is-invalid');
+                    phoneField.classList.remove('is-invalid');
+
+                    if (data.emailExists) {
+                        emailField.classList.add('is-invalid');
+                        showFieldError('Email', 'Email đã tồn tại trong hệ thống');
+                    }
+
+                    if (data.phoneExists) {
+                        phoneField.classList.add('is-invalid');
+                        showFieldError('Phone', 'Số điện thoại đã tồn tại trong hệ thống');
                     }
                 })
                 .catch(error => {
-                    console.error('Database test error:', error);
-                    alert('Database test failed: ' + error.message);
+                    console.error('Duplicate check error:', error);
                 });
+        }
+
+        function showFieldError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            let errorSpan = field.parentNode.querySelector('.text-danger');
+            if (!errorSpan) {
+                errorSpan = document.createElement('span');
+                errorSpan.className = 'text-danger';
+                field.parentNode.appendChild(errorSpan);
+            }
+            errorSpan.textContent = message;
+        }
+
+        // Preview avatar function
+        function previewAvatar(input) {
+            const preview = document.getElementById('avatarPreview');
+            const previewImg = document.getElementById('previewAvatarImg');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
+            }
         }
     </script>
 }

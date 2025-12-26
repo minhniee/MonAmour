@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MonAmour.Attributes;
 using MonAmour.Helpers;
 using MonAmour.Models;
@@ -12,15 +13,27 @@ namespace MonAmour.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IUserManagementService _userManagementService;
-        private readonly IBlogService _blogService;
+        private readonly IProductService _productService;
+        private readonly IPartnerService _partnerService;
+        private readonly ILocationService _locationService;
+        private readonly IConceptService _conceptService;
+        private readonly IOrderService _orderService;
+        private readonly IBookingService _bookingService;
         private readonly ILogger<AdminController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AdminController(IAuthService authService, IUserManagementService userManagementService, IBlogService blogService, ILogger<AdminController> logger)
+        public AdminController(IAuthService authService, IUserManagementService userManagementService, IProductService productService, IPartnerService partnerService, ILocationService locationService, IConceptService conceptService, IOrderService orderService, IBookingService bookingService, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _authService = authService;
             _userManagementService = userManagementService;
-            _blogService = blogService;
+            _productService = productService;
+            _partnerService = partnerService;
+            _locationService = locationService;
+            _conceptService = conceptService;
+            _orderService = orderService;
+            _bookingService = bookingService;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -62,13 +75,19 @@ namespace MonAmour.Controllers
 
                 // Get user statistics
                 var userStats = await _userManagementService.GetUserStatisticsAsync();
-                ViewBag.UserStats = userStats ?? new Dictionary<string, int>
-                {
-                    ["TotalUsers"] = 0,
-                    ["VerifiedUsers"] = 0,
-                    ["AdminUsers"] = 0,
-                    ["ActiveUsers"] = 0
-                };
+                ViewBag.UserStats = userStats;
+
+                // Get product statistics
+                var productStats = await _productService.GetProductStatisticsAsync();
+                ViewBag.ProductStats = productStats;
+
+                // Get concept statistics
+                var conceptStats = await _conceptService.GetConceptStatisticsAsync();
+                ViewBag.ConceptStats = conceptStats;
+
+                // Get partner statistics
+                var partnerStats = await _partnerService.GetPartnerStatisticsAsync();
+                ViewBag.PartnerStats = partnerStats;
 
                 return View();
             }
@@ -76,12 +95,23 @@ namespace MonAmour.Controllers
             {
                 _logger.LogError(ex, "Error loading dashboard data");
                 await SetAdminViewBagAsync();
-                ViewBag.UserStats = new Dictionary<string, int>
+                ViewBag.UserStats = new Dictionary<string, int>();
+                ViewBag.ProductStats = new Dictionary<string, int>
                 {
-                    ["TotalUsers"] = 0,
-                    ["VerifiedUsers"] = 0,
-                    ["AdminUsers"] = 0,
-                    ["ActiveUsers"] = 0
+                    ["TotalProducts"] = 0,
+                    ["ActiveProducts"] = 0,
+                    ["OutOfStock"] = 0,
+                    ["TotalCategories"] = 0
+                };
+                ViewBag.ConceptStats = new Dictionary<string, int>
+                {
+                    ["TotalConcepts"] = 0,
+                    ["ActiveConcepts"] = 0
+                };
+                ViewBag.PartnerStats = new Dictionary<string, int>
+                {
+                    ["TotalPartners"] = 0,
+                    ["ActivePartners"] = 0
                 };
                 return View();
             }
@@ -170,20 +200,18 @@ namespace MonAmour.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateUser(AdminUserViewModel.UserCreateViewModel model)
+        public async Task<IActionResult> CreateUser(IFormFile? AvatarFile, AdminUserViewModel.UserCreateViewModel model)
         {
             try
             {
-                _logger.LogInformation("CreateUser POST called with model: Email={Email}, Name={Name}, Phone={Phone}", 
+                _logger.LogInformation("CreateUser POST called with model: Email={Email}, Name={Name}, Phone={Phone}",
                     model.Email, model.Name, model.Phone);
-                
-                _logger.LogInformation("ModelState.IsValid: {IsValid}", ModelState.IsValid);
-                
+
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
                     _logger.LogWarning("ModelState validation failed: {Errors}", string.Join(", ", errors));
-                    
+
                     await SetAdminViewBagAsync();
                     var roles = await _userManagementService.GetAllRolesAsync();
                     ViewBag.Roles = roles;
@@ -191,8 +219,6 @@ namespace MonAmour.Controllers
                 }
 
                 var adminUserId = AuthHelper.GetUserId(HttpContext);
-                _logger.LogInformation("AdminUserId: {AdminUserId}", adminUserId);
-                
                 if (!adminUserId.HasValue)
                 {
                     _logger.LogError("AdminUserId is null");
@@ -202,10 +228,82 @@ namespace MonAmour.Controllers
                     ViewBag.Roles = roles;
                     return View(model);
                 }
-                
-                _logger.LogInformation("Calling CreateUserAsync with adminUserId: {AdminUserId}", adminUserId.Value);
+
+                // Check for duplicates before creating
+                var (emailExists, phoneExists) = await _userManagementService.CheckDuplicateAsync(model.Email, model.Phone);
+
+                if (emailExists)
+                {
+                    _logger.LogWarning("Email already exists: {Email}", model.Email);
+                    TempData["Error"] = "Email đã tồn tại trong hệ thống";
+                    ModelState.AddModelError("Email", "Email đã tồn tại trong hệ thống");
+                    await SetAdminViewBagAsync();
+                    var roles = await _userManagementService.GetAllRolesAsync();
+                    ViewBag.Roles = roles;
+                    return View(model);
+                }
+
+                if (phoneExists)
+                {
+                    _logger.LogWarning("Phone already exists: {Phone}", model.Phone);
+                    TempData["Error"] = "Số điện thoại đã tồn tại trong hệ thống";
+                    ModelState.AddModelError("Phone", "Số điện thoại đã tồn tại trong hệ thống");
+                    await SetAdminViewBagAsync();
+                    var roles = await _userManagementService.GetAllRolesAsync();
+                    ViewBag.Roles = roles;
+                    return View(model);
+                }
+
+                // Xử lý file upload avatar nếu có
+                if (AvatarFile != null && AvatarFile.Length > 0)
+                {
+                    // Kiểm tra kích thước file (5MB)
+                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["Error"] = "File avatar quá lớn. Kích thước tối đa là 5MB.";
+                        await SetAdminViewBagAsync();
+                        var roles = await _userManagementService.GetAllRolesAsync();
+                        ViewBag.Roles = roles;
+                        return View(model);
+                    }
+
+                    // Kiểm tra loại file
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["Error"] = "Chỉ hỗ trợ file JPG, PNG, GIF cho avatar.";
+                        await SetAdminViewBagAsync();
+                        var roles = await _userManagementService.GetAllRolesAsync();
+                        ViewBag.Roles = roles;
+                        return View(model);
+                    }
+
+                    // Tạo tên file duy nhất
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    
+                    // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
+                    
+                    // Tạo thư mục nếu chưa tồn tại
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    var filePath = Path.Combine(uploadPath, fileName);
+                    
+                    // Lưu file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await AvatarFile.CopyToAsync(stream);
+                    }
+
+                    // Cập nhật Avatar URL trong model
+                    model.Avatar = $"/Imagine/Avatars/{fileName}";
+                }
+
                 var result = await _userManagementService.CreateUserAsync(model, adminUserId.Value);
-                _logger.LogInformation("CreateUserAsync result: {Result}", result);
 
                 if (result)
                 {
@@ -215,13 +313,31 @@ namespace MonAmour.Controllers
                 }
                 else
                 {
-                    _logger.LogWarning("CreateUserAsync returned false - email might already exist");
-                    TempData["Error"] = "Email đã tồn tại hoặc có lỗi xảy ra";
+                    _logger.LogWarning("CreateUserAsync returned false");
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo người dùng. Vui lòng kiểm tra lại thông tin.";
                     await SetAdminViewBagAsync();
                     var roles = await _userManagementService.GetAllRolesAsync();
                     ViewBag.Roles = roles;
                     return View(model);
                 }
+            }
+            catch (InvalidOperationException ex) when (ex.Message == "EMAIL_EXISTS")
+            {
+                TempData["Error"] = "Email đã tồn tại trong hệ thống";
+                ModelState.AddModelError("Email", "Email đã tồn tại trong hệ thống");
+                await SetAdminViewBagAsync();
+                var roles = await _userManagementService.GetAllRolesAsync();
+                ViewBag.Roles = roles;
+                return View(model);
+            }
+            catch (InvalidOperationException ex) when (ex.Message == "PHONE_EXISTS")
+            {
+                TempData["Error"] = "Số điện thoại đã tồn tại trong hệ thống";
+                ModelState.AddModelError("Phone", "Số điện thoại đã tồn tại trong hệ thống");
+                await SetAdminViewBagAsync();
+                var roles = await _userManagementService.GetAllRolesAsync();
+                ViewBag.Roles = roles;
+                return View(model);
             }
             catch (Exception ex)
             {
@@ -233,6 +349,30 @@ namespace MonAmour.Controllers
                 return View(model);
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckDuplicate(string email, string phone, int? excludeUserId = null)
+        {
+            try
+            {
+                var (emailExists, phoneExists) = await _userManagementService.CheckDuplicateAsync(email, phone, excludeUserId);
+
+                return Json(new
+                {
+                    emailExists = emailExists,
+                    phoneExists = phoneExists,
+                    email = email,
+                    phone = phone,
+                    message = emailExists || phoneExists ? "Có dữ liệu trùng lặp" : "Dữ liệu hợp lệ"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking duplicates: email={Email}, phone={Phone}", email, phone);
+                return Json(new { error = ex.Message });
+            }
+        }
+
 
         /// <summary>
         /// Edit User - chỉnh sửa user
@@ -285,7 +425,7 @@ namespace MonAmour.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUser(AdminUserViewModel.UserEditViewModel model)
+        public async Task<IActionResult> EditUser(IFormFile? AvatarFile, AdminUserViewModel.UserEditViewModel model)
         {
             try
             {
@@ -304,6 +444,69 @@ namespace MonAmour.Controllers
                     ViewBag.Roles = roles;
                     return View(model);
                 }
+
+                // Lấy thông tin user hiện tại để giữ avatar cũ nếu không upload mới
+                var existingUser = await _userManagementService.GetUserByIdAsync(model.UserId);
+                if (existingUser == null)
+                {
+                    TempData["Error"] = "Không tìm thấy người dùng";
+                    var roles = await _userManagementService.GetAllRolesAsync();
+                    ViewBag.Roles = roles;
+                    return View(model);
+                }
+
+                // Xử lý file upload avatar nếu có
+                if (AvatarFile != null && AvatarFile.Length > 0)
+                {
+                    // Kiểm tra kích thước file (5MB)
+                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    {
+                        TempData["Error"] = "File avatar quá lớn. Kích thước tối đa là 5MB.";
+                        var roles = await _userManagementService.GetAllRolesAsync();
+                        ViewBag.Roles = roles;
+                        return View(model);
+                    }
+
+                    // Kiểm tra loại file
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        TempData["Error"] = "Chỉ hỗ trợ file JPG, PNG, GIF cho avatar.";
+                        var roles = await _userManagementService.GetAllRolesAsync();
+                        ViewBag.Roles = roles;
+                        return View(model);
+                    }
+
+                    // Tạo tên file duy nhất
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    
+                    // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
+                    
+                    // Tạo thư mục nếu chưa tồn tại
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    var filePath = Path.Combine(uploadPath, fileName);
+                    
+                    // Lưu file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await AvatarFile.CopyToAsync(stream);
+                    }
+
+                    // Cập nhật Avatar URL trong model
+                    model.Avatar = $"/Imagine/Avatars/{fileName}";
+                }
+                else
+                {
+                    // Nếu không có file mới, giữ nguyên avatar hiện tại
+                    model.Avatar = existingUser.Avatar;
+                }
+
                 var result = await _userManagementService.UpdateUserAsync(model, adminUserId.Value);
 
                 if (result)
@@ -573,83 +776,3385 @@ namespace MonAmour.Controllers
             }
         }
 
+        #region Product Management
+
         /// <summary>
-        /// Comments Management - quản lý bình luận
+        /// Product Management - quản lý sản phẩm
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> Comments()
+        public async Task<IActionResult> Products(ProductSearchViewModel? searchModel = null)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+
+                searchModel ??= new ProductSearchViewModel();
+                var (products, totalCount) = await _productService.GetProductsAsync(searchModel);
+                var categories = await _productService.GetAllCategoriesAsync();
+                var statistics = await _productService.GetProductStatisticsAsync();
+
+                ViewBag.Categories = categories;
+                ViewBag.Statistics = statistics;
+                ViewBag.TotalCount = totalCount;
+                ViewBag.CurrentPage = searchModel.Page;
+                ViewBag.PageSize = searchModel.PageSize;
+                ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / searchModel.PageSize);
+
+                return View(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Products action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách sản phẩm";
+                
+                await SetAdminViewBagAsync();
+                ViewBag.Categories = new List<ProductCategoryViewModel>();
+                ViewBag.Statistics = new Dictionary<string, int>();
+                ViewBag.TotalCount = 0;
+                ViewBag.CurrentPage = 1;
+                ViewBag.PageSize = 10;
+                ViewBag.TotalPages = 0;
+                
+                return View(new List<ProductListViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Product - tạo sản phẩm mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreateProduct()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var categories = await _productService.GetAllCategoriesAsync();
+                ViewBag.Categories = categories;
+                return View(new ProductCreateViewModel());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateProduct GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo sản phẩm";
+                return RedirectToAction(nameof(Products));
+            }
+        }
+
+        /// <summary>
+        /// Create Product POST - xử lý tạo sản phẩm
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateProduct(ProductCreateViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    var categories = await _productService.GetAllCategoriesAsync();
+                    ViewBag.Categories = categories;
+                    return View(model);
+                }
+
+                var result = await _productService.CreateProductAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo sản phẩm thành công";
+                    return RedirectToAction(nameof(Products));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo sản phẩm";
+                    await SetAdminViewBagAsync();
+                    var categories = await _productService.GetAllCategoriesAsync();
+                    ViewBag.Categories = categories;
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateProduct POST action");
+                TempData["Error"] = $"Có lỗi xảy ra khi tạo sản phẩm: {ex.Message}";
+                await SetAdminViewBagAsync();
+                var categories = await _productService.GetAllCategoriesAsync();
+                ViewBag.Categories = categories;
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Product - chỉnh sửa sản phẩm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditProduct(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var product = await _productService.GetProductByIdAsync(id);
+                if (product == null)
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm";
+                    return RedirectToAction(nameof(Products));
+                }
+
+                var categories = await _productService.GetAllCategoriesAsync();
+                ViewBag.Categories = categories;
+
+                var editModel = new ProductEditViewModel
+                {
+                    ProductId = product.ProductId,
+                    Name = product.Name,
+                    CategoryId = product.CategoryId,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Material = product.Material,
+                    TargetAudience = product.TargetAudience,
+                    StockQuantity = product.StockQuantity,
+                    Status = product.Status,
+                    CreatedAt = product.CreatedAt
+                };
+
+                return View(editModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditProduct GET action for product {ProductId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin sản phẩm";
+                return RedirectToAction(nameof(Products));
+            }
+        }
+
+        /// <summary>
+        /// Edit Product POST - xử lý chỉnh sửa sản phẩm
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProduct(ProductEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var categories = await _productService.GetAllCategoriesAsync();
+                    ViewBag.Categories = categories;
+                    return View(model);
+                }
+
+                var result = await _productService.UpdateProductAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật sản phẩm thành công";
+                    return RedirectToAction(nameof(Products));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm hoặc có lỗi xảy ra";
+                    var categories = await _productService.GetAllCategoriesAsync();
+                    ViewBag.Categories = categories;
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditProduct POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật sản phẩm";
+                var categories = await _productService.GetAllCategoriesAsync();
+                ViewBag.Categories = categories;
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Product Detail - chi tiết sản phẩm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> ProductDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var product = await _productService.GetProductByIdAsync(id);
+                if (product == null)
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm";
+                    return RedirectToAction(nameof(Products));
+                }
+
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ProductDetail action for product {ProductId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin sản phẩm";
+                return RedirectToAction(nameof(Products));
+            }
+        }
+
+        /// <summary>
+        /// Delete Product - xóa sản phẩm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            try
+            {
+                var result = await _productService.DeleteProductAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa sản phẩm thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa sản phẩm (có thể không tồn tại)";
+                }
+
+                return RedirectToAction(nameof(Products));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteProduct action for product {ProductId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa sản phẩm";
+                return RedirectToAction(nameof(Products));
+            }
+        }
+
+        /// <summary>
+        /// Toggle Product Status - thay đổi trạng thái sản phẩm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleProductStatus(int id, string status)
+        {
+            try
+            {
+                var product = await _productService.GetProductByIdAsync(id);
+                if (product == null)
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm";
+                    return RedirectToAction(nameof(Products));
+                }
+
+                var editModel = new ProductEditViewModel
+                {
+                    ProductId = product.ProductId,
+                    Name = product.Name,
+                    CategoryId = product.CategoryId,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Material = product.Material,
+                    TargetAudience = product.TargetAudience,
+                    StockQuantity = product.StockQuantity,
+                    Status = status,
+                    CreatedAt = product.CreatedAt
+                };
+
+                var result = await _productService.UpdateProductAsync(editModel);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật trạng thái sản phẩm thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái";
+                }
+
+                return RedirectToAction(nameof(Products));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ToggleProductStatus action for product {ProductId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái sản phẩm";
+                return RedirectToAction(nameof(Products));
+            }
+        }
+
+        #endregion
+
+        #region Product Category Management
+
+        /// <summary>
+        /// Product Categories - quản lý danh mục sản phẩm
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> ProductCategories()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var categories = await _productService.GetAllCategoriesAsync();
+                return View(categories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ProductCategories action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách danh mục";
+                await SetAdminViewBagAsync();
+                return View(new List<ProductCategoryViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Category - tạo danh mục mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreateCategory()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                return View(new ProductCategoryViewModel());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateCategory GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo danh mục";
+                return RedirectToAction(nameof(ProductCategories));
+            }
+        }
+
+        /// <summary>
+        /// Create Category POST - xử lý tạo danh mục
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCategory(ProductCategoryViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _productService.CreateCategoryAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo danh mục thành công";
+                    return RedirectToAction(nameof(ProductCategories));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo danh mục";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateCategory POST action");
+                TempData["Error"] = $"Có lỗi xảy ra khi tạo danh mục: {ex.Message}";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Category - chỉnh sửa danh mục
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditCategory(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var category = await _productService.GetCategoryByIdAsync(id);
+                if (category == null)
+                {
+                    TempData["Error"] = "Không tìm thấy danh mục";
+                    return RedirectToAction(nameof(ProductCategories));
+                }
+
+                return View(category);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditCategory GET action for category {CategoryId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin danh mục";
+                return RedirectToAction(nameof(ProductCategories));
+            }
+        }
+
+        /// <summary>
+        /// Edit Category POST - xử lý chỉnh sửa danh mục
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCategory(ProductCategoryViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _productService.UpdateCategoryAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật danh mục thành công";
+                    return RedirectToAction(nameof(ProductCategories));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy danh mục hoặc có lỗi xảy ra";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditCategory POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật danh mục";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete Category - xóa danh mục
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            try
+            {
+                var result = await _productService.DeleteCategoryAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa danh mục thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa danh mục (có thể có sản phẩm trong danh mục này)";
+                }
+
+                return RedirectToAction(nameof(ProductCategories));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteCategory action for category {CategoryId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa danh mục";
+                return RedirectToAction(nameof(ProductCategories));
+            }
+        }
+
+        /// <summary>
+        /// Delete Category With Products - xóa danh mục và xử lý sản phẩm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="reassignToCategoryId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategoryWithProducts(int id, int? reassignToCategoryId = null)
+        {
+            try
+            {
+                _logger.LogInformation("DeleteCategoryWithProducts called for category {CategoryId}, reassignTo: {ReassignToCategoryId}", id, reassignToCategoryId);
+                
+                var result = await _productService.DeleteCategoryWithProductsAsync(id, reassignToCategoryId);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa danh mục thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa danh mục (có thể không tồn tại)";
+                }
+
+                return RedirectToAction(nameof(ProductCategories));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteCategoryWithProducts action for category {CategoryId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa danh mục";
+                return RedirectToAction(nameof(ProductCategories));
+            }
+        }
+
+        /// <summary>
+        /// Get Categories For Reassignment - lấy danh sách danh mục để chuyển sản phẩm
+        /// </summary>
+        /// <param name="excludeCategoryId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetCategoriesForReassignment(int excludeCategoryId)
+        {
+            try
+            {
+                var categories = await _productService.GetCategoriesForReassignmentAsync(excludeCategoryId);
+                return Json(categories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetCategoriesForReassignment action");
+                return Json(new List<object>());
+            }
+        }
+
+        #endregion
+
+        #region Product Image Management
+
+        /// <summary>
+        /// Product Images - quản lý hình ảnh sản phẩm
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> ProductImages(int? productId = null)
         {
             try
             {
                 await SetAdminViewBagAsync();
                 
-                var comments = await _blogService.GetAllCommentsAsync();
-                return View(comments);
+                // Lấy danh sách sản phẩm để hiển thị trong dropdown
+                var products = await _productService.GetProductsForDropdownAsync();
+                ViewBag.Products = products;
+                
+                if (productId.HasValue)
+                {
+                    // Lấy hình ảnh của sản phẩm cụ thể
+                    var images = await _productService.GetProductImagesAsync(productId.Value);
+                    var product = await _productService.GetProductByIdAsync(productId.Value);
+                    ViewBag.SelectedProductId = productId.Value;
+                    
+                    var groupedImages = new List<object>
+                    {
+                        new
+                        {
+                            ProductId = product.ProductId,
+                            ProductName = product.Name,
+                            Images = images
+                        }
+                    };
+                    
+                    return View(groupedImages);
+                }
+                else
+                {
+                    // Lấy tất cả sản phẩm có hình ảnh, nhóm theo sản phẩm
+                    var groupedImages = await _productService.GetProductImagesGroupedByProductAsync();
+                    ViewBag.SelectedProductId = null;
+                    
+                    return View(groupedImages);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading comments management page");
+                _logger.LogError(ex, "Error in ProductImages action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách hình ảnh";
                 await SetAdminViewBagAsync();
-                return View(new List<BlogComment>());
+                ViewBag.Products = new List<object>();
+                ViewBag.SelectedProductId = null;
+                return View(new List<object>());
             }
         }
 
         /// <summary>
-        /// Delete Comment - xóa bình luận
+        /// Get Products for Dropdown - lấy danh sách sản phẩm cho dropdown
         /// </summary>
-        /// <param name="commentId"></param>
         /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> DeleteComment(int commentId)
+        [HttpGet]
+        public async Task<IActionResult> GetProductsForDropdown()
         {
             try
             {
-                var success = await _blogService.DeleteCommentAsync(commentId);
-                if (success)
-                {
-                    TempData["Success"] = "Bình luận đã được xóa thành công!";
-                }
-                else
-                {
-                    TempData["Error"] = "Không thể xóa bình luận!";
-                }
+                var products = await _productService.GetProductsForDropdownAsync();
+                return Json(products);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting comment {CommentId}", commentId);
-                TempData["Error"] = "Có lỗi xảy ra khi xóa bình luận!";
+                _logger.LogError(ex, "Error in GetProductsForDropdown action");
+                return Json(new List<object>());
             }
-
-            return RedirectToAction("Comments");
         }
 
         /// <summary>
-        /// Approve Comment - duyệt bình luận
+        /// Get Product Images - lấy danh sách hình ảnh sản phẩm
         /// </summary>
-        /// <param name="commentId"></param>
+        /// <param name="productId"></param>
         /// <returns></returns>
-        [HttpPost]
-        public async Task<IActionResult> ApproveComment(int commentId)
+        [HttpGet]
+        public async Task<IActionResult> GetProductImages(int productId)
         {
             try
             {
-                var success = await _blogService.ApproveCommentAsync(commentId);
-                if (success)
+                var images = await _productService.GetProductImagesAsync(productId);
+                return Json(images);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetProductImages action for product {ProductId}", productId);
+                return Json(new List<ProductImgViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Add Product Image - thêm hình ảnh sản phẩm
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> AddProductImage(IFormFile? ImageFile, ProductImgViewModel model)
+        {
+            try
+            {
+                // Bỏ qua ModelState validation cho file upload, chỉ kiểm tra các trường cần thiết
+                if (model.ProductId <= 0)
                 {
-                    TempData["Success"] = "Bình luận đã được duyệt!";
+                    return Json(new { success = false, message = "Vui lòng chọn sản phẩm!" });
+                }
+
+                // Kiểm tra giới hạn 3 hình ảnh
+                var canAddMore = await _productService.CanProductAddMoreImagesAsync(model.ProductId);
+                if (!canAddMore)
+                {
+                    return Json(new { success = false, message = "Sản phẩm này đã đạt giới hạn 3 hình ảnh. Không thể thêm hình ảnh mới." });
+                }
+
+                // Xử lý file upload nếu có
+                if (ImageFile != null && ImageFile.Length > 0)
+                {
+                    // Kiểm tra kích thước file (5MB)
+                    if (ImageFile.Length > 5 * 1024 * 1024)
+                    {
+                        return Json(new { success = false, message = "File quá lớn. Kích thước tối đa là 5MB." });
+                    }
+
+                    // Kiểm tra loại file
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(ImageFile.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF." });
+                    }
+
+                                         // Tạo tên file duy nhất
+                     var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                     
+                     // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
+                     var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGProduct");
+                     
+                     // Tạo thư mục nếu chưa tồn tại
+                     if (!Directory.Exists(uploadPath))
+                     {
+                         Directory.CreateDirectory(uploadPath);
+                     }
+
+                     var filePath = Path.Combine(uploadPath, fileName);
+                     
+                     // Lưu file
+                     using (var stream = new FileStream(filePath, FileMode.Create))
+                     {
+                         await ImageFile.CopyToAsync(stream);
+                     }
+
+                     // Cập nhật URL trong model
+                     model.ImgUrl = $"/Imagine/IMGProduct/{fileName}";
+                }
+                else if (string.IsNullOrEmpty(model.ImgUrl))
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn file hình ảnh hoặc nhập URL!" });
+                }
+
+                // Kiểm tra các trường khác
+                if (string.IsNullOrEmpty(model.ImgName))
+                {
+                    model.ImgName = "Hình ảnh sản phẩm";
+                }
+                
+                if (string.IsNullOrEmpty(model.AltText))
+                {
+                    model.AltText = "Hình ảnh sản phẩm";
+                }
+                
+                // Đảm bảo DisplayOrder có giá trị
+                if (model.DisplayOrder <= 0)
+                {
+                    model.DisplayOrder = 1;
+                }
+
+                var result = await _productService.AddProductImageAsync(model);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Thêm hình ảnh thành công" });
                 }
                 else
                 {
-                    TempData["Error"] = "Không thể duyệt bình luận!";
+                    return Json(new { success = false, message = "Không thể thêm hình ảnh. Có thể sản phẩm đã đạt giới hạn 3 hình ảnh." });
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error approving comment {CommentId}", commentId);
-                TempData["Error"] = "Có lỗi xảy ra khi duyệt bình luận!";
+                _logger.LogError(ex, "Error in AddProductImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm hình ảnh" });
+            }
+        }
+
+        /// <summary>
+        /// Set Primary Image - đặt hình ảnh chính
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="imageId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> SetPrimaryImage(int productId, int imageId)
+        {
+            try
+            {
+                var result = await _productService.SetPrimaryImageAsync(productId, imageId);
+                return Json(new { success = result, message = result ? "Đã cập nhật hình ảnh chính" : "Có lỗi xảy ra" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SetPrimaryImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật hình ảnh chính" });
+            }
+        }
+
+        /// <summary>
+        /// Update Product Image - cập nhật hình ảnh sản phẩm
+        /// </summary>
+        /// <param name="ImageFile"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> UpdateProductImage(IFormFile? ImageFile, ProductImgViewModel model)
+        {
+            try
+            {
+                // Bỏ qua ModelState validation cho file upload, chỉ kiểm tra các trường cần thiết
+                if (model.ImgId <= 0)
+                {
+                    return Json(new { success = false, message = "ID hình ảnh không hợp lệ!" });
+                }
+
+                // Lấy thông tin hình ảnh hiện tại từ database
+                var existingImage = await _productService.GetProductImageByIdAsync(model.ImgId);
+                if (existingImage == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy hình ảnh!" });
+                }
+
+                // Xử lý file upload nếu có
+                if (ImageFile != null && ImageFile.Length > 0)
+                {
+                    // Kiểm tra kích thước file (5MB)
+                    if (ImageFile.Length > 5 * 1024 * 1024)
+                    {
+                        return Json(new { success = false, message = "File quá lớn. Kích thước tối đa là 5MB." });
+                    }
+
+                    // Kiểm tra loại file
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(ImageFile.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF." });
+                    }
+
+                    // Tạo tên file duy nhất
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    
+                    // Sử dụng đường dẫn tương đối từ thư mục gốc của ứng dụng
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGProduct");
+                    
+                    // Tạo thư mục nếu chưa tồn tại
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    var filePath = Path.Combine(uploadPath, fileName);
+                    
+                    // Lưu file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ImageFile.CopyToAsync(stream);
+                    }
+
+                    // Cập nhật URL trong model
+                    model.ImgUrl = $"/Imagine/IMGProduct/{fileName}";
+                }
+                else
+                {
+                    // Nếu không có file mới, giữ nguyên URL hiện tại
+                    model.ImgUrl = existingImage.ImgUrl;
+                }
+
+                var result = await _productService.UpdateProductImageAsync(model);
+                return Json(new { success = result, message = result ? "Cập nhật hình ảnh thành công" : "Có lỗi xảy ra" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateProductImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật hình ảnh" });
+            }
+        }
+
+        /// <summary>
+        /// Get Product Image Count - lấy số lượng hình ảnh của sản phẩm
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetProductImageCount(int productId)
+        {
+            try
+            {
+                var imageCount = await _productService.GetProductImageCountAsync(productId);
+                var canAddMore = await _productService.CanProductAddMoreImagesAsync(productId);
+                
+                return Json(new { 
+                    success = true, 
+                    imageCount = imageCount, 
+                    canAddMore = canAddMore,
+                    maxImages = 3,
+                    message = canAddMore ? $"Có thể thêm {3 - imageCount} hình ảnh nữa" : "Đã đạt giới hạn 3 hình ảnh"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetProductImageCount action for product {ProductId}", productId);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi kiểm tra số lượng hình ảnh" });
+            }
+        }
+
+        /// <summary>
+        /// Delete Product Image - xóa hình ảnh sản phẩm
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> DeleteProductImage(int imageId)
+        {
+            try
+            {
+                var result = await _productService.DeleteProductImageAsync(imageId);
+                return Json(new { success = result, message = result ? "Đã xóa hình ảnh" : "Có lỗi xảy ra" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteProductImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa hình ảnh" });
+            }
+        }
+
+        #endregion
+
+        #region Partner Management
+
+        /// <summary>
+        /// Partners - quản lý đối tác
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Partners()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var searchModel = new PartnerSearchViewModel();
+                var (partners, totalCount) = await _partnerService.GetPartnersAsync(searchModel);
+                
+                ViewBag.TotalCount = totalCount;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(partners);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Partners action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách đối tác";
+                await SetAdminViewBagAsync();
+                return View(new List<PartnerViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Partner - tạo đối tác mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreatePartner()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var model = new PartnerCreateViewModel();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreatePartner GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Create Partner POST - xử lý tạo đối tác
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePartner(PartnerCreateViewModel model, IFormFile AvatarFile)
+        {
+            try
+            {
+                _logger.LogInformation("CreatePartner called with model: Name={Name}, Status={Status}, UserId={UserId}, Email={Email}, Phone={Phone}, ContactInfo={ContactInfo}", 
+                    model.Name, model.Status, model.UserId, model.Email, model.Phone, model.ContactInfo);
+                
+                // Log all form data
+                _logger.LogInformation("Form data: {FormData}", string.Join(", ", Request.Form.Select(x => $"{x.Key}={x.Value}")));
+
+                // Handle UserId - convert 0 to null
+                if (model.UserId == 0)
+                {
+                    model.UserId = null;
+                    _logger.LogInformation("Converted UserId from 0 to null");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
+                        string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                // Handle avatar file upload
+                if (AvatarFile != null && AvatarFile.Length > 0)
+                {
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
+                    
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("AvatarFile", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Validate file size (max 5MB)
+                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("AvatarFile", "Kích thước file không được vượt quá 5MB");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Create unique filename
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
+                    
+                    // Ensure directory exists
+                    if (!Directory.Exists(uploadsPath))
+                    {
+                        Directory.CreateDirectory(uploadsPath);
+                    }
+
+                    var filePath = Path.Combine(uploadsPath, fileName);
+                    
+                    // Save file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await AvatarFile.CopyToAsync(stream);
+                    }
+
+                    // Update model with new avatar path
+                    model.Avatar = $"/Imagine/Avatars/{fileName}";
+                }
+
+                var result = await _partnerService.CreatePartnerAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo đối tác thành công";
+                    return RedirectToAction(nameof(Partners));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo đối tác";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreatePartner POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi tạo đối tác";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Partner - chỉnh sửa đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditPartner(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var partner = await _partnerService.GetPartnerByIdAsync(id);
+                if (partner == null)
+                {
+                    TempData["Error"] = "Không tìm thấy đối tác";
+                    return RedirectToAction(nameof(Partners));
+                }
+
+                var model = new PartnerEditViewModel
+                {
+                    PartnerId = partner.PartnerId,
+                    Name = partner.Name,
+                    ContactInfo = partner.ContactInfo,
+                    UserId = partner.UserId,
+                    Email = partner.Email,
+                    Phone = partner.Phone,
+                    Avatar = partner.Avatar,
+                    Status = partner.Status,
+                    CreatedAt = partner.CreatedAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditPartner GET action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Get Partner for Edit - lấy thông tin đối tác cho modal edit
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetPartnerForEdit(int id)
+        {
+            try
+            {
+                var partner = await _partnerService.GetPartnerByIdAsync(id);
+                if (partner == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đối tác" });
+                }
+
+                var result = new
+                {
+                    success = true,
+                    partner = new
+                    {
+                        partnerId = partner.PartnerId,
+                        name = partner.Name,
+                        status = partner.Status,
+                        email = partner.Email,
+                        phone = partner.Phone,
+                        contactInfo = partner.ContactInfo,
+                        avatar = partner.Avatar,
+                        userId = partner.UserId
+                    }
+                };
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetPartnerForEdit action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải thông tin đối tác" });
+            }
+        }
+
+        /// <summary>
+        /// Test Database Connection - kiểm tra kết nối database
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> TestDatabaseConnection()
+        {
+            try
+            {
+                // Test by getting users and partners
+                var users = await _userManagementService.GetAllUsersAsync();
+                var partners = await _partnerService.GetPartnersAsync(new PartnerSearchViewModel { PageSize = 1 });
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Database connection successful",
+                    partnerCount = partners.totalCount,
+                    userCount = users.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Database connection test failed");
+                return Json(new { 
+                    success = false, 
+                    message = "Database connection failed: " + ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Test Create Partner - test tạo partner đơn giản
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> TestCreatePartner()
+        {
+            try
+            {
+                // Get first user to test with UserId
+                var users = await _userManagementService.GetAllUsersAsync();
+                var firstUserId = users.FirstOrDefault()?.UserId;
+
+                var testModel = new PartnerCreateViewModel
+                {
+                    Name = "Test Partner " + DateTime.Now.ToString("HHmmss"),
+                    Status = "Active",
+                    Email = "test@example.com",
+                    Phone = "0123456789",
+                    ContactInfo = "Test contact info",
+                    UserId = firstUserId, // Test with actual user ID
+                    Avatar = null // Test without avatar
+                };
+
+                _logger.LogInformation("Testing partner creation with model: {Model}, UserId: {UserId}", testModel.Name, testModel.UserId);
+
+                var result = await _partnerService.CreatePartnerAsync(testModel);
+                
+                return Json(new { 
+                    success = result, 
+                    message = result ? "Partner created successfully" : "Failed to create partner",
+                    model = testModel,
+                    userId = firstUserId
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Test partner creation failed");
+                return Json(new { 
+                    success = false, 
+                    message = "Test failed: " + ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Test Create Partner Without User - test tạo partner không có UserId
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> TestCreatePartnerWithoutUser()
+        {
+            try
+            {
+                var testModel = new PartnerCreateViewModel
+                {
+                    Name = "Test Partner No User " + DateTime.Now.ToString("HHmmss"),
+                    Status = "Active",
+                    Email = "test@example.com",
+                    Phone = "0123456789",
+                    ContactInfo = "Test contact info",
+                    UserId = null, // Test without user ID
+                    Avatar = null // Test without avatar
+                };
+
+                _logger.LogInformation("Testing partner creation without user: {Model}", testModel.Name);
+
+                var result = await _partnerService.CreatePartnerAsync(testModel);
+                
+                return Json(new { 
+                    success = result, 
+                    message = result ? "Partner created successfully without user" : "Failed to create partner without user",
+                    model = testModel
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Test partner creation without user failed");
+                return Json(new { 
+                    success = false, 
+                    message = "Test failed: " + ex.Message 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get Users for Dropdown - lấy danh sách người dùng cho dropdown
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetUsersForDropdown()
+        {
+            try
+            {
+                var users = await _userManagementService.GetAllUsersAsync();
+                var result = users.Select(u => new
+                {
+                    id = u.UserId,
+                    name = u.Name,
+                    email = u.Email
+                }).ToList();
+
+                return Json(new { success = true, users = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetUsersForDropdown action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải danh sách người dùng" });
+            }
+        }
+
+        /// <summary>
+        /// Get Partners for Dropdown - lấy danh sách đối tác cho dropdown
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetPartnersForDropdown()
+        {
+            try
+            {
+                var partners = await _partnerService.GetPartnersForDropdownAsync();
+                var result = partners.Select(p => new
+                {
+                    id = p.PartnerId,
+                    name = p.Name
+                }).ToList();
+
+                return Json(new { success = true, partners = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetPartnersForDropdown action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải danh sách đối tác" });
+            }
+        }
+
+        /// <summary>
+        /// Get Location for Edit - lấy thông tin địa điểm cho edit modal
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetLocationForEdit(int id)
+        {
+            try
+            {
+                var location = await _locationService.GetLocationByIdAsync(id);
+                if (location == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy địa điểm" });
+                }
+
+                var result = new
+                {
+                    locationId = location.LocationId,
+                    name = location.Name,
+                    address = location.Address,
+                    district = location.District,
+                    city = location.City,
+                    partnerId = location.PartnerId,
+                    ggmapLink = location.GgmapLink,
+                    status = location.Status
+                };
+
+                return Json(new { success = true, location = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetLocationForEdit action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải thông tin địa điểm" });
+            }
+        }
+
+        /// <summary>
+        /// Edit Partner POST - xử lý cập nhật đối tác
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPartner(PartnerEditViewModel model, IFormFile AvatarFile)
+        {
+            try
+            {
+                _logger.LogInformation("EditPartner called with model: PartnerId={PartnerId}, Name={Name}, Status={Status}, UserId={UserId}, Email={Email}, Phone={Phone}, ContactInfo={ContactInfo}", 
+                    model.PartnerId, model.Name, model.Status, model.UserId, model.Email, model.Phone, model.ContactInfo);
+                
+                // Log all form data
+                _logger.LogInformation("Form data: {FormData}", string.Join(", ", Request.Form.Select(x => $"{x.Key}={x.Value}")));
+
+                // Handle UserId - convert 0 to null
+                if (model.UserId == 0)
+                {
+                    model.UserId = null;
+                    _logger.LogInformation("Converted UserId from 0 to null");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
+                        string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                // Handle avatar file upload
+                if (AvatarFile != null && AvatarFile.Length > 0)
+                {
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(AvatarFile.FileName).ToLowerInvariant();
+                    
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("AvatarFile", "Chỉ chấp nhận file ảnh (JPG, PNG, GIF)");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Validate file size (max 5MB)
+                    if (AvatarFile.Length > 5 * 1024 * 1024)
+                    {
+                        ModelState.AddModelError("AvatarFile", "Kích thước file không được vượt quá 5MB");
+                        await SetAdminViewBagAsync();
+                        return View(model);
+                    }
+
+                    // Create unique filename
+                    var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var uploadsPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "Avatars");
+                    
+                    // Ensure directory exists
+                    if (!Directory.Exists(uploadsPath))
+                    {
+                        Directory.CreateDirectory(uploadsPath);
+                    }
+
+                    var filePath = Path.Combine(uploadsPath, fileName);
+                    
+                    // Save file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await AvatarFile.CopyToAsync(stream);
+                    }
+
+                    // Update model with new avatar path
+                    model.Avatar = $"/Imagine/Avatars/{fileName}";
+                }
+
+                var result = await _partnerService.UpdatePartnerAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật đối tác thành công";
+                    return RedirectToAction(nameof(Partners));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy đối tác hoặc có lỗi xảy ra";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditPartner POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật đối tác";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Partner Detail - chi tiết đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> PartnerDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var partner = await _partnerService.GetPartnerByIdAsync(id);
+                if (partner == null)
+                {
+                    TempData["Error"] = "Không tìm thấy đối tác";
+                    return RedirectToAction(nameof(Partners));
+                }
+
+                return View(partner);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in PartnerDetail action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Delete Partner - xóa đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePartner(int id)
+        {
+            try
+            {
+                var result = await _partnerService.DeletePartnerAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa đối tác thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa đối tác (có thể có địa điểm liên kết)";
+                }
+
+                return RedirectToAction(nameof(Partners));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeletePartner action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        /// <summary>
+        /// Toggle Partner Status - thay đổi trạng thái đối tác
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TogglePartnerStatus(int id, string status)
+        {
+            try
+            {
+                var result = await _partnerService.TogglePartnerStatusAsync(id, status);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật trạng thái đối tác thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái";
+                }
+
+                return RedirectToAction(nameof(Partners));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in TogglePartnerStatus action for partner {PartnerId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái đối tác";
+                return RedirectToAction(nameof(Partners));
+            }
+        }
+
+        #endregion
+
+        #region Location Management
+
+        /// <summary>
+        /// Locations - quản lý địa điểm
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Locations()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var searchModel = new LocationSearchViewModel();
+                var (locations, totalCount) = await _locationService.GetLocationsAsync(searchModel);
+                
+                ViewBag.TotalCount = totalCount;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(locations);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Locations action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách địa điểm";
+                await SetAdminViewBagAsync();
+                return View(new List<LocationViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Location - tạo địa điểm mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreateLocation()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var model = new LocationCreateViewModel();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateLocation GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Create Location POST - xử lý tạo địa điểm
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateLocation(LocationCreateViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _locationService.CreateLocationAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo địa điểm thành công";
+                    return RedirectToAction(nameof(Locations));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo địa điểm";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateLocation POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi tạo địa điểm";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Location - chỉnh sửa địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditLocation(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var location = await _locationService.GetLocationByIdAsync(id);
+                if (location == null)
+                {
+                    TempData["Error"] = "Không tìm thấy địa điểm";
+                    return RedirectToAction(nameof(Locations));
+                }
+
+                var model = new LocationEditViewModel
+                {
+                    LocationId = location.LocationId,
+                    Name = location.Name,
+                    Address = location.Address,
+                    District = location.District,
+                    City = location.City,
+                    Status = location.Status,
+                    PartnerId = location.PartnerId,
+                    GgmapLink = location.GgmapLink,
+                    CreatedAt = location.CreatedAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditLocation GET action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Edit Location POST - xử lý cập nhật địa điểm
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditLocation(LocationEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _locationService.UpdateLocationAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật địa điểm thành công";
+                    return RedirectToAction(nameof(Locations));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy địa điểm hoặc có lỗi xảy ra";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditLocation POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật địa điểm";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Location Detail - chi tiết địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> LocationDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var location = await _locationService.GetLocationByIdAsync(id);
+                if (location == null)
+                {
+                    TempData["Error"] = "Không tìm thấy địa điểm";
+                    return RedirectToAction(nameof(Locations));
+                }
+
+                return View(location);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in LocationDetail action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Delete Location - xóa địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteLocation(int id)
+        {
+            try
+            {
+                var result = await _locationService.DeleteLocationAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa địa điểm thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa địa điểm (có thể có concept liên kết)";
+                }
+
+                return RedirectToAction(nameof(Locations));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteLocation action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        /// <summary>
+        /// Toggle Location Status - thay đổi trạng thái địa điểm
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLocationStatus(int id, string status)
+        {
+            try
+            {
+                var result = await _locationService.ToggleLocationStatusAsync(id, status);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật trạng thái địa điểm thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái";
+                }
+
+                return RedirectToAction(nameof(Locations));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ToggleLocationStatus action for location {LocationId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái địa điểm";
+                return RedirectToAction(nameof(Locations));
+            }
+        }
+
+        #endregion
+
+        #region Concept Management
+
+        /// <summary>
+        /// Concepts - quản lý concept
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> Concepts()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var searchModel = new ConceptSearchViewModel();
+                var (concepts, totalCount) = await _conceptService.GetConceptsAsync(searchModel);
+                
+                ViewBag.TotalCount = totalCount;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(concepts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Concepts action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách concept";
+                await SetAdminViewBagAsync();
+                return View(new List<ConceptViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept - tạo concept mới
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> CreateConcept()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var model = new ConceptCreateViewModel();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConcept GET action");
+                TempData["Error"] = "Có lỗi xảy ra khi tải trang tạo concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Create Concept POST - xử lý tạo concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConcept(ConceptCreateViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Tạo concept thành công";
+                    return RedirectToAction(nameof(Concepts));
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi tạo concept";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConcept POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi tạo concept";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept - chỉnh sửa concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> EditConcept(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var concept = await _conceptService.GetConceptByIdAsync(id);
+                if (concept == null)
+                {
+                    TempData["Error"] = "Không tìm thấy concept";
+                    return RedirectToAction(nameof(Concepts));
+                }
+
+                var model = new ConceptEditViewModel
+                {
+                    ConceptId = concept.ConceptId,
+                    Name = concept.Name,
+                    Description = concept.Description,
+                    Price = concept.Price,
+                    LocationId = concept.LocationId,
+                    ColorId = concept.ColorId,
+                    CategoryId = concept.CategoryId,
+                    AmbienceId = concept.AmbienceId,
+                    PreparationTime = concept.PreparationTime,
+                    AvailabilityStatus = concept.AvailabilityStatus,
+                    CreatedAt = concept.CreatedAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConcept GET action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept POST - xử lý cập nhật concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConcept(ConceptEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptAsync(model);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật concept thành công";
+                    return RedirectToAction(nameof(Concepts));
+                }
+                else
+                {
+                    TempData["Error"] = "Không tìm thấy concept hoặc có lỗi xảy ra";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConcept POST action");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật concept";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Concept Detail - chi tiết concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IActionResult> ConceptDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var concept = await _conceptService.GetConceptByIdAsync(id);
+                if (concept == null)
+                {
+                    TempData["Error"] = "Không tìm thấy concept";
+                    return RedirectToAction(nameof(Concepts));
+                }
+
+                return View(concept);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptDetail action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi tải thông tin concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept - xóa concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConcept(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptAsync(id);
+
+                if (result)
+                {
+                    TempData["Success"] = "Xóa concept thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa concept (có thể có booking liên kết)";
+                }
+
+                return RedirectToAction(nameof(Concepts));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConcept action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi xóa concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Toggle Concept Status - thay đổi trạng thái concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleConceptStatus(int id, bool status)
+        {
+            try
+            {
+                var result = await _conceptService.ToggleConceptStatusAsync(id, status);
+
+                if (result)
+                {
+                    TempData["Success"] = "Cập nhật trạng thái concept thành công";
+                }
+                else
+                {
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái";
+                }
+
+                return RedirectToAction(nameof(Concepts));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ToggleConceptStatus action for concept {ConceptId}", id);
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật trạng thái concept";
+                return RedirectToAction(nameof(Concepts));
+            }
+        }
+
+        /// <summary>
+        /// Get Concept Dropdown Data - lấy dữ liệu dropdown cho concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetConceptDropdownData()
+        {
+            try
+            {
+                var categories = await _conceptService.GetConceptCategoriesForDropdownAsync();
+                var colors = await _conceptService.GetConceptColorsForDropdownAsync();
+                var ambiences = await _conceptService.GetConceptAmbiencesForDropdownAsync();
+                var locations = await _conceptService.GetLocationsForDropdownAsync();
+
+                return Json(new { 
+                    success = true, 
+                    categories = categories,
+                    colors = colors,
+                    ambiences = ambiences,
+                    locations = locations
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetConceptDropdownData action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải dữ liệu dropdown" });
+            }
+        }
+
+        #endregion
+
+        #region Concept Category Management
+
+        /// <summary>
+        /// Concept Categories List - danh sách danh mục concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> ConceptCategories()
+        {
+            try
+            {
+                var categories = await _conceptService.GetConceptCategoriesAsync();
+                return View(categories);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptCategories action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách danh mục concept";
+                return View(new List<ConceptCategoryDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept Category - tạo danh mục concept mới
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult CreateConceptCategory()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Create Concept Category POST - xử lý tạo danh mục concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConceptCategory(ConceptCategoryDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptCategoryAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Tạo danh mục concept thành công!";
+                    return RedirectToAction("ConceptCategories");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo danh mục concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConceptCategory POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo danh mục concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Category - chỉnh sửa danh mục concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> EditConceptCategory(int id)
+        {
+            try
+            {
+                var category = await _conceptService.GetConceptCategoryByIdAsync(id);
+                if (category == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy danh mục concept";
+                    return RedirectToAction("ConceptCategories");
+                }
+
+                return View(category);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptCategory action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải thông tin danh mục concept";
+                return RedirectToAction("ConceptCategories");
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Category POST - xử lý chỉnh sửa danh mục concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConceptCategory(ConceptCategoryDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptCategoryAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật danh mục concept thành công!";
+                    return RedirectToAction("ConceptCategories");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật danh mục concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptCategory POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật danh mục concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept Category - xóa danh mục concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConceptCategory(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptCategoryAsync(id);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Xóa danh mục concept thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa danh mục concept này vì đang được sử dụng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptCategory action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa danh mục concept";
             }
 
-            return RedirectToAction("Comments");
+            return RedirectToAction("ConceptCategories");
         }
+
+        #endregion
+
+        #region Concept Color Management
+
+        /// <summary>
+        /// Concept Colors List - danh sách màu sắc concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> ConceptColors()
+        {
+            try
+            {
+                var colors = await _conceptService.GetConceptColorsAsync();
+                return View(colors);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptColors action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách màu sắc concept";
+                return View(new List<ConceptColorDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept Color - tạo màu sắc concept mới
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult CreateConceptColor()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Create Concept Color POST - xử lý tạo màu sắc concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConceptColor(ConceptColorDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptColorAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Tạo màu sắc concept thành công!";
+                    return RedirectToAction("ConceptColors");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo màu sắc concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConceptColor POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo màu sắc concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Color - chỉnh sửa màu sắc concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> EditConceptColor(int id)
+        {
+            try
+            {
+                var color = await _conceptService.GetConceptColorByIdAsync(id);
+                if (color == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy màu sắc concept";
+                    return RedirectToAction("ConceptColors");
+                }
+
+                return View(color);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptColor action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải thông tin màu sắc concept";
+                return RedirectToAction("ConceptColors");
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Color POST - xử lý chỉnh sửa màu sắc concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConceptColor(ConceptColorDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptColorAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật màu sắc concept thành công!";
+                    return RedirectToAction("ConceptColors");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật màu sắc concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptColor POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật màu sắc concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept Color - xóa màu sắc concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConceptColor(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptColorAsync(id);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Xóa màu sắc concept thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa màu sắc concept này vì đang được sử dụng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptColor action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa màu sắc concept";
+            }
+
+            return RedirectToAction("ConceptColors");
+        }
+
+        #endregion
+
+        #region Concept Ambience Management
+
+        /// <summary>
+        /// Concept Ambiences List - danh sách không gian concept
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> ConceptAmbiences()
+        {
+            try
+            {
+                var ambiences = await _conceptService.GetConceptAmbiencesAsync();
+                return View(ambiences);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptAmbiences action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách không gian concept";
+                return View(new List<ConceptAmbienceDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Create Concept Ambience - tạo không gian concept mới
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult CreateConceptAmbience()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Test Admin Area
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Test()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// Create Concept Ambience POST - xử lý tạo không gian concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateConceptAmbience(ConceptAmbienceDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.CreateConceptAmbienceAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Tạo không gian concept thành công!";
+                    return RedirectToAction("ConceptAmbiences");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo không gian concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CreateConceptAmbience POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo không gian concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Ambience - chỉnh sửa không gian concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> EditConceptAmbience(int id)
+        {
+            try
+            {
+                var ambience = await _conceptService.GetConceptAmbienceByIdAsync(id);
+                if (ambience == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy không gian concept";
+                    return RedirectToAction("ConceptAmbiences");
+                }
+
+                return View(ambience);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptAmbience action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải thông tin không gian concept";
+                return RedirectToAction("ConceptAmbiences");
+            }
+        }
+
+        /// <summary>
+        /// Edit Concept Ambience POST - xử lý chỉnh sửa không gian concept
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditConceptAmbience(ConceptAmbienceDropdownViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var result = await _conceptService.UpdateConceptAmbienceAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật không gian concept thành công!";
+                    return RedirectToAction("ConceptAmbiences");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật không gian concept";
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditConceptAmbience POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật không gian concept";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete Concept Ambience - xóa không gian concept
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConceptAmbience(int id)
+        {
+            try
+            {
+                var result = await _conceptService.DeleteConceptAmbienceAsync(id);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Xóa không gian concept thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể xóa không gian concept này vì đang được sử dụng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptAmbience action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa không gian concept";
+            }
+
+            return RedirectToAction("ConceptAmbiences");
+        }
+
+        #endregion
+
+        #region Concept Image Management
+
+        [HttpGet]
+        public async Task<IActionResult> ConceptImages(int? conceptId)
+        {
+            try
+            {
+                var concepts = await _conceptService.GetConceptsForDropdownAsync();
+                ViewBag.Concepts = concepts.Select(c => new SelectListItem
+                {
+                    Value = c.ConceptId.ToString(),
+                    Text = c.Name
+                }).ToList();
+
+                ViewBag.SelectedConceptId = conceptId;
+
+                List<object> conceptImagesGrouped = new List<object>();
+
+                if (conceptId.HasValue)
+                {
+                    // Lấy hình ảnh của concept cụ thể
+                    var images = await _conceptService.GetConceptImagesAsync(conceptId.Value);
+                    var concept = concepts.FirstOrDefault(c => c.ConceptId == conceptId.Value);
+                    if (concept != null)
+                    {
+                        conceptImagesGrouped.Add(new
+                        {
+                            ConceptId = concept.ConceptId,
+                            ConceptName = concept.Name,
+                            Images = images
+                        });
+                    }
+                }
+                else
+                {
+                    // Lấy tất cả concept (kể cả chưa có hình ảnh)
+                    foreach (var concept in concepts)
+                    {
+                        var images = await _conceptService.GetConceptImagesAsync(concept.ConceptId);
+                        conceptImagesGrouped.Add(new
+                        {
+                            ConceptId = concept.ConceptId,
+                            ConceptName = concept.Name,
+                            Images = images
+                        });
+                    }
+                }
+
+                return View(conceptImagesGrouped);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ConceptImages action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách hình ảnh concept";
+                return View(new List<object>());
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddConceptImage(ConceptImgViewModel model, IFormFile imageFile)
+        {
+            try
+            {
+                if (imageFile == null || imageFile.Length == 0)
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn file hình ảnh!" });
+                }
+
+                // Validate file type
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF!" });
+                }
+
+                // Validate file size (5MB max)
+                if (imageFile.Length > 5 * 1024 * 1024)
+                {
+                    return Json(new { success = false, message = "Kích thước file không được vượt quá 5MB!" });
+                }
+
+                // Check if concept can add more images
+                var canAddMore = await _conceptService.CanConceptAddMoreImagesAsync(model.ConceptId);
+                if (!canAddMore)
+                {
+                    return Json(new { success = false, message = "Concept này đã đạt giới hạn 3 hình ảnh!" });
+                }
+
+                // Generate unique filename
+                var fileName = Guid.NewGuid().ToString() + fileExtension;
+                var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGConcept");
+                
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var filePath = Path.Combine(uploadPath, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                // Set image URL
+                model.ImgUrl = $"/Imagine/IMGConcept/{fileName}";
+
+                // Set default values
+                if (string.IsNullOrEmpty(model.ImgName))
+                {
+                    model.ImgName = "Hình ảnh concept";
+                }
+                if (string.IsNullOrEmpty(model.AltText))
+                {
+                    model.AltText = "Hình ảnh concept";
+                }
+                if (model.DisplayOrder == 0)
+                {
+                    model.DisplayOrder = 1;
+                }
+
+                var result = await _conceptService.AddConceptImageAsync(model);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Thêm hình ảnh concept thành công!" });
+                }
+                else
+                {
+                    // Delete uploaded file if database operation failed
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                    return Json(new { success = false, message = "Không thể thêm hình ảnh concept!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in AddConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm hình ảnh concept!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateConceptImage(ConceptImgViewModel model, IFormFile? imageFile)
+        {
+            try
+            {
+                var existingImage = await _conceptService.GetConceptImageByIdAsync(model.ImgId);
+                if (existingImage == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy hình ảnh!" });
+                }
+
+                // If new image file is provided
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        return Json(new { success = false, message = "Chỉ hỗ trợ file JPG, PNG, GIF!" });
+                    }
+
+                    // Validate file size (5MB max)
+                    if (imageFile.Length > 5 * 1024 * 1024)
+                    {
+                        return Json(new { success = false, message = "Kích thước file không được vượt quá 5MB!" });
+                    }
+
+                    // Generate unique filename
+                    var fileName = Guid.NewGuid().ToString() + fileExtension;
+                    var uploadPath = Path.Combine(_webHostEnvironment.WebRootPath, "Imagine", "IMGConcept");
+                    
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    var filePath = Path.Combine(uploadPath, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+
+                    // Delete old image file
+                    if (!string.IsNullOrEmpty(existingImage.ImgUrl))
+                    {
+                        var oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, existingImage.ImgUrl.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
+
+                    // Set new image URL
+                    model.ImgUrl = $"/Imagine/IMGConcept/{fileName}";
+                }
+                else
+                {
+                    // Keep existing image URL
+                    model.ImgUrl = existingImage.ImgUrl;
+                }
+
+                var result = await _conceptService.UpdateConceptImageAsync(model);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Cập nhật hình ảnh concept thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật hình ảnh concept!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật hình ảnh concept!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConceptImage(int imageId)
+        {
+            try
+            {
+                var existingImage = await _conceptService.GetConceptImageByIdAsync(imageId);
+                if (existingImage == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy hình ảnh!" });
+                }
+
+                var result = await _conceptService.DeleteConceptImageAsync(imageId);
+                if (result)
+                {
+                    // Delete image file
+                    if (!string.IsNullOrEmpty(existingImage.ImgUrl))
+                    {
+                        var filePath = Path.Combine(_webHostEnvironment.WebRootPath, existingImage.ImgUrl.TrimStart('/'));
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            System.IO.File.Delete(filePath);
+                        }
+                    }
+
+                    return Json(new { success = true, message = "Xóa hình ảnh concept thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xóa hình ảnh concept!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa hình ảnh concept!" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetPrimaryConceptImage(int conceptId, int imageId)
+        {
+            try
+            {
+                var result = await _conceptService.SetPrimaryImageAsync(conceptId, imageId);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Đặt hình ảnh chính thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể đặt hình ảnh chính!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SetPrimaryConceptImage action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi đặt hình ảnh chính!" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetConceptImageCount(int conceptId)
+        {
+            try
+            {
+                var count = await _conceptService.GetConceptImageCountAsync(conceptId);
+                var canAddMore = await _conceptService.CanConceptAddMoreImagesAsync(conceptId);
+                
+                return Json(new { 
+                    success = true, 
+                    count = count, 
+                    canAddMore = canAddMore,
+                    message = canAddMore ? "Có thể thêm hình ảnh" : "Đã đạt giới hạn 6 hình ảnh"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetConceptImageCount action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi kiểm tra số lượng hình ảnh!" });
+            }
+        }
+
+        #endregion
+
+        #region Order Management
+
+        [HttpGet]
+        public async Task<IActionResult> Orders(OrderSearchViewModel? searchModel)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                
+                searchModel ??= new OrderSearchViewModel();
+                
+                var (orders, totalCount) = await _orderService.GetOrdersAsync(searchModel);
+                var statistics = await _orderService.GetOrderStatisticsAsync();
+                var orderStatuses = await _orderService.GetOrderStatusesAsync();
+                
+                ViewBag.Orders = orders;
+                ViewBag.TotalCount = totalCount;
+                ViewBag.Statistics = statistics;
+                ViewBag.OrderStatuses = orderStatuses;
+                ViewBag.SearchModel = searchModel;
+                
+                return View(orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Orders action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách đơn hàng";
+                return View(new List<OrderViewModel>());
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                
+                var order = await _orderService.GetOrderByIdAsync(id);
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng";
+                    return RedirectToAction("Orders");
+                }
+                
+                var orderStatuses = await _orderService.GetOrderStatusesAsync();
+                var shippingOptions = await _orderService.GetShippingOptionsAsync();
+                
+                ViewBag.OrderStatuses = orderStatuses;
+                ViewBag.ShippingOptions = shippingOptions;
+                
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in OrderDetail action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải chi tiết đơn hàng";
+                return RedirectToAction("Orders");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrder(OrderEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    TempData["ErrorMessage"] = "Dữ liệu không hợp lệ";
+                    return RedirectToAction("OrderDetail", new { id = model.OrderId });
+                }
+
+                var result = await _orderService.UpdateOrderAsync(model);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể cập nhật đơn hàng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateOrder action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đơn hàng";
+            }
+
+            return RedirectToAction("OrderDetail", new { id = model.OrderId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        {
+            try
+            {
+                var result = await _orderService.UpdateOrderStatusAsync(orderId, status);
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật trạng thái đơn hàng thành công!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không thể cập nhật trạng thái đơn hàng";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateOrderStatus action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật trạng thái đơn hàng";
+            }
+
+            return RedirectToAction("OrderDetail", new { id = orderId });
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrderStatistics()
+        {
+            try
+            {
+                var statistics = await _orderService.GetOrderStatisticsAsync();
+                var totalRevenue = await _orderService.GetTotalRevenueAsync();
+                var recentOrders = await _orderService.GetRecentOrdersAsync(5);
+                
+                return Json(new
+                {
+                    success = true,
+                    statistics = statistics,
+                    totalRevenue = totalRevenue,
+                    recentOrders = recentOrders
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetOrderStatistics action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thống kê đơn hàng" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProcessPayment(int orderId, decimal amount, int paymentMethodId)
+        {
+            try
+            {
+                var result = await _orderService.ProcessOrderPaymentAsync(orderId, amount, paymentMethodId);
+                if (result)
+                {
+                    return Json(new { success = true, message = "Xử lý thanh toán thành công!" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xử lý thanh toán" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ProcessPayment action");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xử lý thanh toán" });
+            }
+        }
+
+        #endregion
+
+        #region Booking Management
+
+        /// <summary>
+        /// Display all bookings
+        /// </summary>
+        public async Task<IActionResult> Bookings()
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var bookings = await _bookingService.GetAllBookingsAsync();
+                return View(bookings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Bookings action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách đặt chỗ";
+                return View(new List<BookingViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Display bookings by status
+        /// </summary>
+        public async Task<IActionResult> BookingsByStatus(string status)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var allBookings = await _bookingService.GetAllBookingsAsync();
+                
+                // Filter by status
+                var filteredBookings = allBookings.Where(b => 
+                    string.Equals(b.Status, status, StringComparison.OrdinalIgnoreCase)).ToList();
+                
+                ViewBag.Status = status;
+                ViewBag.StatusDisplayName = status?.ToLower() switch
+                {
+                    "pending" => "Chờ xác nhận",
+                    "confirmed" => "Đã xác nhận", 
+                    "cancelled" => "Đã hủy",
+                    "completed" => "Hoàn thành",
+                    _ => status
+                };
+                
+                return View("Bookings", filteredBookings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in BookingsByStatus action for status: {Status}", status);
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách đặt chỗ theo trạng thái";
+                return View("Bookings", new List<BookingViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Display booking details
+        /// </summary>
+        public async Task<IActionResult> BookingDetail(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var booking = await _bookingService.GetBookingDetailAsync(id);
+                if (booking == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đặt chỗ";
+                    return RedirectToAction("Bookings");
+                }
+                return View(booking);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in BookingDetail action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải chi tiết đặt chỗ";
+                return RedirectToAction("Bookings");
+            }
+        }
+
+
+        /// <summary>
+        /// Display edit booking form
+        /// </summary>
+        public async Task<IActionResult> EditBooking(int id)
+        {
+            try
+            {
+                await SetAdminViewBagAsync();
+                var booking = await _bookingService.GetBookingByIdAsync(id);
+                if (booking == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đặt chỗ";
+                    return RedirectToAction("Bookings");
+                }
+
+                var model = new BookingEditViewModel
+                {
+                    BookingId = booking.BookingId,
+                    UserId = booking.UserId ?? 0,
+                    ConceptId = booking.ConceptId ?? 0,
+                    BookingDate = booking.BookingDate ?? DateOnly.FromDateTime(DateTime.Now),
+                    BookingTime = booking.BookingTime ?? TimeOnly.FromDateTime(DateTime.Now),
+                    Status = booking.Status ?? "pending",
+                    PaymentStatus = booking.PaymentStatus ?? "pending",
+                    TotalPrice = booking.TotalPrice,
+                    ConfirmedAt = booking.ConfirmedAt,
+                    CancelledAt = booking.CancelledAt
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditBooking GET action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải form chỉnh sửa đặt chỗ";
+                return RedirectToAction("Bookings");
+            }
+        }
+
+        /// <summary>
+        /// Handle edit booking form submission
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditBooking(BookingEditViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+
+                var success = await _bookingService.UpdateBookingAsync(model);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật đặt chỗ thành công";
+                    return RedirectToAction("Bookings");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đặt chỗ";
+                    await SetAdminViewBagAsync();
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in EditBooking POST action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật đặt chỗ";
+                await SetAdminViewBagAsync();
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Delete booking
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteBooking(int id)
+        {
+            try
+            {
+                var success = await _bookingService.DeleteBookingAsync(id);
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Xóa đặt chỗ thành công";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa đặt chỗ";
+                }
+                return RedirectToAction("Bookings");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteBooking action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xóa đặt chỗ";
+                return RedirectToAction("Bookings");
+            }
+        }
+
+        /// <summary>
+        /// Get users for dropdown
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetUsersForBookingDropdown()
+        {
+            try
+            {
+                var users = await _bookingService.GetUsersForDropdownAsync();
+                return Json(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting users for booking dropdown");
+                return Json(new List<UserDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Get concepts for dropdown
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetConceptsForBookingDropdown()
+        {
+            try
+            {
+                var concepts = await _bookingService.GetConceptsForDropdownAsync();
+                return Json(concepts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting concepts for booking dropdown");
+                return Json(new List<ConceptDropdownViewModel>());
+            }
+        }
+
+        /// <summary>
+        /// Confirm booking
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ConfirmBooking(int id)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingStatusAsync(id, "confirmed");
+                if (result)
+                {
+                    return Json(new { success = true, message = "Xác nhận đặt chỗ thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể xác nhận đặt chỗ" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error confirming booking {BookingId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xác nhận đặt chỗ" });
+            }
+        }
+
+        /// <summary>
+        /// Cancel booking
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingStatusAsync(id, "cancelled");
+                if (result)
+                {
+                    return Json(new { success = true, message = "Hủy đặt chỗ thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể hủy đặt chỗ" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling booking {BookingId}", id);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi hủy đặt chỗ" });
+            }
+        }
+
+        /// <summary>
+        /// Update booking status
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateBookingStatus(int id, string status)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingStatusAsync(id, status);
+                if (result)
+                {
+                    var statusText = status switch
+                    {
+                        "pending" => "Chờ xác nhận",
+                        "confirmed" => "Đã xác nhận",
+                        "cancelled" => "Đã hủy",
+                        "completed" => "Hoàn thành",
+                        _ => status
+                    };
+                    return Json(new { success = true, message = $"Cập nhật trạng thái thành công: {statusText}" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật trạng thái" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating booking status {BookingId} to {Status}", id, status);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái" });
+            }
+        }
+
+        /// <summary>
+        /// Update booking payment status
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateBookingPaymentStatus(int id, string paymentStatus)
+        {
+            try
+            {
+                var result = await _bookingService.UpdateBookingPaymentStatusAsync(id, paymentStatus);
+                if (result)
+                {
+                    var statusText = paymentStatus switch
+                    {
+                        "pending" => "Chờ thanh toán",
+                        "paid" => "Đã thanh toán",
+                        "failed" => "Thanh toán thất bại",
+                        _ => paymentStatus
+                    };
+                    return Json(new { success = true, message = $"Cập nhật trạng thái thanh toán thành công: {statusText}" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Không thể cập nhật trạng thái thanh toán" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating booking payment status {BookingId} to {PaymentStatus}", id, paymentStatus);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái thanh toán" });
+            }
+        }
+
+        #endregion
     }
 }

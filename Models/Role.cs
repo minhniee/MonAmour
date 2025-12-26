@@ -6,15 +6,13 @@ public partial class Role
 {
     public int RoleId { get; set; }
 
-    [Required]
-    public string RoleName { get; set; } = null!;
+    public string? RoleName { get; set; }
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
-    // Static properties for role names
     public static class Names
     {
-        public const string User = "user";
         public const string Admin = "admin";
+        public const string User = "user";
     }
 }

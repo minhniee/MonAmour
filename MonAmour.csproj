@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Imagine\**" />
+    <Content Remove="Imagine\**" />
+    <EmbeddedResource Remove="Imagine\**" />
+    <None Remove="Imagine\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,12 +29,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\VietQR\" />
     <Folder Include="Helpers\" />
     <Folder Include="Services\Interfaces\" />
     <Folder Include="wwwroot\avatars\" />
     <Folder Include="Services\Implements\" />
-    <Folder Include="Views\ZaloPay\" />
-
+    <Folder Include="wwwroot\Imagine\IMGConcept\" />
+    <Folder Include="wwwroot\Imagine\IMGProduct\" />
   </ItemGroup>
 
 </Project>

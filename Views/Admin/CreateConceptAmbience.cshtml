@@ -1,0 +1,106 @@
+@model MonAmour.ViewModels.ConceptAmbienceDropdownViewModel
+@{
+    ViewData["Title"] = "Thêm không gian concept mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1><i class="fas fa-plus"></i> Thêm không gian concept mới</h1>
+                    <p>Tạo không gian concept mới trong hệ thống</p>
+                </div>
+                <div class="page-actions">
+                    <a href="@Url.Action("ConceptAmbiences", "Admin")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Create Form -->
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-home"></i> Thông tin không gian concept
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="CreateConceptAmbience" method="post" id="createForm">
+                                @Html.AntiForgeryToken()
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label asp-for="Name" class="form-label">
+                                                <i class="fas fa-home"></i> Tên không gian <span class="text-danger">*</span>
+                                            </label>
+                                            <input asp-for="Name" class="form-control" placeholder="Nhập tên không gian concept" required />
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                            <small class="form-text text-muted">
+                                                Ví dụ: Phòng khách, Phòng ngủ, Phòng bếp, Sân vườn, Ban công...
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="@Url.Action("ConceptAmbiences", "Admin")" class="btn btn-secondary">
+                                                <i class="fas fa-times"></i> Hủy
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Tạo không gian
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('#createForm').on('submit', function(e) {
+                var name = $('#Name').val().trim();
+                
+                if (name === '') {
+                    e.preventDefault();
+                    alert('Vui lòng nhập tên không gian concept!');
+                    $('#Name').focus();
+                    return false;
+                }
+                
+                if (name.length < 2) {
+                    e.preventDefault();
+                    alert('Tên không gian phải có ít nhất 2 ký tự!');
+                    $('#Name').focus();
+                    return false;
+                }
+            });
+
+            // Auto-focus on name field
+            $('#Name').focus();
+        });
+    </script>
+}

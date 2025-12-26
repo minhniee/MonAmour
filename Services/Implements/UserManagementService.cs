@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MonAmour.Models;
 using MonAmour.Services.Interfaces;
 using MonAmour.ViewModels;
@@ -99,6 +99,38 @@ public class UserManagementService : IUserManagementService
         }
     }
 
+    public async Task<List<AdminUserViewModel.UserListViewModel>> GetAllUsersAsync()
+    {
+        try
+        {
+            var users = await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .Select(u => new AdminUserViewModel.UserListViewModel
+                {
+                    UserId = u.UserId,
+                    Email = u.Email,
+                    Name = u.Name,
+                    Phone = u.Phone,
+                    Avatar = u.Avatar,
+                    Verified = u.Verified,
+                    Gender = u.Gender,
+                    Status = u.Status,
+                    CreatedAt = u.CreatedAt,
+                    UpdatedAt = u.UpdatedAt,
+                    Roles = u.UserRoles.Select(ur => ur.Role.RoleName).ToList()
+                })
+                .ToListAsync();
+
+            return users;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all users");
+            throw;
+        }
+    }
+
     public async Task<AdminUserViewModel.UserDetailViewModel?> GetUserByIdAsync(int userId)
     {
         try
@@ -147,31 +179,50 @@ public class UserManagementService : IUserManagementService
 
     public async Task<bool> CreateUserAsync(AdminUserViewModel.UserCreateViewModel model, int adminUserId)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            _logger.LogInformation("CreateUserAsync started with email: {Email}, adminUserId: {AdminUserId}", 
-                model.Email, adminUserId);
-            
-            _logger.LogInformation("Model data: Email={Email}, Name={Name}, Phone={Phone}, Gender={Gender}, Status={Status}, Verified={Verified}, RoleIds={RoleIds}", 
-                model.Email, model.Name, model.Phone, model.Gender, model.Status, model.Verified, 
-                string.Join(",", model.RoleIds));
-            
-            // Check if email already exists
-            _logger.LogInformation("Checking if email exists: {Email}", model.Email);
-            if (await IsEmailExistsAsync(model.Email))
+            _logger.LogInformation("CreateUserAsync started with email: {Email}, phone: {Phone}, adminUserId: {AdminUserId}",
+                model.Email, model.Phone, adminUserId);
+
+            // Check for duplicates
+            var (emailExists, phoneExists) = await CheckDuplicateAsync(model.Email, model.Phone);
+
+            if (emailExists)
             {
                 _logger.LogWarning("Email already exists: {Email}", model.Email);
-                return false;
+                throw new InvalidOperationException("EMAIL_EXISTS");
             }
             _logger.LogInformation("Email is available: {Email}", model.Email);
 
+            if (phoneExists)
+            {
+                _logger.LogWarning("Phone already exists: {Phone}", model.Phone);
+                throw new InvalidOperationException("PHONE_EXISTS");
+            }
+
+            _logger.LogInformation("Email and phone are available: {Email}, {Phone}", model.Email, model.Phone);
+
+            // Validate roles exist
+            var validRoleIds = await _context.Roles
+                .Where(r => model.RoleIds.Contains(r.RoleId))
+                .Select(r => r.RoleId)
+                .ToListAsync();
+
+            if (validRoleIds.Count != model.RoleIds.Count)
+            {
+                _logger.LogWarning("Some roles don't exist. Requested: {RequestedRoles}, Valid: {ValidRoles}",
+                    string.Join(",", model.RoleIds), string.Join(",", validRoleIds));
+                throw new InvalidOperationException("INVALID_ROLES");
+            }
+
             var user = new User
             {
-                Email = model.Email,
+                Email = model.Email.Trim(),
                 Password = HashPassword(model.Password),
-                Name = model.Name,
-                Phone = model.Phone,
-                Avatar = model.Avatar,
+                Name = model.Name?.Trim(),
+                Phone = model.Phone?.Trim(),
+                Avatar = string.IsNullOrWhiteSpace(model.Avatar) ? null : model.Avatar.Trim(),
                 BirthDate = model.BirthDate.HasValue ? DateOnly.FromDateTime(model.BirthDate.Value) : null,
                 Gender = model.Gender,
                 Status = model.Status,
@@ -180,14 +231,15 @@ public class UserManagementService : IUserManagementService
                 UpdatedAt = DateTime.Now
             };
 
-            _logger.LogInformation("Created user object: UserId={UserId}, Email={Email}, Name={Name}", 
-                user.UserId, user.Email, user.Name);
+            _logger.LogInformation("Creating user object: Email={Email}, Name={Name}, Phone={Phone}",
+                user.Email, user.Name, user.Phone);
 
             _context.Users.Add(user);
             _logger.LogInformation("Added user to context");
             
             await _context.SaveChangesAsync();
-            _logger.LogInformation("Saved user to database, UserId: {UserId}", user.UserId);
+
+            _logger.LogInformation("User saved to database, UserId: {UserId}", user.UserId);
 
             // Assign roles
             _logger.LogInformation("Assigning roles: {RoleIds}", string.Join(",", model.RoleIds));
@@ -205,17 +257,25 @@ public class UserManagementService : IUserManagementService
             }
 
             await _context.SaveChangesAsync();
-            _logger.LogInformation("Saved user roles to database");
-            
-            _logger.LogInformation("User created successfully: {UserId} by admin {AdminUserId}", user.UserId, adminUserId);
+            await transaction.CommitAsync();
+
+            _logger.LogInformation("User created successfully: {UserId} by admin {AdminUserId}",
+                user.UserId, adminUserId);
             return true;
+        }
+        catch (InvalidOperationException)
+        {
+            await transaction.RollbackAsync();
+            throw; // Re-throw để controller xử lý
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating user with email: {Email}", model.Email);
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error creating user with email: {Email}, phone: {Phone}", model.Email, model.Phone);
             return false;
         }
     }
+
 
     public async Task<bool> UpdateUserAsync(AdminUserViewModel.UserEditViewModel model, int adminUserId)
     {
@@ -399,18 +459,25 @@ public class UserManagementService : IUserManagementService
     {
         try
         {
-            _logger.LogInformation("IsEmailExistsAsync called with email: {Email}, excludeUserId: {ExcludeUserId}", 
+            _logger.LogInformation("IsEmailExistsAsync called with email: {Email}, excludeUserId: {ExcludeUserId}",
                 email, excludeUserId);
-            
-            var query = _context.Users.Where(u => u.Email == email);
-            
+
+            // Normalize email để tránh case-sensitive
+            var normalizedEmail = email.Trim().ToLower();
+
+            var query = _context.Users.Where(u => u.Email.ToLower() == normalizedEmail);
             if (excludeUserId.HasValue)
             {
                 query = query.Where(u => u.UserId != excludeUserId.Value);
             }
 
             var exists = await query.AnyAsync();
-            _logger.LogInformation("Email {Email} exists: {Exists}", email, exists);
+            _logger.LogInformation("Email {Email} exists: {Exists} (normalized: {NormalizedEmail})",
+                email, exists, normalizedEmail);
+
+            // Debug: Log existing emails
+            var existingEmails = await _context.Users.Select(u => u.Email).ToListAsync();
+            _logger.LogInformation("All existing emails: {Emails}", string.Join(", ", existingEmails));
             return exists;
         }
         catch (Exception ex)
@@ -419,6 +486,7 @@ public class UserManagementService : IUserManagementService
             throw;
         }
     }
+
 
     public async Task<Dictionary<string, int>> GetUserStatisticsAsync()
     {
@@ -441,6 +509,55 @@ public class UserManagementService : IUserManagementService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting user statistics");
+            throw;
+        }
+    }
+    public async Task<bool> IsPhoneExistsAsync(string phone, int? excludeUserId = null)
+    {
+        try
+        {
+            _logger.LogInformation("IsPhoneExistsAsync called with phone: {Phone}, excludeUserId: {ExcludeUserId}",
+                phone, excludeUserId);
+
+            if (string.IsNullOrWhiteSpace(phone))
+                return false;
+
+            var normalizedPhone = phone.Trim();
+
+            var query = _context.Users.Where(u => u.Phone == normalizedPhone);
+
+            if (excludeUserId.HasValue)
+            {
+                query = query.Where(u => u.UserId != excludeUserId.Value);
+            }
+
+            var exists = await query.AnyAsync();
+            _logger.LogInformation("Phone {Phone} exists: {Exists}", phone, exists);
+
+            return exists;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking phone existence: {Phone}", phone);
+            throw;
+        }
+    }
+
+    public async Task<(bool EmailExists, bool PhoneExists)> CheckDuplicateAsync(string email, string phone, int? excludeUserId = null)
+    {
+        try
+        {
+            _logger.LogInformation("CheckDuplicateAsync called with email: {Email}, phone: {Phone}, excludeUserId: {ExcludeUserId}",
+                email, phone, excludeUserId);
+
+            var emailExists = await IsEmailExistsAsync(email, excludeUserId);
+            var phoneExists = await IsPhoneExistsAsync(phone, excludeUserId);
+
+            return (emailExists, phoneExists);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking duplicates: email={Email}, phone={Phone}", email, phone);
             throw;
         }
     }

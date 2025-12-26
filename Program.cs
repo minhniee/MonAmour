@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using MonAmour.Filters;
 using MonAmour.Middleware;
 using MonAmour.Models;
@@ -29,7 +30,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromDays(1); // Kéo dài thời gian session
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Cho phép HTTP trong development
 });
 
 // Add HttpContextAccessor
@@ -38,6 +39,16 @@ builder.Services.AddHttpContextAccessor();
 // Add Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IPartnerService, PartnerService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IConceptService, ConceptService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<ICassoService, CassoService>();
+builder.Services.AddScoped<IVietQRService, VietQRService>();
 
 builder.Services.AddScoped<IWishListService, WishListService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
@@ -47,6 +58,16 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 
 // Add SignalR
 builder.Services.AddSignalR();
+
+
+// Add HttpClient for Casso API
+builder.Services.AddHttpClient<ICassoService, CassoService>();
+
+// Add HttpClient for VietQR API
+builder.Services.AddHttpClient<IVietQRService, VietQRService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["VietQR:ApiBase"] ?? "https://api.vietqr.io");
+});
 
 
 var app = builder.Build();
@@ -79,6 +100,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+
+
 app.UseRouting();
 
 // Add Session middleware
@@ -95,5 +118,6 @@ app.MapControllerRoute(
 
 // Map SignalR Hub
 app.MapHub<MonAmour.Hubs.CommentHub>("/commentHub");
+
 
 app.Run();

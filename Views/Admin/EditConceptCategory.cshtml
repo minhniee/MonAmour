@@ -1,0 +1,133 @@
+@model MonAmour.ViewModels.ConceptCategoryDropdownViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa danh mục concept";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1><i class="fas fa-edit"></i> Chỉnh sửa danh mục concept</h1>
+                    <p>Cập nhật thông tin danh mục concept: <strong>@Model.Name</strong></p>
+                </div>
+                <div class="page-actions">
+                    <a href="@Url.Action("ConceptCategories", "Admin")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Edit Form -->
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-tags"></i> Thông tin danh mục concept
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="EditConceptCategory" method="post" id="editForm">
+                                @Html.AntiForgeryToken()
+                                <input asp-for="CategoryId" type="hidden" />
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label asp-for="Name" class="form-label">
+                                                <i class="fas fa-tag"></i> Tên danh mục <span class="text-danger">*</span>
+                                            </label>
+                                            <input asp-for="Name" class="form-control" placeholder="Nhập tên danh mục concept" required />
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label asp-for="Description" class="form-label">
+                                                <i class="fas fa-align-left"></i> Mô tả
+                                            </label>
+                                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                                      placeholder="Nhập mô tả cho danh mục concept (tùy chọn)"></textarea>
+                                            <span asp-validation-for="Description" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                                <label asp-for="IsActive" class="form-check-label">
+                                                    <i class="fas fa-toggle-on"></i> Kích hoạt danh mục
+                                                </label>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                Danh mục được kích hoạt sẽ hiển thị trong các dropdown và có thể được sử dụng cho concept mới.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="@Url.Action("ConceptCategories", "Admin")" class="btn btn-secondary">
+                                                <i class="fas fa-times"></i> Hủy
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Cập nhật danh mục
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('#editForm').on('submit', function(e) {
+                var name = $('#Name').val().trim();
+                
+                if (name === '') {
+                    e.preventDefault();
+                    alert('Vui lòng nhập tên danh mục concept!');
+                    $('#Name').focus();
+                    return false;
+                }
+                
+                if (name.length < 2) {
+                    e.preventDefault();
+                    alert('Tên danh mục phải có ít nhất 2 ký tự!');
+                    $('#Name').focus();
+                    return false;
+                }
+            });
+
+            // Auto-focus on name field
+            $('#Name').focus();
+        });
+    </script>
+}

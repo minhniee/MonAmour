@@ -27,10 +27,9 @@
                                 <div class="text-wine-red/70">@String.Format("{0:N0}₫", item.UnitPrice) × @item.Quantity</div>
                             </div>
                             <div class="flex items-center gap-3">
-                                <form asp-controller="Cart" asp-action="Update" method="post" class="flex items-center gap-2">
+                                <form asp-controller="Cart" asp-action="Update" method="post" class="flex items-center gap-2 auto-update-form">
                                     <input type="hidden" name="itemId" value="@item.OrderItemId" />
-                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="w-20 border border-wine-red/30 rounded px-2 py-1 text-center" />
-                                    <button type="submit" class="px-3 py-2 bg-wine-red text-beige rounded">Cập nhật</button>
+                                    <input type="number" name="quantity" value="@item.Quantity" min="1" class="w-20 border border-wine-red/30 rounded px-2 py-1 text-center cart-qty-input" />
                                 </form>
                                 <form asp-controller="Cart" asp-action="Remove" method="post">
                                     <input type="hidden" name="itemId" value="@item.OrderItemId" />
@@ -47,10 +46,35 @@
                             <span>Tổng cộng</span>
                             <span id="cart-total" data-total="@Model.TotalPrice">@String.Format("{0:N0}₫", Model.TotalPrice)</span>
                         </div>
-                        <form id="checkout-form" asp-controller="Cart" asp-action="Checkout" method="post">
-                            <button type="submit" class="w-full mt-6 bg-wine-red text-beige px-4 py-3 rounded-lg">Thanh toán</button>
-                        </form>
-                        <button id="zp-btn" class="w-full mt-3 border border-wine-red text-wine-red px-4 py-3 rounded-lg">Thanh toán ZaloPay (Sandbox)</button>
+                        <div class="mt-4">
+                            <label for="shipping-phone" class="block font-prata text-wine-red mb-2">Số điện thoại</label>
+                            <input id="shipping-phone" class="w-full border border-wine-red/30 rounded-lg p-3 mb-3" placeholder="Ví dụ: 0912345678" value="@((Model.ShippingAddress!=null && Model.ShippingAddress.Contains("Phone:")) ? Model.ShippingAddress.Split('|').FirstOrDefault()?.Replace("Phone:", "").Trim() : "")" />
+                            <label for="shipping-address" class="block font-prata text-wine-red mb-2">Địa chỉ giao hàng</label>
+                            <textarea id="shipping-address" class="w-full border border-wine-red/30 rounded-lg p-3" rows="3" placeholder="Nhập địa chỉ đầy đủ">@Model.ShippingAddress</textarea>
+                            <div class="text-sm text-wine-red/60 mt-1" id="address-status"></div>
+                        </div>
+                        <!-- Removed general checkout button; we use VietQR only -->
+                        <button id="vietqr-btn" class="w-full mt-3 border border-wine-red text-wine-red px-4 py-3 rounded-lg">Thanh toán VietQR</button>
+                        <div id="vietqr-wrap" class="mt-4 hidden text-center">
+                            <div class="inline-block bg-white border border-wine-red/20 rounded-xl p-4">
+                                <img id="vietqr-img" alt="VietQR" class="mx-auto w-64 h-64 object-contain" />
+                                <div class="mt-2 text-sm text-wine-red/70 font-noto-serif" id="vietqr-note"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="casso-wrap" class="mt-4 hidden">
+                            <div class="bg-white border border-wine-red/20 rounded-xl p-4">
+                                <div class="text-center mb-4">
+                                    <h3 class="font-prata text-wine-red text-lg mb-2">Hướng dẫn thanh toán</h3>
+                                    <div id="casso-qr-code" class="mb-4"></div>
+                                    <div id="casso-instructions" class="text-sm text-wine-red/70 font-noto-serif space-y-1"></div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button id="casso-check-btn" class="flex-1 bg-wine-red text-beige px-4 py-2 rounded-lg text-sm">Kiểm tra thanh toán</button>
+                                    <button id="casso-refresh-btn" class="px-4 py-2 border border-wine-red text-wine-red rounded-lg text-sm">Làm mới</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -107,30 +131,226 @@
         });
     }
 
-    const zpBtn = document.getElementById('zp-btn');
-    if (zpBtn) {
-        zpBtn.addEventListener('click', async function(){
+    // Auto submit quantity change
+    document.querySelectorAll('.cart-qty-input').forEach(function(input){
+        input.addEventListener('change', function(){
+            const form = this.closest('.auto-update-form');
+            if (!form) return;
+            form.submit();
+        });
+        input.addEventListener('input', function(){
+            const form = this.closest('.auto-update-form');
+            if (!form) return;
+            // Debounce minor typing by delaying submit
+            clearTimeout(this._debounceTimer);
+            this._debounceTimer = setTimeout(()=>form.submit(), 600);
+        });
+    });
+
+    // ZaloPay removed
+
+    // Save shipping address on change (debounced)
+    const addressInput = document.getElementById('shipping-address');
+    const phoneInput = document.getElementById('shipping-phone');
+    const addressStatus = document.getElementById('address-status');
+    let addressTimer;
+    if (addressInput) {
+        const saveAddress = async () => {
+            const addr = addressInput.value.trim();
+            const phone = (phoneInput ? phoneInput.value.trim() : '');
+            if (!addr) { addressStatus.textContent = 'Vui lòng nhập địa chỉ giao hàng'; return; }
+            if (!/^0[0-9]{9,10}$/.test(phone)) { addressStatus.textContent = 'Vui lòng nhập số điện thoại hợp lệ'; return; }
+            addressStatus.textContent = 'Đang lưu...';
+            const fd = new FormData();
+            fd.append('address', addr);
+            fd.append('phone', phone);
+            const res = await fetch('/Cart/SaveAddress', { method: 'POST', body: fd, credentials: 'same-origin' });
+            const data = await res.json().catch(()=>({success:false,message:'Lỗi không xác định'}));
+            addressStatus.textContent = data.message || (data.success ? 'Đã lưu' : 'Không thể lưu địa chỉ');
+        };
+        addressInput.addEventListener('input', function(){
+            clearTimeout(addressTimer);
+            addressTimer = setTimeout(saveAddress, 700);
+        });
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(){
+                clearTimeout(addressTimer);
+                addressTimer = setTimeout(saveAddress, 700);
+            });
+            phoneInput.addEventListener('blur', saveAddress);
+        }
+        addressInput.addEventListener('blur', saveAddress);
+    }
+
+    // VietQR
+    const vietqrBtn = document.getElementById('vietqr-btn');
+    const vietqrWrap = document.getElementById('vietqr-wrap');
+    const vietqrImg = document.getElementById('vietqr-img');
+    const vietqrNote = document.getElementById('vietqr-note');
+    const totalEl = document.getElementById('cart-total');
+    if (vietqrBtn && totalEl) {
+        vietqrBtn.addEventListener('click', async function(){
             try{
-                const res = await fetch('/Zalopay/CreateOrder', { method: 'POST', credentials: 'same-origin' });
-                const text = await res.text();
-                let data;
-                try { data = JSON.parse(text); } catch (_) { data = null; }
-                const ok = data && ((data.return_code === 1) || (data.returncode === 1) || (data.returnmessage === 'Success') || (data.return_message === 'Success'));
-                if (ok) {
-                    const orderUrl = (data.order_url || data.orderurl);
-                    if (orderUrl) {
-                        window.location.href = orderUrl;
-                    } else {
-                        alert('Thiếu order_url trong phản hồi ZaloPay:\n' + text);
-                    }
-                } else {
-                    alert((data && (data.return_message || data.returnmessage)) ? ((data.return_message || data.returnmessage) + '\n' + text) : ('Không tạo được đơn ZaloPay\n' + text));
+                // require phone and address before payment
+                const addr = addressInput ? addressInput.value.trim() : '';
+                const phone = phoneInput ? phoneInput.value.trim() : '';
+                if (!addr) {
+                    alert('Vui lòng nhập địa chỉ giao hàng trước khi thanh toán');
+                    addressInput.focus();
+                    return;
                 }
-            }catch(err){
-                alert('Lỗi khi tạo đơn ZaloPay: ' + (err && err.message ? err.message : err));
+                if (!/^0[0-9]{9,10}$/.test(phone)) {
+                    alert('Vui lòng nhập số điện thoại hợp lệ trước khi thanh toán');
+                    phoneInput && phoneInput.focus();
+                    return;
+                }
+                const totalStr = totalEl.dataset.total || '0';
+                const amount = Math.max(0, Math.round(parseFloat(totalStr)));
+                // Sử dụng mã tham chiếu theo đơn để đồng bộ với đối soát Casso
+                const note = 'ORDER' + (@Model.OrderId);
+
+                // Prefer verified API
+                let res = await fetch('/Gift_box/GenerateVietQrVerified', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: (()=>{ const fd = new FormData(); fd.append('amount', amount); fd.append('note', note); return fd; })()
+                });
+                let data = await res.json().catch(()=>null);
+                if (data && data.success && data.response && data.response.data && data.response.data.qrDataURL) {
+                    vietqrImg.src = data.response.data.qrDataURL;
+                    vietqrNote.textContent = note + ' • ' + amount.toLocaleString('vi-VN') + '₫';
+                    vietqrWrap.classList.remove('hidden');
+                    
+                    // Also show bank transfer instructions immediately
+                    await showCassoInstructions();
+                    return;
+                }
+
+                // Fallback to unsigned image endpoint
+                const res2 = await fetch('/Gift_box/GenerateVietQr?amount=' + encodeURIComponent(amount) + '&note=' + encodeURIComponent(note));
+                const data2 = await res2.json();
+                if (data2 && data2.success && data2.url) {
+                    vietqrImg.src = data2.url;
+                    vietqrNote.textContent = note + ' • ' + amount.toLocaleString('vi-VN') + '₫';
+                    vietqrWrap.classList.remove('hidden');
+                    
+                    // Also show bank transfer instructions immediately
+                    await showCassoInstructions();
+                } else {
+                    alert((data && data.message) || (data2 && data2.message) || 'Không tạo được VietQR');
+                }
+            } catch (err) {
+                alert('Lỗi khi tạo VietQR: ' + (err && err.message ? err.message : err));
             }
         });
     }
+
+    // Casso Bank Transfer
+    const cassoWrap = document.getElementById('casso-wrap');
+    const cassoInstructions = document.getElementById('casso-instructions');
+    const cassoQrCode = document.getElementById('casso-qr-code');
+    const cassoCheckBtn = document.getElementById('casso-check-btn');
+    const cassoRefreshBtn = document.getElementById('casso-refresh-btn');
+    
+    async function showCassoInstructions() {
+        try {
+            const res = await fetch('/Cart/GetPaymentInstructions', { credentials: 'same-origin' });
+            const data = await res.json();
+            
+            if (data.success) {
+                if (data.qrCodeUrl) {
+                    cassoQrCode.innerHTML = `
+                        <div class="bg-white rounded-lg p-3 border-2 border-dashed border-wine-red/30 mb-3">
+                            <img src="${data.qrCodeUrl}" alt="QR Code" class="mx-auto max-w-full h-auto" style="max-height: 150px;">
+                        </div>
+                        <p class="text-xs text-wine-red/70 mb-2">Quét mã QR bằng ứng dụng ngân hàng</p>
+                    `;
+                } else {
+                    cassoQrCode.innerHTML = '';
+                }
+                
+                cassoInstructions.innerHTML = data.instructions.map(instruction => 
+                    `<div>• ${instruction}</div>`
+                ).join('');
+                cassoWrap.classList.remove('hidden');
+            } else {
+                alert(data.message || 'Không thể lấy hướng dẫn thanh toán');
+            }
+        } catch (err) {
+            alert('Lỗi khi lấy hướng dẫn thanh toán: ' + (err && err.message ? err.message : err));
+        }
+    }
+   
+    if (cassoCheckBtn) {
+        cassoCheckBtn.addEventListener('click', async function(){
+            try {
+                cassoCheckBtn.disabled = true;
+                cassoCheckBtn.textContent = 'Đang kiểm tra...';
+                
+                const res = await fetch('/Cart/CheckCassoPayment', { 
+                    method: 'POST', 
+                    credentials: 'same-origin' 
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    const toast = document.createElement('div');
+                    toast.textContent = data.message || 'Thanh toán thành công';
+                    toast.className = 'fixed bottom-6 right-6 bg-wine-red text-beige px-4 py-3 rounded-lg shadow-lg';
+                    toast.style.zIndex = '9999';
+                    toast.style.fontFamily = 'Noto Serif, serif';
+                    document.body.appendChild(toast);
+                    setTimeout(()=>{ toast.style.transition='opacity .5s'; toast.style.opacity='0'; setTimeout(()=>toast.remove(), 500); }, 3000);
+                    
+                    // Reload page after successful payment
+                    setTimeout(() => { window.location.reload(); }, 2000);
+                } else {
+                    alert(data.message || 'Chưa có giao dịch nào phù hợp');
+                }
+            } catch (err) {
+                alert('Lỗi khi kiểm tra thanh toán: ' + (err && err.message ? err.message : err));
+            } finally {
+                cassoCheckBtn.disabled = false;
+                cassoCheckBtn.textContent = 'Kiểm tra thanh toán';
+            }
+        });
+    }
+
+    if (cassoRefreshBtn) {
+        cassoRefreshBtn.addEventListener('click', function(){
+            cassoWrap.classList.add('hidden');
+        });
+    }
+
+    // Auto-refresh payment status every 30 seconds
+    let autoRefreshInterval;
+    function startAutoRefresh() {
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+        
+        autoRefreshInterval = setInterval(async () => {
+            try {
+                const res = await fetch('/Cart/GetPaymentStatus', { credentials: 'same-origin' });
+                const data = await res.json();
+                
+                if (data.success && data.hasCart && data.isPaid) {
+                    // Payment completed, stop auto-refresh and reload page
+                    clearInterval(autoRefreshInterval);
+                    const toast = document.createElement('div');
+                    toast.textContent = '🎉 Thanh toán thành công! Đang cập nhật...';
+                    toast.className = 'fixed bottom-6 right-6 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg';
+                    toast.style.zIndex = '9999';
+                    toast.style.fontFamily = 'Noto Serif, serif';
+                    document.body.appendChild(toast);
+                    setTimeout(() => { window.location.reload(); }, 2000);
+                }
+            } catch (err) {
+                console.log('Auto-refresh error:', err);
+            }
+        }, 30000); // Check every 30 seconds
+    }
+
+    // Start auto-refresh when page loads
+    startAutoRefresh();
 })();
 </script>
 

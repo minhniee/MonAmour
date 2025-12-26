@@ -1,0 +1,500 @@
+@model List<MonAmour.ViewModels.ProductCategoryViewModel>
+@{
+    ViewData["Title"] = "Quản lý Danh mục Sản phẩm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Danh mục Sản phẩm</h1>
+        <div>
+            <a href="@Url.Action("CreateCategory", "Admin")" class="btn btn-primary shadow-sm mr-2">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Thêm Danh mục
+            </a>
+            <a href="@Url.Action("Products", "Admin")" class="d-none d-sm-inline-block btn btn-secondary shadow-sm">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng danh mục</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tags fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Danh mục có sản phẩm</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(c => c.ProductCount > 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Danh mục trống</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count(c => c.ProductCount == 0)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-folder-open fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tổng sản phẩm</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Sum(c => c.ProductCount)</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-cubes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Danh mục</h6>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                     aria-labelledby="dropdownMenuLink">
+                    <div class="dropdown-header">Tùy chọn:</div>
+                    <a class="dropdown-item" href="@Url.Action("Products", "Admin")">
+                        <i class="fas fa-box fa-sm fa-fw mr-2 text-gray-400"></i>Quản lý Sản phẩm
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" onclick="exportCategories()">
+                        <i class="fas fa-download fa-sm fa-fw mr-2 text-gray-400"></i>Xuất Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="categoriesTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên danh mục</th>
+                                <th>Số sản phẩm</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in Model)
+                            {
+                                <tr>
+                                    <td>@category.CategoryId</td>
+                                    <td>
+                                        <strong>@category.Name</strong>
+                                    </td>
+                                    <td>
+                                        @if (category.ProductCount > 0)
+                                        {
+                                            <span class="badge badge-success">@category.ProductCount</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">0</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (category.ProductCount > 0)
+                                        {
+                                            <span class="badge badge-success">Đang sử dụng</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-warning">Trống</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-warning btn-sm" title="Chỉnh sửa"
+                                                    onclick="editCategory(@category.CategoryId, '@category.Name')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            
+                                            <!-- Delete Button - Always enabled -->
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    title="@if (category.ProductCount == 0) { <text>Xóa danh mục (không có sản phẩm)</text> } else { <text>Xóa danh mục (có @category.ProductCount sản phẩm)</text> }"
+                                                    onclick="deleteCategory(@category.CategoryId, '@Html.Raw(category.Name.Replace("'", "\\'"))', @category.ProductCount)">
+                                                <i class="fas fa-times"></i> Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có danh mục nào</h5>
+                    <p class="text-muted">Hãy tạo danh mục đầu tiên để bắt đầu</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createCategoryModal">
+                        <i class="fas fa-plus mr-2"></i>Thêm Danh mục
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Create Category Modal -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1" role="dialog" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCategoryModalLabel">Thêm Danh mục mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="createCategoryForm" method="post" action="@Url.Action("CreateCategory", "Admin")">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="categoryName" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="categoryName" name="Name" required 
+                               placeholder="Nhập tên danh mục..." maxlength="100">
+                        <small class="form-text text-muted">Tối đa 100 ký tự</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-2"></i>Lưu danh mục
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Chỉnh sửa Danh mục</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editCategoryForm" method="post" action="@Url.Action("EditCategory", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editCategoryId" name="CategoryId" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editCategoryName" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editCategoryName" name="Name" required 
+                               placeholder="Nhập tên danh mục..." maxlength="100">
+                        <small class="form-text text-muted">Tối đa 100 ký tự</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save mr-2"></i>Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCategoryModalLabel">Xác nhận xóa danh mục</h5>
+                <button type="button" class="close" onclick="closeDeleteModal()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="deleteCategoryInfo">
+                    <p>Bạn có chắc chắn muốn xóa danh mục "<span id="categoryNameToDelete"></span>"?</p>
+                    <div id="productCountWarning" class="alert alert-warning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Cảnh báo:</strong> Danh mục này có <span id="productCount"></span> sản phẩm. 
+                        Bạn cần chọn cách xử lý các sản phẩm này trước khi xóa danh mục.
+                    </div>
+                </div>
+                
+                <div id="productHandlingOptions" style="display: none;">
+                    <h6 class="mt-3 mb-2">Chọn cách xử lý sản phẩm:</h6>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="productHandling" id="reassignProducts" value="reassign">
+                            <label class="form-check-label" for="reassignProducts">
+                                Chuyển sản phẩm sang danh mục khác
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="productHandling" id="uncategorizeProducts" value="uncategorize" checked>
+                            <label class="form-check-label" for="uncategorizeProducts">
+                                Chuyển sản phẩm sang trạng thái không phân loại
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="categorySelection" class="form-group" style="display: none;">
+                        <label for="targetCategoryId">Chọn danh mục đích:</label>
+                        <select class="form-control" id="targetCategoryId" name="targetCategoryId">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Lưu ý:</strong> Hành động này không thể hoàn tác!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteCategory" onclick="confirmDelete()">
+                    <i class="fas fa-trash mr-2"></i>Xóa danh mục
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editCategory(categoryId, categoryName) {
+            $('#editCategoryId').val(categoryId);
+            $('#editCategoryName').val(categoryName);
+            $('#editCategoryModal').modal('show');
+        }
+        
+        function deleteCategory(categoryId, categoryName, productCount) {
+            console.log('deleteCategory called:', categoryId, categoryName, productCount);
+            
+            // Set modal content
+            $('#categoryNameToDelete').text(categoryName);
+            
+            // Show/hide product handling options based on product count
+            if (productCount > 0) {
+                $('#productCount').text(productCount);
+                $('#productCountWarning').show();
+                $('#productHandlingOptions').show();
+                
+                // Load available categories for reassignment
+                loadCategoriesForReassignment(categoryId);
+            } else {
+                $('#productCountWarning').hide();
+                $('#productHandlingOptions').hide();
+            }
+            
+            // Store category ID for later use
+            $('#deleteCategoryModal').data('categoryId', categoryId);
+            
+            // Show modal
+            $('#deleteCategoryModal').modal('show');
+        }
+        
+        function loadCategoriesForReassignment(excludeCategoryId) {
+            $.get('@Url.Action("GetCategoriesForReassignment", "Admin")', { excludeCategoryId: excludeCategoryId })
+                .done(function(categories) {
+                    var select = $('#targetCategoryId');
+                    select.empty();
+                    select.append('<option value="">-- Chọn danh mục --</option>');
+                    
+                    if (categories && categories.length > 0) {
+                        categories.forEach(function(category) {
+                            select.append('<option value="' + category.categoryId + '">' + category.name + '</option>');
+                        });
+                    } else {
+                        select.append('<option value="" disabled>Không có danh mục khác</option>');
+                    }
+                })
+                .fail(function() {
+                    console.error('Failed to load categories for reassignment');
+                    var select = $('#targetCategoryId');
+                    select.empty();
+                    select.append('<option value="">-- Lỗi tải danh mục --</option>');
+                });
+        }
+        
+        function closeDeleteModal() {
+            console.log('closeDeleteModal called');
+            $('#deleteCategoryModal').modal('hide');
+        }
+        
+        function confirmDelete() {
+            console.log('confirmDelete called');
+            
+            var categoryId = $('#deleteCategoryModal').data('categoryId');
+            var productHandling = $('input[name="productHandling"]:checked').val();
+            var targetCategoryId = $('#targetCategoryId').val();
+            
+            console.log('Category ID:', categoryId);
+            console.log('Product handling:', productHandling);
+            console.log('Target category ID:', targetCategoryId);
+            
+            // Validate if reassign is selected but no target category is chosen
+            if (productHandling === 'reassign' && !targetCategoryId) {
+                alert('Vui lòng chọn danh mục đích để chuyển sản phẩm');
+                return false;
+            }
+            
+            // Disable button to prevent double submission
+            $('#confirmDeleteCategory').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang xóa...');
+            
+            // Create form dynamically
+            var form = $('<form>', {
+                'method': 'POST',
+                'action': '@Url.Action("DeleteCategoryWithProducts", "Admin")'
+            });
+            
+            // Get anti-forgery token
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            if (!token) {
+                token = $('meta[name="__RequestVerificationToken"]').attr('content');
+            }
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': '__RequestVerificationToken',
+                'value': token
+            }));
+            
+            form.append($('<input>', {
+                'type': 'hidden',
+                'name': 'id',
+                'value': categoryId
+            }));
+            
+            if (productHandling === 'reassign' && targetCategoryId) {
+                form.append($('<input>', {
+                    'type': 'hidden',
+                    'name': 'reassignToCategoryId',
+                    'value': targetCategoryId
+                }));
+            }
+            
+            console.log('Submitting delete form...');
+            
+            // Submit the form
+            $('body').append(form);
+            form.submit();
+            
+            return false;
+        }
+        
+        function exportCategories() {
+            // Implement export functionality
+            alert('Tính năng xuất Excel sẽ được phát triển sau');
+        }
+        
+        // Form validation
+        $(document).ready(function() {
+            $('#createCategoryForm').validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "Vui lòng nhập tên danh mục",
+                        minlength: "Tên danh mục phải có ít nhất 2 ký tự",
+                        maxlength: "Tên danh mục không được vượt quá 100 ký tự"
+                    }
+                }
+            });
+            
+            $('#editCategoryForm').validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "Vui lòng nhập tên danh mục",
+                        minlength: "Tên danh mục phải có ít nhất 2 ký tự",
+                        maxlength: "Tên danh mục không được vượt quá 100 ký tự"
+                    }
+                }
+            });
+            
+            // Initialize DataTable
+            $('#categoriesTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+                },
+                "pageLength": 25,
+                "order": [[0, "asc"]], // Sort by ID asc
+                "columnDefs": [
+                    { "orderable": false, "targets": [4] } // Disable sorting for action column
+                ]
+            });
+        });
+        
+        // Use event delegation for dynamic content
+        $(document).on('change', 'input[name="productHandling"]', function() {
+            if ($(this).val() === 'reassign') {
+                $('#categorySelection').show();
+            } else {
+                $('#categorySelection').hide();
+            }
+        });
+    </script>
+}

@@ -41,6 +41,8 @@ public partial class User
 
     public virtual ICollection<Partner> Partners { get; set; } = new List<Partner>();
 
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual ICollection<Token> Tokens { get; set; } = new List<Token>();

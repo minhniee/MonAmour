@@ -5,6 +5,7 @@ namespace MonAmour.Services.Interfaces;
 public interface IUserManagementService
 {
     Task<(List<AdminUserViewModel.UserListViewModel> Users, int TotalCount)> GetUsersAsync(AdminUserViewModel.UserSearchViewModel searchModel);
+    Task<List<AdminUserViewModel.UserListViewModel>> GetAllUsersAsync();
     Task<AdminUserViewModel.UserDetailViewModel?> GetUserByIdAsync(int userId);
     Task<bool> CreateUserAsync(AdminUserViewModel.UserCreateViewModel model, int adminUserId);
     Task<bool> UpdateUserAsync(AdminUserViewModel.UserEditViewModel model, int adminUserId);
@@ -15,4 +16,6 @@ public interface IUserManagementService
     Task<List<AdminUserViewModel.RoleViewModel>> GetAllRolesAsync();
     Task<bool> IsEmailExistsAsync(string email, int? excludeUserId = null);
     Task<Dictionary<string, int>> GetUserStatisticsAsync();
+    Task<bool> IsPhoneExistsAsync(string phone, int? excludeUserId = null); 
+    Task<(bool EmailExists, bool PhoneExists)> CheckDuplicateAsync(string email, string phone, int? excludeUserId = null); 
 }

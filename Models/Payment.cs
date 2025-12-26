@@ -17,7 +17,19 @@ public partial class Payment
 
     public DateTime? ProcessedAt { get; set; }
 
+    public string? PaymentReference { get; set; }
+
+    public long? TransactionId { get; set; }
+
+    public int? UserId { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
     public virtual ICollection<PaymentDetail> PaymentDetails { get; set; } = new List<PaymentDetail>();
 
     public virtual PaymentMethod? PaymentMethod { get; set; }
+
+    public virtual ICollection<PaymentStatus> PaymentStatuses { get; set; } = new List<PaymentStatus>();
+
+    public virtual User? User { get; set; }
 }

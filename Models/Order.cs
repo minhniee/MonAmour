@@ -16,6 +16,8 @@ public partial class Order
 
     public string? TrackingNumber { get; set; }
 
+    public string? ShippingAddress { get; set; }
+
     public DateOnly? EstimatedDelivery { get; set; }
 
     public DateTime? DeliveredAt { get; set; }
@@ -23,8 +25,6 @@ public partial class Order
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-
-    public string? ShippingAddress { get; set; }
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
